@@ -1,0 +1,70 @@
+{
+  "workspace": "Agent Windsurf Amline",
+  "root": "E:/CTO",
+  "projects": [
+    {
+      "name": "backend-api",
+      "category": "core-service",
+      "path": "backend/backend",
+      "stack": ["python", "fastapi", "postgres", "redis"],
+      "install": "poetry install --with dev",
+      "validate": ["poetry check", "pytest tests/ -q"]
+    },
+    {
+      "name": "pdf-generator",
+      "category": "service",
+      "path": "pdf-generator",
+      "stack": ["python", "fastapi"],
+      "install": "poetry install",
+      "validate": ["poetry check"]
+    },
+    {
+      "name": "admin-ui",
+      "category": "app",
+      "path": "admin-ui",
+      "stack": ["node", "react", "vite", "typescript"],
+      "install": "npm install",
+      "validate": ["npm run lint", "npm run build"]
+    },
+    {
+      "name": "amline-ui",
+      "category": "app",
+      "path": "amline-ui",
+      "stack": ["node", "nextjs"],
+      "install": "npm install",
+      "validate": ["npm run lint", "npm run build"]
+    },
+    {
+      "name": "site",
+      "category": "app",
+      "path": "site",
+      "stack": ["node", "nextjs"],
+      "install": "npm install",
+      "validate": ["npm run lint", "npm run build"]
+    },
+    {
+      "name": "seo-dashboard",
+      "category": "app",
+      "path": "seo-dashboard",
+      "stack": ["node", "nextjs"],
+      "install": "npm ci",
+      "validate": ["npm run lint", "npm run build"]
+    },
+    {
+      "name": "figma-tools",
+      "category": "tooling",
+      "path": "Figma",
+      "stack": ["node", "react-scripts", "python"],
+      "install": "npm ci",
+      "validate": ["npm run build"]
+    },
+    {
+      "name": "taskflow-frontend",
+      "category": "lab",
+      "path": "Agent/Agent/winfsurf-20/taskflow/frontend",
+      "stack": ["node", "react", "vite"],
+      "install": "npm ci",
+      "validate": ["npm run build"]
+    }
+  ]
+}

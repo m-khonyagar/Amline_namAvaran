@@ -1,0 +1,101 @@
+# دیپلوی خودکار داشبورد سئو روی agent.amline.ir
+# پیش‌نیاز: اضافه کردن DEPLOY_SSH_KEY به GitHub Secrets
+
+name: Deploy SEO Dashboard (agent.amline.ir)
+
+on:
+  workflow_dispatch:  # اجرای دستی
+  push:
+    branches: [main]
+    paths:
+      - 'seo-dashboard/**'
+      - 'docs/gsc_data/gsc_full_export.json'
+      - '.github/workflows/deploy-seo-agent.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: seo-dashboard/package-lock.json
+
+      - name: Build SEO Dashboard
+        working-directory: seo-dashboard
+        env:
+          NEXT_PUBLIC_BASE_PATH: ''
+        run: |
+          npm ci
+          npm run build
+
+      - name: Create deploy package
+        working-directory: seo-dashboard
+        run: |
+          mkdir -p deploy-temp
+          cp -r .next/standalone/* deploy-temp/
+          cp -r .next/static deploy-temp/.next/
+          [ -d public ] && cp -r public deploy-temp/ || true
+          mkdir -p deploy-temp/data/gsc
+          tar -czf ../seo-dashboard-deploy.tar.gz -C deploy-temp .
+          rm -rf deploy-temp
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H 212.80.24.203 >> ~/.ssh/known_hosts
+
+      - name: Create .env
+        run: |
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > seo-dashboard.env
+
+      - name: Deploy to server
+        env:
+          SSH_KEY: ~/.ssh/deploy_key
+        run: |
+          scp -i $SSH_KEY -o StrictHostKeyChecking=no \
+            seo-dashboard-deploy.tar.gz \
+            docs/gsc_data/gsc_full_export.json \
+            seo-dashboard.env \
+            root@212.80.24.203:/tmp/
+          ssh -i $SSH_KEY -o StrictHostKeyChecking=no root@212.80.24.203 'bash -s' << 'REMOTE'
+            set -e
+            mkdir -p /opt/amline/seo-dashboard
+            rm -rf /opt/amline/seo-dashboard/*
+            tar -xzf /tmp/seo-dashboard-deploy.tar.gz -C /opt/amline/seo-dashboard
+            mkdir -p /opt/amline/seo-dashboard/data/gsc
+            mv /tmp/gsc_full_export.json /opt/amline/seo-dashboard/data/gsc/
+            mv /tmp/seo-dashboard.env /opt/amline/seo-dashboard/.env
+            which node >/dev/null 2>&1 || (apt-get update -qq && apt-get install -y nodejs)
+            NODE_CMD=$(which /opt/node/bin/node 2>/dev/null || which node)
+            cat > /etc/systemd/system/seo-dashboard.service << EOF
+            [Unit]
+            Description=Amline SEO Dashboard
+            After=network.target
+            [Service]
+            Type=simple
+            User=root
+            WorkingDirectory=/opt/amline/seo-dashboard
+            Environment=GSC_DATA_PATH=/opt/amline/seo-dashboard/data/gsc/gsc_full_export.json
+            Environment=PORT=3003
+            EnvironmentFile=/opt/amline/seo-dashboard/.env
+            ExecStart=/opt/node/bin/node server.js
+            Restart=always
+            RestartSec=5
+            [Install]
+            WantedBy=multi-user.target
+            EOF
+            [ ! -x /opt/node/bin/node ] && sed -i 's|/opt/node/bin/node|node|' /etc/systemd/system/seo-dashboard.service
+            systemctl daemon-reload
+            systemctl enable seo-dashboard
+            systemctl restart seo-dashboard
+            sleep 3
+            curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3003/ || true
+            echo "Deploy done"
+          REMOTE

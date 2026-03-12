@@ -1,0 +1,54 @@
+name: Feature Request
+description: Propose a new feature or workflow improvement.
+title: "[feature] "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for product, engineering, and workflow improvements.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Target area
+      options:
+        - backend
+        - admin-ui
+        - amline-ui
+        - site
+        - seo-dashboard
+        - pdf-generator
+        - taskflow
+        - figma
+        - ci-cd
+        - docs
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or opportunity
+      placeholder: What pain point are we solving?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      placeholder: Describe the desired behavior or workflow.
+    validations:
+      required: true
+  - type: textarea
+    id: success
+    attributes:
+      label: Success criteria
+      placeholder: How will we know this is complete?
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      placeholder: Links, screenshots, docs, related work.
+    validations:
+      required: false

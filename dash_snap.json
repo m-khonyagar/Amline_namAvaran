@@ -1,0 +1,283 @@
+{
+  "id": 9,
+  "keys": [
+    "description",
+    "archived",
+    "view_count",
+    "collection_position",
+    "dashcards",
+    "param_values",
+    "initially_published_at",
+    "can_write",
+    "tabs",
+    "enable_embedding",
+    "collection_id",
+    "show_in_getting_started",
+    "name",
+    "width",
+    "caveats",
+    "collection_authority_level",
+    "creator_id",
+    "can_restore",
+    "moderation_reviews",
+    "updated_at",
+    "made_public_by_id",
+    "embedding_params",
+    "cache_ttl",
+    "last_used_param_values",
+    "id",
+    "last_viewed_at",
+    "position",
+    "archived_directly",
+    "entity_id",
+    "param_fields",
+    "last-edit-info",
+    "collection",
+    "parameters",
+    "auto_apply_filters",
+    "created_at",
+    "public_uuid",
+    "points_of_interest",
+    "can_delete"
+  ],
+  "dashcards_count": 9,
+  "first_dashcard": {
+    "size_x": 18,
+    "dashboard_tab_id": null,
+    "series": [],
+    "action_id": null,
+    "collection_authority_level": null,
+    "card": {
+      "cache_invalidated_at": null,
+      "description": null,
+      "archived": false,
+      "view_count": 10,
+      "collection_position": null,
+      "source_card_id": null,
+      "table_id": null,
+      "result_metadata": [
+        {
+          "display_name": "call_date",
+          "field_ref": [
+            "field",
+            "call_date",
+            {
+              "base-type": "type/Date"
+            }
+          ],
+          "base_type": "type/Date",
+          "effective_type": "type/Date",
+          "name": "call_date",
+          "semantic_type": null,
+          "fingerprint": {
+            "global": {
+              "distinct-count": 31,
+              "nil%": 0.0
+            },
+            "type": {
+              "type/DateTime": {
+                "earliest": "2026-01-18",
+                "latest": "2026-02-21"
+              }
+            }
+          }
+        },
+        {
+          "display_name": "total_calls",
+          "field_ref": [
+            "field",
+            "total_calls",
+            {
+              "base-type": "type/BigInteger"
+            }
+          ],
+          "base_type": "type/BigInteger",
+          "effective_type": "type/BigInteger",
+          "name": "total_calls",
+          "semantic_type": null,
+          "fingerprint": {
+            "global": {
+              "distinct-count": 18,
+              "nil%": 0.0
+            },
+            "type": {
+              "type/Number": {
+                "min": 1.0,
+                "q1": 10.83772233983162,
+                "q3": 19.55051025721682,
+                "max": 55.0,
+                "sd": 11.001172957990113,
+                "avg": 16.677419354838708
+              }
+            }
+          }
+        },
+        {
+          "display_name": "total_duration",
+          "field_ref": [
+            "field",
+            "total_duration",
+            {
+              "base-type": "type/Decimal"
+            }
+          ],
+          "base_type": "type/Decimal",
+          "effective_type": "type/Decimal",
+          "name": "total_duration",
+          "semantic_type": "type/Duration",
+          "fingerprint": {
+            "global": {
+              "distinct-count": 31,
+              "nil%": 0.0
+            },
+            "type": {
+              "type/Number": {
+                "min": 47.0,
+                "q1": 1435.0,
+                "q3": 4385.75,
+                "max": 10521.0,
+                "sd": 2242.5508315884535,
+                "avg": 3121.032258064516
+              }
+            }
+          }
+        },
+        {
+          "display_name": "total_billsec",
+          "field_ref": [
+            "field",
+            "total_billsec",
+            {
+              "base-type": "type/Decimal"
+            }
+          ],
+          "base_type": "type/Decimal",
+          "effective_type": "type/Decimal",
+          "name": "total_billsec",
+          "semantic_type": null,
+          "fingerprint": {
+            "global": {
+              "distinct-count": 31,
+              "nil%": 0.0
+            },
+            "type": {
+              "type/Number": {
+                "min": 0.0,
+                "q1": 1371.25,
+                "q3": 4261.5,
+                "max": 10336.0,
+                "sd": 2205.6900185802438,
+                "avg": 2977.516129032258
+              }
+            }
+          }
+        },
+        {
+          "display_name": "avg_duration",
+          "field_ref": [
+            "field",
+            "avg_duration",
+            {
+              "base-type": "type/Decimal"
+            }
+          ],
+          "base_type": "type/Decimal",
+          "effective_type": "type/Decimal",
+          "name": "avg_duration",
+          "semantic_type": "type/Duration",
+          "fingerprint": {
+            "global": {
+              "distinct-count": 31,
+              "nil%": 0.0
+            },
+            "type": {
+              "type/Number": {
+                "min": 23.5,
+                "q1": 103.375,
+                "q3": 265.4,
+                "max": 1447.0,
+                "sd": 251.16108787890718,
+                "avg": 226.51612903225808
+              }
+            }
+          }
+        },
+        {
+          "display_name": "avg_billsec",
+          "field_ref": [
+            "field",
+            "avg_billsec",
+            {
+              "base-type": "type/Decimal"
+            }
+          ],
+          "base_type": "type/Decimal",
+          "effective_type": "type/Decimal",
+          "name": "avg_billsec",
+          "semantic_type": null,
+          "fingerprint": {
+            "global": {
+              "distinct-count": 31,
+              "nil%": 0.0
+            },
+            "type": {
+              "type/Number": {
+                "min": 0.0,
+                "q1": 93.975,
+                "q3": 255.82500000000002,
+                "max": 1438.0,
+                "sd": 252.16457448193614,
+                "avg": 217.2935483870968
+              }
+            }
+          }
+        }
+      ],
+      "initially_published_at": null,
+      "can_write": true,
+      "database_id": 3,
+      "enable_embedding": false,
+      "collection_id": null,
+      "query_type": "native",
+      "name": "VoIP - خلاصه روزانه تماس ورودی (جدول)",
+      "last_used_at": "2026-02-21T07:04:33.297898Z",
+      "type": "question",
+      "query_average_duration": 999,
+      "creator_id": 14,
+      "moderation_reviews": [],
+      "updated_at": "2026-02-21T06:50:32.820019Z",
+      "made_public_by_id": null,
+      "embedding_params": null,
+      "cache_ttl": null,
+      "dataset_query": {
+        "database": 3,
+        "type": "native",
+        "native": {
+          "query": "\n        SELECT * FROM incoming_daily_summary\n        ORDER BY call_date DESC\n        LIMIT 31\n        "
+        }
+      },
+      "id": 97,
+      "parameter_mappings": [],
+      "display": "table",
+      "archived_directly": false,
+      "entity_id": "a2yzchRg4RtAz-aWLEuto",
+      "collection_preview": true,
+      "visualization_settings": {},
+      "metabase_version": "v0.52.7.2 (4f82841)",
+      "parameters": [],
+      "created_at": "2026-02-21T06:50:32.820019Z",
+      "public_uuid": null
+    },
+    "updated_at": "2026-02-21T06:56:14.300023Z",
+    "col": 6,
+    "id": 68,
+    "parameter_mappings": [],
+    "card_id": 97,
+    "entity_id": "FuPFNhOSwDSEbM7WiRzJW",
+    "visualization_settings": {},
+    "size_y": 4,
+    "dashboard_id": 9,
+    "created_at": "2026-02-21T06:50:34.334941Z",
+    "row": 27
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "en": {
+    "app": {
+      "title": "Agent Windsurf Amline",
+      "subtitle": "Autonomous Task Execution"
+    },
+    "nav": {
+      "home": "Home",
+      "history": "History",
+      "new_task": "New Task"
+    },
+    "task": {
+      "goal_placeholder": "What would you like the agent to do?",
+      "create_task": "Create Task",
+      "generate_plan": "Generate Plan",
+      "run": "Run",
+      "running": "Running...",
+      "retry": "Retry",
+      "cancel": "Cancel",
+      "api_docs": "API Docs"
+    },
+    "status": {
+      "queued": "Queued",
+      "planning": "Planning",
+      "ready": "Ready",
+      "running": "Running",
+      "succeeded": "Succeeded",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "events": {
+      "timeline": "Events Timeline",
+      "live_logs": "Live Logs",
+      "no_events": "No events yet.",
+      "no_logs": "No logs yet."
+    },
+    "artifacts": {
+      "title": "Artifacts",
+      "preview": "Preview",
+      "download": "Download",
+      "no_artifacts": "No artifacts yet."
+    },
+    "memory": {
+      "summary": "Task Summary",
+      "reflections": "Reflections",
+      "search_memory": "Search Memory",
+      "related_tasks": "Related Tasks",
+      "no_memory": "No memory found."
+    },
+    "language": {
+      "switch": "Switch Language",
+      "english": "English",
+      "persian": "Persian (فارسی)"
+    }
+  },
+  "fa": {
+    "app": {
+      "title": "Agent Windsurf Amline",
+      "subtitle": "اجرای خودکار تسک‌ها"
+    },
+    "nav": {
+      "home": "صفحه اصلی",
+      "history": "سابقه",
+      "new_task": "تسک جدید"
+    },
+    "task": {
+      "goal_placeholder": "می‌خواهید عامل چه کاری انجام دهد؟",
+      "create_task": "ایجاد تسک",
+      "generate_plan": "تولید برنامه",
+      "run": "اجرا",
+      "running": "در حال اجرا...",
+      "retry": "تلاش مجدد",
+      "cancel": "لغو",
+      "api_docs": "اسناد API"
+    },
+    "status": {
+      "queued": "در صف",
+      "planning": "برنامه‌ریزی",
+      "ready": "آماده",
+      "running": "در حال اجرا",
+      "succeeded": "موفق",
+      "failed": "ناموفق",
+      "cancelled": "لغو شده"
+    },
+    "events": {
+      "timeline": "جدول زمانی رویدادها",
+      "live_logs": "لاگ‌های زنده",
+      "no_events": "رویدادی وجود ندارد.",
+      "no_logs": "لاگی وجود ندارد."
+    },
+    "artifacts": {
+      "title": "مصنوعات",
+      "preview": "پیش‌نمایش",
+      "download": "دانلود",
+      "no_artifacts": "مصنوعاتی وجود ندارد."
+    },
+    "memory": {
+      "summary": "خلاصه تسک",
+      "reflections": "بازتاب‌ها",
+      "search_memory": "جستجوی حافظه",
+      "related_tasks": "تسک‌های مرتبط",
+      "no_memory": "حافظه‌ای یافت نشد."
+    },
+    "language": {
+      "switch": "تغییر زبان",
+      "english": "English",
+      "persian": "فارسی"
+    }
+  }
+}
