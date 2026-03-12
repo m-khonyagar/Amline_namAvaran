@@ -1,0 +1,275 @@
+version: '3.8'
+
+services:
+  # ==================== Infrastructure ====================
+  postgres:
+    image: postgres:15-alpine
+    container_name: amline-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-amline}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-amline_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-amline}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-amline}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - amline-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: amline-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD:-amline_redis_secret}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - amline-network
+
+  minio:
+    image: minio/minio:latest
+    container_name: amline-minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-amline}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-amline_minio_secret}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - amline-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: amline-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-amline}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-amline_rabbitmq_secret}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - amline-network
+    profiles:
+      - optional
+
+  # ==================== Backend Services ====================
+  backend:
+    build:
+      context: ./backend/backend
+      dockerfile: Dockerfile
+    container_name: amline-backend
+    environment:
+      - APP_ENV=staging
+      - APP_DEBUG=true
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-amline}:${POSTGRES_PASSWORD:-amline_secret}@postgres:5432/${POSTGRES_DB:-amline}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-amline_redis_secret}
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-amline}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-amline_minio_secret}
+      - MINIO_PUBLIC_BUCKET=public
+      - MINIO_PRIVATE_BUCKET=private
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - JWT_ALGORITHM=HS256
+      - JWT_ACCESS_EXPIRE=3600
+      - JWT_REFRESH_EXPIRE=86400
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-in-production}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER:-amline}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-amline_rabbitmq_secret}
+      - PDF_GENERATOR_SERVICE_URL=http://pdf-generator:8000
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:8000
+    ports:
+      - "8080:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - amline-network
+
+  pdf-generator:
+    build:
+      context: ./pdf-generator
+      dockerfile: Dockerfile
+    container_name: amline-pdf-generator
+    environment:
+      - APP_ENV=staging
+      - APP_DEBUG=true
+      - HOST=0.0.0.0
+      - PORT=8000
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-amline}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-amline_minio_secret}
+      - MINIO_BUCKET=contracts
+    ports:
+      - "8001:8000"
+    depends_on:
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - amline-network
+
+  # ==================== Frontend Applications ====================
+  admin-ui:
+    build:
+      context: ./admin-ui
+      dockerfile: Dockerfile
+    container_name: amline-admin-ui
+    environment:
+      - VITE_API_BASE_URL=http://backend
+      - VITE_API_URL=http://backend
+    ports:
+      - "3002:80"
+    depends_on:
+      - backend
+    networks:
+      - amline-network
+
+  amline-ui:
+    build:
+      context: ./amline-ui
+      dockerfile: Dockerfile
+    container_name: amline-ui
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://backend
+      - NEXT_PUBLIC_API_URL=http://backend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - amline-network
+
+  site:
+    build:
+      context: ./site
+      dockerfile: Dockerfile
+    container_name: amline-site
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://backend
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
+    networks:
+      - amline-network
+
+  # ==================== SEO Dashboard ====================
+  seo-dashboard:
+    build:
+      context: ./seo-dashboard
+      dockerfile: Dockerfile
+    container_name: amline-seo-dashboard
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GSC_DATA_PATH=/app/data/gsc/gsc_full_export.json
+    volumes:
+      - ./seo-dashboard/data/gsc:/app/data/gsc:ro
+    ports:
+      - "3003:3003"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - amline-network
+
+  # ==================== Init Services ====================
+  db-init:
+    build:
+      context: ./backend/backend
+      dockerfile: Dockerfile
+    container_name: amline-db-init
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-amline}:${POSTGRES_PASSWORD:-amline_secret}@postgres:5432/${POSTGRES_DB:-amline}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "Waiting for database..."
+        sleep 10
+        echo "Running migrations..."
+        alembic upgrade head
+        echo "Seeding initial data..."
+        python -m cli seed
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - amline-network
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: amline-minio-init
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-amline}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-amline_minio_secret}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        mc alias set myminio http://minio:9000 ${MINIO_ACCESS_KEY:-amline} ${MINIO_SECRET_KEY:-amline_minio_secret}
+        mc mb myminio/public --ignore-existing
+        mc mb myminio/private --ignore-existing
+        mc mb myminio/contracts --ignore-existing
+        mc anonymous set download myminio/public
+        mc anonymous set download myminio/contracts
+    depends_on:
+      minio:
+        condition: service_healthy
+    networks:
+      - amline-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  rabbitmq_data:
+
+networks:
+  amline-network:
+    driver: bridge

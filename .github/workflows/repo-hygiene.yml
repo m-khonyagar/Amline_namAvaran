@@ -1,0 +1,32 @@
+name: Repository Hygiene
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  hygiene:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Block tracked node_modules
+        run: |
+          if git ls-files | grep -E '(^|/)node_modules/'; then
+            echo "Tracked node_modules detected."
+            exit 1
+          fi
+
+      - name: Block generated deploy archives
+        run: |
+          if git ls-files | grep -E '(^|/).*deploy\.tar\.gz$'; then
+            echo "Tracked deploy archives detected."
+            exit 1
+          fi
+
+      - name: Require repository manifest
+        run: test -f workspace.manifest.json

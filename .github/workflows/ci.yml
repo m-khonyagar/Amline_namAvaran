@@ -1,0 +1,244 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ==================== Backend Tests ====================
+  backend-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Cache Poetry packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+
+      - name: Install dependencies
+        working-directory: backend/backend
+        run: poetry install --with dev
+
+      - name: Run linter
+        working-directory: backend/backend
+        run: |
+          flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          black --check src/
+          isort --check-only src/
+
+      - name: Run type checker
+        working-directory: backend/backend
+        run: mypy src/
+
+      - name: Run tests
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+        working-directory: backend/backend
+        run: pytest tests/ -v --cov=src --cov-report=xml
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./backend/backend/coverage.xml
+
+  # ==================== Build Docker Images ====================
+  build-backend:
+    runs-on: ubuntu-latest
+    needs: backend-test
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/backend
+          push: false
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/backend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-pdf-generator:
+    runs-on: ubuntu-latest
+    needs: backend-test
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build PDF Generator
+        uses: docker/build-push-action@v5
+        with:
+          context: ./pdf-generator
+          push: false
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/pdf-generator:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-admin-ui:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: admin-ui
+        run: npm install
+
+      - name: Run linter
+        working-directory: admin-ui
+        run: npm run lint || true
+
+      - name: Build Admin UI
+        uses: docker/build-push-action@v5
+        with:
+          context: ./admin-ui
+          push: false
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/admin-ui:${{ github.sha }}
+
+  build-amline-ui:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: amline-ui
+        run: npm install
+
+      - name: Build Amline UI
+        uses: docker/build-push-action@v5
+        with:
+          context: ./amline-ui
+          push: false
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/amline-ui:${{ github.sha }}
+
+  build-site:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: site
+        run: npm install
+
+      - name: Build Site
+        uses: docker/build-push-action@v5
+        with:
+          context: ./site
+          push: false
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/site:${{ github.sha }}
+
+  build-seo-dashboard:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: seo-dashboard/package-lock.json
+
+      - name: Install dependencies
+        working-directory: seo-dashboard
+        run: npm ci
+
+      - name: Run linter
+        working-directory: seo-dashboard
+        run: npm run lint
+
+      - name: Build SEO Dashboard
+        working-directory: seo-dashboard
+        run: npm run build
+
+  # ==================== Deploy ====================
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-pdf-generator, build-admin-ui, build-amline-ui, build-site, build-seo-dashboard]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to server
+        run: |
+          echo "Deploying to production server..."
+          # Add your deployment commands here
+          # e.g., using ssh, ansible, kubectl, etc.

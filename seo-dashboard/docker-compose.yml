@@ -1,0 +1,14 @@
+# داشبورد سئو املاین - اجرای مستقل
+services:
+  seo-dashboard:
+    build: .
+    container_name: amline-seo-dashboard
+    ports:
+      - "3003:3003"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GSC_DATA_PATH=/app/data/gsc/gsc_full_export.json
+    volumes:
+      # مسیر داده GSC - فایل gsc_full_export.json را اینجا قرار دهید
+      - ./data/gsc:/app/data/gsc:ro
+    restart: unless-stopped

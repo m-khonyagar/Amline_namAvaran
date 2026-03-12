@@ -1,0 +1,21 @@
+# Default owner
+* @m-khonyagar
+
+# Repository management
+/.github/ @m-khonyagar
+/docs/ @m-khonyagar
+/scripts/ @m-khonyagar
+/workspace.manifest.json @m-khonyagar
+
+# Core platform
+/backend/ @m-khonyagar
+/pdf-generator/ @m-khonyagar
+/admin-ui/ @m-khonyagar
+/amline-ui/ @m-khonyagar
+/site/ @m-khonyagar
+/seo-dashboard/ @m-khonyagar
+
+# Labs and experimental work
+/Agent/ @m-khonyagar
+/Figma/ @m-khonyagar
+/ai-video-directory/ @m-khonyagar
