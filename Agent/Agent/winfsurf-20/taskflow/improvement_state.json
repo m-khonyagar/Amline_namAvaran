@@ -1,0 +1,206 @@
+{
+  "enabled": true,
+  "auto_review_interval_minutes": 15,
+  "last_review_at": "2026-03-21T14:19:11.529377+00:00",
+  "profile": {
+    "strategy_summary": "Continuously improve by reviewing recent runs, extracting reusable lessons, and feeding a compact playbook into the next agent workflow.",
+    "prompt_prefix": "Prefer short, reversible execution bursts when a request needs live operator actions. Create a visible artifact early and keep the task summary concise so users can verify outcomes quickly. Prefer the most relevant operational tools first: telegram, bale, workflow_task, gmail.",
+    "preferred_tools": [
+      "telegram",
+      "bale",
+      "workflow_task",
+      "gmail",
+      "file_share"
+    ],
+    "guidance": [
+      "Prefer short, reversible execution bursts when a request needs live operator actions.",
+      "Create a visible artifact early and keep the task summary concise so users can verify outcomes quickly.",
+      "Prefer the most relevant operational tools first: telegram, bale, workflow_task, gmail."
+    ]
+  },
+  "reviews": [
+    {
+      "id": "review-20260321141911",
+      "created_at": "2026-03-21T14:19:11.529377+00:00",
+      "task_snapshot": {
+        "total": 14,
+        "succeeded": 8,
+        "failed": 0,
+        "running": 4,
+        "queued": 2
+      },
+      "lessons": [
+        "Prefer short, reversible execution bursts when a request needs live operator actions.",
+        "Create a visible artifact early and keep the task summary concise so users can verify outcomes quickly.",
+        "Prefer the most relevant operational tools first: telegram, bale, workflow_task, gmail."
+      ],
+      "preferred_tools": [
+        "telegram",
+        "bale",
+        "workflow_task",
+        "gmail",
+        "file_share"
+      ]
+    },
+    {
+      "id": "review-20260321141905",
+      "created_at": "2026-03-21T14:19:05.150088+00:00",
+      "task_snapshot": {
+        "total": 12,
+        "succeeded": 7,
+        "failed": 0,
+        "running": 3,
+        "queued": 2
+      },
+      "lessons": [
+        "Prefer short, reversible execution bursts when a request needs live operator actions.",
+        "Create a visible artifact early and keep the task summary concise so users can verify outcomes quickly.",
+        "Prefer the most relevant operational tools first: telegram, bale, workflow_task, gmail."
+      ],
+      "preferred_tools": [
+        "telegram",
+        "bale",
+        "workflow_task",
+        "gmail",
+        "file_share"
+      ]
+    },
+    {
+      "id": "review-20260321140659",
+      "created_at": "2026-03-21T14:06:59.214927+00:00",
+      "task_snapshot": {
+        "total": 12,
+        "succeeded": 7,
+        "failed": 0,
+        "running": 3,
+        "queued": 2
+      },
+      "lessons": [
+        "Prefer short, reversible execution bursts when a request needs live operator actions.",
+        "Create a visible artifact early and keep the task summary concise so users can verify outcomes quickly.",
+        "Prefer the most relevant operational tools first: telegram, bale, workflow_task, gmail."
+      ],
+      "preferred_tools": [
+        "telegram",
+        "bale",
+        "workflow_task",
+        "gmail",
+        "file_share"
+      ]
+    },
+    {
+      "id": "review-20260321140655",
+      "created_at": "2026-03-21T14:06:55.000543+00:00",
+      "task_snapshot": {
+        "total": 11,
+        "succeeded": 5,
+        "failed": 0,
+        "running": 4,
+        "queued": 2
+      },
+      "lessons": [
+        "Prefer short, reversible execution bursts when a request needs live operator actions.",
+        "Create a visible artifact early and keep the task summary concise so users can verify outcomes quickly.",
+        "Prefer the most relevant operational tools first: telegram, bale, workflow_task, gmail."
+      ],
+      "preferred_tools": [
+        "telegram",
+        "bale",
+        "workflow_task",
+        "gmail",
+        "file_share"
+      ]
+    },
+    {
+      "id": "review-20260321140652",
+      "created_at": "2026-03-21T14:06:52.234296+00:00",
+      "task_snapshot": {
+        "total": 9,
+        "succeeded": 5,
+        "failed": 0,
+        "running": 2,
+        "queued": 2
+      },
+      "lessons": [
+        "Prefer short, reversible execution bursts when a request needs live operator actions.",
+        "Create a visible artifact early and keep the task summary concise so users can verify outcomes quickly.",
+        "Prefer the most relevant operational tools first: telegram, bale, workflow_task, gmail."
+      ],
+      "preferred_tools": [
+        "telegram",
+        "bale",
+        "workflow_task",
+        "gmail",
+        "file_share"
+      ]
+    },
+    {
+      "id": "review-20260320215903",
+      "created_at": "2026-03-20T21:59:03.763963+00:00",
+      "task_snapshot": {
+        "total": 9,
+        "succeeded": 5,
+        "failed": 0,
+        "running": 2,
+        "queued": 2
+      },
+      "lessons": [
+        "Prefer short, reversible execution bursts when a request needs live operator actions.",
+        "Create a visible artifact early and keep the task summary concise so users can verify outcomes quickly.",
+        "Prefer the most relevant operational tools first: telegram, bale, workflow_task, gmail."
+      ],
+      "preferred_tools": [
+        "telegram",
+        "bale",
+        "workflow_task",
+        "gmail",
+        "file_share"
+      ]
+    },
+    {
+      "id": "review-20260320215856",
+      "created_at": "2026-03-20T21:58:56.383333+00:00",
+      "task_snapshot": {
+        "total": 7,
+        "succeeded": 4,
+        "failed": 0,
+        "running": 1,
+        "queued": 2
+      },
+      "lessons": [
+        "Prefer short, reversible execution bursts when a request needs live operator actions.",
+        "Create a visible artifact early and keep the task summary concise so users can verify outcomes quickly.",
+        "Prefer the most relevant operational tools first: telegram, bale, workflow_task, gmail."
+      ],
+      "preferred_tools": [
+        "telegram",
+        "bale",
+        "workflow_task",
+        "gmail",
+        "file_share"
+      ]
+    },
+    {
+      "id": "review-20260320214805",
+      "created_at": "2026-03-20T21:48:05.577044+00:00",
+      "task_snapshot": {
+        "total": 6,
+        "succeeded": 4,
+        "failed": 0,
+        "running": 0,
+        "queued": 2
+      },
+      "lessons": [
+        "Create a visible artifact early and keep the task summary concise so users can verify outcomes quickly.",
+        "Prefer the most relevant operational tools first: telegram, bale, gmail, file_share."
+      ],
+      "preferred_tools": [
+        "telegram",
+        "bale",
+        "gmail",
+        "file_share",
+        "workflow_task"
+      ]
+    }
+  ]
+}

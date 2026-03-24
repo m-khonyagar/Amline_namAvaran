@@ -1,0 +1,51 @@
+# Default: super-agent API + OpenAI (OPENAI_API_KEY). Optional local LLM: docker compose --profile ollama up -d
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: super-agent-ollama
+    profiles: ["ollama"]
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "127.0.0.1:11434:11434"
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  super-agent:
+    build: .
+    container_name: super-agent-api
+    restart: unless-stopped
+    environment:
+      SUPER_AGENT_CONFIG: ${SUPER_AGENT_CONFIG:-/app/config/docker-openai.yaml}
+      SUPER_AGENT_LLM_PROVIDER: ${SUPER_AGENT_LLM_PROVIDER:-openai}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      # Optional: SUPER_AGENT_LLM_PROVIDER=ollama + profile ollama + SUPER_AGENT_CONFIG=/app/config/docker.yaml
+      # Optional: OPENAI_BASE_URL=https://...
+      # SUPER_AGENT_OLLAMA_BASE / SUPER_AGENT_MODEL when using profile ollama + docker.yaml
+      # SUPER_AGENT_DEPLOY_TOKEN: change-me
+    volumes:
+      - super_agent_memory:/app/memory
+      - super_agent_logs:/app/logs
+    ports:
+      - "0.0.0.0:8080:8080"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=5)\"",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  ollama_data:
+  super_agent_memory:
+  super_agent_logs:

@@ -1,0 +1,11 @@
+.venv
+__pycache__
+*.pyc
+.git
+.gitignore
+logs/*.log
+memory/*.db
+*.md
+tests
+pytest.ini
+requirements-test.txt

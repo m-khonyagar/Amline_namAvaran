@@ -1,0 +1,23 @@
+{
+  "name": "qa-amline-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "QA E2E tests for app-dev.amline.ir - قرارداد رهن و اجاره",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:otp": "playwright test --grep OTP",
+    "test:negative": "playwright test --grep Negative",
+    "test:logical": "playwright test --grep Logical",
+    "test:ux": "playwright test --grep UX",
+    "test:edge": "playwright test --grep Edge",
+    "test:flow": "playwright test --grep Flow",
+    "test:comprehensive": "playwright test tests/08-comprehensive-negative.spec.ts tests/09-comprehensive-logical.spec.ts tests/10-comprehensive-edge.spec.ts tests/11-comprehensive-ux.spec.ts tests/12-full-flow-all-scenarios.spec.ts",
+    "test:all": "playwright test --grep-invert \"@manual\"",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^20.14.0"
+  }
+}

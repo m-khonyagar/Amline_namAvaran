@@ -1,0 +1,569 @@
+{
+  "sessions": {
+    "8f94cace-155f-45b9-a60d-bb84f95b94f3": {
+      "id": "8f94cace-155f-45b9-a60d-bb84f95b94f3",
+      "title": "Interactive chat",
+      "mode": "chat",
+      "messages": [
+        {
+          "id": "d0071b72-46ee-41b7-85e5-c24d27970d78",
+          "role": "user",
+          "content": "Send the update and share the uploaded file",
+          "created_at": "2026-03-20T21:15:55.642916+00:00",
+          "attachments": [
+            {
+              "id": "baf3c3ba-5ed5-4b25-847f-504b1e035211",
+              "name": "assistant-upload-sample.txt"
+            }
+          ],
+          "assigned_tools": [
+            {
+              "parameters": {
+                "subject": "Scheduled update",
+                "to": "someone@example.com",
+                "body": "This message was scheduled from chat.",
+                "scheduled_for": "2026-03-21T00:55:55.5721485+03:30"
+              },
+              "tool_id": "gmail"
+            },
+            {
+              "parameters": {
+                "target_folder": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\shared-from-chat"
+              },
+              "tool_id": "file_share"
+            }
+          ]
+        },
+        {
+          "id": "56c7f947-198c-4265-8afc-00cdb9180d2a",
+          "role": "assistant",
+          "content": "- Scheduled an email to someone@example.com for 2026-03-20T21:25:55.572148+00:00.\n- Copied 1 file(s) into E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\shared-from-chat.\n- Captured 1 uploaded item(s) in the workspace.",
+          "created_at": "2026-03-20T21:15:55.642916+00:00",
+          "actions": [
+            {
+              "type": "gmail",
+              "status": "scheduled",
+              "action_id": "5ab4083e-c995-4897-80a7-b6814209c412",
+              "message": "Scheduled an email to someone@example.com for 2026-03-20T21:25:55.572148+00:00."
+            },
+            {
+              "type": "file_share",
+              "status": "completed",
+              "message": "Copied 1 file(s) into E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\shared-from-chat.",
+              "target_folder": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\shared-from-chat"
+            }
+          ]
+        }
+      ],
+      "created_at": "2026-03-20T21:15:41.737838+00:00",
+      "updated_at": "2026-03-20T21:15:55.642916+00:00"
+    },
+    "2494e10e-b09a-4076-bb95-ada115dda52e": {
+      "id": "2494e10e-b09a-4076-bb95-ada115dda52e",
+      "title": "Agent run",
+      "mode": "agent",
+      "messages": [
+        {
+          "id": "f026ef49-b870-4804-a9a5-22f6021e2384",
+          "role": "user",
+          "content": "Create a release checklist for the current project",
+          "created_at": "2026-03-20T21:16:10.529719+00:00",
+          "attachments": [],
+          "assigned_tools": []
+        },
+        {
+          "id": "7af63404-6847-47d4-bfd0-3b332b76c396",
+          "role": "assistant",
+          "content": "- Started a local workflow for: Create a release checklist for the current project",
+          "created_at": "2026-03-20T21:16:10.534710+00:00",
+          "actions": [
+            {
+              "type": "workflow_task",
+              "status": "started",
+              "task_id": "c3508612-8886-417c-a9b0-47279250cbea"
+            }
+          ]
+        }
+      ],
+      "created_at": "2026-03-20T21:15:55.642916+00:00",
+      "updated_at": "2026-03-20T21:16:10.534710+00:00"
+    },
+    "e70d2bdf-cbb5-45ee-a277-488d0bd13726": {
+      "id": "e70d2bdf-cbb5-45ee-a277-488d0bd13726",
+      "title": "Learning loop validation",
+      "mode": "agent",
+      "messages": [
+        {
+          "id": "1d66fe41-f6af-4d1c-b504-8628691972a1",
+          "role": "user",
+          "content": "Prepare a deployment checklist for the packaged desktop release",
+          "created_at": "2026-03-20T21:48:05.577044+00:00",
+          "attachments": [],
+          "assigned_tools": []
+        },
+        {
+          "id": "3892529e-c27b-43fc-a9bc-a1b7b7b2ed1a",
+          "role": "assistant",
+          "content": "- Started a local workflow for: Prepare a deployment checklist for the packaged desktop release\n- Applied learned playbook: Create a visible artifact early and keep the task summary concise so users can verify outcomes quickly.\n- Current self-improvement profile prefers: telegram, bale, gmail, file_share.",
+          "created_at": "2026-03-20T21:48:05.577044+00:00",
+          "actions": [
+            {
+              "type": "workflow_task",
+              "status": "started",
+              "task_id": "02cd1d3a-b5d7-4713-8ac4-ed5ff9c113da"
+            }
+          ]
+        }
+      ],
+      "created_at": "2026-03-20T21:48:05.577044+00:00",
+      "updated_at": "2026-03-20T21:48:05.577044+00:00"
+    },
+    "74dea77f-1c15-486d-9f42-9304bd91ff27": {
+      "id": "74dea77f-1c15-486d-9f42-9304bd91ff27",
+      "title": "Verification chat",
+      "mode": "chat",
+      "messages": [
+        {
+          "id": "2e3f50f2-3238-41c6-92dc-5711d9425536",
+          "role": "user",
+          "content": "Run connector and sharing verification.",
+          "created_at": "2026-03-20T21:59:01.547716+00:00",
+          "attachments": [
+            {
+              "id": "108214be-03a6-47ac-8353-f53f568bfb97",
+              "name": "verification-upload.txt"
+            }
+          ],
+          "assigned_tools": [
+            {
+              "parameters": {
+                "target_folder": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\shared-output"
+              },
+              "tool_id": "file_share"
+            },
+            {
+              "parameters": {
+                "subject": "Scheduled verification email",
+                "to": "recipient@example.com",
+                "body": "This is a scheduled test message.",
+                "scheduled_for": "2026-03-20T22:29:01.5260933Z"
+              },
+              "tool_id": "gmail"
+            },
+            {
+              "parameters": {
+                "message": "Notification tool verified.",
+                "title": "Verification"
+              },
+              "tool_id": "notification"
+            }
+          ]
+        },
+        {
+          "id": "ba088a07-fa76-48eb-a101-4353a62ecd37",
+          "role": "assistant",
+          "content": "- Copied 1 file(s) into E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\shared-output.\n- Scheduled an email to recipient@example.com for 2026-03-20T22:29:01.526093+00:00.\n- Notification sent: Verification\n- Current self-improvement profile prefers: telegram, bale, workflow_task, gmail.\n- Captured 1 uploaded item(s) in the workspace.",
+          "created_at": "2026-03-20T21:59:01.958558+00:00",
+          "actions": [
+            {
+              "type": "file_share",
+              "status": "completed",
+              "message": "Copied 1 file(s) into E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\shared-output.",
+              "target_folder": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\shared-output"
+            },
+            {
+              "type": "gmail",
+              "status": "scheduled",
+              "action_id": "98529dd6-48af-47c6-934b-ddf4e4040772",
+              "message": "Scheduled an email to recipient@example.com for 2026-03-20T22:29:01.526093+00:00."
+            },
+            {
+              "type": "notification",
+              "status": "completed",
+              "message": "Notification sent: Verification",
+              "result": {
+                "title": "Verification",
+                "message": "Notification tool verified.",
+                "source": "assistant",
+                "ok": true,
+                "detail": ""
+              }
+            }
+          ]
+        }
+      ],
+      "created_at": "2026-03-20T21:59:01.524081+00:00",
+      "updated_at": "2026-03-20T21:59:01.958558+00:00"
+    },
+    "af6410ea-566a-459e-a495-511066f26711": {
+      "id": "af6410ea-566a-459e-a495-511066f26711",
+      "title": "Verification agent",
+      "mode": "agent",
+      "messages": [
+        {
+          "id": "c2e03c42-d66c-47c1-8e9e-5d66470f4ec9",
+          "role": "user",
+          "content": "Prepare a release readiness checklist",
+          "created_at": "2026-03-20T21:59:01.977279+00:00",
+          "attachments": [],
+          "assigned_tools": []
+        },
+        {
+          "id": "5c21bda3-82d8-459b-abf8-f0e242b5d611",
+          "role": "assistant",
+          "content": "- Started a local workflow for: Prepare a release readiness checklist\n- Applied learned playbook: Prefer short, reversible execution bursts when a request needs live operator actions.\n- Current self-improvement profile prefers: telegram, bale, workflow_task, gmail.",
+          "created_at": "2026-03-20T21:59:01.998214+00:00",
+          "actions": [
+            {
+              "type": "workflow_task",
+              "status": "started",
+              "task_id": "f01f12c4-2828-4b75-b8ff-a1831bb0a390"
+            }
+          ]
+        }
+      ],
+      "created_at": "2026-03-20T21:59:01.974930+00:00",
+      "updated_at": "2026-03-20T21:59:01.998214+00:00"
+    },
+    "7fedca5c-b119-40bc-a8d8-edf8a1a793c3": {
+      "id": "7fedca5c-b119-40bc-a8d8-edf8a1a793c3",
+      "title": "Verification chat",
+      "mode": "chat",
+      "messages": [
+        {
+          "id": "5232efb9-fcbd-4b75-8796-1e7a05a2c770",
+          "role": "user",
+          "content": "Run connector and sharing verification.",
+          "created_at": "2026-03-21T14:06:57.394680+00:00",
+          "attachments": [
+            {
+              "id": "54817dd1-5799-4449-9b8b-50f9ec72abbc",
+              "name": "verification-upload.txt"
+            }
+          ],
+          "assigned_tools": [
+            {
+              "parameters": {
+                "target_folder": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\shared-output"
+              },
+              "tool_id": "file_share"
+            },
+            {
+              "parameters": {
+                "subject": "Scheduled verification email",
+                "to": "recipient@example.com",
+                "body": "This is a scheduled test message.",
+                "scheduled_for": "2026-03-21T14:36:57.3637228Z"
+              },
+              "tool_id": "gmail"
+            },
+            {
+              "parameters": {
+                "message": "Notification tool verified.",
+                "title": "Verification"
+              },
+              "tool_id": "notification"
+            }
+          ]
+        },
+        {
+          "id": "7ef2717c-a20f-46b7-a18b-5f580c9c7ff3",
+          "role": "assistant",
+          "content": "- Copied 1 file(s) into E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\shared-output.\n- Scheduled an email to recipient@example.com for 2026-03-21T14:36:57.363722+00:00.\n- Notification sent: Verification\n- Current self-improvement profile prefers: telegram, bale, workflow_task, gmail.\n- Captured 1 uploaded item(s) in the workspace.",
+          "created_at": "2026-03-21T14:06:57.699594+00:00",
+          "actions": [
+            {
+              "type": "file_share",
+              "status": "completed",
+              "message": "Copied 1 file(s) into E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\shared-output.",
+              "target_folder": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\shared-output"
+            },
+            {
+              "type": "gmail",
+              "status": "scheduled",
+              "action_id": "4cad3e70-8ef6-4ce3-a957-d81e4cbde805",
+              "message": "Scheduled an email to recipient@example.com for 2026-03-21T14:36:57.363722+00:00."
+            },
+            {
+              "type": "notification",
+              "status": "completed",
+              "message": "Notification sent: Verification",
+              "result": {
+                "title": "Verification",
+                "message": "Notification tool verified.",
+                "source": "assistant",
+                "ok": true,
+                "detail": ""
+              }
+            }
+          ]
+        }
+      ],
+      "created_at": "2026-03-21T14:06:57.363722+00:00",
+      "updated_at": "2026-03-21T14:06:57.699594+00:00"
+    },
+    "950ac75c-988e-4ce6-8ecf-5883eeb30830": {
+      "id": "950ac75c-988e-4ce6-8ecf-5883eeb30830",
+      "title": "Verification agent",
+      "mode": "agent",
+      "messages": [
+        {
+          "id": "d8845193-8f37-4612-9c55-f5a7f156fcf5",
+          "role": "user",
+          "content": "Prepare a release readiness checklist",
+          "created_at": "2026-03-21T14:06:57.710093+00:00",
+          "attachments": [],
+          "assigned_tools": []
+        },
+        {
+          "id": "bb9de4a1-4a0a-4a8a-9bf4-0af1b7c1d586",
+          "role": "assistant",
+          "content": "- Started a local workflow for: Prepare a release readiness checklist\n- Applied learned playbook: Prefer short, reversible execution bursts when a request needs live operator actions.\n- Current self-improvement profile prefers: telegram, bale, workflow_task, gmail.",
+          "created_at": "2026-03-21T14:06:57.719260+00:00",
+          "actions": [
+            {
+              "type": "workflow_task",
+              "status": "started",
+              "task_id": "4b94625f-9898-48bd-8a4f-f3f32a17e381"
+            }
+          ]
+        }
+      ],
+      "created_at": "2026-03-21T14:06:57.705083+00:00",
+      "updated_at": "2026-03-21T14:06:57.719260+00:00"
+    },
+    "73e61e06-f55d-457a-a3f3-28b7916ea8d9": {
+      "id": "73e61e06-f55d-457a-a3f3-28b7916ea8d9",
+      "title": "Verification chat",
+      "mode": "chat",
+      "messages": [
+        {
+          "id": "9f8678c2-8e92-4370-b4be-63d52c836cf7",
+          "role": "user",
+          "content": "Run connector and sharing verification.",
+          "created_at": "2026-03-21T14:19:09.856721+00:00",
+          "attachments": [
+            {
+              "id": "c8e0a4c7-356e-4944-8f5b-fff0a29acdad",
+              "name": "verification-upload.txt"
+            }
+          ],
+          "assigned_tools": [
+            {
+              "parameters": {
+                "target_folder": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\shared-output"
+              },
+              "tool_id": "file_share"
+            },
+            {
+              "parameters": {
+                "subject": "Scheduled verification email",
+                "to": "recipient@example.com",
+                "body": "This is a scheduled test message.",
+                "scheduled_for": "2026-03-21T14:49:09.8324018Z"
+              },
+              "tool_id": "gmail"
+            },
+            {
+              "parameters": {
+                "message": "Notification tool verified.",
+                "title": "Verification"
+              },
+              "tool_id": "notification"
+            }
+          ]
+        },
+        {
+          "id": "13b562fa-6de9-4b70-ac14-5f2c213bd5d2",
+          "role": "assistant",
+          "content": "- Copied 1 file(s) into E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\shared-output.\n- Scheduled an email to recipient@example.com for 2026-03-21T14:49:09.832401+00:00.\n- Notification sent: Verification\n- Current self-improvement profile prefers: telegram, bale, workflow_task, gmail.\n- Captured 1 uploaded item(s) in the workspace.",
+          "created_at": "2026-03-21T14:19:10.140579+00:00",
+          "actions": [
+            {
+              "type": "file_share",
+              "status": "completed",
+              "message": "Copied 1 file(s) into E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\shared-output.",
+              "target_folder": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\shared-output"
+            },
+            {
+              "type": "gmail",
+              "status": "scheduled",
+              "action_id": "8d48dae0-b978-4712-ba58-266871225887",
+              "message": "Scheduled an email to recipient@example.com for 2026-03-21T14:49:09.832401+00:00."
+            },
+            {
+              "type": "notification",
+              "status": "completed",
+              "message": "Notification sent: Verification",
+              "result": {
+                "title": "Verification",
+                "message": "Notification tool verified.",
+                "source": "assistant",
+                "ok": true,
+                "detail": ""
+              }
+            }
+          ]
+        }
+      ],
+      "created_at": "2026-03-21T14:19:09.831399+00:00",
+      "updated_at": "2026-03-21T14:19:10.140579+00:00"
+    },
+    "96c305a5-c7a9-4dc4-a019-7399a2814983": {
+      "id": "96c305a5-c7a9-4dc4-a019-7399a2814983",
+      "title": "Verification agent",
+      "mode": "agent",
+      "messages": [
+        {
+          "id": "7bc01637-27da-4025-a4e1-8d89a6d3a4ff",
+          "role": "user",
+          "content": "Prepare a release readiness checklist",
+          "created_at": "2026-03-21T14:19:10.147498+00:00",
+          "attachments": [],
+          "assigned_tools": []
+        },
+        {
+          "id": "6fb7c2a8-c5cc-4224-891a-acf2c717c836",
+          "role": "assistant",
+          "content": "- Started a local workflow for: Prepare a release readiness checklist\n- Applied learned playbook: Prefer short, reversible execution bursts when a request needs live operator actions.\n- Current self-improvement profile prefers: telegram, bale, workflow_task, gmail.",
+          "created_at": "2026-03-21T14:19:10.159426+00:00",
+          "actions": [
+            {
+              "type": "workflow_task",
+              "status": "started",
+              "task_id": "728f950b-df67-48ea-9106-cc5d86d028d8"
+            }
+          ]
+        }
+      ],
+      "created_at": "2026-03-21T14:19:10.145838+00:00",
+      "updated_at": "2026-03-21T14:19:10.159426+00:00"
+    }
+  },
+  "connectors": {
+    "gmail": {
+      "id": "gmail",
+      "type": "gmail",
+      "enabled": true,
+      "config": {
+        "port": "465",
+        "host": "smtp.gmail.com",
+        "username": "demo@example.com",
+        "password": "demo-app-password",
+        "from_email": "demo@example.com"
+      },
+      "updated_at": "2026-03-21T14:19:09.769536+00:00"
+    },
+    "telegram": {
+      "id": "telegram",
+      "type": "telegram",
+      "enabled": true,
+      "config": {
+        "bot_token": "demo-telegram-token",
+        "default_chat_id": "2001",
+        "allowed_chat_ids": "2001,2002"
+      },
+      "updated_at": "2026-03-21T14:19:09.774487+00:00"
+    },
+    "bale": {
+      "id": "bale",
+      "type": "bale",
+      "enabled": true,
+      "config": {
+        "bot_token": "demo-bale-token",
+        "default_chat_id": "3001",
+        "allowed_chat_ids": "3001,3002"
+      },
+      "updated_at": "2026-03-21T14:19:09.776532+00:00"
+    }
+  },
+  "scheduled_actions": {
+    "5ab4083e-c995-4897-80a7-b6814209c412": {
+      "id": "5ab4083e-c995-4897-80a7-b6814209c412",
+      "type": "gmail_send",
+      "status": "failed",
+      "payload": {
+        "connector_id": "gmail",
+        "to": "someone@example.com",
+        "subject": "Scheduled update",
+        "body": "This message was scheduled from chat."
+      },
+      "scheduled_for": "2026-03-20T21:25:55.572148+00:00",
+      "created_at": "2026-03-20T21:15:55.642916+00:00",
+      "error": "[WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond"
+    },
+    "98529dd6-48af-47c6-934b-ddf4e4040772": {
+      "id": "98529dd6-48af-47c6-934b-ddf4e4040772",
+      "type": "gmail_send",
+      "status": "scheduled",
+      "payload": {
+        "connector_id": "gmail",
+        "to": "recipient@example.com",
+        "subject": "Scheduled verification email",
+        "body": "This is a scheduled test message."
+      },
+      "scheduled_for": "2026-03-20T22:29:01.526093+00:00",
+      "created_at": "2026-03-20T21:59:01.547716+00:00"
+    },
+    "4cad3e70-8ef6-4ce3-a957-d81e4cbde805": {
+      "id": "4cad3e70-8ef6-4ce3-a957-d81e4cbde805",
+      "type": "gmail_send",
+      "status": "scheduled",
+      "payload": {
+        "connector_id": "gmail",
+        "to": "recipient@example.com",
+        "subject": "Scheduled verification email",
+        "body": "This is a scheduled test message."
+      },
+      "scheduled_for": "2026-03-21T14:36:57.363722+00:00",
+      "created_at": "2026-03-21T14:06:57.394680+00:00"
+    },
+    "8d48dae0-b978-4712-ba58-266871225887": {
+      "id": "8d48dae0-b978-4712-ba58-266871225887",
+      "type": "gmail_send",
+      "status": "scheduled",
+      "payload": {
+        "connector_id": "gmail",
+        "to": "recipient@example.com",
+        "subject": "Scheduled verification email",
+        "body": "This is a scheduled test message."
+      },
+      "scheduled_for": "2026-03-21T14:49:09.832401+00:00",
+      "created_at": "2026-03-21T14:19:09.858774+00:00"
+    }
+  },
+  "uploads": {
+    "baf3c3ba-5ed5-4b25-847f-504b1e035211": {
+      "id": "baf3c3ba-5ed5-4b25-847f-504b1e035211",
+      "name": "assistant-upload-sample.txt",
+      "path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\workspace\\assistant_uploads\\baf3c3ba-5ed5-4b25-847f-504b1e035211\\assistant-upload-sample.txt",
+      "content_type": "text/plain",
+      "size": 25,
+      "created_at": "2026-03-20T21:15:41.712927+00:00"
+    },
+    "108214be-03a6-47ac-8353-f53f568bfb97": {
+      "id": "108214be-03a6-47ac-8353-f53f568bfb97",
+      "name": "verification-upload.txt",
+      "path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\workspace\\assistant_uploads\\108214be-03a6-47ac-8353-f53f568bfb97\\verification-upload.txt",
+      "content_type": "text/plain",
+      "size": 28,
+      "created_at": "2026-03-20T21:59:01.510780+00:00"
+    },
+    "54817dd1-5799-4449-9b8b-50f9ec72abbc": {
+      "id": "54817dd1-5799-4449-9b8b-50f9ec72abbc",
+      "name": "verification-upload.txt",
+      "path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\workspace\\assistant_uploads\\54817dd1-5799-4449-9b8b-50f9ec72abbc\\verification-upload.txt",
+      "content_type": "text/plain",
+      "size": 28,
+      "created_at": "2026-03-21T14:06:57.341664+00:00"
+    },
+    "c8e0a4c7-356e-4944-8f5b-fff0a29acdad": {
+      "id": "c8e0a4c7-356e-4944-8f5b-fff0a29acdad",
+      "name": "verification-upload.txt",
+      "path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\workspace\\assistant_uploads\\c8e0a4c7-356e-4944-8f5b-fff0a29acdad\\verification-upload.txt",
+      "content_type": "text/plain",
+      "size": 28,
+      "created_at": "2026-03-21T14:19:09.821315+00:00"
+    }
+  }
+}

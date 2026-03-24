@@ -5,12 +5,23 @@ interface BottomInputProps {
   value: string;
   onChange: (v: string) => void;
   onSubmit: () => void;
+  onSuggestionClick?: (value: string) => void;
+  suggestions?: string[];
   placeholder?: string;
   disabled?: boolean;
   className?: string;
 }
 
-export function BottomInput({ value, onChange, onSubmit, placeholder, disabled = false, className = '' }: BottomInputProps) {
+export function BottomInput({
+  value,
+  onChange,
+  onSubmit,
+  onSuggestionClick,
+  suggestions = [],
+  placeholder,
+  disabled = false,
+  className = '',
+}: BottomInputProps) {
   const { t } = useTranslation();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -66,6 +77,20 @@ export function BottomInput({ value, onChange, onSubmit, placeholder, disabled =
             </div>
             <p className="hidden lg:block text-[11px] text-muted-foreground">{t('describeOutcome')}</p>
           </div>
+          {suggestions.length > 0 && onSuggestionClick && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {suggestions.map((suggestion) => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  className="rounded-md border border-border bg-secondary/50 px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-secondary"
+                  onClick={() => onSuggestionClick(suggestion)}
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

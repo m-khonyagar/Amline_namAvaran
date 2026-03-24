@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from '../i18n';
 import { backend } from '../api';
+import { API_BASE } from '../api/config';
+import { MarkdownContent } from './MarkdownContent';
 
 interface ArtifactsViewerProps {
   className?: string;
@@ -13,186 +15,111 @@ export function ArtifactsViewer({ className = '' }: ArtifactsViewerProps) {
   const [filterType, setFilterType] = useState('all');
   const [artifacts, setArtifacts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const loadArtifacts = async () => {
+    try {
+      setErrorMessage('');
+      const data = await backend.getArtifacts();
+      setArtifacts(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error(error);
+      setErrorMessage(error instanceof Error ? error.message : 'Unable to load artifacts right now.');
+      setArtifacts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    backend.getArtifacts().then(setArtifacts).catch(() => setArtifacts([])).finally(() => setLoading(false));
+    void loadArtifacts();
   }, []);
 
-  const defaultArtifacts = [
-    {
-      id: '1',
-      name: 'app.py',
-      type: 'code',
-      path: '/workspace/flask_app/app.py',
-      size: 2048,
-      content: `from flask import Flask, render_template, request
-from flask_sqlalchemy import SQLAlchemy
-import os
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
-db = SQLAlchemy(app)
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-
-    def __repr__(self):
-        return f'<User {self.username}>'
-
-class Post(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/api/posts', methods=['GET'])
-def get_posts():
-    posts = Post.query.all()
-    return jsonify([{'id': p.id, 'title': p.title, 'content': p.content} for p in posts])
-
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True)`,
-      language: 'python',
-      createdAt: '2026-03-11T10:20:00Z',
-      taskId: '1',
-    },
-    {
-      id: '2',
-      name: 'requirements.txt',
-      type: 'text',
-      path: '/workspace/flask_app/requirements.txt',
-      size: 256,
-      content: `Flask==2.3.3
-Flask-SQLAlchemy==3.0.5
-SQLAlchemy==2.0.21
-Werkzeug==2.3.7
-Jinja2==3.1.2
-click==8.1.7
-itsdangerous==2.1.2
-MarkupSafe==2.1.3`,
-      language: 'text',
-      createdAt: '2026-03-11T10:15:00Z',
-      taskId: '1',
-    },
-    {
-      id: '3',
-      name: 'index.html',
-      type: 'code',
-      path: '/workspace/flask_app/templates/index.html',
-      size: 1024,
-      content: `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask Blog</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold mb-8">Flask Blog</h1>
-        <div id="posts" class="space-y-4">
-            <!-- Posts will be loaded here -->
-        </div>
-    </div>
-    <script src="/static/js/app.js"></script>
-</body>
-</html>`,
-      language: 'html',
-      createdAt: '2026-03-11T10:25:00Z',
-      taskId: '1',
-    },
-    {
-      id: '4',
-      name: 'research_notes.md',
-      type: 'text',
-      path: '/workspace/research/web_dev_best_practices.md',
-      size: 1536,
-      content: `# Web Development Best Practices
-
-## Database Design
-- Use ORM for database operations
-- Implement proper indexing
-- Use migrations for schema changes
-- Add foreign key constraints
-
-## API Design
-- Use RESTful principles
-- Implement proper HTTP status codes
-- Add input validation
-- Use JWT for authentication
-
-## Frontend
-- Use responsive design
-- Implement proper error handling
-- Add loading states
-- Use semantic HTML
-
-## Security
-- Validate all inputs
-- Use parameterized queries
-- Implement CSRF protection
-- Use HTTPS in production
-
-## Performance
-- Implement caching
-- Optimize database queries
-- Use CDN for static assets
-- Minimize bundle size`,
-      language: 'markdown',
-      createdAt: '2026-03-11T11:00:00Z',
-      taskId: '2',
-    },
-  ];
-
-  const artifactsToUse = artifacts.length > 0 ? artifacts : defaultArtifacts;
-
-  const filteredArtifacts = artifactsToUse.filter((artifact: any) => {
-    const matchesSearch = searchQuery === '' || 
+  const filteredArtifacts = artifacts.filter((artifact: any) => {
+    const matchesSearch =
+      searchQuery === '' ||
       (artifact.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (artifact.path || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = filterType === 'all' || artifact.type === filterType;
     return matchesSearch && matchesType;
   });
 
-  const getTypeIcon = (type: string) => {
+  const getTypeLabel = (type: string) => {
     switch (type) {
-      case 'code': return '📄';
-      case 'text': return '📝';
-      case 'image': return '🖼️';
-      case 'binary': return '🔧';
-      default: return '📁';
+      case 'code':
+        return 'CODE';
+      case 'text':
+        return 'TEXT';
+      case 'image':
+        return 'IMAGE';
+      case 'binary':
+        return 'BIN';
+      default:
+        return 'FILE';
     }
   };
 
-  const getLanguageIcon = (language: string) => {
+  const getLanguageLabel = (language: string) => {
     switch (language) {
-      case 'python': return '🐍';
-      case 'javascript': return '🟨';
-      case 'html': return '🌐';
-      case 'css': return '🎨';
-      case 'markdown': return '📝';
-      default: return '📄';
+      case 'python':
+        return 'PY';
+      case 'javascript':
+        return 'JS';
+      case 'html':
+        return 'HTML';
+      case 'css':
+        return 'CSS';
+      case 'markdown':
+        return 'MD';
+      default:
+        return 'TXT';
     }
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (!bytes) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   };
 
-  const selectedArtifactData = artifactsToUse.find((a: any) => a.id === selectedArtifact);
+  const selectedArtifactData = artifacts.find((a: any) => a.id === selectedArtifact);
+  const artifactCounts = {
+    total: artifacts.length,
+    code: artifacts.filter((artifact) => artifact.type === 'code').length,
+    text: artifacts.filter((artifact) => artifact.type === 'text').length,
+    binary: artifacts.filter((artifact) => artifact.type === 'binary').length,
+  };
+
+  useEffect(() => {
+    if (!selectedArtifactData || selectedArtifactData.content) return;
+    const controller = new AbortController();
+
+    const loadPreview = async () => {
+      try {
+        setPreviewLoading(true);
+        const res = await fetch(`${API_BASE}/artifacts/${selectedArtifactData.id}`, { signal: controller.signal });
+        if (!res.ok) return;
+        const data = await res.json();
+        setArtifacts((prev) =>
+          prev.map((artifact) =>
+            artifact.id === selectedArtifactData.id
+              ? { ...artifact, content: data.content || '', size: data.size || artifact.size }
+              : artifact
+          )
+        );
+      } catch {
+        // Keep metadata visible even when preview loading fails.
+      } finally {
+        setPreviewLoading(false);
+      }
+    };
+
+    void loadPreview();
+    return () => controller.abort();
+  }, [selectedArtifactData]);
 
   if (loading && artifacts.length === 0) {
     return (
@@ -204,26 +131,60 @@ MarkupSafe==2.1.3`,
     );
   }
 
-  const handleOpenInExplorer = (path: string) => {
-    // In a real app, this would open the file in the system file explorer
-    console.log('Open in explorer:', path);
+  const handleOpenArtifact = (artifact: any) => {
+    window.open(artifact.downloadUrl || `${API_BASE}/artifacts/${artifact.id}/download`, '_blank', 'noopener,noreferrer');
   };
 
-  const handleCopyPath = (path: string) => {
-    navigator.clipboard.writeText(path);
-    console.log('Path copied to clipboard:', path);
+  const handleCopyPath = async (path: string) => {
+    try {
+      await navigator.clipboard.writeText(path);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const renderPreview = (artifact: any) => {
+    const content = previewLoading ? 'Loading preview...' : artifact.content || artifact.path;
+    const language = (artifact.language || '').toLowerCase();
+    const isMarkdown = language === 'markdown' || artifact.name?.toLowerCase().endsWith('.md');
+    if (isMarkdown) {
+      return <MarkdownContent content={content} className="text-[12px]" />;
+    }
+    return (
+      <pre className="text-[11px] text-foreground font-mono whitespace-pre-wrap leading-relaxed">
+        {content}
+      </pre>
+    );
   };
 
   return (
     <div className={`p-5 ${className}`}>
       <div className="mb-5">
-        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-2.5">{t('outputs')}</p>
+        <p className="shell-section-label mb-2.5">{t('outputs')}</p>
+        <div className="hero-chip mb-3 text-[11px] font-semibold">
+          <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+          <span>Output browser</span>
+        </div>
         <h1 className="text-[22px] font-semibold text-foreground leading-tight">{t('artifacts')}</h1>
         <p className="text-[13px] text-muted-foreground mt-2.5">{t('viewManageFiles')}</p>
       </div>
 
-      {/* Search and Filters */}
-      <div className="surface-card p-4 mb-4">
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
+        {[
+          { label: 'All files', value: artifactCounts.total, caption: 'Every generated output in the local workspace' },
+          { label: 'Code', value: artifactCounts.code, caption: 'Scripts, snippets, and source files' },
+          { label: 'Text', value: artifactCounts.text, caption: 'Summaries, notes, and markdown deliverables' },
+          { label: 'Binary', value: artifactCounts.binary, caption: 'Downloads and non-text assets' },
+        ].map((item) => (
+          <div key={item.label} className="surface-card p-4">
+            <p className="shell-section-label">{item.label}</p>
+            <p className="mt-2 text-[22px] font-semibold tracking-[-0.03em] text-foreground">{item.value}</p>
+            <p className="mt-1.5 text-[11px] text-muted-foreground">{item.caption}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="surface-card glass-frame p-4 mb-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <input
             type="text"
@@ -232,22 +193,26 @@ MarkupSafe==2.1.3`,
             onChange={(e) => setSearchQuery(e.target.value)}
             className="input flex-1"
           />
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            className="input w-full md:w-40"
-          >
+          <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="input w-full md:w-40">
             <option value="all">{t('allTypes')}</option>
             <option value="code">{t('code')}</option>
             <option value="text">{t('text')}</option>
             <option value="image">{t('images')}</option>
             <option value="binary">{t('binary')}</option>
           </select>
+          <button className="btn-secondary text-[12px] h-10 px-3" onClick={() => void loadArtifacts()}>
+            {t('refresh')}
+          </button>
         </div>
       </div>
 
+      {errorMessage && (
+        <div className="mb-4 rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-[12px] text-destructive">
+          {errorMessage}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-4">
-        {/* Artifacts List */}
         <div className="space-y-2.5">
           {filteredArtifacts.length === 0 ? (
             <div className="surface-card p-10 text-center">
@@ -259,20 +224,24 @@ MarkupSafe==2.1.3`,
               <button
                 key={artifact.id}
                 className={`surface-card p-4 w-full text-left transition-colors ${
-                  selectedArtifact === artifact.id ? 'border-primary/30' : 'hover:border-primary/20'
+                  selectedArtifact === artifact.id ? 'border-primary/30 shadow-[0_12px_28px_hsl(var(--primary)/0.14)]' : 'hover:border-primary/20'
                 }`}
                 onClick={() => setSelectedArtifact(artifact.id)}
               >
                 <div className="flex items-start justify-between gap-3 mb-2.5">
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    <span className="text-[18px] shrink-0">{getTypeIcon(artifact.type)}</span>
+                    <span className="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-border bg-secondary px-2 text-[10px] font-semibold text-foreground">
+                      {getTypeLabel(artifact.type)}
+                    </span>
                     <div className="min-w-0 flex-1">
                       <h3 className="text-[14px] font-semibold text-foreground leading-snug truncate">{artifact.name}</h3>
                       <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{artifact.path}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="text-[14px]">{getLanguageIcon(artifact.language)}</span>
+                    <span className="px-1.5 py-0.5 text-[10px] bg-secondary text-secondary-foreground rounded border border-border">
+                      {getLanguageLabel(artifact.language)}
+                    </span>
                     <span className="px-1.5 py-0.5 text-[10px] bg-secondary text-secondary-foreground rounded border border-border">
                       {artifact.type}
                     </span>
@@ -284,11 +253,10 @@ MarkupSafe==2.1.3`,
                   <span>{new Date(artifact.createdAt).toLocaleDateString()}</span>
                 </div>
 
-                {/* Preview */}
                 <div className="mb-2.5">
-                  <p className="text-[11px] text-muted-foreground line-clamp-2 font-mono bg-secondary/40 p-2 rounded leading-relaxed">
-                    {artifact.content.split('\n').slice(0, 2).join('\n')}
-                    {artifact.content.split('\n').length > 2 && '\n...'}
+                  <p className="text-[11px] text-muted-foreground line-clamp-2 font-mono bg-secondary/40 p-2 rounded-xl leading-relaxed">
+                    {(artifact.content || artifact.path).split('\n').slice(0, 2).join('\n')}
+                    {(artifact.content || artifact.path).split('\n').length > 2 && '\n...'}
                   </p>
                 </div>
               </button>
@@ -296,21 +264,31 @@ MarkupSafe==2.1.3`,
           )}
         </div>
 
-        {/* Artifact Preview Panel */}
         <div className="lg:col-span-1">
           {selectedArtifactData ? (
-            <div className="surface-card p-4 sticky top-4">
+            <div className="surface-card glass-frame p-4 sticky top-4">
               <div className="flex items-center gap-2.5 mb-3.5">
-                <span className="text-[20px]">{getTypeIcon(selectedArtifactData.type)}</span>
+                <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-lg border border-border bg-secondary px-2 text-[10px] font-semibold text-foreground">
+                  {getTypeLabel(selectedArtifactData.type)}
+                </span>
                 <div className="min-w-0 flex-1">
                   <h3 className="text-[14px] font-semibold text-foreground leading-snug truncate">{selectedArtifactData.name}</h3>
                   <div className="flex items-center gap-1.5 mt-1">
-                    <span className="text-[14px]">{getLanguageIcon(selectedArtifactData.language)}</span>
                     <span className="text-[10px] bg-secondary text-secondary-foreground rounded px-1.5 py-0.5 border border-border">
-                      {selectedArtifactData.language}
+                      {getLanguageLabel(selectedArtifactData.language)}
+                    </span>
+                    <span className="text-[10px] bg-secondary text-secondary-foreground rounded px-1.5 py-0.5 border border-border">
+                      {selectedArtifactData.type}
                     </span>
                   </div>
                 </div>
+              </div>
+
+              <div className="surface-elevated p-3 mb-3.5">
+                <p className="shell-section-label mb-2">Delivery view</p>
+                <p className="text-[12px] text-foreground leading-6">
+                  Inspect the output, open it directly, or copy the path to hand it off to another tool or teammate.
+                </p>
               </div>
 
               <div className="surface-elevated p-3 mb-3.5">
@@ -327,31 +305,21 @@ MarkupSafe==2.1.3`,
                     </div>
                   )}
                 </div>
-                <p className="text-[11px] text-muted-foreground mt-2.5">
-                  {new Date(selectedArtifactData.createdAt).toLocaleString()}
-                </p>
+                <p className="text-[11px] text-muted-foreground mt-2.5">{new Date(selectedArtifactData.createdAt).toLocaleString()}</p>
               </div>
 
               <div className="mb-3.5">
                 <h4 className="text-[12px] font-medium text-foreground mb-2">{t('contentPreview')}</h4>
-                <div className="surface-elevated rounded-md p-3 max-h-96 overflow-y-auto shell-scroll">
-                  <pre className="text-[11px] text-foreground font-mono whitespace-pre-wrap leading-relaxed">
-                    {selectedArtifactData.content}
-                  </pre>
+                <div className="surface-elevated rounded-2xl p-3 max-h-96 overflow-y-auto shell-scroll">
+                  {renderPreview(selectedArtifactData)}
                 </div>
               </div>
 
               <div className="flex gap-2">
-                <button 
-                  className="btn-secondary text-[11px] h-7 px-2.5 flex-1"
-                  onClick={() => handleOpenInExplorer(selectedArtifactData.path)}
-                >
+                <button className="btn-secondary text-[11px] h-7 px-2.5 flex-1" onClick={() => handleOpenArtifact(selectedArtifactData)}>
                   {t('open')}
                 </button>
-                <button 
-                  className="btn-secondary text-[11px] h-7 px-2.5 flex-1"
-                  onClick={() => handleCopyPath(selectedArtifactData.path)}
-                >
+                <button className="btn-secondary text-[11px] h-7 px-2.5 flex-1" onClick={() => void handleCopyPath(selectedArtifactData.path)}>
                   {t('copyPath')}
                 </button>
               </div>

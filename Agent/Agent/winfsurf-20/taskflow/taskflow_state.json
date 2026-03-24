@@ -1,0 +1,1618 @@
+{
+  "tasks": {
+    "101822e8-1c18-41c9-9dad-3c06c3fb73ce": {
+      "id": "101822e8-1c18-41c9-9dad-3c06c3fb73ce",
+      "goal": "Create a usable release checklist",
+      "status": "succeeded",
+      "created_at": "2026-03-20T09:51:59.677336+00:00",
+      "updated_at": "2026-03-20T09:52:45.439744+00:00",
+      "workspace_path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\workspace\\tasks\\101822e8-1c18-41c9-9dad-3c06c3fb73ce",
+      "steps": [
+        {
+          "id": "37732737-5a45-4b8f-9514-9579a32e1cb8",
+          "idx": 1,
+          "title": "Clarify goal",
+          "description": "Clarify goal completed successfully.",
+          "status": "succeeded",
+          "agent": "PlannerAgent",
+          "start_time": "2026-03-20T09:52:41.803175+00:00",
+          "end_time": "2026-03-20T09:52:42.998525+00:00"
+        },
+        {
+          "id": "c275fc78-d31e-4d2c-95db-f4d358d638e2",
+          "idx": 2,
+          "title": "Produce execution notes",
+          "description": "Produce execution notes completed successfully.",
+          "status": "succeeded",
+          "agent": "CoderAgent",
+          "start_time": "2026-03-20T09:52:43.000542+00:00",
+          "end_time": "2026-03-20T09:52:44.198637+00:00"
+        },
+        {
+          "id": "38a2ec8e-f923-421d-8b80-77c4be638ee1",
+          "idx": 3,
+          "title": "Create deliverable artifact",
+          "description": "Create deliverable artifact completed successfully.",
+          "status": "succeeded",
+          "agent": "ExecutorAgent",
+          "start_time": "2026-03-20T09:52:44.201651+00:00",
+          "end_time": "2026-03-20T09:52:45.417712+00:00"
+        }
+      ],
+      "events": [
+        {
+          "id": "bfeeb1a5-1dfa-4138-85d2-0a2d9dab0d87",
+          "type": "task_created",
+          "ts": "2026-03-20T09:51:59.677336+00:00",
+          "level": "info",
+          "message": "Task created: Create a usable release checklist",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "0b1bf1de-f977-4a32-b2e8-ffb39bfb1886",
+          "type": "plan_ready",
+          "ts": "2026-03-20T09:52:33.002892+00:00",
+          "level": "info",
+          "message": "Execution plan generated.",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "e8260a22-b0b3-4bcb-984c-e0df43925893",
+          "type": "task_started",
+          "ts": "2026-03-20T09:52:41.803175+00:00",
+          "level": "info",
+          "message": "Task execution started.",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "5f9ababf-c807-4d40-a223-485d0cfbad8f",
+          "type": "event",
+          "ts": "2026-03-20T09:52:41.804076+00:00",
+          "level": "info",
+          "message": "Executing step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\"}",
+          "step_id": "37732737-5a45-4b8f-9514-9579a32e1cb8"
+        },
+        {
+          "id": "e977cc56-9685-49d9-add8-a7ba026dad2e",
+          "type": "progress",
+          "ts": "2026-03-20T09:52:42.999537+00:00",
+          "level": "info",
+          "message": "Finished step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\", \"status\": \"succeeded\"}",
+          "step_id": "37732737-5a45-4b8f-9514-9579a32e1cb8"
+        },
+        {
+          "id": "99275098-08c6-4c45-80a6-d355801b0d77",
+          "type": "event",
+          "ts": "2026-03-20T09:52:43.002246+00:00",
+          "level": "info",
+          "message": "Executing step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\"}",
+          "step_id": "c275fc78-d31e-4d2c-95db-f4d358d638e2"
+        },
+        {
+          "id": "9ec5f874-fce4-4f4b-a3cb-a20bda643644",
+          "type": "progress",
+          "ts": "2026-03-20T09:52:44.199646+00:00",
+          "level": "info",
+          "message": "Finished step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\", \"status\": \"succeeded\"}",
+          "step_id": "c275fc78-d31e-4d2c-95db-f4d358d638e2"
+        },
+        {
+          "id": "04498850-322a-4f7a-864a-377e96364ea4",
+          "type": "event",
+          "ts": "2026-03-20T09:52:44.202648+00:00",
+          "level": "info",
+          "message": "Executing step 3: Create deliverable artifact",
+          "payload_json": "{\"step\": \"Create deliverable artifact\"}",
+          "step_id": "38a2ec8e-f923-421d-8b80-77c4be638ee1"
+        },
+        {
+          "id": "7a27ced9-2be8-43cf-922d-b5de04612120",
+          "type": "progress",
+          "ts": "2026-03-20T09:52:45.418218+00:00",
+          "level": "info",
+          "message": "Finished step 3: Create deliverable artifact",
+          "payload_json": "{\"step\": \"Create deliverable artifact\", \"status\": \"succeeded\"}",
+          "step_id": "38a2ec8e-f923-421d-8b80-77c4be638ee1"
+        },
+        {
+          "id": "8f3ebda1-9de0-4c14-a1d8-c2521412630d",
+          "type": "task_completed",
+          "ts": "2026-03-20T09:52:45.439744+00:00",
+          "level": "info",
+          "message": "Task completed successfully.",
+          "payload_json": "{\"artifact_id\": \"5e6bbcd0-33ba-48fd-b7ba-a951f02124fd\"}",
+          "step_id": null
+        }
+      ],
+      "artifacts": [
+        "5e6bbcd0-33ba-48fd-b7ba-a951f02124fd"
+      ],
+      "summary": "Completed task: Create a usable release checklist"
+    },
+    "b2539683-6102-4dca-a61d-df3f863658ca": {
+      "id": "b2539683-6102-4dca-a61d-df3f863658ca",
+      "goal": "Draft a welcome guide for a non-technical user",
+      "status": "succeeded",
+      "created_at": "2026-03-20T10:01:36.344340+00:00",
+      "updated_at": "2026-03-20T10:01:40.131990+00:00",
+      "workspace_path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\workspace\\tasks\\b2539683-6102-4dca-a61d-df3f863658ca",
+      "steps": [
+        {
+          "id": "6ee9fc9f-60ed-41a2-b7b9-48fcd5e4e703",
+          "idx": 1,
+          "title": "Clarify goal",
+          "description": "Clarify goal completed successfully.",
+          "status": "succeeded",
+          "agent": "PlannerAgent",
+          "start_time": "2026-03-20T10:01:36.489001+00:00",
+          "end_time": "2026-03-20T10:01:37.683041+00:00"
+        },
+        {
+          "id": "5e619ef8-ff8c-4110-9f71-734127a34219",
+          "idx": 2,
+          "title": "Produce execution notes",
+          "description": "Produce execution notes completed successfully.",
+          "status": "succeeded",
+          "agent": "CoderAgent",
+          "start_time": "2026-03-20T10:01:37.685885+00:00",
+          "end_time": "2026-03-20T10:01:38.901898+00:00"
+        },
+        {
+          "id": "5c7aea47-ccb9-4274-a807-16b1e8bd16d7",
+          "idx": 3,
+          "title": "Create deliverable artifact",
+          "description": "Create deliverable artifact completed successfully.",
+          "status": "succeeded",
+          "agent": "ExecutorAgent",
+          "start_time": "2026-03-20T10:01:38.904423+00:00",
+          "end_time": "2026-03-20T10:01:40.123245+00:00"
+        }
+      ],
+      "events": [
+        {
+          "id": "1c295cf1-5e44-4982-8010-a0269bc6f5e3",
+          "type": "task_created",
+          "ts": "2026-03-20T10:01:36.344340+00:00",
+          "level": "info",
+          "message": "Task created: Draft a welcome guide for a non-technical user",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "da95b7e1-3d74-459c-8eb1-efafdb47f1e6",
+          "type": "plan_ready",
+          "ts": "2026-03-20T10:01:36.417442+00:00",
+          "level": "info",
+          "message": "Execution plan generated.",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "213b0f2e-6dd6-4e1c-9aef-89bbb7d15063",
+          "type": "task_started",
+          "ts": "2026-03-20T10:01:36.485347+00:00",
+          "level": "info",
+          "message": "Task execution started.",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "03264656-aeaf-4432-9a1f-ecb144822a96",
+          "type": "event",
+          "ts": "2026-03-20T10:01:36.489001+00:00",
+          "level": "info",
+          "message": "Executing step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\"}",
+          "step_id": "6ee9fc9f-60ed-41a2-b7b9-48fcd5e4e703"
+        },
+        {
+          "id": "da903058-c310-422c-a582-663149ed4364",
+          "type": "progress",
+          "ts": "2026-03-20T10:01:37.684978+00:00",
+          "level": "info",
+          "message": "Finished step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\", \"status\": \"succeeded\"}",
+          "step_id": "6ee9fc9f-60ed-41a2-b7b9-48fcd5e4e703"
+        },
+        {
+          "id": "64b8a662-8515-4850-b710-3ab87f53ca13",
+          "type": "event",
+          "ts": "2026-03-20T10:01:37.685885+00:00",
+          "level": "info",
+          "message": "Executing step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\"}",
+          "step_id": "5e619ef8-ff8c-4110-9f71-734127a34219"
+        },
+        {
+          "id": "a09e1589-2c5a-47d1-a097-cc91716d61d1",
+          "type": "progress",
+          "ts": "2026-03-20T10:01:38.903417+00:00",
+          "level": "info",
+          "message": "Finished step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\", \"status\": \"succeeded\"}",
+          "step_id": "5e619ef8-ff8c-4110-9f71-734127a34219"
+        },
+        {
+          "id": "bb592645-8503-46d0-9943-421c59c1f698",
+          "type": "event",
+          "ts": "2026-03-20T10:01:38.905935+00:00",
+          "level": "info",
+          "message": "Executing step 3: Create deliverable artifact",
+          "payload_json": "{\"step\": \"Create deliverable artifact\"}",
+          "step_id": "5c7aea47-ccb9-4274-a807-16b1e8bd16d7"
+        },
+        {
+          "id": "b16ac265-39b7-491c-b430-0aea2d9fa793",
+          "type": "progress",
+          "ts": "2026-03-20T10:01:40.123245+00:00",
+          "level": "info",
+          "message": "Finished step 3: Create deliverable artifact",
+          "payload_json": "{\"step\": \"Create deliverable artifact\", \"status\": \"succeeded\"}",
+          "step_id": "5c7aea47-ccb9-4274-a807-16b1e8bd16d7"
+        },
+        {
+          "id": "eb1f4409-5dda-4602-b3c3-3c979d0c8a84",
+          "type": "task_completed",
+          "ts": "2026-03-20T10:01:40.131990+00:00",
+          "level": "info",
+          "message": "Task completed successfully.",
+          "payload_json": "{\"artifact_id\": \"59c09cdf-dc2c-43ec-a8de-69fc707c5f62\"}",
+          "step_id": null
+        }
+      ],
+      "artifacts": [
+        "59c09cdf-dc2c-43ec-a8de-69fc707c5f62"
+      ],
+      "summary": "Completed task: Draft a welcome guide for a non-technical user"
+    },
+    "84f627a3-8695-4234-93d3-a3b00cd84c3c": {
+      "id": "84f627a3-8695-4234-93d3-a3b00cd84c3c",
+      "goal": "Verify new workspace path is used",
+      "status": "queued",
+      "created_at": "2026-03-20T10:10:15.826279+00:00",
+      "updated_at": "2026-03-20T10:10:15.827279+00:00",
+      "workspace_path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\workspace\\tasks\\84f627a3-8695-4234-93d3-a3b00cd84c3c",
+      "steps": [],
+      "events": [
+        {
+          "id": "20dec997-75b1-4c64-b0bc-438312d3763f",
+          "type": "task_created",
+          "ts": "2026-03-20T10:10:15.827279+00:00",
+          "level": "info",
+          "message": "Task created: Verify new workspace path is used",
+          "payload_json": null,
+          "step_id": null
+        }
+      ],
+      "artifacts": [],
+      "summary": ""
+    },
+    "3ee4e1da-1e85-428b-8192-3c00a751df30": {
+      "id": "3ee4e1da-1e85-428b-8192-3c00a751df30",
+      "goal": "Sequential workspace verification",
+      "status": "queued",
+      "created_at": "2026-03-20T10:11:25.723104+00:00",
+      "updated_at": "2026-03-20T10:11:25.724098+00:00",
+      "workspace_path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\workspace-demo-2\\tasks\\3ee4e1da-1e85-428b-8192-3c00a751df30",
+      "steps": [],
+      "events": [
+        {
+          "id": "b61075bf-036d-4103-a118-798e54153a9a",
+          "type": "task_created",
+          "ts": "2026-03-20T10:11:25.724098+00:00",
+          "level": "info",
+          "message": "Task created: Sequential workspace verification",
+          "payload_json": null,
+          "step_id": null
+        }
+      ],
+      "artifacts": [],
+      "summary": ""
+    },
+    "6735dc4c-a0e0-4bb8-bc82-f8ac59435a39": {
+      "id": "6735dc4c-a0e0-4bb8-bc82-f8ac59435a39",
+      "goal": "Smoke test workflow",
+      "status": "succeeded",
+      "created_at": "2026-03-20T18:02:02.571808+00:00",
+      "updated_at": "2026-03-20T18:02:06.286296+00:00",
+      "workspace_path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\workspace-demo-2\\tasks\\6735dc4c-a0e0-4bb8-bc82-f8ac59435a39",
+      "steps": [
+        {
+          "id": "34e342e6-88aa-4069-b2ae-c13e06fe0529",
+          "idx": 1,
+          "title": "Clarify goal",
+          "description": "Clarify goal completed successfully.",
+          "status": "succeeded",
+          "agent": "PlannerAgent",
+          "start_time": "2026-03-20T18:02:02.643394+00:00",
+          "end_time": "2026-03-20T18:02:03.852485+00:00"
+        },
+        {
+          "id": "f47fc5f5-45ac-456c-86e7-c31bdf1e37dc",
+          "idx": 2,
+          "title": "Produce execution notes",
+          "description": "Produce execution notes completed successfully.",
+          "status": "succeeded",
+          "agent": "CoderAgent",
+          "start_time": "2026-03-20T18:02:03.858740+00:00",
+          "end_time": "2026-03-20T18:02:05.067693+00:00"
+        },
+        {
+          "id": "410a022e-3b75-46d5-8e32-a0e442f93273",
+          "idx": 3,
+          "title": "Create deliverable artifact",
+          "description": "Create deliverable artifact completed successfully.",
+          "status": "succeeded",
+          "agent": "ExecutorAgent",
+          "start_time": "2026-03-20T18:02:05.074534+00:00",
+          "end_time": "2026-03-20T18:02:06.276765+00:00"
+        }
+      ],
+      "events": [
+        {
+          "id": "48d1aa4f-ff21-4c4d-b31b-833b21627b7a",
+          "type": "task_created",
+          "ts": "2026-03-20T18:02:02.574346+00:00",
+          "level": "info",
+          "message": "Task created: Smoke test workflow",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "e26bf0a9-dcb6-4ad6-9845-ef248b062663",
+          "type": "task_started",
+          "ts": "2026-03-20T18:02:02.643394+00:00",
+          "level": "info",
+          "message": "Task execution started.",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "ea788f31-30a9-47b6-be97-d1e306dba55d",
+          "type": "event",
+          "ts": "2026-03-20T18:02:02.643394+00:00",
+          "level": "info",
+          "message": "Executing step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\"}",
+          "step_id": "34e342e6-88aa-4069-b2ae-c13e06fe0529"
+        },
+        {
+          "id": "5b9f6f56-1dc5-49ee-8f7a-4ddb8f3fda5c",
+          "type": "progress",
+          "ts": "2026-03-20T18:02:03.855250+00:00",
+          "level": "info",
+          "message": "Finished step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\", \"status\": \"succeeded\"}",
+          "step_id": "34e342e6-88aa-4069-b2ae-c13e06fe0529"
+        },
+        {
+          "id": "4795493f-d803-48fc-bb4f-d7cc4e3fc437",
+          "type": "event",
+          "ts": "2026-03-20T18:02:03.858740+00:00",
+          "level": "info",
+          "message": "Executing step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\"}",
+          "step_id": "f47fc5f5-45ac-456c-86e7-c31bdf1e37dc"
+        },
+        {
+          "id": "1af6fa5e-c756-45a5-aea6-d649e04d4d97",
+          "type": "progress",
+          "ts": "2026-03-20T18:02:05.069386+00:00",
+          "level": "info",
+          "message": "Finished step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\", \"status\": \"succeeded\"}",
+          "step_id": "f47fc5f5-45ac-456c-86e7-c31bdf1e37dc"
+        },
+        {
+          "id": "8a605822-56f6-4955-8313-00ea2685d0cb",
+          "type": "event",
+          "ts": "2026-03-20T18:02:05.079602+00:00",
+          "level": "info",
+          "message": "Executing step 3: Create deliverable artifact",
+          "payload_json": "{\"step\": \"Create deliverable artifact\"}",
+          "step_id": "410a022e-3b75-46d5-8e32-a0e442f93273"
+        },
+        {
+          "id": "7203ee22-6aa2-4945-a507-2f030fe0af7c",
+          "type": "progress",
+          "ts": "2026-03-20T18:02:06.278298+00:00",
+          "level": "info",
+          "message": "Finished step 3: Create deliverable artifact",
+          "payload_json": "{\"step\": \"Create deliverable artifact\", \"status\": \"succeeded\"}",
+          "step_id": "410a022e-3b75-46d5-8e32-a0e442f93273"
+        },
+        {
+          "id": "ce9cfe2a-875c-4e97-9f6e-f2d0ff71f2b7",
+          "type": "task_completed",
+          "ts": "2026-03-20T18:02:06.286296+00:00",
+          "level": "info",
+          "message": "Task completed successfully.",
+          "payload_json": "{\"artifact_id\": \"7cb5b3c0-14de-4b24-8295-53d048260052\"}",
+          "step_id": null
+        }
+      ],
+      "artifacts": [
+        "7cb5b3c0-14de-4b24-8295-53d048260052"
+      ],
+      "summary": "Completed task: Smoke test workflow"
+    },
+    "c3508612-8886-417c-a9b0-47279250cbea": {
+      "id": "c3508612-8886-417c-a9b0-47279250cbea",
+      "goal": "Create a release checklist for the current project",
+      "status": "succeeded",
+      "created_at": "2026-03-20T21:16:10.529719+00:00",
+      "updated_at": "2026-03-20T21:16:14.158946+00:00",
+      "workspace_path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\workspace-demo-2\\tasks\\c3508612-8886-417c-a9b0-47279250cbea",
+      "steps": [
+        {
+          "id": "32193520-4734-494c-9769-608311dcff28",
+          "idx": 1,
+          "title": "Clarify goal",
+          "description": "Clarify goal completed successfully.",
+          "status": "succeeded",
+          "agent": "PlannerAgent",
+          "start_time": "2026-03-20T21:16:10.536488+00:00",
+          "end_time": "2026-03-20T21:16:11.742476+00:00"
+        },
+        {
+          "id": "00e84940-6cc4-4ac1-a487-a6d29f0797f0",
+          "idx": 2,
+          "title": "Produce execution notes",
+          "description": "Produce execution notes completed successfully.",
+          "status": "succeeded",
+          "agent": "CoderAgent",
+          "start_time": "2026-03-20T21:16:11.747468+00:00",
+          "end_time": "2026-03-20T21:16:12.952283+00:00"
+        },
+        {
+          "id": "dd4603a9-bd85-47bf-a061-37b5aca8bb36",
+          "idx": 3,
+          "title": "Create deliverable artifact",
+          "description": "Create deliverable artifact completed successfully.",
+          "status": "succeeded",
+          "agent": "ExecutorAgent",
+          "start_time": "2026-03-20T21:16:12.959541+00:00",
+          "end_time": "2026-03-20T21:16:14.148775+00:00"
+        }
+      ],
+      "events": [
+        {
+          "id": "613ceb3c-4400-4d3d-8e50-cf7546f1b961",
+          "type": "task_created",
+          "ts": "2026-03-20T21:16:10.530833+00:00",
+          "level": "info",
+          "message": "Task created: Create a release checklist for the current project",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "3536bb56-24f5-4aae-ad05-be699ecc4085",
+          "type": "task_started",
+          "ts": "2026-03-20T21:16:10.532698+00:00",
+          "level": "info",
+          "message": "Task execution started.",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "3ebaf491-242f-4a85-a567-ef91a352d6e2",
+          "type": "event",
+          "ts": "2026-03-20T21:16:10.537997+00:00",
+          "level": "info",
+          "message": "Executing step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\"}",
+          "step_id": "32193520-4734-494c-9769-608311dcff28"
+        },
+        {
+          "id": "c3c4c41c-b25c-474b-8c66-5309c4d165ed",
+          "type": "progress",
+          "ts": "2026-03-20T21:16:11.744471+00:00",
+          "level": "info",
+          "message": "Finished step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\", \"status\": \"succeeded\"}",
+          "step_id": "32193520-4734-494c-9769-608311dcff28"
+        },
+        {
+          "id": "5c6860fe-5933-47d5-a4eb-48339d4509ff",
+          "type": "event",
+          "ts": "2026-03-20T21:16:11.749506+00:00",
+          "level": "info",
+          "message": "Executing step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\"}",
+          "step_id": "00e84940-6cc4-4ac1-a487-a6d29f0797f0"
+        },
+        {
+          "id": "58c493dd-3a6f-49f0-bfb8-9a3ac2a8ea96",
+          "type": "progress",
+          "ts": "2026-03-20T21:16:12.956107+00:00",
+          "level": "info",
+          "message": "Finished step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\", \"status\": \"succeeded\"}",
+          "step_id": "00e84940-6cc4-4ac1-a487-a6d29f0797f0"
+        },
+        {
+          "id": "1029c7a0-2591-49e3-af04-39445a4bb065",
+          "type": "event",
+          "ts": "2026-03-20T21:16:12.959818+00:00",
+          "level": "info",
+          "message": "Executing step 3: Create deliverable artifact",
+          "payload_json": "{\"step\": \"Create deliverable artifact\"}",
+          "step_id": "dd4603a9-bd85-47bf-a061-37b5aca8bb36"
+        },
+        {
+          "id": "9b66e252-5112-46e1-b508-d59007e7d662",
+          "type": "progress",
+          "ts": "2026-03-20T21:16:14.152152+00:00",
+          "level": "info",
+          "message": "Finished step 3: Create deliverable artifact",
+          "payload_json": "{\"step\": \"Create deliverable artifact\", \"status\": \"succeeded\"}",
+          "step_id": "dd4603a9-bd85-47bf-a061-37b5aca8bb36"
+        },
+        {
+          "id": "0f81a518-07bb-450d-a4d4-ffa3bc63dff9",
+          "type": "task_completed",
+          "ts": "2026-03-20T21:16:14.158946+00:00",
+          "level": "info",
+          "message": "Task completed successfully.",
+          "payload_json": "{\"artifact_id\": \"d06c5da4-d5d5-4362-80c6-8a788263adb7\"}",
+          "step_id": null
+        }
+      ],
+      "artifacts": [
+        "d06c5da4-d5d5-4362-80c6-8a788263adb7"
+      ],
+      "summary": "Completed task: Create a release checklist for the current project"
+    },
+    "02cd1d3a-b5d7-4713-8ac4-ed5ff9c113da": {
+      "id": "02cd1d3a-b5d7-4713-8ac4-ed5ff9c113da",
+      "goal": "Prepare a deployment checklist for the packaged desktop release",
+      "status": "running",
+      "created_at": "2026-03-20T21:48:05.577044+00:00",
+      "updated_at": "2026-03-20T21:48:05.577044+00:00",
+      "workspace_path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\workspace-demo-2\\tasks\\02cd1d3a-b5d7-4713-8ac4-ed5ff9c113da",
+      "steps": [
+        {
+          "id": "49c883c1-e3d0-4a57-9bea-c56f7366122b",
+          "idx": 1,
+          "title": "Clarify goal",
+          "description": "Review the task objective: Prepare a deployment checklist for the packaged desktop release",
+          "status": "running",
+          "agent": "PlannerAgent",
+          "start_time": "2026-03-20T21:48:05.577044+00:00",
+          "end_time": null
+        },
+        {
+          "id": "463be54d-e32d-4141-b21f-c943681efd5e",
+          "idx": 2,
+          "title": "Produce execution notes",
+          "description": "Write a concise implementation outline and success criteria.",
+          "status": "ready",
+          "agent": "CoderAgent",
+          "start_time": null,
+          "end_time": null
+        },
+        {
+          "id": "de4c7cc4-989c-44fd-9f05-d9e58ee6fc5e",
+          "idx": 3,
+          "title": "Create deliverable artifact",
+          "description": "Generate a concrete result inside the task workspace.",
+          "status": "ready",
+          "agent": "ExecutorAgent",
+          "start_time": null,
+          "end_time": null
+        }
+      ],
+      "events": [
+        {
+          "id": "620dd35a-baf5-4740-9f52-0da0d7c1dda7",
+          "type": "task_created",
+          "ts": "2026-03-20T21:48:05.577044+00:00",
+          "level": "info",
+          "message": "Task created: Prepare a deployment checklist for the packaged desktop release",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "041596df-467b-4bb4-a444-5b000367a934",
+          "type": "improvement_guidance",
+          "ts": "2026-03-20T21:48:05.577044+00:00",
+          "level": "info",
+          "message": "Attached the latest self-improvement playbook to this workflow.",
+          "payload_json": "{\"artifact_id\": \"f199e18e-2397-4d85-9e35-3d1571aa2a54\"}",
+          "step_id": null
+        },
+        {
+          "id": "1c8c9c06-4bd5-4d24-8e94-b5718eae5777",
+          "type": "task_started",
+          "ts": "2026-03-20T21:48:05.577044+00:00",
+          "level": "info",
+          "message": "Task execution started.",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "006ffd15-11ca-48c0-a8d2-2d17bb200cc3",
+          "type": "event",
+          "ts": "2026-03-20T21:48:05.577044+00:00",
+          "level": "info",
+          "message": "Executing step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\"}",
+          "step_id": "49c883c1-e3d0-4a57-9bea-c56f7366122b"
+        }
+      ],
+      "artifacts": [
+        "f199e18e-2397-4d85-9e35-3d1571aa2a54"
+      ],
+      "summary": ""
+    },
+    "6ac98ec9-09ae-40da-bf44-5d18b4d30017": {
+      "id": "6ac98ec9-09ae-40da-bf44-5d18b4d30017",
+      "goal": "Verification workflow end-to-end",
+      "status": "succeeded",
+      "created_at": "2026-03-20T21:58:56.961603+00:00",
+      "updated_at": "2026-03-20T21:59:00.619219+00:00",
+      "workspace_path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\tasks\\6ac98ec9-09ae-40da-bf44-5d18b4d30017",
+      "steps": [
+        {
+          "id": "aaf102c9-ee50-452e-8cf3-9c3c03028a49",
+          "idx": 1,
+          "title": "Clarify goal",
+          "description": "Clarify goal completed successfully.",
+          "status": "succeeded",
+          "agent": "PlannerAgent",
+          "start_time": "2026-03-20T21:58:56.983184+00:00",
+          "end_time": "2026-03-20T21:58:58.185000+00:00"
+        },
+        {
+          "id": "e9167ecd-160c-42cc-89f1-26edb89b74a7",
+          "idx": 2,
+          "title": "Produce execution notes",
+          "description": "Produce execution notes completed successfully.",
+          "status": "succeeded",
+          "agent": "CoderAgent",
+          "start_time": "2026-03-20T21:58:58.187196+00:00",
+          "end_time": "2026-03-20T21:58:59.394960+00:00"
+        },
+        {
+          "id": "2720b857-4d6b-4229-bf42-b18438d66c9e",
+          "idx": 3,
+          "title": "Create deliverable artifact",
+          "description": "Create deliverable artifact completed successfully.",
+          "status": "succeeded",
+          "agent": "ExecutorAgent",
+          "start_time": "2026-03-20T21:58:59.399124+00:00",
+          "end_time": "2026-03-20T21:59:00.605542+00:00"
+        }
+      ],
+      "events": [
+        {
+          "id": "15f9d999-6285-4908-9b52-2cb03cba1fde",
+          "type": "task_created",
+          "ts": "2026-03-20T21:58:56.961603+00:00",
+          "level": "info",
+          "message": "Task created: Verification workflow end-to-end",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "6ef368eb-b744-4079-8f67-a2c683acc713",
+          "type": "plan_ready",
+          "ts": "2026-03-20T21:58:56.964654+00:00",
+          "level": "info",
+          "message": "Execution plan generated.",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "0bd77889-f546-4a5c-8d37-7d3c7fb2b62b",
+          "type": "task_started",
+          "ts": "2026-03-20T21:58:56.981444+00:00",
+          "level": "info",
+          "message": "Task execution started.",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "95e06c7b-ebba-4a55-8b2a-ddbd566ea1a6",
+          "type": "event",
+          "ts": "2026-03-20T21:58:56.985790+00:00",
+          "level": "info",
+          "message": "Executing step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\"}",
+          "step_id": "aaf102c9-ee50-452e-8cf3-9c3c03028a49"
+        },
+        {
+          "id": "221904ca-bd6f-4f4b-be8b-111ad02d089c",
+          "type": "progress",
+          "ts": "2026-03-20T21:58:58.185000+00:00",
+          "level": "info",
+          "message": "Finished step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\", \"status\": \"succeeded\"}",
+          "step_id": "aaf102c9-ee50-452e-8cf3-9c3c03028a49"
+        },
+        {
+          "id": "eef3a070-23e1-48c2-b996-fba53bc1459a",
+          "type": "event",
+          "ts": "2026-03-20T21:58:58.188867+00:00",
+          "level": "info",
+          "message": "Executing step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\"}",
+          "step_id": "e9167ecd-160c-42cc-89f1-26edb89b74a7"
+        },
+        {
+          "id": "a20e5854-2ab7-4c54-b6e5-87130362a494",
+          "type": "progress",
+          "ts": "2026-03-20T21:58:59.395503+00:00",
+          "level": "info",
+          "message": "Finished step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\", \"status\": \"succeeded\"}",
+          "step_id": "e9167ecd-160c-42cc-89f1-26edb89b74a7"
+        },
+        {
+          "id": "73e52431-5161-4453-98d8-3cc87503a130",
+          "type": "event",
+          "ts": "2026-03-20T21:58:59.399124+00:00",
+          "level": "info",
+          "message": "Executing step 3: Create deliverable artifact",
+          "payload_json": "{\"step\": \"Create deliverable artifact\"}",
+          "step_id": "2720b857-4d6b-4229-bf42-b18438d66c9e"
+        },
+        {
+          "id": "9322fb05-f98d-4c8c-93a3-c3566968df9f",
+          "type": "progress",
+          "ts": "2026-03-20T21:59:00.607038+00:00",
+          "level": "info",
+          "message": "Finished step 3: Create deliverable artifact",
+          "payload_json": "{\"step\": \"Create deliverable artifact\", \"status\": \"succeeded\"}",
+          "step_id": "2720b857-4d6b-4229-bf42-b18438d66c9e"
+        },
+        {
+          "id": "b95aaa23-967d-4d20-b9e1-2f133754ef0f",
+          "type": "task_completed",
+          "ts": "2026-03-20T21:59:00.619219+00:00",
+          "level": "info",
+          "message": "Task completed successfully.",
+          "payload_json": "{\"artifact_id\": \"13b035f9-098d-4a27-8681-50ab6ee66fff\"}",
+          "step_id": null
+        }
+      ],
+      "artifacts": [
+        "13b035f9-098d-4a27-8681-50ab6ee66fff"
+      ],
+      "summary": "Completed task: Verification workflow end-to-end"
+    },
+    "f01f12c4-2828-4b75-b8ff-a1831bb0a390": {
+      "id": "f01f12c4-2828-4b75-b8ff-a1831bb0a390",
+      "goal": "Prepare a release readiness checklist",
+      "status": "running",
+      "created_at": "2026-03-20T21:59:01.977279+00:00",
+      "updated_at": "2026-03-20T21:59:03.232232+00:00",
+      "workspace_path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\tasks\\f01f12c4-2828-4b75-b8ff-a1831bb0a390",
+      "steps": [
+        {
+          "id": "9139346e-0726-4467-a02f-1ea64a6a5558",
+          "idx": 1,
+          "title": "Clarify goal",
+          "description": "Clarify goal completed successfully.",
+          "status": "succeeded",
+          "agent": "PlannerAgent",
+          "start_time": "2026-03-20T21:59:02.002307+00:00",
+          "end_time": "2026-03-20T21:59:03.226109+00:00"
+        },
+        {
+          "id": "4b6369df-58f9-4ca9-ad8a-95617ba67889",
+          "idx": 2,
+          "title": "Produce execution notes",
+          "description": "Write a concise implementation outline and success criteria.",
+          "status": "running",
+          "agent": "CoderAgent",
+          "start_time": "2026-03-20T21:59:03.230479+00:00",
+          "end_time": null
+        },
+        {
+          "id": "9a7b15d6-4a27-40a9-b878-84b603280dc3",
+          "idx": 3,
+          "title": "Create deliverable artifact",
+          "description": "Generate a concrete result inside the task workspace.",
+          "status": "ready",
+          "agent": "ExecutorAgent",
+          "start_time": null,
+          "end_time": null
+        }
+      ],
+      "events": [
+        {
+          "id": "b9a0007b-de68-435c-8d60-974ed48f7b1b",
+          "type": "task_created",
+          "ts": "2026-03-20T21:59:01.977279+00:00",
+          "level": "info",
+          "message": "Task created: Prepare a release readiness checklist",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "15d09e83-2644-466e-a34b-4aa16ca5557f",
+          "type": "improvement_guidance",
+          "ts": "2026-03-20T21:59:01.987664+00:00",
+          "level": "info",
+          "message": "Attached the latest self-improvement playbook to this workflow.",
+          "payload_json": "{\"artifact_id\": \"4218825d-372d-428f-aa49-637cba57583e\"}",
+          "step_id": null
+        },
+        {
+          "id": "d3369c25-00b2-41fb-882c-fb0cd3eb8ac0",
+          "type": "task_started",
+          "ts": "2026-03-20T21:59:01.994731+00:00",
+          "level": "info",
+          "message": "Task execution started.",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "08fbfbfe-fefc-4900-90e6-c952083222f7",
+          "type": "event",
+          "ts": "2026-03-20T21:59:02.006407+00:00",
+          "level": "info",
+          "message": "Executing step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\"}",
+          "step_id": "9139346e-0726-4467-a02f-1ea64a6a5558"
+        },
+        {
+          "id": "be21405c-c514-4f2d-a0ce-54a8a2cb6293",
+          "type": "progress",
+          "ts": "2026-03-20T21:59:03.228140+00:00",
+          "level": "info",
+          "message": "Finished step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\", \"status\": \"succeeded\"}",
+          "step_id": "9139346e-0726-4467-a02f-1ea64a6a5558"
+        },
+        {
+          "id": "2b73ba89-ab20-4990-bbf3-470477befc84",
+          "type": "event",
+          "ts": "2026-03-20T21:59:03.232232+00:00",
+          "level": "info",
+          "message": "Executing step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\"}",
+          "step_id": "4b6369df-58f9-4ca9-ad8a-95617ba67889"
+        }
+      ],
+      "artifacts": [
+        "4218825d-372d-428f-aa49-637cba57583e"
+      ],
+      "summary": ""
+    },
+    "5c957a37-0002-4a2c-a278-35eeeb47bf94": {
+      "id": "5c957a37-0002-4a2c-a278-35eeeb47bf94",
+      "goal": "Packaged app smoke test",
+      "status": "succeeded",
+      "created_at": "2026-03-21T14:06:52.658996+00:00",
+      "updated_at": "2026-03-21T14:06:56.338872+00:00",
+      "workspace_path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\workspace-demo-2\\tasks\\5c957a37-0002-4a2c-a278-35eeeb47bf94",
+      "steps": [
+        {
+          "id": "3bae0440-c92c-4688-afe7-663df8a6002f",
+          "idx": 1,
+          "title": "Clarify goal",
+          "description": "Clarify goal completed successfully.",
+          "status": "succeeded",
+          "agent": "PlannerAgent",
+          "start_time": "2026-03-21T14:06:52.678401+00:00",
+          "end_time": "2026-03-21T14:06:53.877650+00:00"
+        },
+        {
+          "id": "de1d9d82-0a60-4ce3-93e4-e2612d91dd8d",
+          "idx": 2,
+          "title": "Produce execution notes",
+          "description": "Produce execution notes completed successfully.",
+          "status": "succeeded",
+          "agent": "CoderAgent",
+          "start_time": "2026-03-21T14:06:53.886603+00:00",
+          "end_time": "2026-03-21T14:06:55.100140+00:00"
+        },
+        {
+          "id": "7f505821-bde4-413b-88e8-eff268f43438",
+          "idx": 3,
+          "title": "Create deliverable artifact",
+          "description": "Create deliverable artifact completed successfully.",
+          "status": "succeeded",
+          "agent": "ExecutorAgent",
+          "start_time": "2026-03-21T14:06:55.102301+00:00",
+          "end_time": "2026-03-21T14:06:56.325949+00:00"
+        }
+      ],
+      "events": [
+        {
+          "id": "012d4c1f-d3ba-4447-a704-a34e17718421",
+          "type": "task_created",
+          "ts": "2026-03-21T14:06:52.662757+00:00",
+          "level": "info",
+          "message": "Task created: Packaged app smoke test",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "c18cefef-f549-4ccb-aaf7-824564715893",
+          "type": "task_started",
+          "ts": "2026-03-21T14:06:52.678186+00:00",
+          "level": "info",
+          "message": "Task execution started.",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "d880bcb8-b3b7-465c-9bb2-4615751f817e",
+          "type": "event",
+          "ts": "2026-03-21T14:06:52.683104+00:00",
+          "level": "info",
+          "message": "Executing step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\"}",
+          "step_id": "3bae0440-c92c-4688-afe7-663df8a6002f"
+        },
+        {
+          "id": "cb5cab4c-b7ab-40bb-b2c8-b24a0b9c473e",
+          "type": "progress",
+          "ts": "2026-03-21T14:06:53.881028+00:00",
+          "level": "info",
+          "message": "Finished step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\", \"status\": \"succeeded\"}",
+          "step_id": "3bae0440-c92c-4688-afe7-663df8a6002f"
+        },
+        {
+          "id": "e5eede6a-ef00-478a-bf32-79eb974fb1d1",
+          "type": "event",
+          "ts": "2026-03-21T14:06:53.891559+00:00",
+          "level": "info",
+          "message": "Executing step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\"}",
+          "step_id": "de1d9d82-0a60-4ce3-93e4-e2612d91dd8d"
+        },
+        {
+          "id": "487f4158-c146-42c7-afb4-432b5c908f05",
+          "type": "progress",
+          "ts": "2026-03-21T14:06:55.102301+00:00",
+          "level": "info",
+          "message": "Finished step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\", \"status\": \"succeeded\"}",
+          "step_id": "de1d9d82-0a60-4ce3-93e4-e2612d91dd8d"
+        },
+        {
+          "id": "b9f195af-a27e-4c3e-addf-bd251d02249c",
+          "type": "event",
+          "ts": "2026-03-21T14:06:55.112629+00:00",
+          "level": "info",
+          "message": "Executing step 3: Create deliverable artifact",
+          "payload_json": "{\"step\": \"Create deliverable artifact\"}",
+          "step_id": "7f505821-bde4-413b-88e8-eff268f43438"
+        },
+        {
+          "id": "c931d8c0-2280-4b7c-8bf2-c13fdef6b449",
+          "type": "progress",
+          "ts": "2026-03-21T14:06:56.330667+00:00",
+          "level": "info",
+          "message": "Finished step 3: Create deliverable artifact",
+          "payload_json": "{\"step\": \"Create deliverable artifact\", \"status\": \"succeeded\"}",
+          "step_id": "7f505821-bde4-413b-88e8-eff268f43438"
+        },
+        {
+          "id": "4528e719-0be6-4414-9e70-4cb111bc44aa",
+          "type": "task_completed",
+          "ts": "2026-03-21T14:06:56.338872+00:00",
+          "level": "info",
+          "message": "Task completed successfully.",
+          "payload_json": "{\"artifact_id\": \"ad68e9e1-0013-4813-a7a0-ddc8e53c09ad\"}",
+          "step_id": null
+        }
+      ],
+      "artifacts": [
+        "ad68e9e1-0013-4813-a7a0-ddc8e53c09ad"
+      ],
+      "summary": "Completed task: Packaged app smoke test"
+    },
+    "15d7d5e7-0d80-4d1f-9e5e-f4328a7e3beb": {
+      "id": "15d7d5e7-0d80-4d1f-9e5e-f4328a7e3beb",
+      "goal": "Verification workflow end-to-end",
+      "status": "succeeded",
+      "created_at": "2026-03-21T14:06:52.791389+00:00",
+      "updated_at": "2026-03-21T14:06:56.503445+00:00",
+      "workspace_path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\tasks\\15d7d5e7-0d80-4d1f-9e5e-f4328a7e3beb",
+      "steps": [
+        {
+          "id": "9711b1e1-49ab-4e5f-b4e3-c2441a37ba81",
+          "idx": 1,
+          "title": "Clarify goal",
+          "description": "Clarify goal completed successfully.",
+          "status": "succeeded",
+          "agent": "PlannerAgent",
+          "start_time": "2026-03-21T14:06:52.832879+00:00",
+          "end_time": "2026-03-21T14:06:54.039072+00:00"
+        },
+        {
+          "id": "655d7b45-6443-4b6e-a407-301f67b1321b",
+          "idx": 2,
+          "title": "Produce execution notes",
+          "description": "Produce execution notes completed successfully.",
+          "status": "succeeded",
+          "agent": "CoderAgent",
+          "start_time": "2026-03-21T14:06:54.046693+00:00",
+          "end_time": "2026-03-21T14:06:55.265622+00:00"
+        },
+        {
+          "id": "aa3e62da-e8fc-4d97-a8bf-950bb67671b7",
+          "idx": 3,
+          "title": "Create deliverable artifact",
+          "description": "Create deliverable artifact completed successfully.",
+          "status": "succeeded",
+          "agent": "ExecutorAgent",
+          "start_time": "2026-03-21T14:06:55.272600+00:00",
+          "end_time": "2026-03-21T14:06:56.492358+00:00"
+        }
+      ],
+      "events": [
+        {
+          "id": "5e7dbad2-abff-4534-9d89-39c72c486f68",
+          "type": "task_created",
+          "ts": "2026-03-21T14:06:52.791389+00:00",
+          "level": "info",
+          "message": "Task created: Verification workflow end-to-end",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "96abad2c-2c53-4695-a091-23812ac30f1a",
+          "type": "plan_ready",
+          "ts": "2026-03-21T14:06:52.794564+00:00",
+          "level": "info",
+          "message": "Execution plan generated.",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "c04b83bf-0519-4644-bd44-9138775624b3",
+          "type": "task_started",
+          "ts": "2026-03-21T14:06:52.831991+00:00",
+          "level": "info",
+          "message": "Task execution started.",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "ee46043a-366b-44c6-bae7-4d97a52f16d3",
+          "type": "event",
+          "ts": "2026-03-21T14:06:52.835334+00:00",
+          "level": "info",
+          "message": "Executing step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\"}",
+          "step_id": "9711b1e1-49ab-4e5f-b4e3-c2441a37ba81"
+        },
+        {
+          "id": "1eafaa96-96a1-4f51-ac68-7120c1d9f3f0",
+          "type": "progress",
+          "ts": "2026-03-21T14:06:54.044242+00:00",
+          "level": "info",
+          "message": "Finished step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\", \"status\": \"succeeded\"}",
+          "step_id": "9711b1e1-49ab-4e5f-b4e3-c2441a37ba81"
+        },
+        {
+          "id": "0855a6ba-fe77-484f-99b5-f50a096f5021",
+          "type": "event",
+          "ts": "2026-03-21T14:06:54.052509+00:00",
+          "level": "info",
+          "message": "Executing step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\"}",
+          "step_id": "655d7b45-6443-4b6e-a407-301f67b1321b"
+        },
+        {
+          "id": "7e5d82b5-1bd3-483a-af56-3216c05eda43",
+          "type": "progress",
+          "ts": "2026-03-21T14:06:55.269417+00:00",
+          "level": "info",
+          "message": "Finished step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\", \"status\": \"succeeded\"}",
+          "step_id": "655d7b45-6443-4b6e-a407-301f67b1321b"
+        },
+        {
+          "id": "50023101-130f-4b73-8c53-8571a77c213d",
+          "type": "event",
+          "ts": "2026-03-21T14:06:55.276792+00:00",
+          "level": "info",
+          "message": "Executing step 3: Create deliverable artifact",
+          "payload_json": "{\"step\": \"Create deliverable artifact\"}",
+          "step_id": "aa3e62da-e8fc-4d97-a8bf-950bb67671b7"
+        },
+        {
+          "id": "8023a5ae-2f3b-475c-8748-c32c792b7304",
+          "type": "progress",
+          "ts": "2026-03-21T14:06:56.495022+00:00",
+          "level": "info",
+          "message": "Finished step 3: Create deliverable artifact",
+          "payload_json": "{\"step\": \"Create deliverable artifact\", \"status\": \"succeeded\"}",
+          "step_id": "aa3e62da-e8fc-4d97-a8bf-950bb67671b7"
+        },
+        {
+          "id": "81d64c5f-daa6-491d-8abc-aacded68e80a",
+          "type": "task_completed",
+          "ts": "2026-03-21T14:06:56.503445+00:00",
+          "level": "info",
+          "message": "Task completed successfully.",
+          "payload_json": "{\"artifact_id\": \"e51a4127-1b21-47dd-abbf-675fbf4637af\"}",
+          "step_id": null
+        }
+      ],
+      "artifacts": [
+        "e51a4127-1b21-47dd-abbf-675fbf4637af"
+      ],
+      "summary": "Completed task: Verification workflow end-to-end"
+    },
+    "4b94625f-9898-48bd-8a4f-f3f32a17e381": {
+      "id": "4b94625f-9898-48bd-8a4f-f3f32a17e381",
+      "goal": "Prepare a release readiness checklist",
+      "status": "running",
+      "created_at": "2026-03-21T14:06:57.710093+00:00",
+      "updated_at": "2026-03-21T14:07:00.158583+00:00",
+      "workspace_path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\tasks\\4b94625f-9898-48bd-8a4f-f3f32a17e381",
+      "steps": [
+        {
+          "id": "bd2591f2-61e1-4dec-bbb6-75bd34e6dc22",
+          "idx": 1,
+          "title": "Clarify goal",
+          "description": "Clarify goal completed successfully.",
+          "status": "succeeded",
+          "agent": "PlannerAgent",
+          "start_time": "2026-03-21T14:06:57.722167+00:00",
+          "end_time": "2026-03-21T14:06:58.931521+00:00"
+        },
+        {
+          "id": "067dd16c-8c99-4c82-b715-aca2db20da90",
+          "idx": 2,
+          "title": "Produce execution notes",
+          "description": "Produce execution notes completed successfully.",
+          "status": "succeeded",
+          "agent": "CoderAgent",
+          "start_time": "2026-03-21T14:06:58.936931+00:00",
+          "end_time": "2026-03-21T14:07:00.142186+00:00"
+        },
+        {
+          "id": "5d8f1a30-50c2-4583-8bac-36ea7d477f8a",
+          "idx": 3,
+          "title": "Create deliverable artifact",
+          "description": "Generate a concrete result inside the task workspace.",
+          "status": "running",
+          "agent": "ExecutorAgent",
+          "start_time": "2026-03-21T14:07:00.152575+00:00",
+          "end_time": null
+        }
+      ],
+      "events": [
+        {
+          "id": "6c0dcb33-d827-4bca-abd8-e4e4594635d0",
+          "type": "task_created",
+          "ts": "2026-03-21T14:06:57.710093+00:00",
+          "level": "info",
+          "message": "Task created: Prepare a release readiness checklist",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "d151da24-12fb-40b8-be0a-534440f8dea2",
+          "type": "improvement_guidance",
+          "ts": "2026-03-21T14:06:57.715228+00:00",
+          "level": "info",
+          "message": "Attached the latest self-improvement playbook to this workflow.",
+          "payload_json": "{\"artifact_id\": \"19f9ef8e-2996-44ba-8650-1741fd281536\"}",
+          "step_id": null
+        },
+        {
+          "id": "65dd8e1b-c720-45d7-ae36-7346dc5a14b4",
+          "type": "task_started",
+          "ts": "2026-03-21T14:06:57.715228+00:00",
+          "level": "info",
+          "message": "Task execution started.",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "352ce402-a65e-43ca-a440-2ff652dc752d",
+          "type": "event",
+          "ts": "2026-03-21T14:06:57.722695+00:00",
+          "level": "info",
+          "message": "Executing step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\"}",
+          "step_id": "bd2591f2-61e1-4dec-bbb6-75bd34e6dc22"
+        },
+        {
+          "id": "6ded3d0a-2064-405d-8711-42a16d76d3fe",
+          "type": "progress",
+          "ts": "2026-03-21T14:06:58.933273+00:00",
+          "level": "info",
+          "message": "Finished step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\", \"status\": \"succeeded\"}",
+          "step_id": "bd2591f2-61e1-4dec-bbb6-75bd34e6dc22"
+        },
+        {
+          "id": "5a0cce32-1ca7-479b-bbcc-5fffcf686e48",
+          "type": "event",
+          "ts": "2026-03-21T14:06:58.937972+00:00",
+          "level": "info",
+          "message": "Executing step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\"}",
+          "step_id": "067dd16c-8c99-4c82-b715-aca2db20da90"
+        },
+        {
+          "id": "1ce09c48-5f7b-490e-ba94-e9ee25f24fbd",
+          "type": "progress",
+          "ts": "2026-03-21T14:07:00.142186+00:00",
+          "level": "info",
+          "message": "Finished step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\", \"status\": \"succeeded\"}",
+          "step_id": "067dd16c-8c99-4c82-b715-aca2db20da90"
+        },
+        {
+          "id": "cb30ad3b-a06c-4075-9959-cdd4233d35c8",
+          "type": "event",
+          "ts": "2026-03-21T14:07:00.158583+00:00",
+          "level": "info",
+          "message": "Executing step 3: Create deliverable artifact",
+          "payload_json": "{\"step\": \"Create deliverable artifact\"}",
+          "step_id": "5d8f1a30-50c2-4583-8bac-36ea7d477f8a"
+        }
+      ],
+      "artifacts": [
+        "19f9ef8e-2996-44ba-8650-1741fd281536"
+      ],
+      "summary": ""
+    },
+    "154673c8-774a-45b6-b747-dd69aa884272": {
+      "id": "154673c8-774a-45b6-b747-dd69aa884272",
+      "goal": "Verification workflow end-to-end",
+      "status": "succeeded",
+      "created_at": "2026-03-21T14:19:05.326109+00:00",
+      "updated_at": "2026-03-21T14:19:09.017264+00:00",
+      "workspace_path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\tasks\\154673c8-774a-45b6-b747-dd69aa884272",
+      "steps": [
+        {
+          "id": "bb2848fa-748c-454b-8170-91d3ba5dc22e",
+          "idx": 1,
+          "title": "Clarify goal",
+          "description": "Clarify goal completed successfully.",
+          "status": "succeeded",
+          "agent": "PlannerAgent",
+          "start_time": "2026-03-21T14:19:05.347263+00:00",
+          "end_time": "2026-03-21T14:19:06.562279+00:00"
+        },
+        {
+          "id": "60d2049e-42b7-4576-ac49-df5b6ae73a27",
+          "idx": 2,
+          "title": "Produce execution notes",
+          "description": "Produce execution notes completed successfully.",
+          "status": "succeeded",
+          "agent": "CoderAgent",
+          "start_time": "2026-03-21T14:19:06.576236+00:00",
+          "end_time": "2026-03-21T14:19:07.791507+00:00"
+        },
+        {
+          "id": "9ea4fc41-97fc-499e-b9f7-89261c103cc1",
+          "idx": 3,
+          "title": "Create deliverable artifact",
+          "description": "Create deliverable artifact completed successfully.",
+          "status": "succeeded",
+          "agent": "ExecutorAgent",
+          "start_time": "2026-03-21T14:19:07.805549+00:00",
+          "end_time": "2026-03-21T14:19:08.993424+00:00"
+        }
+      ],
+      "events": [
+        {
+          "id": "7bd4f30d-1469-4c74-8a05-e6e730c4032b",
+          "type": "task_created",
+          "ts": "2026-03-21T14:19:05.328161+00:00",
+          "level": "info",
+          "message": "Task created: Verification workflow end-to-end",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "d6e13f5f-2a5d-4ba3-ad31-ec13e924be98",
+          "type": "plan_ready",
+          "ts": "2026-03-21T14:19:05.332535+00:00",
+          "level": "info",
+          "message": "Execution plan generated.",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "79b5382f-6887-418b-90b5-6c65395de669",
+          "type": "task_started",
+          "ts": "2026-03-21T14:19:05.345406+00:00",
+          "level": "info",
+          "message": "Task execution started.",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "7e73f0df-328e-40f0-b147-f835592e893c",
+          "type": "event",
+          "ts": "2026-03-21T14:19:05.348317+00:00",
+          "level": "info",
+          "message": "Executing step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\"}",
+          "step_id": "bb2848fa-748c-454b-8170-91d3ba5dc22e"
+        },
+        {
+          "id": "4bd63faa-025d-4787-b87e-f2c42611af32",
+          "type": "progress",
+          "ts": "2026-03-21T14:19:06.565149+00:00",
+          "level": "info",
+          "message": "Finished step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\", \"status\": \"succeeded\"}",
+          "step_id": "bb2848fa-748c-454b-8170-91d3ba5dc22e"
+        },
+        {
+          "id": "31c717c0-21c4-4e5d-9ef4-5387133f51b4",
+          "type": "event",
+          "ts": "2026-03-21T14:19:06.582805+00:00",
+          "level": "info",
+          "message": "Executing step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\"}",
+          "step_id": "60d2049e-42b7-4576-ac49-df5b6ae73a27"
+        },
+        {
+          "id": "03fb867a-4e24-4992-a639-f740df259e3e",
+          "type": "progress",
+          "ts": "2026-03-21T14:19:07.803318+00:00",
+          "level": "info",
+          "message": "Finished step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\", \"status\": \"succeeded\"}",
+          "step_id": "60d2049e-42b7-4576-ac49-df5b6ae73a27"
+        },
+        {
+          "id": "401033cd-0da0-4852-bc8d-ed3f60f1b5a6",
+          "type": "event",
+          "ts": "2026-03-21T14:19:07.807842+00:00",
+          "level": "info",
+          "message": "Executing step 3: Create deliverable artifact",
+          "payload_json": "{\"step\": \"Create deliverable artifact\"}",
+          "step_id": "9ea4fc41-97fc-499e-b9f7-89261c103cc1"
+        },
+        {
+          "id": "7ee96583-1fb0-4bfd-bffa-5d873b43951c",
+          "type": "progress",
+          "ts": "2026-03-21T14:19:08.999667+00:00",
+          "level": "info",
+          "message": "Finished step 3: Create deliverable artifact",
+          "payload_json": "{\"step\": \"Create deliverable artifact\", \"status\": \"succeeded\"}",
+          "step_id": "9ea4fc41-97fc-499e-b9f7-89261c103cc1"
+        },
+        {
+          "id": "9ca9eb81-2a9f-4cd3-b9ce-6e7d11294b51",
+          "type": "task_completed",
+          "ts": "2026-03-21T14:19:09.017264+00:00",
+          "level": "info",
+          "message": "Task completed successfully.",
+          "payload_json": "{\"artifact_id\": \"c09e265c-c599-4043-913b-db85f49f62df\"}",
+          "step_id": null
+        }
+      ],
+      "artifacts": [
+        "c09e265c-c599-4043-913b-db85f49f62df"
+      ],
+      "summary": "Completed task: Verification workflow end-to-end"
+    },
+    "728f950b-df67-48ea-9106-cc5d86d028d8": {
+      "id": "728f950b-df67-48ea-9106-cc5d86d028d8",
+      "goal": "Prepare a release readiness checklist",
+      "status": "running",
+      "created_at": "2026-03-21T14:19:10.148506+00:00",
+      "updated_at": "2026-03-21T14:19:12.600108+00:00",
+      "workspace_path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\tasks\\728f950b-df67-48ea-9106-cc5d86d028d8",
+      "steps": [
+        {
+          "id": "f1ccc15c-1fca-4dff-9472-8e54c918448d",
+          "idx": 1,
+          "title": "Clarify goal",
+          "description": "Clarify goal completed successfully.",
+          "status": "succeeded",
+          "agent": "PlannerAgent",
+          "start_time": "2026-03-21T14:19:10.161448+00:00",
+          "end_time": "2026-03-21T14:19:11.359530+00:00"
+        },
+        {
+          "id": "ffe26e84-0951-4ab2-9e9f-f544262151f9",
+          "idx": 2,
+          "title": "Produce execution notes",
+          "description": "Produce execution notes completed successfully.",
+          "status": "succeeded",
+          "agent": "CoderAgent",
+          "start_time": "2026-03-21T14:19:11.368218+00:00",
+          "end_time": "2026-03-21T14:19:12.580334+00:00"
+        },
+        {
+          "id": "aa852ce0-a106-4e54-965e-ea5a2e8e705a",
+          "idx": 3,
+          "title": "Create deliverable artifact",
+          "description": "Generate a concrete result inside the task workspace.",
+          "status": "running",
+          "agent": "ExecutorAgent",
+          "start_time": "2026-03-21T14:19:12.592863+00:00",
+          "end_time": null
+        }
+      ],
+      "events": [
+        {
+          "id": "ef345a38-8a46-401f-9f64-d58a6caf7466",
+          "type": "task_created",
+          "ts": "2026-03-21T14:19:10.149507+00:00",
+          "level": "info",
+          "message": "Task created: Prepare a release readiness checklist",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "eec51589-2fd5-4ba3-b20b-b0e581521a7b",
+          "type": "improvement_guidance",
+          "ts": "2026-03-21T14:19:10.154851+00:00",
+          "level": "info",
+          "message": "Attached the latest self-improvement playbook to this workflow.",
+          "payload_json": "{\"artifact_id\": \"992d4712-eca1-44f5-a2de-afe008a72642\"}",
+          "step_id": null
+        },
+        {
+          "id": "ac476941-6cba-4bf9-8a40-991df2bbe82b",
+          "type": "task_started",
+          "ts": "2026-03-21T14:19:10.158398+00:00",
+          "level": "info",
+          "message": "Task execution started.",
+          "payload_json": null,
+          "step_id": null
+        },
+        {
+          "id": "45fa8de5-bbc6-4b1d-9166-a4b5b57d21a8",
+          "type": "event",
+          "ts": "2026-03-21T14:19:10.162467+00:00",
+          "level": "info",
+          "message": "Executing step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\"}",
+          "step_id": "f1ccc15c-1fca-4dff-9472-8e54c918448d"
+        },
+        {
+          "id": "52f75d18-475c-4ec1-98ee-b4e22e742b1e",
+          "type": "progress",
+          "ts": "2026-03-21T14:19:11.364461+00:00",
+          "level": "info",
+          "message": "Finished step 1: Clarify goal",
+          "payload_json": "{\"step\": \"Clarify goal\", \"status\": \"succeeded\"}",
+          "step_id": "f1ccc15c-1fca-4dff-9472-8e54c918448d"
+        },
+        {
+          "id": "503055b7-ff97-4e6f-976d-07fb562f8bb2",
+          "type": "event",
+          "ts": "2026-03-21T14:19:11.372461+00:00",
+          "level": "info",
+          "message": "Executing step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\"}",
+          "step_id": "ffe26e84-0951-4ab2-9e9f-f544262151f9"
+        },
+        {
+          "id": "1476c0e7-1036-4580-848a-e5216f927c5e",
+          "type": "progress",
+          "ts": "2026-03-21T14:19:12.586472+00:00",
+          "level": "info",
+          "message": "Finished step 2: Produce execution notes",
+          "payload_json": "{\"step\": \"Produce execution notes\", \"status\": \"succeeded\"}",
+          "step_id": "ffe26e84-0951-4ab2-9e9f-f544262151f9"
+        },
+        {
+          "id": "76d7e3cb-5eb0-4729-b5c7-8a39bc14d046",
+          "type": "event",
+          "ts": "2026-03-21T14:19:12.600108+00:00",
+          "level": "info",
+          "message": "Executing step 3: Create deliverable artifact",
+          "payload_json": "{\"step\": \"Create deliverable artifact\"}",
+          "step_id": "aa852ce0-a106-4e54-965e-ea5a2e8e705a"
+        }
+      ],
+      "artifacts": [
+        "992d4712-eca1-44f5-a2de-afe008a72642"
+      ],
+      "summary": ""
+    }
+  },
+  "artifacts": {
+    "5e6bbcd0-33ba-48fd-b7ba-a951f02124fd": {
+      "id": "5e6bbcd0-33ba-48fd-b7ba-a951f02124fd",
+      "task_id": "101822e8-1c18-41c9-9dad-3c06c3fb73ce",
+      "path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\workspace\\tasks\\101822e8-1c18-41c9-9dad-3c06c3fb73ce\\summary.md",
+      "kind": "text",
+      "created_at": "2026-03-20T09:52:45.437723+00:00"
+    },
+    "59c09cdf-dc2c-43ec-a8de-69fc707c5f62": {
+      "id": "59c09cdf-dc2c-43ec-a8de-69fc707c5f62",
+      "task_id": "b2539683-6102-4dca-a61d-df3f863658ca",
+      "path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\workspace\\tasks\\b2539683-6102-4dca-a61d-df3f863658ca\\summary.md",
+      "kind": "text",
+      "created_at": "2026-03-20T10:01:40.123245+00:00"
+    },
+    "7cb5b3c0-14de-4b24-8295-53d048260052": {
+      "id": "7cb5b3c0-14de-4b24-8295-53d048260052",
+      "task_id": "6735dc4c-a0e0-4bb8-bc82-f8ac59435a39",
+      "path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\workspace-demo-2\\tasks\\6735dc4c-a0e0-4bb8-bc82-f8ac59435a39\\summary.md",
+      "kind": "text",
+      "created_at": "2026-03-20T18:02:06.280079+00:00"
+    },
+    "d06c5da4-d5d5-4362-80c6-8a788263adb7": {
+      "id": "d06c5da4-d5d5-4362-80c6-8a788263adb7",
+      "task_id": "c3508612-8886-417c-a9b0-47279250cbea",
+      "path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\workspace-demo-2\\tasks\\c3508612-8886-417c-a9b0-47279250cbea\\summary.md",
+      "kind": "text",
+      "created_at": "2026-03-20T21:16:14.158946+00:00"
+    },
+    "f199e18e-2397-4d85-9e35-3d1571aa2a54": {
+      "id": "f199e18e-2397-4d85-9e35-3d1571aa2a54",
+      "task_id": "02cd1d3a-b5d7-4713-8ac4-ed5ff9c113da",
+      "path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\workspace-demo-2\\tasks\\02cd1d3a-b5d7-4713-8ac4-ed5ff9c113da\\agent-playbook.md",
+      "kind": "text",
+      "created_at": "2026-03-20T21:48:05.577044+00:00"
+    },
+    "13b035f9-098d-4a27-8681-50ab6ee66fff": {
+      "id": "13b035f9-098d-4a27-8681-50ab6ee66fff",
+      "task_id": "6ac98ec9-09ae-40da-bf44-5d18b4d30017",
+      "path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\tasks\\6ac98ec9-09ae-40da-bf44-5d18b4d30017\\summary.md",
+      "kind": "text",
+      "created_at": "2026-03-20T21:59:00.617394+00:00"
+    },
+    "4218825d-372d-428f-aa49-637cba57583e": {
+      "id": "4218825d-372d-428f-aa49-637cba57583e",
+      "task_id": "f01f12c4-2828-4b75-b8ff-a1831bb0a390",
+      "path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\tasks\\f01f12c4-2828-4b75-b8ff-a1831bb0a390\\agent-playbook.md",
+      "kind": "text",
+      "created_at": "2026-03-20T21:59:01.983851+00:00"
+    },
+    "ad68e9e1-0013-4813-a7a0-ddc8e53c09ad": {
+      "id": "ad68e9e1-0013-4813-a7a0-ddc8e53c09ad",
+      "task_id": "5c957a37-0002-4a2c-a278-35eeeb47bf94",
+      "path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\workspace-demo-2\\tasks\\5c957a37-0002-4a2c-a278-35eeeb47bf94\\summary.md",
+      "kind": "text",
+      "created_at": "2026-03-21T14:06:56.337132+00:00"
+    },
+    "e51a4127-1b21-47dd-abbf-675fbf4637af": {
+      "id": "e51a4127-1b21-47dd-abbf-675fbf4637af",
+      "task_id": "15d7d5e7-0d80-4d1f-9e5e-f4328a7e3beb",
+      "path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\tasks\\15d7d5e7-0d80-4d1f-9e5e-f4328a7e3beb\\summary.md",
+      "kind": "text",
+      "created_at": "2026-03-21T14:06:56.501153+00:00"
+    },
+    "19f9ef8e-2996-44ba-8650-1741fd281536": {
+      "id": "19f9ef8e-2996-44ba-8650-1741fd281536",
+      "task_id": "4b94625f-9898-48bd-8a4f-f3f32a17e381",
+      "path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\tasks\\4b94625f-9898-48bd-8a4f-f3f32a17e381\\agent-playbook.md",
+      "kind": "text",
+      "created_at": "2026-03-21T14:06:57.710093+00:00"
+    },
+    "c09e265c-c599-4043-913b-db85f49f62df": {
+      "id": "c09e265c-c599-4043-913b-db85f49f62df",
+      "task_id": "154673c8-774a-45b6-b747-dd69aa884272",
+      "path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\tasks\\154673c8-774a-45b6-b747-dd69aa884272\\summary.md",
+      "kind": "text",
+      "created_at": "2026-03-21T14:19:09.011675+00:00"
+    },
+    "992d4712-eca1-44f5-a2de-afe008a72642": {
+      "id": "992d4712-eca1-44f5-a2de-afe008a72642",
+      "task_id": "728f950b-df67-48ea-9106-cc5d86d028d8",
+      "path": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace\\verification-workspace\\tasks\\728f950b-df67-48ea-9106-cc5d86d028d8\\agent-playbook.md",
+      "kind": "text",
+      "created_at": "2026-03-21T14:19:10.152511+00:00"
+    }
+  },
+  "settings": {
+    "workspacePath": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\workspace-demo-2",
+    "safetyMode": "permissive",
+    "preferredModel": "Fast iteration mode"
+  }
+}

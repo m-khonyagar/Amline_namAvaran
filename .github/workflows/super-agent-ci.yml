@@ -1,0 +1,36 @@
+name: super-agent
+
+on:
+  push:
+    paths:
+      - "super-agent/**"
+      - ".github/workflows/super-agent-ci.yml"
+  pull_request:
+    paths:
+      - "super-agent/**"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: super-agent
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-test.txt
+      - run: pytest -q
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./super-agent
+          file: ./super-agent/Dockerfile
+          push: false
+          tags: super-agent:test

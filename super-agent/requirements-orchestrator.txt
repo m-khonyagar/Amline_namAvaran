@@ -1,0 +1,3 @@
+# Phase 3 — LangGraph orchestration (Blueprint §2.2, §3.3)
+langgraph>=0.2.0,<0.3
+langchain-core>=0.3.0,<0.4

@@ -1,5 +1,8 @@
 # Setup GitHub remote and push (requires GitHub CLI - gh)
 # Run from repo root: .\scripts\setup-github-remote.ps1
+#
+# If you already have an "origin" and only want to push to YOUR repo URL, use instead:
+#   .\scripts\push-to-my-repo.ps1 -RepoUrl "https://github.com/USER/REPO.git" -CommitAll
 
 $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path $PSScriptRoot -Parent

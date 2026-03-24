@@ -27,21 +27,41 @@ function mapStatus(s: string): string {
     planning: 'pending',
     ready: 'pending',
     running: 'running',
-    paused: 'running',
+    paused: 'paused',
     succeeded: 'completed',
     failed: 'failed',
+    cancelled: 'cancelled',
   };
   return map[s] || s;
 }
 
 const realBackend = {
+  getSettings: async () => {
+    return apiFetch<{
+      workspacePath: string;
+      safetyMode: string;
+      preferredModel: string;
+    }>('/settings');
+  },
+
+  updateSettings: async (payload: {
+    workspacePath?: string;
+    safetyMode?: string;
+    preferredModel?: string;
+  }) => {
+    return apiFetch('/settings', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  },
+
   getTasks: async () => {
     const list = await apiFetch<Array<{ id: string; goal: string; status: string; created_at: string; updated_at: string }>>('/tasks');
     return list.map((t) => ({
       id: t.id,
       goal: t.goal,
       status: mapStatus(t.status),
-      agentMode: 'multi_agent',
+      agentMode: 'guided_workflow',
       language: 'en',
       createdAt: t.created_at,
       updatedAt: t.updated_at,
@@ -52,9 +72,27 @@ const realBackend = {
 
   getTask: async (taskId: string) => {
     const [taskRes, eventsRes, artifactsRes] = await Promise.all([
-      apiFetch<{ id: string; goal: string; status: string; steps: Array<{ id: string; idx: number; title: string; description: string; status: string }> }>(`/tasks/${taskId}`),
+      apiFetch<{
+        id: string;
+        goal: string;
+        status: string;
+        created_at: string;
+        updated_at: string;
+        workspace_path: string;
+        summary?: string;
+        steps: Array<{
+          id: string;
+          idx: number;
+          title: string;
+          description: string;
+          status: string;
+          agent?: string;
+          start_time?: string | null;
+          end_time?: string | null;
+        }>;
+      }>(`/tasks/${taskId}`),
       apiFetch<Array<{ ts: string; level: string; message: string; payload_json?: string }>>(`/tasks/${taskId}/events`).catch(() => []),
-      apiFetch<Array<{ id: string; path: string; kind: string; created_at: string }>>(`/tasks/${taskId}/artifacts`).catch(() => []),
+      apiFetch<Array<{ id: string; path: string; kind: string; created_at: string; size?: number }>>(`/tasks/${taskId}/artifacts`).catch(() => []),
     ]);
 
     const steps = taskRes.steps || [];
@@ -64,10 +102,12 @@ const realBackend = {
       id: taskRes.id,
       goal: taskRes.goal,
       status: mapStatus(taskRes.status),
-      agentMode: 'multi_agent',
+      agentMode: 'guided_workflow',
       language: 'en',
-      createdAt: '',
-      updatedAt: '',
+      createdAt: taskRes.created_at,
+      updatedAt: taskRes.updated_at,
+      workspacePath: taskRes.workspace_path,
+      summary: taskRes.summary || '',
       currentStep: completedSteps,
       totalSteps: Math.max(steps.length, 1),
       plan: steps.map((s) => s.title),
@@ -75,9 +115,9 @@ const realBackend = {
         id: s.id,
         title: s.title,
         status: mapStatus(s.status),
-        agent: 'Agent',
-        startTime: '',
-        endTime: '',
+        agent: s.agent || 'Workflow role',
+        startTime: s.start_time || '',
+        endTime: s.end_time || '',
         output: s.description,
       })),
       artifacts: artifactsRes.map((a) => ({
@@ -85,13 +125,14 @@ const realBackend = {
         name: a.path.split(/[/\\]/).pop() || a.path,
         type: a.kind || 'file',
         path: a.path,
-        size: 0,
+        size: a.size || 0,
         createdAt: a.created_at,
+        downloadUrl: `${API_BASE}/artifacts/${a.id}/download`,
       })),
       logs: eventsRes.map((e) => ({
         timestamp: e.ts,
         level: e.level,
-        agent: 'System',
+        agent: 'Workflow',
         message: e.message,
       })),
     };
@@ -125,13 +166,23 @@ const realBackend = {
   },
 
   getAgents: async () => {
-    // Backend doesn't have agents endpoint - return placeholder
-    return [
-      { name: 'PlannerAgent', status: 'idle', currentTask: 'Available', startTime: null, endTime: null, stepsCompleted: 0, totalSteps: 0 },
-      { name: 'CoderAgent', status: 'idle', currentTask: 'Available', startTime: null, endTime: null, stepsCompleted: 0, totalSteps: 0 },
-      { name: 'BrowserAgent', status: 'idle', currentTask: 'Available', startTime: null, endTime: null, stepsCompleted: 0, totalSteps: 0 },
-      { name: 'ExternalWorkerAgent', status: 'idle', currentTask: 'Available', startTime: null, endTime: null, stepsCompleted: 0, totalSteps: 0 },
-    ];
+    try {
+      const list = await apiFetch<Array<{
+        name: string;
+        status: string;
+        currentTask: string;
+        startTime: string | null;
+        endTime: string | null;
+        stepsCompleted: number;
+        totalSteps: number;
+      }>>('/agents');
+      return list.map((agent) => ({
+        ...agent,
+        status: mapStatus(agent.status),
+      }));
+    } catch {
+      return [];
+    }
   },
 
   createTask: async (goal: string, language: string = 'en') => {
@@ -143,7 +194,7 @@ const realBackend = {
       id,
       goal,
       status: 'pending',
-      agentMode: 'single_agent',
+      agentMode: 'guided_flow',
       language,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -182,17 +233,18 @@ const realBackend = {
 
   getArtifacts: async () => {
     try {
-      const list = await apiFetch<Array<{ id: string; task_id: string; path: string; kind: string; created_at: string }>>('/artifacts?limit=50');
+      const list = await apiFetch<Array<{ id: string; task_id: string; path: string; kind: string; created_at: string; size?: number }>>('/artifacts?limit=50');
       return list.map((a) => ({
         id: a.id,
         name: a.path.split(/[/\\]/).pop() || a.path,
         type: a.kind || 'file',
         path: a.path,
-        size: 0,
+        size: a.size || 0,
         content: '',
         language: 'text',
         createdAt: a.created_at,
         taskId: a.task_id,
+        downloadUrl: `${API_BASE}/artifacts/${a.id}/download`,
       }));
     } catch {
       return [];

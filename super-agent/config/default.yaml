@@ -1,0 +1,35 @@
+# Default configuration — override with SUPER_AGENT_CONFIG env path
+version: "2.1"
+
+# full = PLAN→RESEARCH→CODE→TEST→EXECUTE (+ cloud/local LLM); plan_only = planner (+ brain)
+workflow:
+  mode: full
+
+# openai: set OPENAI_API_KEY in environment (required for cloud). ollama: local Ollama HTTP.
+llm:
+  provider: openai
+  openai:
+    model: gpt-4o-mini
+    # base_url: null   # optional: Azure / compatible proxy
+
+ollama:
+  base_url: "http://127.0.0.1:11434"
+  model: "qwen2:7b-instruct"
+
+paths:
+  project_root: "."
+  memory_db: "memory/tasks.db"
+  logs_dir: "logs"
+
+security:
+  command_tier: "low" # low | medium | high
+  command_whitelist:
+    - "python"
+    - "pip"
+    - "git"
+    - "dir"
+    - "where"
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(levelname)s | %(name)s | %(message)s"

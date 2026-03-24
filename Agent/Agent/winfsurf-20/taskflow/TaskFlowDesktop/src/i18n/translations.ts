@@ -1,32 +1,27 @@
 export const translations = {
   en: {
-    // Navigation
     dashboard: 'Dashboard',
     tasks: 'Tasks',
     memory: 'Memory',
     artifacts: 'Artifacts',
     settings: 'Settings',
-    
-    // Dashboard
+
     recentTasks: 'Recent Tasks',
     activeAgents: 'Active Agents',
     systemHealth: 'System Health',
     externalTools: 'External Tools',
     quickActions: 'Quick Actions',
-    
-    // Task Status
+
     pending: 'Pending',
     running: 'Running',
     completed: 'Completed',
     failed: 'Failed',
     cancelled: 'Cancelled',
-    
-    // Agent Status
+
     idle: 'Idle',
     assigned: 'Assigned',
     working: 'Working',
-    
-    // Actions
+
     create: 'Create',
     start: 'Start',
     stop: 'Stop',
@@ -41,8 +36,7 @@ export const translations = {
     send: 'Send',
     attach: 'Attach',
     cmd: 'Cmd',
-    
-    // Common
+
     search: 'Search',
     filter: 'Filter',
     sort: 'Sort',
@@ -52,8 +46,7 @@ export const translations = {
     success: 'Success',
     warning: 'Warning',
     info: 'Info',
-    
-    // Task Detail
+
     goal: 'Goal',
     plan: 'Plan',
     steps: 'Steps',
@@ -62,51 +55,43 @@ export const translations = {
     taskArtifacts: 'Artifacts',
     collaboration: 'Collaboration',
     supervision: 'Supervision',
-    
-    // Agent Collaboration
+
     agentStates: 'Agent States',
     messages: 'Messages',
     timeline: 'Timeline',
-    
-    // External Supervision
+
     selectedTool: 'Selected Tool',
     prompt: 'Prompt',
     revisions: 'Revisions',
     evaluation: 'Evaluation',
     acceptance: 'Acceptance',
-    
-    // Settings
+
     theme: 'Theme',
     language: 'Language',
     workspace: 'Workspace',
     models: 'Models',
     safety: 'Safety',
-    
-    // Themes
+
     darkMode: 'Dark Mode',
     lightMode: 'Light Mode',
     system: 'System',
-    
-    // Chat
+
     askAnything: 'What can I help you with?',
-    
-    // Commands
+
     commandPalette: 'Command Palette',
     createTask: 'Create Task',
     openDashboard: 'Open Dashboard',
     toggleTheme: 'Toggle Theme',
     switchLanguage: 'Switch Language',
     openSettings: 'Open Settings',
-    
-    // Keyboard Shortcuts
+
     shortcuts: 'Keyboard Shortcuts',
     ctrlK: 'Command Palette',
     ctrlN: 'New Task',
     ctrlL: 'Toggle Logs',
     ctrlM: 'Open Memory',
     ctrlT: 'Toggle Theme',
-    
-    // Additional translations
+
     agents: 'Agents',
     files: 'Files',
     history: 'History',
@@ -223,40 +208,35 @@ export const translations = {
     describeIntendedOutcome: 'Describe the intended outcome...',
     fastCapture: 'Fast capture',
     trackActiveWork: 'Track active work, review agent activity, and launch actions without leaving the workspace.',
-    configurePreferences: 'Configure your Agent Windsurf Amline preferences',
+    configurePreferences: 'Configure your Agent Windsurf preferences',
     viewManageFiles: 'View and manage generated files and outputs',
     exploreSearchMemory: 'Explore and search through AI memory and learning',
     connectIntegrations: 'Connect Slack, Teams, Linear, Jira, and more to extend your workspace capabilities.',
   },
-  
+
   fa: {
-    // Navigation
     dashboard: 'داشبورد',
-    tasks: 'وظایف',
+    tasks: 'وظیفه‌ها',
     memory: 'حافظه',
-    artifacts: 'مصنوعات',
+    artifacts: 'خروجی‌ها',
     settings: 'تنظیمات',
-    
-    // Dashboard
-    recentTasks: 'وظایف اخیر',
-    activeAgents: 'عامل‌های فعال',
+
+    recentTasks: 'وظیفه‌های اخیر',
+    activeAgents: 'ایجنت‌های فعال',
     systemHealth: 'سلامت سیستم',
     externalTools: 'ابزارهای خارجی',
-    quickActions: 'اقدامات سریع',
-    
-    // Task Status
+    quickActions: 'اقدام‌های سریع',
+
     pending: 'در انتظار',
     running: 'در حال اجرا',
-    completed: 'تکمیل شده',
-    failed: 'شکست خورده',
-    cancelled: 'لغو شده',
-    
-    // Agent Status
+    completed: 'تکمیل‌شده',
+    failed: 'ناموفق',
+    cancelled: 'لغوشده',
+
     idle: 'بیکار',
-    assigned: 'محول شده',
-    working: 'در حال کار',
-    
-    // Actions
+    assigned: 'اختصاص‌یافته',
+    working: 'مشغول',
+
     create: 'ایجاد',
     start: 'شروع',
     stop: 'توقف',
@@ -265,120 +245,110 @@ export const translations = {
     delete: 'حذف',
     edit: 'ویرایش',
     view: 'مشاهده',
-    export: 'صدور',
+    export: 'خروجی گرفتن',
     approve: 'تایید',
     cancel: 'لغو',
     send: 'ارسال',
-    attach: 'ضمیمه',
+    attach: 'پیوست',
     cmd: 'دستور',
-    
-    // Common
+
     search: 'جستجو',
     filter: 'فیلتر',
     sort: 'مرتب‌سازی',
     refresh: 'تازه‌سازی',
     loading: 'در حال بارگذاری...',
     error: 'خطا',
-    success: 'موفقیت',
+    success: 'موفق',
     warning: 'هشدار',
     info: 'اطلاعات',
-    
-    // Task Detail
+
     goal: 'هدف',
-    plan: 'طرح',
-    steps: 'مراحل',
+    plan: 'برنامه',
+    steps: 'گام‌ها',
     progress: 'پیشرفت',
     logs: 'لاگ‌ها',
-    taskArtifacts: 'مصنوعات',
+    taskArtifacts: 'خروجی‌ها',
     collaboration: 'همکاری',
     supervision: 'نظارت',
-    
-    // Agent Collaboration
-    agentStates: 'وضعیت عامل‌ها',
+
+    agentStates: 'وضعیت ایجنت‌ها',
     messages: 'پیام‌ها',
-    timeline: 'جدول زمانی',
-    
-    // External Supervision
-    selectedTool: 'ابزار انتخاب شده',
+    timeline: 'خط زمانی',
+
+    selectedTool: 'ابزار انتخاب‌شده',
     prompt: 'پرامپت',
     revisions: 'بازبینی‌ها',
     evaluation: 'ارزیابی',
     acceptance: 'پذیرش',
-    
-    // Settings
+
     theme: 'تم',
     language: 'زبان',
     workspace: 'فضای کاری',
     models: 'مدل‌ها',
     safety: 'ایمنی',
-    
-    // Themes
-    darkMode: 'حالت تاریک',
+
+    darkMode: 'حالت تیره',
     lightMode: 'حالت روشن',
     system: 'سیستم',
-    
-    // Chat
-    askAnything: 'چطور می‌توانم کمکتان کنم؟',
-    
-    // Commands
+
+    askAnything: 'چطور می‌توانم کمک کنم؟',
+
     commandPalette: 'پالت دستورات',
     createTask: 'ایجاد وظیفه',
     openDashboard: 'باز کردن داشبورد',
     toggleTheme: 'تغییر تم',
     switchLanguage: 'تغییر زبان',
     openSettings: 'باز کردن تنظیمات',
-    
-    // Keyboard Shortcuts
-    shortcuts: 'میانبرهای صفحه کلید',
+
+    shortcuts: 'میان‌برهای صفحه‌کلید',
     ctrlK: 'پالت دستورات',
     ctrlN: 'وظیفه جدید',
-    ctrlL: 'تغییر لاگ‌ها',
+    ctrlL: 'نمایش لاگ‌ها',
     ctrlM: 'باز کردن حافظه',
     ctrlT: 'تغییر تم',
-    
-    // Additional translations
-    agents: 'عامل‌ها',
+
+    agents: 'ایجنت‌ها',
     files: 'فایل‌ها',
     history: 'تاریخچه',
-    integrations: 'ادغام‌ها',
+    integrations: 'یکپارچه‌سازی‌ها',
     newTask: 'وظیفه جدید',
     taskDetail: 'جزئیات وظیفه',
-    computerControl: 'کنترل کامپیوتر',
+    computerControl: 'کنترل رایانه',
     liveOrchestration: 'ارکستراسیون زنده',
-    shellDescription: 'برنامه‌ریزی، اجرا و بافت فضای کاری در یک پوسته درجه توسعه‌دهنده.',
+    shellDescription: 'برنامه‌ریزی، اجرا و بافت فضای کاری در یک پوسته مناسب توسعه‌دهنده.',
     systemHealthy: 'سیستم سالم است',
     expand: 'باز کردن',
-    collapse: 'بستن',
+    collapse: 'جمع کردن',
     overview: 'نمای کلی',
     total: 'کل',
-    noTasksFound: 'وظیفه‌ای یافت نشد',
-    noAgentsFound: 'عاملی یافت نشد',
-    noIntegrationsFound: 'ادغامی یافت نشد',
-    noMemoriesFound: 'حافظه‌ای یافت نشد',
-    noArtifactsFound: 'مصنوعی یافت نشد',
+    noTasksFound: 'هیچ وظیفه‌ای پیدا نشد',
+    noAgentsFound: 'هیچ ایجنتی پیدا نشد',
+    noIntegrationsFound: 'هیچ یکپارچه‌سازی‌ای پیدا نشد',
+    noMemoriesFound: 'هیچ حافظه‌ای پیدا نشد',
+    noArtifactsFound: 'هیچ خروجی‌ای پیدا نشد',
     tryDifferentFilter: 'فیلتر یا عبارت جستجوی دیگری را امتحان کنید.',
-    selectMemoryToView: 'یک حافظه را برای مشاهده جزئیات انتخاب کنید',
-    selectArtifactToPreview: 'یک مصنوع را برای پیش‌نمایش انتخاب کنید',
+    selectMemoryToView: 'برای دیدن جزئیات، یک حافظه را انتخاب کنید',
+    selectArtifactToPreview: 'برای پیش‌نمایش، یک خروجی را انتخاب کنید',
     generalSettings: 'تنظیمات عمومی',
     applicationName: 'نام برنامه',
     version: 'نسخه',
     workspacePath: 'مسیر فضای کاری',
-    autoCleanup: 'پاکسازی خودکار',
+    autoCleanup: 'پاک‌سازی خودکار',
     defaultModel: 'مدل پیش‌فرض',
     apiKey: 'کلید API (اختیاری)',
-    maxTokens: 'حداکثر توکن‌ها',
+    maxTokens: 'حداکثر توکن',
     safetyMode: 'حالت ایمنی',
     externalToolSupervision: 'نظارت ابزار خارجی',
     resetToDefaults: 'بازنشانی به پیش‌فرض',
     saveSettings: 'ذخیره تنظیمات',
     browse: 'مرور',
-    connections: 'اتصالات',
+    connections: 'اتصال‌ها',
     outputs: 'خروجی‌ها',
     knowledge: 'دانش',
     configuration: 'پیکربندی',
     queue: 'صف',
-    taskInspection: 'بازرسی وظیفه',
-    stored: 'ذخیره شده',
+    taskInspection: 'بررسی وظیفه',
+    stored: 'ذخیره‌شده',
     visible: 'قابل مشاهده',
     patterns: 'الگوها',
     reflections: 'بازتاب‌ها',
@@ -387,7 +357,7 @@ export const translations = {
     open: 'باز کردن',
     connect: 'اتصال',
     manage: 'مدیریت',
-    comingSoon: 'به زودی',
+    comingSoon: 'به‌زودی',
     all: 'همه',
     communication: 'ارتباطات',
     projectManagement: 'مدیریت پروژه',
@@ -411,52 +381,52 @@ export const translations = {
     lastUpdated: 'آخرین به‌روزرسانی',
     created: 'ایجاد شده',
     observed: 'مشاهده شده',
-    highLeverage: 'اهرم بالا',
+    highLeverage: 'اثر بالا',
     createTaskAction: 'ایجاد وظیفه',
-    reviewAgents: 'بررسی عامل‌ها',
+    reviewAgents: 'بررسی ایجنت‌ها',
     systemCheck: 'بررسی سیستم',
-    startNewWorkflow: 'شروع یک گردش کار عامل جدید',
+    startNewWorkflow: 'شروع یک گردش کار جدید',
     inspectOrchestration: 'بررسی ارکستراسیون فعال',
     resumeWorkspace: 'ادامه فضای کاری اخیر',
     refreshServices: 'تازه‌سازی سرویس‌ها و سلامت',
     currentExecution: 'اجرای فعلی',
     recentSignals: 'سیگنال‌های اخیر',
-    step: 'مرحله',
-    agent: 'عامل',
+    step: 'گام',
+    agent: 'ایجنت',
     output: 'خروجی',
     executionProgress: 'پیشرفت اجرا',
     executionStream: 'جریان اجرا',
-    agentHandoffs: 'تحویل عامل‌ها',
+    agentHandoffs: 'تحویل بین ایجنت‌ها',
     startedWorkflow: 'گردش کار را شروع کرد',
-    tookOverAfterStep: 'پس از مرحله به عهده گرفت',
+    tookOverAfterStep: 'بعد از گام بر عهده گرفت',
     enterToSend: 'Enter برای ارسال',
     shiftEnterNewline: 'Shift+Enter برای خط جدید',
-    describeOutcome: 'نتیجه مورد نظر، بافت و محدودیت‌ها را توصیف کنید.',
-    commandSurface: 'سطح دستور',
-    attachFile: 'ضمیمه فایل',
+    describeOutcome: 'نتیجه مورد نظر، بافت و محدودیت‌ها را توضیح دهید.',
+    commandSurface: 'سطح فرمان',
+    attachFile: 'پیوست فایل',
     mainContent: 'محتوای اصلی',
-    tasksConversationContext: 'وظایف، گفتگو و بافت اجرا.',
-    commandCenter: 'مرکز دستورات',
-    activityTimeline: 'جدول زمانی فعالیت',
+    tasksConversationContext: 'وظیفه‌ها، گفتگو و بافت اجرا.',
+    commandCenter: 'مرکز فرمان',
+    activityTimeline: 'خط زمانی فعالیت',
     mode: 'حالت',
     started: 'شروع شد',
     ended: 'پایان یافت',
-    liveAgentSession: 'جلسه عامل زنده',
-    streamingOutput: 'خروجی استریم، پرامپت‌ها و بازخورد اجرا.',
-    streaming: 'در حال استریم',
+    liveAgentSession: 'نشست زنده ایجنت',
+    streamingOutput: 'خروجی زنده، پرامپت‌ها و بازخورد اجرا.',
+    streaming: 'در حال پخش',
     you: 'شما',
-    agentLabel: 'عامل',
-    monitorAgents: 'نظارت بر فعالیت چندعاملی، بار کاری و تمرکز اجرای فعلی.',
+    agentLabel: 'ایجنت',
+    monitorAgents: 'فعالیت چندایجنتی، بار کاری و تمرکز اجرای فعلی را دنبال کنید.',
     status: 'وضعیت',
     focus: 'تمرکز',
-    reviewActiveWork: 'بررسی کار فعال، راه‌اندازی وظایف جدید و مدیریت اجرا بدون از دست دادن بافت.',
-    describeIntendedOutcome: 'نتیجه مورد نظر را توصیف کنید...',
-    fastCapture: 'ضبط سریع',
-    trackActiveWork: 'ردیابی کار فعال، بررسی فعالیت عامل‌ها و راه‌اندازی اقدامات بدون ترک فضای کاری.',
-    configurePreferences: 'پیکربندی تنظیمات Agent Windsurf Amline شما',
-    viewManageFiles: 'مشاهده و مدیریت فایل‌ها و خروجی‌های تولید شده',
-    exploreSearchMemory: 'کاوش و جستجو در حافظه و یادگیری AI',
-    connectIntegrations: 'اتصال Slack، Teams، Linear، Jira و بیشتر برای گسترش قابلیت‌های فضای کاری شما.',
+    reviewActiveWork: 'کارهای فعال را بررسی کنید، وظیفه تازه بسازید و اجرا را بدون از دست دادن بافت مدیریت کنید.',
+    describeIntendedOutcome: 'نتیجه مورد نظر را توضیح دهید...',
+    fastCapture: 'ثبت سریع',
+    trackActiveWork: 'کارهای فعال را پیگیری کنید، وضعیت ایجنت‌ها را ببینید و بدون خروج از فضای کاری اقدام کنید.',
+    configurePreferences: 'تنظیمات Agent Windsurf را پیکربندی کنید',
+    viewManageFiles: 'فایل‌ها و خروجی‌های تولیدشده را ببینید و مدیریت کنید',
+    exploreSearchMemory: 'در حافظه و یادگیری هوش مصنوعی جستجو کنید',
+    connectIntegrations: 'Slack، Teams، Linear، Jira و موارد دیگر را برای گسترش توانمندی‌های فضای کاری متصل کنید.',
   },
 };
 

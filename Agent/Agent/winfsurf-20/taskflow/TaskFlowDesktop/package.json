@@ -1,5 +1,5 @@
 {
-  "name": "agent-windsurf-amline",
+  "name": "agent-windsurf",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -18,6 +18,8 @@
     "postcss": "^8.5.8",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
     "tailwindcss": "^4.2.1",
     "zustand": "^5.0.11"
   },
