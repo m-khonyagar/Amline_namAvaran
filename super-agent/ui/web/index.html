@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Super-Agent — درخواست و خروجی</title>
+    <link rel="stylesheet" href="/ui-assets/styles.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>Super-Agent</h1>
+        <p>درخواست خود را بنویسید؛ سیستم برنامه، نیازمندی‌ها، نمونه کد و تست را آماده می‌کند.</p>
+      </header>
+
+      <div id="status" class="status">…</div>
+
+      <form id="form">
+        <label for="goal">متن درخواست</label>
+        <textarea
+          id="goal"
+          name="goal"
+          placeholder="مثال: یک اسکریپت پایتون برای تبدیل CSV به JSON بنویس و مراحل را خلاصه کن."
+          required
+        ></textarea>
+
+        <div class="row">
+          <label><input type="checkbox" id="planOnly" /> فقط برنامه‌ریزی (سریع‌تر)</label>
+          <label><input type="checkbox" id="skipBrain" /> بدون مدل زبانی (خروجی آزمایشی)</label>
+        </div>
+
+        <label for="token">توکن اختیاری (اگر سرور SUPER_AGENT_DEPLOY_TOKEN دارد)</label>
+        <input type="password" id="token" name="token" autocomplete="off" placeholder="خالی بگذارید اگر لازم نیست" />
+
+        <button type="submit" class="primary" id="submit">اجرا و دریافت خروجی</button>
+        <p class="hint">API برای ادغام: <code>POST /v1/run</code> — سلامت: <code>/health</code> — آمادگی: <code>/ready</code></p>
+      </form>
+
+      <p id="err" class="error" role="alert"></p>
+      <div id="output" class="out"></div>
+    </div>
+    <script src="/ui-assets/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,12 @@
+# ---------------------------------------------------------------------------
+# Snippet to APPEND to an existing .ovpn profile (end of file is fine).
+# Only use if your VPN provider allows full-tunnel and DNS blocking on client.
+# Remove the # from lines you need.
+# ---------------------------------------------------------------------------
+
+# redirect-gateway def1
+# redirect-gateway def1 ipv6
+
+# block-outside-dns
+
+# If your provider uses comp-lzo and you get errors, do not duplicate; match their profile.

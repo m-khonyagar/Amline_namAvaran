@@ -1,6 +1,19 @@
 
 // Mock backend API for desktop testing
 const mockBackend = {
+  getSettings: async () => ({
+    workspacePath: './workspace',
+    safetyMode: 'standard',
+    preferredModel: 'Local executor',
+  }),
+
+  updateSettings: async (payload: Record<string, unknown>) => ({
+    workspacePath: './workspace',
+    safetyMode: 'standard',
+    preferredModel: 'Local executor',
+    ...payload,
+  }),
+
   // Get all tasks
   getTasks: async () => {
     await new Promise(resolve => setTimeout(resolve, 100));

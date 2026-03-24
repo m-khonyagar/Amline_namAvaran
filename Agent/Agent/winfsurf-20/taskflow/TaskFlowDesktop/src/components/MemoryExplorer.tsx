@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from '../i18n';
 import { backend } from '../api';
 
@@ -12,60 +12,29 @@ export function MemoryExplorer({ className = '' }: MemoryExplorerProps) {
   const [selectedMemory, setSelectedMemory] = useState<string | null>(null);
   const [memories, setMemories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const loadMemories = async () => {
+    try {
+      setErrorMessage('');
+      const data = await backend.getMemory();
+      setMemories(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error(error);
+      setErrorMessage(error instanceof Error ? error.message : 'Unable to load memory right now.');
+      setMemories([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    backend.getMemory().then((data) => {
-      setMemories(Array.isArray(data) ? data : []);
-    }).catch(() => setMemories([])).finally(() => setLoading(false));
+    void loadMemories();
   }, []);
 
-  const defaultMemories = [
-    {
-      id: '1',
-      type: 'task_summary',
-      title: 'Flask Web Application Development',
-      content: 'Successfully created a Flask web application with SQLAlchemy models, REST API endpoints, and Jinja2 templates. The application includes user authentication and CRUD operations for blog posts.',
-      tags: ['flask', 'web', 'python', 'sqlalchemy'],
-      createdAt: '2026-03-11T10:30:00Z',
-      taskId: '1',
-      relevance: 0.95,
-    },
-    {
-      id: '2',
-      type: 'reflection',
-      title: 'Best Practices for Web Development',
-      content: 'Key insights from web development research: 1) Use ORM for database operations, 2) Implement proper error handling, 3) Add input validation, 4) Use environment variables for configuration, 5) Implement logging.',
-      tags: ['best-practices', 'web', 'development'],
-      createdAt: '2026-03-11T11:00:00Z',
-      taskId: '2',
-      relevance: 0.87,
-    },
-    {
-      id: '3',
-      type: 'pattern',
-      title: 'Multi-Agent Collaboration Pattern',
-      content: 'Effective pattern for complex tasks: 1) PlannerAgent breaks down requirements, 2) Specialist agents handle specific domains, 3) ReviewerAgent ensures quality, 4) Coordinator manages handoffs.',
-      tags: ['multi-agent', 'collaboration', 'pattern'],
-      createdAt: '2026-03-11T09:45:00Z',
-      taskId: null,
-      relevance: 0.92,
-    },
-    {
-      id: '4',
-      type: 'task_summary',
-      title: 'React Dashboard Implementation',
-      content: 'Built a responsive dashboard with React, TypeScript, and Tailwind CSS. Features include real-time data updates, dark mode support, and internationalization.',
-      tags: ['react', 'typescript', 'dashboard', 'ui'],
-      createdAt: '2026-03-10T16:20:00Z',
-      taskId: '4',
-      relevance: 0.78,
-    },
-  ];
-
-  const memoriesToUse = memories.length > 0 ? memories : defaultMemories;
-
-  const filteredMemories = memoriesToUse.filter((memory: any) => {
-    const matchesSearch = searchQuery === '' || 
+  const filteredMemories = memories.filter((memory: any) => {
+    const matchesSearch =
+      searchQuery === '' ||
       (memory.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (memory.content || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (memory.tags || []).some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -82,61 +51,79 @@ export function MemoryExplorer({ className = '' }: MemoryExplorerProps) {
     );
   }
 
-  const getTypeIcon = (type: string) => {
+  const getTypeLabel = (type: string) => {
     switch (type) {
-      case 'task_summary': return '📋';
-      case 'reflection': return '💭';
-      case 'pattern': return '🔗';
-      default: return '📝';
+      case 'task_summary':
+        return 'TASK';
+      case 'reflection':
+        return 'NOTE';
+      case 'pattern':
+        return 'RULE';
+      default:
+        return 'ITEM';
     }
   };
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'task_summary': return 'bg-info text-info-foreground';
-      case 'reflection': return 'bg-warning text-warning-foreground';
-      case 'pattern': return 'bg-success text-success-foreground';
-      default: return 'bg-muted text-muted-foreground';
+      case 'task_summary':
+        return 'bg-info text-info-foreground';
+      case 'reflection':
+        return 'bg-warning text-warning-foreground';
+      case 'pattern':
+        return 'bg-success text-success-foreground';
+      default:
+        return 'bg-muted text-muted-foreground';
     }
   };
 
-  const selectedMemoryData = filteredMemories.find(m => m.id === selectedMemory);
+  const selectedMemoryData = filteredMemories.find((memory) => memory.id === selectedMemory);
 
   return (
     <div className={`p-5 ${className}`}>
       <div className="mb-5">
-        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-2.5">{t('knowledge')}</p>
+        <p className="shell-section-label mb-2.5">{t('knowledge')}</p>
         <h1 className="text-[22px] font-semibold text-foreground leading-tight">{t('memory')}</h1>
         <p className="text-[13px] text-muted-foreground mt-2.5">{t('exploreSearchMemory')}</p>
       </div>
 
-      {/* Search and Stats */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
         {[
-          { label: t('stored'), value: memoriesToUse.length },
-          { label: t('visible'), value: filteredMemories.length },
-          { label: t('patterns'), value: memoriesToUse.filter((m: any) => m.type === 'pattern').length },
-          { label: t('reflections'), value: memoriesToUse.filter((m: any) => m.type === 'reflection').length },
+          { label: t('stored'), value: memories.length, caption: 'All saved memory items in this workspace' },
+          { label: t('visible'), value: filteredMemories.length, caption: 'Items matching the current filter' },
+          { label: t('patterns'), value: memories.filter((memory: any) => memory.type === 'pattern').length, caption: 'Reusable workflow rules' },
+          { label: t('reflections'), value: memories.filter((memory: any) => memory.type === 'reflection').length, caption: 'Operational notes and learnings' },
         ].map((stat) => (
-          <div key={stat.label} className="surface-elevated px-3.5 py-2.5">
-            <p className="text-[11px] text-muted-foreground">{stat.label}</p>
-            <p className="mt-1.5 text-[18px] font-semibold text-foreground leading-none">{stat.value}</p>
+          <div key={stat.label} className="surface-card p-4">
+            <p className="shell-section-label">{stat.label}</p>
+            <p className="mt-2 text-[22px] font-semibold tracking-[-0.03em] text-foreground leading-none">{stat.value}</p>
+            <p className="mt-1.5 text-[11px] text-muted-foreground">{stat.caption}</p>
           </div>
         ))}
       </div>
 
       <div className="surface-card p-4 mb-4">
-        <input
-          type="text"
-          placeholder={`${t('search')} memories`}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="input w-full"
-        />
+        <div className="flex flex-col gap-3 md:flex-row md:items-center">
+          <input
+            type="text"
+            placeholder={`${t('search')} memories`}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="input w-full"
+          />
+          <button className="btn-secondary text-[12px] h-10 px-3" onClick={() => void loadMemories()}>
+            {t('refresh')}
+          </button>
+        </div>
       </div>
 
+      {errorMessage && (
+        <div className="mb-4 rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-[12px] text-destructive">
+          {errorMessage}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-4">
-        {/* Memory List */}
         <div className="space-y-2.5">
           {filteredMemories.length === 0 ? (
             <div className="surface-card p-10 text-center">
@@ -154,12 +141,12 @@ export function MemoryExplorer({ className = '' }: MemoryExplorerProps) {
               >
                 <div className="flex items-start justify-between gap-3 mb-2.5">
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    <span className="text-[18px] shrink-0">{getTypeIcon(memory.type)}</span>
+                    <span className="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-border bg-secondary px-2 text-[10px] font-semibold text-foreground">
+                      {getTypeLabel(memory.type)}
+                    </span>
                     <div className="min-w-0 flex-1">
                       <h3 className="text-[14px] font-semibold text-foreground leading-snug truncate">{memory.title}</h3>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">
-                        {new Date(memory.createdAt).toLocaleDateString()}
-                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">{new Date(memory.createdAt).toLocaleDateString()}</p>
                     </div>
                   </div>
                   <span className={`px-2 py-0.5 text-[11px] font-medium rounded-full shrink-0 border ${getTypeColor(memory.type)}`}>
@@ -167,42 +154,43 @@ export function MemoryExplorer({ className = '' }: MemoryExplorerProps) {
                   </span>
                 </div>
 
-                <p className="text-[12px] text-muted-foreground mb-2.5 line-clamp-2 leading-relaxed">
-                  {memory.content}
-                </p>
+                <p className="text-[12px] text-muted-foreground mb-2.5 line-clamp-2 leading-relaxed">{memory.content}</p>
 
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex flex-wrap gap-1">
                     {memory.tags.slice(0, 3).map((tag: string) => (
-                      <span
-                        key={tag}
-                        className="px-1.5 py-0.5 text-[10px] bg-secondary text-secondary-foreground rounded"
-                      >
+                      <span key={tag} className="px-1.5 py-0.5 text-[10px] bg-secondary text-secondary-foreground rounded">
                         #{tag}
                       </span>
                     ))}
                   </div>
-                  <span className="text-[10px] text-muted-foreground shrink-0">
-                    {Math.round(memory.relevance * 100)}% relevant
-                  </span>
+                  <span className="text-[10px] text-muted-foreground shrink-0">{Math.round(memory.relevance * 100)}% relevant</span>
                 </div>
               </button>
             ))
           )}
         </div>
 
-        {/* Memory Detail Panel */}
         <div className="lg:col-span-1">
           {selectedMemoryData ? (
-            <div className="surface-card p-4 sticky top-4">
+            <div className="surface-card glass-frame p-4 sticky top-4">
               <div className="flex items-center gap-2.5 mb-3.5">
-                <span className="text-[20px]">{getTypeIcon(selectedMemoryData.type)}</span>
+                <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-lg border border-border bg-secondary px-2 text-[10px] font-semibold text-foreground">
+                  {getTypeLabel(selectedMemoryData.type)}
+                </span>
                 <div className="min-w-0 flex-1">
                   <h3 className="text-[14px] font-semibold text-foreground leading-snug">{selectedMemoryData.title}</h3>
                   <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium mt-1 ${getTypeColor(selectedMemoryData.type)}`}>
                     {selectedMemoryData.type.replace('_', ' ')}
                   </span>
                 </div>
+              </div>
+
+              <div className="surface-elevated p-3 mb-3.5">
+                <p className="shell-section-label mb-2">Knowledge view</p>
+                <p className="text-[12px] text-foreground leading-6">
+                  Review what the workspace has learned, why it is relevant, and which task or pattern it should influence next.
+                </p>
               </div>
 
               <div className="surface-elevated p-3 mb-3.5">
@@ -218,39 +206,23 @@ export function MemoryExplorer({ className = '' }: MemoryExplorerProps) {
                     </div>
                   )}
                 </div>
-                <p className="text-[11px] text-muted-foreground mt-2.5">
-                  {new Date(selectedMemoryData.createdAt).toLocaleString()}
-                </p>
+                <p className="text-[11px] text-muted-foreground mt-2.5">{new Date(selectedMemoryData.createdAt).toLocaleString()}</p>
               </div>
 
               <div className="mb-3.5">
                 <h4 className="text-[12px] font-medium text-foreground mb-2">{t('content')}</h4>
-                <p className="text-[12px] text-foreground leading-relaxed">
-                  {selectedMemoryData.content}
-                </p>
+                <p className="text-[12px] text-foreground leading-relaxed">{selectedMemoryData.content}</p>
               </div>
 
               <div className="mb-3.5">
                 <h4 className="text-[12px] font-medium text-foreground mb-2">{t('tags')}</h4>
                 <div className="flex flex-wrap gap-1">
                   {selectedMemoryData.tags.map((tag: string) => (
-                    <span
-                      key={tag}
-                      className="px-1.5 py-0.5 text-[10px] bg-secondary text-secondary-foreground rounded"
-                    >
+                    <span key={tag} className="px-1.5 py-0.5 text-[10px] bg-secondary text-secondary-foreground rounded">
                       #{tag}
                     </span>
                   ))}
                 </div>
-              </div>
-
-              <div className="flex gap-2">
-                <button className="btn-secondary text-[11px] h-7 px-2.5 flex-1">
-                  {t('export')}
-                </button>
-                <button className="btn-secondary text-[11px] h-7 px-2.5 flex-1">
-                  {t('edit')}
-                </button>
               </div>
             </div>
           ) : (

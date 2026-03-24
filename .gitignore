@@ -86,3 +86,6 @@ node-linux.tar.xz
 paramiko_debug.log
 seo-dashboard-deploy.tar.gz
 *-deploy.tar.gz
+
+# Offline VPN bundle (contains keys + vpn.auth; never commit)
+vpn-setup/offline-vpn-bundle/READY_TO_COPY/

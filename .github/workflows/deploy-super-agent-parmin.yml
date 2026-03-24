@@ -1,0 +1,89 @@
+# Deploy super-agent to your VPS over SSH from GitHub Actions (different egress than Cursor — may reach Parmin).
+#
+# Secrets (repo → Settings → Secrets → Actions):
+#   PARMIN_SSH_HOST        e.g. 212.80.24.134
+#   PARMIN_SSH_USER        e.g. root
+#   PARMIN_SSH_KEY         private key PEM (full file contents)
+#   OPENAI_API_KEY         recommended — creates /opt/super-agent/.env on server
+# Optional:
+#   (optional) OPENAI_MODEL — otherwise compose default is used
+#
+# Run: Actions → "Deploy super-agent (SSH)" → Run workflow.
+# If GitHub-hosted runners also cannot reach your VPS, add a self-hosted runner ON the server and change `runs-on:` to `[self-hosted, Linux]`.
+name: Deploy super-agent (SSH)
+
+on:
+  workflow_dispatch:
+    inputs:
+      ssh_port:
+        description: "SSH port"
+        required: true
+        default: "22"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build tarball
+        run: |
+          set -e
+          cd super-agent
+          tar czf ../super-agent-bundle.tgz \
+            --exclude='./.venv' \
+            --exclude='./.git' \
+            --exclude='./__pycache__' \
+            --exclude='./memory/*.db' \
+            --exclude='./logs/*.log' \
+            .
+
+      - name: Ensure remote directory
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PARMIN_SSH_HOST }}
+          username: ${{ secrets.PARMIN_SSH_USER }}
+          key: ${{ secrets.PARMIN_SSH_KEY }}
+          port: ${{ inputs.ssh_port }}
+          script: |
+            set -e
+            mkdir -p /opt/super-agent
+            chmod 755 /opt/super-agent
+
+      - name: Upload bundle
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PARMIN_SSH_HOST }}
+          username: ${{ secrets.PARMIN_SSH_USER }}
+          key: ${{ secrets.PARMIN_SSH_KEY }}
+          port: ${{ inputs.ssh_port }}
+          source: super-agent-bundle.tgz
+          target: /opt/super-agent/
+
+      - name: Extract, .env, Docker bootstrap
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PARMIN_SSH_HOST }}
+          username: ${{ secrets.PARMIN_SSH_USER }}
+          key: ${{ secrets.PARMIN_SSH_KEY }}
+          port: ${{ inputs.ssh_port }}
+          script: |
+            set -euo pipefail
+            cd /opt/super-agent
+            umask 077
+            tar xzf super-agent-bundle.tgz
+            chmod +x deploy/parmin-bootstrap.sh
+            if [ -n "${{ secrets.OPENAI_API_KEY }}" ]; then
+              echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
+              if [ -n "${{ secrets.OPENAI_MODEL }}" ]; then
+                echo "OPENAI_MODEL=${{ secrets.OPENAI_MODEL }}" >> .env
+              fi
+              chmod 600 .env
+            fi
+            bash deploy/parmin-bootstrap.sh /opt/super-agent
+            echo "--- health ---"
+            curl -fsS http://127.0.0.1:8080/health || true
+            echo ""
+            echo "--- ready ---"
+            curl -fsS http://127.0.0.1:8080/ready || true
+            echo ""

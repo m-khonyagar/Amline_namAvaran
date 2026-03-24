@@ -1,0 +1,31 @@
+# API container: OpenAI only (no Ollama service required). Set OPENAI_API_KEY on the host/compose.
+version: "2.1"
+
+workflow:
+  mode: full
+
+llm:
+  provider: openai
+  openai:
+    model: gpt-4o-mini
+
+paths:
+  project_root: "."
+  memory_db: "memory/tasks.db"
+  logs_dir: "logs"
+
+security:
+  command_tier: "low"
+  command_whitelist:
+    - "python"
+    - "pip"
+    - "git"
+    - "ls"
+    - "cat"
+    - "head"
+    - "pwd"
+    - "uname"
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(levelname)s | %(name)s | %(message)s"

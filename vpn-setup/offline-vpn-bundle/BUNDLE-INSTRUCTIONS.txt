@@ -1,0 +1,36 @@
+================================================================================
+بسته آفلاین (نسخه خودکار از همین PC)
+================================================================================
+
+روی لپ‌تاپ اول (همین که OpenVPN رویش کار می‌کند):
+
+  1) رمز VPN را OpenVPN Connect به صورت رمزنگاری نگه می‌دارد؛ از Credential Manager
+     به صورت متن ساده قابل برداشت نیست. یک بار فقط برای ساخت بسته، در همان جلسه
+     PowerShell یا cmd قرار بدهید:
+
+     PowerShell:
+       $env:VPN_BUNDLE_PLAIN_PASSWORD = 'رمز_وی_پی_ان_شما'
+       Set-Location 'E:\CTO\vpn-setup\offline-vpn-bundle'
+       Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+       .\Build-OfflineVpnBundle.ps1
+
+     اگر پروفایل خاصی می‌خواهید (پیش‌فرض = جدیدترین .ovpn در پوشه profiles):
+       .\Build-OfflineVpnBundle.ps1 -ProfileId 1773563126038
+
+     اگر winget خطا داد، فایل .msi را از https://openvpn.net/client/ بگیرید و در
+     READY_TO_COPY\installers بگذارید و دوباره اجرا کنید:
+       .\Build-OfflineVpnBundle.ps1 -SkipMsiDownload
+
+  2) پوشهٔ کامل READY_TO_COPY را روی فلش/هارد کپی کنید (کل پوشه).
+
+روی لپ‌تاپ دوم (بدون اینترنت):
+
+  - RUN-ON-LAPTOP2.bat را راست‌کلیک → Run as administrator
+  - یا PowerShell ادمین در همان پوشه:
+      .\Setup-Laptop2-Offline.ps1
+
+امنیت: vpn.auth و vpn-bundle.ovpn حاوی رمز و کلید خصوصی هستند. بعد از وصل شدن VPN،
+در صورت تمایل vpn.auth را از فلش پاک کنید. این پوشه را در git commit نکنید (در
+.gitignore است).
+
+================================================================================

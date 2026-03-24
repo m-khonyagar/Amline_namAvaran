@@ -1,0 +1,35 @@
+# Docker + Ollama sidecar: set SUPER_AGENT_LLM_PROVIDER=ollama and run compose with profile `ollama`.
+version: "2.1"
+
+workflow:
+  mode: full
+
+llm:
+  provider: ollama
+  openai:
+    model: gpt-4o-mini
+
+ollama:
+  base_url: "http://ollama:11434"
+  model: "qwen2:7b-instruct"
+
+paths:
+  project_root: "."
+  memory_db: "memory/tasks.db"
+  logs_dir: "logs"
+
+security:
+  command_tier: "low"
+  command_whitelist:
+    - "python"
+    - "pip"
+    - "git"
+    - "ls"
+    - "cat"
+    - "head"
+    - "pwd"
+    - "uname"
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(levelname)s | %(name)s | %(message)s"

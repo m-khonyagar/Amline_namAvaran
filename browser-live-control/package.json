@@ -1,0 +1,17 @@
+{
+  "name": "browser-live-control",
+  "version": "1.0.0",
+  "description": "Live control of Chrome via Playwright CDP",
+  "type": "module",
+  "scripts": {
+    "start-chrome": "powershell -ExecutionPolicy Bypass -File ./start-chrome-debug.ps1",
+    "goto": "node run-command.js goto",
+    "click": "node run-command.js click",
+    "type": "node run-command.js type",
+    "screenshot": "node run-command.js screenshot",
+    "run": "node run-command.js"
+  },
+  "dependencies": {
+    "playwright": "^1.49.0"
+  }
+}

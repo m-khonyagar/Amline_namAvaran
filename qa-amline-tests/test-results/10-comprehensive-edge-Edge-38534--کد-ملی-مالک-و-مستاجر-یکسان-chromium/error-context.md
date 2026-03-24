@@ -1,0 +1,217 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic:
+    - main:
+      - generic:
+        - button:
+          - img
+        - link "logo":
+          - /url: /
+          - heading "logo" [level=1]:
+            - img "logo"
+        - button:
+          - img [ref=e2] [cursor=pointer]
+      - generic:
+        - generic:
+          - generic:
+            - link "قرارداد رهن و اجاره":
+              - /url: /contractnewflow
+              - img "قرارداد رهن و اجاره"
+          - generic:
+            - link "قرارداد رهن و اجاره":
+              - /url: https://amline.ir/licenses?title=backurl
+              - img "قرارداد رهن و اجاره"
+          - generic:
+            - link "قرارداد رهن و اجاره":
+              - /url: http://admin.amline.ir/login?title=backurl
+              - img "قرارداد رهن و اجاره"
+      - generic:
+        - generic:
+          - button "انعقاد قرارداد قرارداد رهن و اجاره":
+            - img "انعقاد قرارداد"
+            - text: قرارداد رهن و اجاره
+          - link "انعقاد قرارداد قرارداد خرید و فروش":
+            - /url: /contracts/buy
+            - img "انعقاد قرارداد"
+            - text: قرارداد خرید و فروش
+        - link "محاسبه کمیسیون محاسبه کمیسیون":
+          - /url: /commission/calculate
+          - img "محاسبه کمیسیون"
+          - text: محاسبه کمیسیون
+      - link "وبلاگ":
+        - /url: https://amline.ir/blog
+        - img "وبلاگ"
+      - generic:
+        - navigation:
+          - link "استعلام ملک استعلام ملک":
+            - /url: https://my.ssaa.ir/portal/ssar/request-status
+            - generic:
+              - img "استعلام ملک"
+            - paragraph: استعلام ملک
+          - link "استعلام سند استعلام سند":
+            - /url: https://my.ssaa.ir/portal/ssar/originality-document
+            - generic:
+              - img "استعلام سند"
+            - paragraph: استعلام سند
+          - link "استعلام چک استعلام چک":
+            - /url: https://www.cbi.ir/EstelamSayad/24090.aspx
+            - generic:
+              - img "استعلام چک"
+            - paragraph: استعلام چک
+          - link "استعلام قرارداد استعلام قرارداد":
+            - /url: /contracts/inquiry
+            - generic:
+              - img "استعلام قرارداد"
+            - paragraph: استعلام قرارداد
+      - generic:
+        - heading "چطوری با املاین قرارداد بنویسیم؟" [level=2]
+        - generic:
+          - generic:
+            - generic: "1"
+            - generic:
+              - heading "تکمیل اطلاعات مالک و مستاجر" [level=4]
+              - paragraph: اطلاعات شناسنامه‌ای، شماره تماس، کد ملی و آدرس مالک و مستاجر ثبت شده و احراز هویت پایه‌ای انجام می‌شود.
+          - generic:
+            - generic: "2"
+            - generic:
+              - heading "اسکن سند و تکمیل اطلاعات ملک" [level=4]
+              - paragraph: تصویر سند مالکیت، نوع ملک، متراژ، طبقه، تعداد اتاق‌ها و سایر مشخصات ملک ثبت می‌شود.
+          - generic:
+            - generic: "3"
+            - generic:
+              - heading "تاریخ و مبلغ قرارداد" [level=4]
+              - paragraph: بازه زمانی قرارداد، مبلغ اجاره، رهن و نحوه پرداخت (چک یا نقد) توسط کاربر تعیین می‌شود.
+          - generic:
+            - generic: "4"
+            - generic:
+              - heading "امضای قرارداد توسط مالک و مستأجر" [level=4]
+              - paragraph: پس از تأیید نهایی متن، طرفین با ارسال کد، قرارداد را به‌صورت دیجیتال امضا می‌کنند.
+          - generic:
+            - generic: "5"
+            - generic:
+              - heading "تایید کارشناس و صدور کد رهگیری" [level=4]
+              - paragraph: بعد از امضای قرارداد کارشناس حقوقی، قرارداد شما را تایید کرده و کد رهگیری شما به صورت رایگان دریافت می‌شود.
+      - generic:
+        - heading "مزایای بستن قرارداد در املاین" [level=2]
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - img
+            - heading "دریافت کدرهگیری رایگان!" [level=4]
+            - paragraph: بعد از اینکه قراردادت رو توی املاین نوشتی، ما برات کد رهگیری رسمی رو میگیریم تا خیالت از همه چیز راحت باشه.
+          - generic:
+            - generic:
+              - generic:
+                - img
+            - heading "حق کمیسیون شفاف و قانونی" [level=4]
+            - paragraph: املاین فقط حداقل کمیسیون قانونی رو دریافت می‌کنه که توسط اتحادیه مشاوران املاک تعیین شده. نه بیشتر، نه کمتر!
+          - generic:
+            - generic:
+              - generic:
+                - img
+            - heading "۷ روز هفته، ۲۴ ساعت" [level=4]
+            - paragraph: در هر ساعتی از شبانه‌روز حتی نیمه شب یا بامداد می‌تونی قرارداد موردنظرت رو تو کمتر از ده دقیقه بنویسی.
+      - generic:
+        - heading "نمونه قرارداد آنلاین در املاین" [level=2]
+        - region:
+          - generic:
+            - generic:
+              - group:
+                - generic:
+                  - img "نمونه قرارداد 1"
+              - group:
+                - generic:
+                  - img "نمونه قرارداد 2"
+              - group:
+                - generic:
+                  - img "نمونه قرارداد 3"
+              - group:
+                - generic:
+                  - img "نمونه قرارداد 4"
+              - group:
+                - generic:
+                  - img "نمونه قرارداد 5"
+      - generic:
+        - generic:
+          - generic:
+            - button "خدمات مشتریان":
+              - generic: خدمات مشتریان
+              - generic:
+                - img
+          - generic:
+            - button "راهنمای املاین":
+              - generic: راهنمای املاین
+              - generic:
+                - img
+          - generic:
+            - button "املاین":
+              - generic: املاین
+              - generic:
+                - img
+        - generic:
+          - generic:
+            - img "دسترسی 24 ساعته به سامانه"
+            - text: دسترسی
+            - text: 24 ساعته
+          - generic:
+            - img "کد رهگیری آنلاین"
+            - text: کد رهگیری
+            - text: آنلاین
+          - generic:
+            - img "دارای مجوز اتحادیه املاک"
+            - text: دارای مجوز
+            - text: اتحادیه املاک
+          - generic:
+            - img "خدمات ارزان و به صرفه"
+            - text: ارزان و
+            - text: به صرفه
+        - generic:
+          - img "logo"
+          - link "سایت املاین":
+            - /url: https://amline.ir
+          - generic:
+            - img
+            - text: "تلفن پشتیبانی:"
+            - link "025-32048000":
+              - /url: tel:+982532048000
+          - generic:
+            - img
+            - text: "نشانی: قم ، پردیسان ، اندیشه ۳ ،پلاک ۱۵"
+          - generic:
+            - link:
+              - /url: https://eitaa.com/Amlinebime
+              - img
+            - link:
+              - /url: https://www.linkedin.com/company/amline-ir/
+              - img
+    - generic:
+      - generic:
+        - link "خانه":
+          - /url: /
+          - img
+          - generic: خانه
+        - link "گفتگو":
+          - /url: /chat
+          - img
+          - generic: گفتگو
+        - link "قراردادها":
+          - /url: /contracts
+          - img
+          - generic: قراردادها
+        - link "حساب من":
+          - /url: /profile
+          - img
+          - generic: حساب من
+    - region "Notifications alt+T"
+  - dialog "Popover Title" [ref=e4]:
+    - generic [ref=e6]: اگه سوالی داشته باشی از اینجا میتونی جوابش رو پیدا کنی!
+    - contentinfo
+  - generic:
+    - alert
+  - img
+  - iframe [ref=e8]:
+    - img [ref=f1e3] [cursor=pointer]
+```

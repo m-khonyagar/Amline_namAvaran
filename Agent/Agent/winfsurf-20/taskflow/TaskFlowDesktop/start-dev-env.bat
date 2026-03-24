@@ -1,27 +1,19 @@
 @echo off
-echo Starting TaskFlow Desktop Development Environment...
-echo.
-
-echo 1. Starting Backend...
+setlocal
 cd /d "%~dp0"
-start "TaskFlow Backend" cmd /k "start-backend.bat"
-
-echo 2. Starting Web Dev Server...
+echo Starting Agent Windsurf development environment...
+echo.
+echo 1. Starting backend on http://127.0.0.1:8060
+start "Agent Windsurf Backend" cmd /k "call start-backend.bat"
+echo 2. Starting web shell on http://localhost:1420
 timeout /t 3 /nobreak > nul
-start "TaskFlow Web Dev" cmd /k "start-web-dev.bat"
-
+start "Agent Windsurf Web" cmd /k "call start-web-dev.bat"
 echo.
-echo Development Environment Started!
-echo.
+echo Environment started.
 echo Backend: http://127.0.0.1:8060
-echo Web Dev: http://localhost:1420
+echo Web UI:  http://localhost:1420
 echo.
-echo Open your browser to http://localhost:1420 to use the app
-echo.
-echo Press any key to stop all services...
-pause > nul
-
-echo Stopping services...
-taskkill /f /im node.exe
-taskkill /f /im python.exe
-echo All services stopped.
+echo Leave the two new windows open while you work.
+echo Close them manually when you are done.
+pause
+endlocal

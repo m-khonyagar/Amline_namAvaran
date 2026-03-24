@@ -1,0 +1,9 @@
+{
+  "tasks": {},
+  "artifacts": {},
+  "settings": {
+    "workspacePath": "E:\\CTO\\Agent\\Agent\\winfsurf-20\\taskflow\\workspace",
+    "safetyMode": "standard",
+    "preferredModel": "Local executor"
+  }
+}
