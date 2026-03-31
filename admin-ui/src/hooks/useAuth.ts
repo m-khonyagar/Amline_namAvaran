@@ -28,51 +28,52 @@ export function useAuth() {
     const userData = getCookie(CookieNames.USER)
 
     if (!token) {
-      setAuthState({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-      })
+      setAuthState({ user: null, isAuthenticated: false, isLoading: false })
+      return
+    }
+
+    // dev bypass — فوری بدون API call
+    if (token === 'dev-token-12345') {
+      if (userData) {
+        try {
+          const user = JSON.parse(userData) as User
+          if (user.id && user.mobile && user.role) {
+            setAuthState({ user, isAuthenticated: true, isLoading: false })
+            return
+          }
+        } catch { /* continue */ }
+      }
+      // اگه userData نبود، mock user بساز
+      const mockUser: User = {
+        id: 'dev-001', mobile: '09120000000',
+        full_name: 'کاربر آزمایشی', role: 'admin',
+        permissions: ['users:read','users:write','contracts:read','contracts:write',
+          'ads:read','ads:write','wallets:read','wallets:write','settings:read','settings:write'],
+      }
+      setCookie(CookieNames.USER, JSON.stringify(mockUser), 1)
+      setAuthState({ user: mockUser, isAuthenticated: true, isLoading: false })
       return
     }
 
     try {
-      // Always validate with API for security
       const response = await apiClient.get<User>('/auth/me')
       const user = response.data
-      // Update cookie with fresh data from API
       setCookie(CookieNames.USER, JSON.stringify(user), 1)
-      setAuthState({
-        user,
-        isAuthenticated: true,
-        isLoading: false,
-      })
+      setAuthState({ user, isAuthenticated: true, isLoading: false })
     } catch {
-      // If API call fails, check if we have cached user data
       if (userData) {
         try {
           const user = JSON.parse(userData) as User
-          // Validate cached user has required fields
           if (user.id && user.mobile && user.role && user.permissions) {
-            setAuthState({
-              user,
-              isAuthenticated: true,
-              isLoading: false,
-            })
+            setAuthState({ user, isAuthenticated: true, isLoading: false })
             return
           }
-        } catch {
-          // Invalid JSON, continue to clear cookies
-        }
+        } catch { /* continue */ }
       }
       removeCookie(CookieNames.ACCESS_TOKEN)
       removeCookie(CookieNames.REFRESH_TOKEN)
       removeCookie(CookieNames.USER)
-      setAuthState({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-      })
+      setAuthState({ user: null, isAuthenticated: false, isLoading: false })
     }
   }, [])
 

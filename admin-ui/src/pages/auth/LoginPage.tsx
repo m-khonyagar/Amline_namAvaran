@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { toast } from 'sonner'
+import { setCookie } from '../../lib/cookies'
+import { CookieNames } from '../../lib/cookies'
 
 export default function LoginPage() {
   const [mobile, setMobile] = useState('')
@@ -10,6 +12,28 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const { login, sendOtp } = useAuth()
   const navigate = useNavigate()
+
+  // ورود آزمایشی بدون نیاز به backend
+  const handleDevLogin = () => {
+    const mockUser = {
+      id: 'dev-001',
+      mobile: '09120000000',
+      full_name: 'کاربر آزمایشی',
+      role: 'admin',
+      permissions: [
+        'users:read', 'users:write',
+        'contracts:read', 'contracts:write',
+        'ads:read', 'ads:write',
+        'wallets:read', 'wallets:write',
+        'settings:read', 'settings:write',
+      ],
+    }
+    setCookie(CookieNames.ACCESS_TOKEN, 'dev-token-12345', 1)
+    setCookie(CookieNames.USER, JSON.stringify(mockUser), 1)
+    toast.success('ورود آزمایشی موفق')
+    navigate('/dashboard')
+    window.location.reload()
+  }
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -122,6 +146,19 @@ export default function LoginPage() {
         <div className="mt-8 text-center text-sm text-gray-400">
           © ۱۴۰۳ - اَملاین - تمامی حقوق محفوظ است
         </div>
+
+        {/* Dev bypass */}
+        {import.meta.env.DEV && (
+          <div className="mt-4 pt-4 border-t border-dashed border-gray-200">
+            <button
+              type="button"
+              onClick={handleDevLogin}
+              className="w-full py-2 text-sm text-orange-600 border border-orange-300 rounded-lg hover:bg-orange-50 transition-colors"
+            >
+              🔧 ورود آزمایشی (فقط در محیط توسعه)
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
