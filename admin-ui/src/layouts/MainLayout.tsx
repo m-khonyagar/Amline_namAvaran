@@ -36,7 +36,7 @@ export default function MainLayout() {
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.to === '/dashboard'}
+              end={item.to === '/dashboard' || item.to === '/contracts'}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-6 py-2.5 text-sm transition-colors ${
                   isActive
@@ -45,7 +45,7 @@ export default function MainLayout() {
                 }`
               }
             >
-              <span>{item.icon}</span>
+              <span aria-hidden="true">{item.icon}</span>
               <span>{item.label}</span>
             </NavLink>
           ))}
