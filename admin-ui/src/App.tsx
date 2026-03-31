@@ -12,6 +12,7 @@ import WalletsPage from './pages/wallets/WalletsPage'
 import SettingsPage from './pages/settings/SettingsPage'
 import { useAuth } from './hooks/useAuth'
 import { PermissionGuard } from './components/auth/PermissionGuard'
+import { ContractWizardPage } from './features/contract-wizard/ContractWizardPage'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
@@ -88,6 +89,11 @@ function App() {
             <Route path="pr-contracts" element={
               <PermissionGuard permission="contracts:read">
                 <PRContractsPage />
+              </PermissionGuard>
+            } />
+            <Route path="wizard" element={
+              <PermissionGuard permission="contracts:read">
+                <ContractWizardPage platform="admin" />
               </PermissionGuard>
             } />
           </Route>

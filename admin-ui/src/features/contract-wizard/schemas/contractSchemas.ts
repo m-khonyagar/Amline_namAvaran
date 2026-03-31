@@ -1,0 +1,40 @@
+import { z } from 'zod';
+
+const paymentStageSchema = z.object({
+  due_date: z.string().min(1, 'تاریخ سررسید الزامی است'),
+  payment_type: z.enum(['CASH', 'CHEQUE']),
+  amount: z.number().positive('مبلغ باید بزرگ‌تر از صفر باشد'),
+  description: z.string().optional(),
+});
+
+export const datingSchema = z
+  .object({
+    start_date: z.string().min(1, 'تاریخ شروع الزامی است'),
+    end_date: z.string().min(1, 'تاریخ پایان الزامی است'),
+    delivery_date: z.string().min(1, 'تاریخ تحویل الزامی است'),
+  })
+  .refine((d) => new Date(d.end_date) > new Date(d.start_date), {
+    message: 'تاریخ پایان باید بعد از تاریخ شروع باشد',
+    path: ['end_date'],
+  });
+
+export const mortgageSchema = z.object({
+  total_amount: z.number().positive('مبلغ ودیعه باید بزرگ‌تر از صفر باشد'),
+  stages: z.array(paymentStageSchema),
+});
+
+export const rentingSchema = z.object({
+  monthly_rent_amount: z.number().positive('مبلغ اجاره باید بزرگ‌تر از صفر باشد'),
+  rent_due_day_of_month: z.number().min(1).max(31).optional().nullable(),
+  stages: z.array(paymentStageSchema),
+});
+
+export const salePriceSchema = z.object({
+  total_price: z.number().positive('قیمت فروش باید بزرگ‌تر از صفر باشد'),
+  stages: z.array(paymentStageSchema),
+});
+
+export type DatingFormData = z.infer<typeof datingSchema>;
+export type MortgageFormData = z.infer<typeof mortgageSchema>;
+export type RentingFormData = z.infer<typeof rentingSchema>;
+export type SalePriceFormData = z.infer<typeof salePriceSchema>;
