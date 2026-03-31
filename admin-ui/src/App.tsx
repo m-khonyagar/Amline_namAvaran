@@ -7,14 +7,18 @@ import UsersPage from './pages/users/UsersPage'
 import UserDetailPage from './pages/users/UserDetailPage'
 import AdsPage from './pages/ads/AdsPage'
 import ContractsPage from './pages/contracts/ContractsPage'
+import ContractDetailPage from './pages/contracts/ContractDetailPage'
 import PRContractsPage from './pages/contracts/PRContractsPage'
 import WalletsPage from './pages/wallets/WalletsPage'
 import SettingsPage from './pages/settings/SettingsPage'
+import CRMPage from './pages/crm/CRMPage'
+import LeadDetailPage from './pages/crm/LeadDetailPage'
 import { useAuth } from './hooks/useAuth'
 import { PermissionGuard } from './components/auth/PermissionGuard'
 import { ContractWizardPage } from './features/contract-wizard/ContractWizardPage'
+import type { ReactNode } from 'react'
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
 
   if (isLoading) {
@@ -35,19 +39,16 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <>
-      <Toaster 
-        position="top-left" 
+      <Toaster
+        position="top-left"
         dir="rtl"
         toastOptions={{
-          style: {
-            background: '#333',
-            color: '#fff',
-          },
+          style: { background: '#333', color: '#fff' },
         }}
       />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        
+
         <Route
           path="/"
           element={
@@ -58,7 +59,7 @@ function App() {
         >
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
-          
+
           <Route path="users">
             <Route index element={
               <PermissionGuard permission="users:read">
@@ -71,7 +72,7 @@ function App() {
               </PermissionGuard>
             } />
           </Route>
-          
+
           <Route path="ads">
             <Route index element={
               <PermissionGuard permission="ads:read">
@@ -79,11 +80,16 @@ function App() {
               </PermissionGuard>
             } />
           </Route>
-          
+
           <Route path="contracts">
             <Route index element={
               <PermissionGuard permission="contracts:read">
                 <ContractsPage />
+              </PermissionGuard>
+            } />
+            <Route path=":id" element={
+              <PermissionGuard permission="contracts:read">
+                <ContractDetailPage />
               </PermissionGuard>
             } />
             <Route path="pr-contracts" element={
@@ -97,7 +103,7 @@ function App() {
               </PermissionGuard>
             } />
           </Route>
-          
+
           <Route path="wallets">
             <Route index element={
               <PermissionGuard permission="wallets:read">
@@ -105,14 +111,19 @@ function App() {
               </PermissionGuard>
             } />
           </Route>
-          
+
           <Route path="settings" element={
             <PermissionGuard permission="settings:read">
               <SettingsPage />
             </PermissionGuard>
           } />
+
+          <Route path="crm">
+            <Route index element={<CRMPage />} />
+            <Route path=":id" element={<LeadDetailPage />} />
+          </Route>
         </Route>
-        
+
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </>
