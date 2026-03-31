@@ -1,0 +1,121 @@
+import { test, expect, type Page } from '@playwright/test';
+
+const BASE = 'http://localhost:3002';
+
+// ---- Helper: ورود آزمایشی ----
+async function devLogin(page: Page) {
+  await page.goto(`${BASE}/login`);
+  // صبر برای نمایش دکمه ورود آزمایشی
+  const devBtn = page.getByRole('button', { name: /ورود آزمایشی/i });
+  await expect(devBtn).toBeVisible({ timeout: 20000 });
+  await devBtn.click();
+  await page.waitForURL(`${BASE}/dashboard`, { timeout: 15000 });
+}
+
+// ================================================================
+// ۱. صفحه Login
+// ================================================================
+test('صفحه login نمایش داده می‌شود', async ({ page }) => {
+  await page.goto(`${BASE}/login`);
+  await expect(page.getByRole('button', { name: /ورود آزمایشی/i })).toBeVisible({ timeout: 20000 });
+  await expect(page.getByPlaceholder(/0912/)).toBeVisible();
+});
+
+// ================================================================
+// ۲. ورود آزمایشی و داشبورد
+// ================================================================
+test('ورود آزمایشی و نمایش داشبورد', async ({ page }) => {
+  await devLogin(page);
+  await expect(page).toHaveURL(`${BASE}/dashboard`);
+  // داشبورد باید محتوا داشته باشد
+  await expect(page.locator('body')).not.toBeEmpty();
+});
+
+// ================================================================
+// ۳. CRM — KanbanBoard
+// ================================================================
+test('CRM: صفحه KanbanBoard نمایش داده می‌شود', async ({ page }) => {
+  await devLogin(page);
+  await page.goto(`${BASE}/crm`);
+  // heading ستون «جدید» در Kanban
+  await expect(page.getByRole('heading', { name: 'جدید' })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole('heading', { name: 'تماس گرفته' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'در مذاکره' })).toBeVisible();
+});
+
+// ================================================================
+// ۴. CRM — افزودن Lead جدید
+// ================================================================
+test('CRM: افزودن Lead جدید', async ({ page }) => {
+  await devLogin(page);
+  await page.goto(`${BASE}/crm`);
+  await expect(page.getByRole('heading', { name: 'جدید' })).toBeVisible({ timeout: 15000 });
+
+  // کلیک روی دکمه «+ افزودن Lead» در ستون NEW
+  await page.getByRole('button', { name: /\+ افزودن Lead/i }).first().click();
+
+  // modal باید باز بشه — فرم نمایش داده بشه
+  await expect(page.getByPlaceholder('علی محمدی')).toBeVisible({ timeout: 5000 });
+  await page.getByPlaceholder('علی محمدی').fill('علی محمدی');
+  await page.getByPlaceholder('09121234567').fill('09121234567');
+
+  // کلیک روی دکمه ذخیره داخل modal
+  await page.getByRole('button', { name: 'ذخیره', exact: true }).click();
+  await expect(page.getByText('علی محمدی')).toBeVisible({ timeout: 5000 });
+});
+
+// ================================================================
+// ۵. Contract Wizard — StartStep
+// ================================================================
+test('Contract Wizard: صفحه شروع نمایش داده می‌شود', async ({ page }) => {
+  await devLogin(page);
+  await page.goto(`${BASE}/contracts/wizard`);
+  await expect(page.getByText('رهن و اجاره')).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText('خرید و فروش')).toBeVisible();
+  await expect(page.getByText('برای خودم')).toBeVisible();
+  await expect(page.getByText('برای دیگران')).toBeVisible();
+});
+
+// ================================================================
+// ۶. Contract Wizard — انتخاب نوع قرارداد
+// ================================================================
+test('Contract Wizard: انتخاب رهن و اجاره', async ({ page }) => {
+  await devLogin(page);
+  await page.goto(`${BASE}/contracts/wizard`);
+  await expect(page.getByText('رهن و اجاره')).toBeVisible({ timeout: 15000 });
+  await page.getByText('رهن و اجاره').click();
+  await page.getByText('برای دیگران').click();
+  const startBtn = page.getByRole('button', { name: 'شروع قرارداد', exact: true });
+  await expect(startBtn).toBeVisible({ timeout: 5000 });
+});
+
+// ================================================================
+// ۷. صفحه قراردادها
+// ================================================================
+test('صفحه قراردادها نمایش داده می‌شود', async ({ page }) => {
+  await devLogin(page);
+  await page.goto(`${BASE}/contracts`);
+  await expect(page.getByRole('button', { name: /قرارداد جدید/i })).toBeVisible({ timeout: 15000 });
+});
+
+// ================================================================
+// ۸. صفحه کاربران
+// ================================================================
+test('صفحه کاربران نمایش داده می‌شود', async ({ page }) => {
+  await devLogin(page);
+  await page.goto(`${BASE}/users`);
+  // صفحه باید load بشه
+  await page.waitForTimeout(3000);
+  await expect(page.locator('body')).not.toBeEmpty();
+});
+
+// ================================================================
+// ۹. Navigation
+// ================================================================
+test('داشبورد: navigation بین صفحات', async ({ page }) => {
+  await devLogin(page);
+  await page.goto(`${BASE}/crm`);
+  await expect(page).toHaveURL(`${BASE}/crm`);
+  await page.goto(`${BASE}/dashboard`);
+  await expect(page).toHaveURL(`${BASE}/dashboard`);
+});
