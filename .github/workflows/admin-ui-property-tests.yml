@@ -1,6 +1,7 @@
 name: Admin UI tests (Vitest + Playwright)
 
 on:
+  workflow_dispatch:
   push:
     branches: [main, develop]
     paths:
@@ -10,6 +11,7 @@ on:
     branches: [main, develop]
     paths:
       - 'admin-ui/**'
+      - '.github/workflows/admin-ui-property-tests.yml'
 
 jobs:
   vitest-pbt:
