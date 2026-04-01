@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import type { Lead, LeadStatus } from '../types'
-import { getLeads, updateLeadStatus, createLead } from '../crmStorage'
+import { loadLeads, saveLeadStatus, createLeadRecord } from '../crmService'
+import { logAudit } from '../../../lib/auditLog'
 import { LeadCard } from './LeadCard'
 import { LeadForm } from './LeadForm'
 
@@ -16,11 +17,17 @@ const COLUMNS: { status: LeadStatus; label: string; color: string }[] = [
 
 export function KanbanBoard() {
   const navigate = useNavigate()
-  const [leads, setLeads] = useState<Lead[]>(() => getLeads())
+  const [leads, setLeads] = useState<Lead[]>([])
   const [draggingId, setDraggingId] = useState<string | null>(null)
   const [showNewLeadForm, setShowNewLeadForm] = useState(false)
 
-  const refresh = () => setLeads(getLeads())
+  const refresh = () => {
+    void loadLeads().then(setLeads)
+  }
+
+  useEffect(() => {
+    refresh()
+  }, [])
 
   const handleDragStart = (_e: DragEvent, id: string) => {
     setDraggingId(id)
@@ -33,12 +40,18 @@ export function KanbanBoard() {
   const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetStatus: LeadStatus) => {
     e.preventDefault()
     if (!draggingId) return
-    const updated = updateLeadStatus(draggingId, targetStatus)
-    if (updated) {
-      refresh()
-      toast.success('وضعیت Lead به‌روز شد')
-    }
-    setDraggingId(null)
+    void (async () => {
+      const updated = await saveLeadStatus(draggingId, targetStatus)
+      if (updated) {
+        void logAudit('crm.lead.status_change', 'lead', {
+          lead_id: draggingId,
+          status: targetStatus,
+        })
+        refresh()
+        toast.success('وضعیت Lead به‌روز شد')
+      }
+      setDraggingId(null)
+    })()
   }
 
   const handleCreateLead = (values: {
@@ -48,10 +61,13 @@ export function KanbanBoard() {
     notes: string
     assigned_to: string | null
   }) => {
-    createLead({ ...values, status: 'NEW', contract_id: null })
-    refresh()
-    setShowNewLeadForm(false)
-    toast.success('Lead جدید ایجاد شد')
+    void (async () => {
+      await createLeadRecord(values)
+      void logAudit('crm.lead.create', 'lead', { full_name: values.full_name })
+      refresh()
+      setShowNewLeadForm(false)
+      toast.success('Lead جدید ایجاد شد')
+    })()
   }
 
   return (
@@ -79,32 +95,31 @@ export function KanbanBoard() {
               onDrop={(e) => handleDrop(e, col.status)}
             >
               <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-gray-700">{col.label}</h3>
-                <span className="rounded-full bg-white px-2 py-0.5 text-xs font-medium text-gray-500 shadow-sm">
+                <h3 className="text-sm font-bold text-gray-800">{col.label}</h3>
+                <span className="rounded-full bg-white/80 px-2 py-0.5 text-xs font-medium text-gray-600">
                   {colLeads.length}
                 </span>
               </div>
-
+              {col.status === 'NEW' && (
+                <button
+                  type="button"
+                  onClick={() => setShowNewLeadForm(true)}
+                  className="mb-3 w-full rounded-lg border border-dashed border-blue-300 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+                >
+                  + افزودن Lead
+                </button>
+              )}
               <div className="space-y-2">
                 {colLeads.map((lead) => (
                   <LeadCard
                     key={lead.id}
                     lead={lead}
-                    onView={(id) => navigate(`/crm/${id}`)}
                     draggable
                     onDragStart={handleDragStart}
+                    onView={(lid) => navigate(`/crm/${lid}`)}
                   />
                 ))}
               </div>
-
-              {col.status === 'NEW' && (
-                <button
-                  onClick={() => setShowNewLeadForm(true)}
-                  className="mt-3 w-full rounded-lg border-2 border-dashed border-blue-300 py-2 text-sm text-blue-500 hover:border-blue-400 hover:bg-blue-50"
-                >
-                  + افزودن Lead
-                </button>
-              )}
             </div>
           )
         })}

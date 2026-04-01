@@ -1,5 +1,10 @@
+/**
+ * احراز هویت — تا قبل از پشتیبانی رسمی backend برای httpOnly، توکن در cookie ذخیره می‌شود.
+ * جزئیات مهاجرت در docs/HTTPONLY_AUTH.md
+ */
 import { useState, useEffect, useCallback } from 'react'
 import { apiClient } from '../lib/api'
+import { ensureMappedError } from '../lib/errorMapper'
 import { CookieNames, getCookie, removeCookie, setCookie } from '../lib/cookies'
 
 export interface User {
@@ -7,6 +12,7 @@ export interface User {
   mobile: string
   full_name?: string
   role: string
+  role_id?: string
   permissions: string[]
 }
 
@@ -26,14 +32,11 @@ export function useAuth() {
   const checkAuth = useCallback(async () => {
     const token = getCookie(CookieNames.ACCESS_TOKEN)
     const userData = getCookie(CookieNames.USER)
+    // dev bypass — فقط در توسعه و فقط وقتی VITE_ENABLE_DEV_BYPASS=true صریحاً تنظیم شده
+    const isDevBypassEnabled =
+      import.meta.env.DEV && import.meta.env.VITE_ENABLE_DEV_BYPASS === 'true'
 
-    if (!token) {
-      setAuthState({ user: null, isAuthenticated: false, isLoading: false })
-      return
-    }
-
-    // dev bypass — فوری بدون API call
-    if (token === 'dev-token-12345') {
+    if (isDevBypassEnabled && token === 'dev-token-12345') {
       if (userData) {
         try {
           const user = JSON.parse(userData) as User
@@ -46,9 +49,10 @@ export function useAuth() {
       // اگه userData نبود، mock user بساز
       const mockUser: User = {
         id: 'dev-001', mobile: '09120000000',
-        full_name: 'کاربر آزمایشی', role: 'admin',
+        full_name: 'کاربر آزمایشی', role: 'admin', role_id: 'role-admin',
         permissions: ['users:read','users:write','contracts:read','contracts:write',
-          'ads:read','ads:write','wallets:read','wallets:write','settings:read','settings:write'],
+          'ads:read','ads:write','wallets:read','wallets:write','settings:read','settings:write',
+          'audit:read','roles:read','roles:write','reports:read','notifications:read'],
       }
       setCookie(CookieNames.USER, JSON.stringify(mockUser), 1)
       setAuthState({ user: mockUser, isAuthenticated: true, isLoading: false })
@@ -61,6 +65,7 @@ export function useAuth() {
       setCookie(CookieNames.USER, JSON.stringify(user), 1)
       setAuthState({ user, isAuthenticated: true, isLoading: false })
     } catch {
+      // fallback: اگر backend session/httpOnly هنوز کامل نبود، user cache را موقتاً بپذیر
       if (userData) {
         try {
           const user = JSON.parse(userData) as User
@@ -84,30 +89,26 @@ export function useAuth() {
   const login = async (mobile: string, otp: string) => {
     try {
       const response = await apiClient.post<{
-        access_token: string
-        refresh_token: string
-        user: User
+        access_token?: string
+        refresh_token?: string
+        user?: User
       }>('/admin/login', { mobile, otp })
 
-      const { access_token, refresh_token, user } = response.data
+      const { access_token, refresh_token } = response.data
 
-      setCookie(CookieNames.ACCESS_TOKEN, access_token, 1)
-      setCookie(CookieNames.REFRESH_TOKEN, refresh_token, 30)
+      if (access_token) setCookie(CookieNames.ACCESS_TOKEN, access_token, 1)
+      if (refresh_token) setCookie(CookieNames.REFRESH_TOKEN, refresh_token, 30)
+
+      // برای حالت session/httpOnly، user را از /auth/me می‌گیریم.
+      const me = await apiClient.get<User>('/auth/me')
+      const user = me.data
       setCookie(CookieNames.USER, JSON.stringify(user), 1)
-
-      setAuthState({
-        user,
-        isAuthenticated: true,
-        isLoading: false,
-      })
+      setAuthState({ user, isAuthenticated: true, isLoading: false })
 
       return { success: true }
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { detail?: string } } }
-      return {
-        success: false,
-        message: err.response?.data?.detail || 'خطا در ورود',
-      }
+      const m = ensureMappedError(error)
+      return { success: false, message: m.message }
     }
   }
 
@@ -116,11 +117,8 @@ export function useAuth() {
       await apiClient.post('/admin/otp/send', { mobile })
       return { success: true }
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { detail?: string } } }
-      return {
-        success: false,
-        message: err.response?.data?.detail || 'خطا در ارسال کد',
-      }
+      const m = ensureMappedError(error)
+      return { success: false, message: m.message }
     }
   }
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { apiClient } from '../api/contractApi';
 import { StepErrorBanner } from './StepErrorBanner';
+import { useMappedStepError } from '../hooks/useMappedStepError';
 
 interface AddendumFormData {
   subject: string;
@@ -15,7 +16,7 @@ interface AddendumFormProps {
 }
 
 export function AddendumForm({ contractId, onSuccess, onCancel }: AddendumFormProps) {
-  const [serverError, setServerError] = useState<string | null>(null);
+  const { error: serverError, details, hint, setFromError, clear } = useMappedStepError();
   const [signStep, setSignStep] = useState(false);
 
   const {
@@ -25,25 +26,25 @@ export function AddendumForm({ contractId, onSuccess, onCancel }: AddendumFormPr
   } = useForm<AddendumFormData>();
 
   async function onSubmit(data: AddendumFormData) {
-    setServerError(null);
+    clear();
     try {
       await apiClient.post(`/contracts/${contractId}/addendum`, {
         subject: data.subject,
         content: data.content,
       });
       setSignStep(true);
-    } catch {
-      setServerError('خطا در ثبت متمم. دوباره تلاش کنید.');
+    } catch (err: unknown) {
+      setFromError(err);
     }
   }
 
   async function handleInitiateSign() {
-    setServerError(null);
+    clear();
     try {
       await apiClient.post(`/contracts/${contractId}/addendum/sign/initiate`);
       onSuccess();
-    } catch {
-      setServerError('خطا در شروع فرآیند امضا.');
+    } catch (err: unknown) {
+      setFromError(err);
     }
   }
 
@@ -53,7 +54,7 @@ export function AddendumForm({ contractId, onSuccess, onCancel }: AddendumFormPr
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-sm text-green-700">
           متمم با موفقیت ثبت شد. برای تکمیل فرآیند، امضای طرفین الزامی است.
         </div>
-        <StepErrorBanner message={serverError} onDismiss={() => setServerError(null)} />
+        <StepErrorBanner message={serverError} details={details} hint={hint} onDismiss={() => clear()} />
         <button
           type="button"
           onClick={handleInitiateSign}
@@ -68,7 +69,7 @@ export function AddendumForm({ contractId, onSuccess, onCancel }: AddendumFormPr
   return (
     <div dir="rtl" className="space-y-4">
       <h3 className="text-base font-bold text-gray-800">ثبت متمم جدید</h3>
-      <StepErrorBanner message={serverError} onDismiss={() => setServerError(null)} />
+      <StepErrorBanner message={serverError} details={details} hint={hint} onDismiss={() => clear()} />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div>

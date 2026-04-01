@@ -78,8 +78,18 @@ def merge_llm_from_env(cfg: dict[str, Any]) -> dict[str, Any]:
     return cfg
 
 
+def merge_amline_from_env(cfg: dict[str, Any]) -> dict[str, Any]:
+    cfg = dict(cfg)
+    base = (os.environ.get("AMLINE_API_BASE_URL") or "").strip()
+    if base:
+        amline = dict(cfg.get("amline") or {})
+        amline["api_base_url"] = base.rstrip("/")
+        cfg["amline"] = amline
+    return cfg
+
+
 def merge_runtime_env(cfg: dict[str, Any]) -> dict[str, Any]:
-    return merge_llm_from_env(merge_ollama_from_env(cfg))
+    return merge_amline_from_env(merge_llm_from_env(merge_ollama_from_env(cfg)))
 
 
 def run_session(

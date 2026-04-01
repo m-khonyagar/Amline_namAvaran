@@ -1,10 +1,10 @@
-import { useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { rentingSchema, type RentingFormData } from '../../schemas/contractSchemas';
 import { contractApi } from '../../api/contractApi';
 import type { StepProps } from '../../types/wizard';
 import { StepErrorBanner } from '../StepErrorBanner';
+import { useMappedStepError } from '../../hooks/useMappedStepError';
 
 function toToman(rial: number): string {
   if (!rial || isNaN(rial)) return '۰';
@@ -12,7 +12,7 @@ function toToman(rial: number): string {
 }
 
 export function RentingStep({ contractId, onComplete }: StepProps) {
-  const [serverError, setServerError] = useState<string | null>(null);
+  const { error: serverError, details, hint, setFromError, clear } = useMappedStepError();
 
   const {
     register,
@@ -29,7 +29,7 @@ export function RentingStep({ contractId, onComplete }: StepProps) {
   const monthlyRent = watch('monthly_rent_amount');
 
   async function onSubmit(data: RentingFormData) {
-    setServerError(null);
+    clear();
     try {
       const res = await contractApi.addRenting(contractId, {
         monthly_rent_amount: data.monthly_rent_amount,
@@ -40,15 +40,14 @@ export function RentingStep({ contractId, onComplete }: StepProps) {
       const nextStep = (res.data as { next_step?: string })?.next_step ?? 'SIGNING';
       onComplete(nextStep as import('../../types/wizard').PRContractStep);
     } catch (err: unknown) {
-      const e = err as { type?: string; message?: string };
-      setServerError(e.message ?? 'خطا در ثبت اجاره');
+      setFromError(err);
     }
   }
 
   return (
     <div dir="rtl" className="space-y-4">
       <h2 className="text-lg font-bold text-gray-800">اجاره ماهانه</h2>
-      <StepErrorBanner message={serverError} onDismiss={() => setServerError(null)} />
+      <StepErrorBanner message={serverError} details={details} hint={hint} onDismiss={() => clear()} />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {/* مبلغ اجاره ماهانه */}

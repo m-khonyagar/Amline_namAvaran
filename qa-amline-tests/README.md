@@ -55,6 +55,7 @@ $env:OTP_CODE="12345"; npx playwright test tests/06-contract-flow-full.spec.ts t
 ## متغیر محیطی
 
 ```bash
+BASE_URL=http://localhost:3000 npm test
 BASE_URL=http://app-dev.amline.ir npm test
 ```
 

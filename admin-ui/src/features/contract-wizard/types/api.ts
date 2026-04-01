@@ -25,6 +25,14 @@ export interface ContractResponse {
   created_at: string;
 }
 
+/** پاسخ GET /contracts/{id}/status — با OpenAPI رسمی align شود در openapi-sync */
+export interface ContractStatusApiResponse {
+  status: ContractStatus;
+  step: PRContractStep | string;
+  contract_id?: string;
+  type?: ContractType;
+}
+
 export interface Party {
   id: string;
   party_type: PartyType;
@@ -56,6 +64,7 @@ export interface FileResponse {
 
 export interface StartContractDto {
   contract_type: ContractType;
+  party_type: PartyType;
   is_guaranteed?: boolean;
 }
 

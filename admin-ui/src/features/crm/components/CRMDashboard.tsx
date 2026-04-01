@@ -1,7 +1,7 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
-import { getLeads } from '../crmStorage'
-import type { LeadStatus } from '../types'
+import { loadLeads } from '../crmService'
+import type { Lead, LeadStatus } from '../types'
 
 const STATUS_LABELS: Record<LeadStatus, string> = {
   NEW: 'جدید',
@@ -20,7 +20,11 @@ const STATUS_COLORS: Record<LeadStatus, string> = {
 }
 
 export function CRMDashboard() {
-  const leads = getLeads()
+  const [leads, setLeads] = useState<Lead[]>([])
+
+  useEffect(() => {
+    void loadLeads().then(setLeads)
+  }, [])
 
   const stats = useMemo(() => {
     const now = new Date()

@@ -79,6 +79,12 @@ export function wizardReducer(state: WizardState, action: WizardAction): WizardS
         error: null,
       };
 
+    case 'RESET_WIZARD':
+      return {
+        ...initialWizardState,
+        platform: state.platform,
+      };
+
     default:
       return state;
   }

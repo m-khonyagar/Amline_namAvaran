@@ -4,6 +4,8 @@ import { contractApi } from '../../api/contractApi';
 import { resolveService } from '../../services/resolveService';
 import type { StepProps } from '../../types/wizard';
 import { StepErrorBanner } from '../StepErrorBanner';
+import { ensureMappedError } from '../../../../lib/errorMapper';
+import { useMappedStepError } from '../../hooks/useMappedStepError';
 
 interface PlaceInfoFormData {
   postal_code: string;
@@ -24,7 +26,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
 
 export function PlaceInfoStep({ contractId, onComplete }: StepProps) {
-  const [serverError, setServerError] = useState<string | null>(null);
+  const { error: serverError, details, hint, setFromError, clear } = useMappedStepError();
   const [uploadedFileIds, setUploadedFileIds] = useState<number[]>([]);
   const [uploadedFileNames, setUploadedFileNames] = useState<string[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -94,8 +96,8 @@ export function PlaceInfoStep({ contractId, onComplete }: StepProps) {
       const ids = results.map((r) => Number(r.data.id));
       setUploadedFileIds((prev) => [...prev, ...ids]);
       setUploadedFileNames((prev) => [...prev, ...files.map((f) => f.name)]);
-    } catch {
-      setFileError('خطا در آپلود فایل');
+    } catch (err: unknown) {
+      setFileError(ensureMappedError(err).message);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -108,7 +110,7 @@ export function PlaceInfoStep({ contractId, onComplete }: StepProps) {
   }
 
   async function onSubmit(data: PlaceInfoFormData) {
-    setServerError(null);
+    clear();
     try {
       const res = await contractApi.addHomeInfo(contractId, {
         property_use_type: data.property_use_type,
@@ -133,15 +135,14 @@ export function PlaceInfoStep({ contractId, onComplete }: StepProps) {
       const nextStep = (res.data as { next_step?: string })?.next_step ?? 'DATING';
       onComplete(nextStep as import('../../types/wizard').PRContractStep);
     } catch (err: unknown) {
-      const e = err as { type?: string; message?: string };
-      setServerError(e.message ?? 'خطا در ثبت اطلاعات ملک');
+      setFromError(err);
     }
   }
 
   return (
     <div dir="rtl" className="space-y-4">
       <h2 className="text-lg font-bold text-gray-800">اطلاعات ملک</h2>
-      <StepErrorBanner message={serverError} onDismiss={() => setServerError(null)} />
+      <StepErrorBanner message={serverError} details={details} hint={hint} onDismiss={() => clear()} />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {/* کد پستی */}

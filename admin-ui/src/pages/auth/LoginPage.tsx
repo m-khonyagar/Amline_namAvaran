@@ -1,19 +1,24 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../../hooks/useAuth'
-import { toast } from 'sonner'
-import { setCookie } from '../../lib/cookies'
-import { CookieNames } from '../../lib/cookies'
+import { useState, type ChangeEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
+import { toast } from 'sonner';
+import { setCookie } from '../../lib/cookies';
+import { CookieNames } from '../../lib/cookies';
+import { ThemeToggle } from '../../components/ThemeToggle';
+import { Button } from '../../ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
+import { Input } from '../../ui/input';
 
 export default function LoginPage() {
-  const [mobile, setMobile] = useState('')
-  const [otp, setOtp] = useState('')
-  const [step, setStep] = useState<'mobile' | 'otp'>('mobile')
-  const [loading, setLoading] = useState(false)
-  const { login, sendOtp } = useAuth()
-  const navigate = useNavigate()
+  const [mobile, setMobile] = useState('');
+  const [otp, setOtp] = useState('');
+  const [step, setStep] = useState<'mobile' | 'otp'>('mobile');
+  const [loading, setLoading] = useState(false);
+  const { login, sendOtp } = useAuth();
+  const navigate = useNavigate();
+  const isDevBypassEnabled =
+    import.meta.env.DEV && import.meta.env.VITE_ENABLE_DEV_BYPASS !== 'false';
 
-  // ورود آزمایشی بدون نیاز به backend
   const handleDevLogin = () => {
     const mockUser = {
       id: 'dev-001',
@@ -21,145 +26,145 @@ export default function LoginPage() {
       full_name: 'کاربر آزمایشی',
       role: 'admin',
       permissions: [
-        'users:read', 'users:write',
-        'contracts:read', 'contracts:write',
-        'ads:read', 'ads:write',
-        'wallets:read', 'wallets:write',
-        'settings:read', 'settings:write',
+        'users:read',
+        'users:write',
+        'contracts:read',
+        'contracts:write',
+        'ads:read',
+        'ads:write',
+        'wallets:read',
+        'wallets:write',
+        'settings:read',
+        'settings:write',
       ],
-    }
-    setCookie(CookieNames.ACCESS_TOKEN, 'dev-token-12345', 1)
-    setCookie(CookieNames.USER, JSON.stringify(mockUser), 1)
-    toast.success('ورود آزمایشی موفق')
-    navigate('/dashboard')
-    window.location.reload()
-  }
+    };
+    setCookie(CookieNames.ACCESS_TOKEN, 'dev-token-12345', 1);
+    setCookie(CookieNames.USER, JSON.stringify(mockUser), 1);
+    toast.success('ورود آزمایشی موفق');
+    navigate('/dashboard');
+  };
 
   const handleSendOtp = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!mobile || mobile.length !== 11) {
-      toast.error('لطفاً شماره موبایل صحیح وارد کنید')
-      return
+      toast.error('لطفاً شماره موبایل ۱۱ رقمی و صحیح وارد کنید (مثلاً 09121234567)');
+      return;
     }
 
-    setLoading(true)
-    const result = await sendOtp(mobile)
-    setLoading(false)
+    setLoading(true);
+    const result = await sendOtp(mobile);
+    setLoading(false);
 
     if (result.success) {
-      setStep('otp')
-      toast.success('کد تأیید به شماره شما ارسال شد')
+      setStep('otp');
+      toast.success('کد تأیید به شماره شما ارسال شد');
     } else {
-      toast.error(result.message || 'خطا در ارسال کد')
+      toast.error(result.message || 'خطا در ارسال کد');
     }
-  }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!otp || otp.length < 4 || otp.length > 6) {
-      toast.error('لطفاً کد تأیید ۴ تا ۶ رقمی را وارد کنید')
-      return
+      toast.error('کد تأیید باید بین ۴ تا ۶ رقم باشد؛ دوباره بررسی کنید');
+      return;
     }
 
-    setLoading(true)
-    const result = await login(mobile, otp)
-    setLoading(false)
+    setLoading(true);
+    const result = await login(mobile, otp);
+    setLoading(false);
 
     if (result.success) {
-      toast.success('خوش آمدید!')
-      navigate('/dashboard')
+      toast.success('خوش آمدید!');
+      navigate('/dashboard');
     } else {
-      toast.error(result.message || 'خطا در ورود')
+      toast.error(result.message || 'خطا در ورود');
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-xl">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary">اَملاین</h1>
-          <p className="text-gray-500 mt-2">پنل مدیریت</p>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-100 via-[var(--amline-bg)] to-[var(--amline-primary-muted)] px-4 py-10 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <div className="relative w-full max-w-md">
+        <div className="absolute left-0 top-0 z-10 sm:left-2 sm:top-2">
+          <ThemeToggle />
         </div>
 
-        {/* Form */}
-        {step === 'mobile' ? (
-          <form onSubmit={handleSendOtp} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                شماره موبایل
-              </label>
-              <input
-                type="tel"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-                placeholder="0912..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                dir="ltr"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 px-4 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors disabled:opacity-50"
-            >
-              {loading ? 'در حال ارسال...' : 'ارسال کد تأیید'}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                کد تأیید
-              </label>
-              <input
-                type="text"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                placeholder="****"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-center text-2xl tracking-widest"
-                dir="ltr"
-                maxLength={6}
-              />
-              <p className="text-sm text-gray-500 mt-2">
-                کد ارسال شده به {mobile}
-              </p>
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 px-4 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors disabled:opacity-50"
-            >
-              {loading ? 'در حال ورود...' : 'ورود'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setStep('mobile')}
-              className="w-full py-2 text-sm text-gray-600 hover:text-primary"
-            >
-              تغییر شماره موبایل
-            </button>
-          </form>
-        )}
+        <Card className="overflow-hidden shadow-amline-lg ring-1 ring-black/5 dark:ring-white/10">
+          <CardHeader className="space-y-1 border-0 pb-2 text-center">
+            <CardTitle className="amline-display text-[var(--amline-primary)]">اَملاین</CardTitle>
+            <CardDescription className="text-base">ورود به پنل مدیریت</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6 pt-2">
+            {step === 'mobile' ? (
+              <form onSubmit={handleSendOtp} className="space-y-5" noValidate>
+                <Input
+                  label="شماره موبایل"
+                  name="mobile"
+                  type="tel"
+                  value={mobile}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setMobile(e.target.value.replace(/\D/g, '').slice(0, 11))
+                  }
+                  placeholder="09121234567"
+                  hint="۱۱ رقم با پیش‌شماره ۰۹ وارد کنید"
+                  dir="ltr"
+                  className="text-left"
+                  autoComplete="tel"
+                />
+                <Button type="submit" className="w-full" size="lg" loading={loading} disabled={loading}>
+                  ارسال کد تأیید
+                </Button>
+              </form>
+            ) : (
+              <form onSubmit={handleLogin} className="space-y-5" noValidate>
+                <Input
+                  label="کد تأیید"
+                  name="otp"
+                  type="text"
+                  value={otp}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))
+                  }
+                  placeholder="••••••"
+                  hint={`کد ارسال‌شده به ${mobile}`}
+                  dir="ltr"
+                  className="text-center text-2xl tracking-[0.4em]"
+                  maxLength={6}
+                  autoComplete="one-time-code"
+                />
+                <Button type="submit" className="w-full" size="lg" loading={loading} disabled={loading}>
+                  ورود
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() => setStep('mobile')}
+                >
+                  تغییر شماره موبایل
+                </Button>
+              </form>
+            )}
 
-        {/* Footer */}
-        <div className="mt-8 text-center text-sm text-gray-400">
-          © ۱۴۰۳ - اَملاین - تمامی حقوق محفوظ است
-        </div>
+            <p className="text-center text-xs text-[var(--amline-fg-subtle)]">
+              © ۱۴۰۳ اَملاین — تمامی حقوق محفوظ است
+            </p>
 
-        {/* Dev bypass */}
-        {import.meta.env.DEV && (
-          <div className="mt-4 pt-4 border-t border-dashed border-gray-200">
-            <button
-              type="button"
-              onClick={handleDevLogin}
-              className="w-full py-2 text-sm text-orange-600 border border-orange-300 rounded-lg hover:bg-orange-50 transition-colors"
-            >
-              🔧 ورود آزمایشی (فقط در محیط توسعه)
-            </button>
-          </div>
-        )}
+            {isDevBypassEnabled && (
+              <div className="border-t border-dashed border-[var(--amline-border)] pt-4 dark:border-slate-600">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full border-amber-300 text-amber-800 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-950/50"
+                  onClick={handleDevLogin}
+                >
+                  ورود آزمایشی (فقط توسعه)
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
-  )
+  );
 }

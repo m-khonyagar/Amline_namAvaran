@@ -7,9 +7,10 @@ import { StartStep } from './components/steps/StartStep';
 import { DraftBanner } from './components/DraftBanner';
 import { RevokeContractButton } from './components/RevokeContractButton';
 import { CommissionStep } from './components/steps/CommissionStep';
-import { getStepRegistry } from './registry/stepRegistry';
+import { getStepRegistry, STEP_ORDER } from './registry/stepRegistry';
 import { localDraftStorage } from './storage/draftStorage';
 import type { DraftEntry } from './storage/draftStorage';
+import { signingPartiesStorage } from './storage/signingPartiesStorage';
 import { useContractStatusPolling } from './hooks/useContractStatusPolling';
 import type { ContractStatus, PRContractStep } from './types/wizard';
 
@@ -51,10 +52,36 @@ function WizardInner({ platform }: WizardInnerProps) {
     dispatch({ type: 'APPLY_NEXT_STEP', payload: { nextStep } });
   }
 
+  function handleStepNavigation(nextStep: PRContractStep) {
+    if (!state.contractId || !state.contractType) {
+      dispatch({ type: 'APPLY_NEXT_STEP', payload: { nextStep } });
+      return;
+    }
+    const currentIndex = STEP_ORDER.indexOf(state.currentStep);
+    const targetIndex = STEP_ORDER.indexOf(nextStep);
+    const isBackNavigation = targetIndex >= 0 && currentIndex >= 0 && targetIndex < currentIndex;
+    if (isBackNavigation) {
+      const ok = window.confirm(
+        'آیا مطمئن هستید می‌خواهید به مرحله قبل برگردید؟ تغییرات ثبت‌نشده این مرحله از بین می‌رود.'
+      );
+      if (!ok) return;
+    }
+    localDraftStorage.save({
+      contractId: state.contractId,
+      contractType: state.contractType,
+      currentStep: nextStep,
+      isScribeMode: state.isScribeMode,
+    });
+    dispatch({ type: 'APPLY_NEXT_STEP', payload: { nextStep } });
+  }
+
   // مرحله DRAFT — نمایش DraftBanner + StartStep
   if (state.currentStep === 'DRAFT' || !state.contractId || !state.contractType) {
     return (
-      <div dir="rtl" className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+      <div
+        dir="rtl"
+        className="mx-auto w-full max-w-3xl space-y-6 rounded-[var(--amline-radius-xl)] border border-[var(--amline-border)] bg-[var(--amline-surface)] p-4 shadow-amline sm:p-6 lg:p-8 dark:border-slate-700 dark:bg-[var(--amline-surface-elevated)]"
+      >
         <DraftBanner
           onContinue={(draft: DraftEntry) => {
             dispatch({
@@ -67,7 +94,11 @@ function WizardInner({ platform }: WizardInnerProps) {
               },
             });
           }}
-          onStartNew={() => {/* نمایش StartStep با state داخلی */}}
+          onStartNew={() => {
+            localDraftStorage.clearAll();
+            if (state.contractId) signingPartiesStorage.clear(state.contractId);
+            dispatch({ type: 'RESET_WIZARD' });
+          }}
         />
         <StartStep
           platform={platform}
@@ -88,7 +119,10 @@ function WizardInner({ platform }: WizardInnerProps) {
   // وضعیت PENDING_COMMISSION — نمایش CommissionStep
   if (state.contractStatus === 'PENDING_COMMISSION') {
     return (
-      <div dir="rtl" className="max-w-2xl mx-auto px-4 py-6">
+      <div
+        dir="rtl"
+        className="mx-auto w-full max-w-3xl rounded-[var(--amline-radius-xl)] border border-[var(--amline-border)] bg-[var(--amline-surface)] p-4 shadow-amline sm:p-6 dark:border-slate-700 dark:bg-[var(--amline-surface-elevated)]"
+      >
         <CommissionStep
           contractId={state.contractId}
           contractType={state.contractType}
@@ -101,7 +135,10 @@ function WizardInner({ platform }: WizardInnerProps) {
   }
 
   return (
-    <div dir="rtl" className="max-w-2xl mx-auto px-4 py-6">
+    <div
+      dir="rtl"
+      className="mx-auto w-full max-w-3xl space-y-6 rounded-[var(--amline-radius-xl)] border border-[var(--amline-border)] bg-[var(--amline-surface)] p-4 shadow-amline sm:p-6 lg:p-8 dark:border-slate-700 dark:bg-[var(--amline-surface-elevated)]"
+    >
       {/* نوار پیشرفت */}
       <div className="mb-6">
         <ProgressBar
@@ -109,10 +146,26 @@ function WizardInner({ platform }: WizardInnerProps) {
           completedSteps={state.completedSteps}
           contractType={state.contractType}
           editableSteps={state.editableSteps}
-          onStepClick={(step) =>
-            dispatch({ type: 'APPLY_NEXT_STEP', payload: { nextStep: step } })
-          }
+          onStepClick={handleStepNavigation}
         />
+      </div>
+
+      <div className="flex items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => {
+            const idx = STEP_ORDER.indexOf(state.currentStep);
+            if (idx <= 0) return;
+            handleStepNavigation(STEP_ORDER[idx - 1]);
+          }}
+          disabled={STEP_ORDER.indexOf(state.currentStep) <= 0}
+          className="rounded-lg border border-[var(--amline-border)] px-4 py-2 text-sm font-medium text-[var(--amline-fg-muted)] hover:bg-[var(--amline-surface-muted)] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          بازگشت به مرحله قبل
+        </button>
+        <span className="text-xs text-[var(--amline-fg-subtle)]">
+          برای ویرایش مرحله‌های قبلی از نوار مراحل هم می‌توانید استفاده کنید
+        </span>
       </div>
 
       {/* بنر وضعیت */}
@@ -137,10 +190,11 @@ function WizardInner({ platform }: WizardInnerProps) {
           contractType={state.contractType}
           platform={platform}
           isScribeMode={state.isScribeMode}
+          signingParties={signingPartiesStorage.load(state.contractId)}
           onComplete={handleStepComplete}
         />
       ) : (
-        <div className="text-center py-8 text-gray-400 text-sm">
+        <div className="py-10 text-center text-sm text-[var(--amline-fg-muted)]">
           این مرحله در حال توسعه است...
         </div>
       )}

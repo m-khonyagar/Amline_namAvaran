@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand: #1d4ed8;
+  --brand-light: #3b82f6;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: 'Vazirmatn', sans-serif; }

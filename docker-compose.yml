@@ -30,7 +30,7 @@ services:
     ports:
       - "6379:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      test: ["CMD-SHELL", "redis-cli -a \"${REDIS_PASSWORD:-amline_redis_secret}\" ping | grep -q PONG || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -85,30 +85,20 @@ services:
       dockerfile: Dockerfile
     container_name: amline-backend
     environment:
-      - APP_ENV=staging
-      - APP_DEBUG=true
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-amline}:${POSTGRES_PASSWORD:-amline_secret}@postgres:5432/${POSTGRES_DB:-amline}
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-amline_redis_secret}
-      - MINIO_ENDPOINT=minio:9000
-      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-amline}
-      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-amline_minio_secret}
-      - MINIO_PUBLIC_BUCKET=public
-      - MINIO_PRIVATE_BUCKET=private
-      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
-      - JWT_ALGORITHM=HS256
-      - JWT_ACCESS_EXPIRE=3600
-      - JWT_REFRESH_EXPIRE=86400
-      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-in-production}
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_USER=${RABBITMQ_USER:-amline}
-      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-amline_rabbitmq_secret}
-      - PDF_GENERATOR_SERVICE_URL=http://pdf-generator:8000
-      - SENTRY_DSN=${SENTRY_DSN:-}
-      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:8000
+      - AMLINE_ENV=staging
+      - AMLINE_DATABASE_URL=postgresql+psycopg://${POSTGRES_USER:-amline}:${POSTGRES_PASSWORD:-amline_secret}@postgres:5432/${POSTGRES_DB:-amline}
+      - AMLINE_REDIS_URL=redis://:${REDIS_PASSWORD:-amline_redis_secret}@redis:6379/0
+      - AMLINE_JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - AMLINE_JWT_ISSUER=amline
+      - AMLINE_JWT_ACCESS_MINUTES=60
+      - AMLINE_JWT_REFRESH_DAYS=30
+      - AMLINE_S3_ENDPOINT_URL=http://minio:9000
+      - AMLINE_S3_ACCESS_KEY=${MINIO_ACCESS_KEY:-amline}
+      - AMLINE_S3_SECRET_KEY=${MINIO_SECRET_KEY:-amline_minio_secret}
+      - AMLINE_S3_BUCKET=amline-docs
+      - AMLINE_BOOTSTRAP_ADMIN_MOBILE=${BOOTSTRAP_ADMIN_MOBILE:-09120000000}
     ports:
-      - "8080:80"
+      - "8080:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -117,7 +107,7 @@ services:
       minio:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -227,7 +217,12 @@ services:
       dockerfile: Dockerfile
     container_name: amline-db-init
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-amline}:${POSTGRES_PASSWORD:-amline_secret}@postgres:5432/${POSTGRES_DB:-amline}
+      - AMLINE_DATABASE_URL=postgresql+psycopg://${POSTGRES_USER:-amline}:${POSTGRES_PASSWORD:-amline_secret}@postgres:5432/${POSTGRES_DB:-amline}
+      - AMLINE_REDIS_URL=redis://:${REDIS_PASSWORD:-amline_redis_secret}@redis:6379/0
+      - AMLINE_JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - AMLINE_S3_ENDPOINT_URL=http://minio:9000
+      - AMLINE_S3_ACCESS_KEY=${MINIO_ACCESS_KEY:-amline}
+      - AMLINE_S3_SECRET_KEY=${MINIO_SECRET_KEY:-amline_minio_secret}
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
@@ -235,8 +230,7 @@ services:
         sleep 10
         echo "Running migrations..."
         alembic upgrade head
-        echo "Seeding initial data..."
-        python -m cli seed
+        echo "Migrations done."
     depends_on:
       postgres:
         condition: service_healthy

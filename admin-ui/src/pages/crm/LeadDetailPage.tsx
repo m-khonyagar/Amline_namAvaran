@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { getLeads, updateLead } from '../../features/crm/crmStorage'
+import { loadLead, updateLeadRecord } from '../../features/crm/crmService'
+import { logAudit } from '../../lib/auditLog'
 import { ActivityTimeline } from '../../features/crm/components/ActivityTimeline'
 import { LeadForm } from '../../features/crm/components/LeadForm'
 import type { Lead } from '../../features/crm/types'
@@ -27,8 +28,29 @@ export default function LeadDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [isEditing, setIsEditing] = useState(false)
+  const [lead, setLead] = useState<Lead | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  const lead = getLeads().find((l) => l.id === id)
+  useEffect(() => {
+    if (!id) {
+      setLoading(false)
+      setLead(null)
+      return
+    }
+    setLoading(true)
+    void loadLead(id).then((l) => {
+      setLead(l)
+      setLoading(false)
+    })
+  }, [id])
+
+  if (loading) {
+    return (
+      <div dir="rtl" className="flex justify-center p-10 text-gray-500">
+        در حال بارگذاری…
+      </div>
+    )
+  }
 
   if (!lead) {
     return (
@@ -38,18 +60,23 @@ export default function LeadDetailPage() {
     )
   }
 
-  const handleUpdate = (values: Omit<Lead, 'id' | 'status' | 'created_at' | 'updated_at' | 'contract_id'>) => {
-    updateLead(lead.id, values)
-    toast.success('اطلاعات Lead به‌روز شد')
-    setIsEditing(false)
-    // Force re-render by navigating to same page
-    navigate(`/crm/${id}`, { replace: true })
+  const handleUpdate = (
+    values: Omit<Lead, 'id' | 'status' | 'created_at' | 'updated_at' | 'contract_id'>
+  ) => {
+    void (async () => {
+      const updated = await updateLeadRecord(lead.id, values)
+      if (updated) setLead(updated)
+      void logAudit('crm.lead.update', 'lead', { lead_id: lead.id })
+      toast.success('اطلاعات Lead به‌روز شد')
+      setIsEditing(false)
+      navigate(`/crm/${id}`, { replace: true })
+    })()
   }
 
   return (
     <div dir="rtl" className="p-6">
       <div className="mb-6 flex items-center gap-4">
-        <button onClick={() => navigate('/crm')} className="text-sm text-gray-500 hover:text-gray-700">
+        <button type="button" onClick={() => navigate('/crm')} className="text-sm text-gray-500 hover:text-gray-700">
           ← بازگشت
         </button>
         <h1 className="text-2xl font-bold text-gray-900">{lead.full_name}</h1>
@@ -74,6 +101,7 @@ export default function LeadDetailPage() {
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-800">اطلاعات Lead</h2>
                 <button
+                  type="button"
                   onClick={() => setIsEditing(true)}
                   className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
                 >

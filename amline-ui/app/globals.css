@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --amline-primary: #1d6feb;
+  --amline-primary-hover: #155cc9;
+  --amline-primary-muted: rgba(29, 111, 235, 0.12);
+  --amline-accent: #0d9488;
+  --amline-bg: #f4f6f9;
+  --amline-fg: #0f172a;
+  --amline-fg-muted: #475569;
+  --amline-fg-subtle: #94a3b8;
+  --amline-surface: #ffffff;
+  --amline-surface-elevated: #ffffff;
+  --amline-surface-muted: #f1f5f9;
+  --amline-border: #e2e8f0;
+  --amline-border-strong: #cbd5e1;
+  --amline-ring: #1d6feb;
+  --amline-radius-md: 0.625rem;
+  --amline-radius-lg: 0.875rem;
+  --amline-radius-xl: 1.125rem;
+  --amline-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --amline-shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --amline-shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.1);
+  --primary: var(--amline-primary);
+}
+
+.dark {
+  --amline-bg: #0b1120;
+  --amline-fg: #f1f5f9;
+  --amline-fg-muted: #94a3b8;
+  --amline-fg-subtle: #64748b;
+  --amline-surface: #111827;
+  --amline-surface-elevated: #1e293b;
+  --amline-surface-muted: #1e293b;
+  --amline-border: #334155;
+  --amline-border-strong: #475569;
+  --amline-primary: #3b82f6;
+  --amline-primary-hover: #2563eb;
+  --amline-primary-muted: rgba(59, 130, 246, 0.15);
+  --amline-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+html {
+  direction: rtl;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-vazirmatn), 'Vazir', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.65;
+  background-color: var(--amline-bg);
+  color: var(--amline-fg);
+}
+
+.amline-display {
+  @apply text-2xl font-bold tracking-tight md:text-3xl;
+}
+
+.bg-primary\/5 {
+  background-color: rgb(29 111 235 / 0.05);
+}
+
+.bg-primary\/10 {
+  background-color: rgb(29 111 235 / 0.1);
+}
+
+.border-primary {
+  border-color: var(--primary);
+}
+
+.text-primary {
+  color: var(--primary);
+}
+
+.ring-primary {
+  --tw-ring-color: var(--primary);
+}

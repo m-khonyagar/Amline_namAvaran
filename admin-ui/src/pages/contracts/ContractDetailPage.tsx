@@ -1,9 +1,12 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { apiClient } from '../../lib/api'
 import type { ContractResponse } from '../../features/contract-wizard/types/api'
 import type { ContractStatus } from '../../features/contract-wizard/types/wizard'
+import { AddendumForm } from '../../features/contract-wizard/components/AddendumForm'
+import { AddendumList } from '../../features/contract-wizard/components/AddendumList'
 
 const STATUS_LABELS: Record<string, string> = {
   ADMIN_STARTED: 'شروع شده توسط ادمین',
@@ -52,6 +55,7 @@ export default function ContractDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const [showAddendumForm, setShowAddendumForm] = useState(false)
 
   const { data: contract, isLoading, isError } = useQuery<ContractResponse>({
     queryKey: ['contract', id],
@@ -174,6 +178,35 @@ export default function ContractDetailPage() {
               </div>
             </div>
           )}
+
+          {/* Addendum */}
+          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-800">متمم‌های قرارداد</h2>
+              <button
+                type="button"
+                onClick={() => setShowAddendumForm((s) => !s)}
+                className="rounded-lg border border-primary px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/5"
+              >
+                {showAddendumForm ? 'بستن فرم' : 'ثبت متمم جدید'}
+              </button>
+            </div>
+
+            {showAddendumForm && (
+              <div className="mb-5 rounded-lg border border-gray-100 bg-gray-50 p-4">
+                <AddendumForm
+                  contractId={contract.id}
+                  onSuccess={() => {
+                    toast.success('متمم ثبت شد')
+                    setShowAddendumForm(false)
+                  }}
+                  onCancel={() => setShowAddendumForm(false)}
+                />
+              </div>
+            )}
+
+            <AddendumList contractId={contract.id} />
+          </div>
         </div>
 
         {/* Actions */}

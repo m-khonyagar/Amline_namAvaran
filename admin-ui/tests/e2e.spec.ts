@@ -1,6 +1,12 @@
 import { test, expect, type Page } from '@playwright/test';
+import { clearAmlineBrowserStorage } from './storage-helpers';
 
-const BASE = 'http://localhost:3002';
+const BASE = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3002';
+
+test.beforeEach(async ({ page }) => {
+  await page.goto(`${BASE}/login`);
+  await clearAmlineBrowserStorage(page);
+});
 
 // ---- Helper: ورود آزمایشی ----
 async function devLogin(page: Page) {
@@ -118,4 +124,19 @@ test('داشبورد: navigation بین صفحات', async ({ page }) => {
   await expect(page).toHaveURL(`${BASE}/crm`);
   await page.goto(`${BASE}/dashboard`);
   await expect(page).toHaveURL(`${BASE}/dashboard`);
+});
+
+// ================================================================
+// ۱۰. تم — Light / Dark / ماندگاری
+// ================================================================
+test('تم: انتخاب تیره و ماندگاری در localStorage', async ({ page }) => {
+  await devLogin(page);
+  const themeSelect = page.locator('#app-sidebar select[aria-labelledby="theme-label"]');
+  await expect(themeSelect).toBeVisible({ timeout: 15000 });
+  await themeSelect.selectOption('dark');
+  await expect(page.locator('html')).toHaveClass(/dark/);
+  const stored = await page.evaluate(() => localStorage.getItem('amline_theme'));
+  expect(stored).toBe('dark');
+  await page.reload();
+  await expect(page.locator('html')).toHaveClass(/dark/);
 });

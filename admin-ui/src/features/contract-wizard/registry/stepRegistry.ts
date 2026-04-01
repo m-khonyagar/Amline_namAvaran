@@ -7,6 +7,7 @@ import { DatingStep } from '../components/steps/DatingStep';
 import { MortgageStep } from '../components/steps/MortgageStep';
 import { RentingStep } from '../components/steps/RentingStep';
 import { SalePriceStep } from '../components/steps/SalePriceStep';
+import { SaleRentingBridgeStep } from '../components/steps/SaleRentingBridgeStep';
 import { SigningStep } from '../components/steps/SigningStep';
 import { WitnessStep } from '../components/steps/WitnessStep';
 import { FinishStep } from '../components/steps/FinishStep';
@@ -49,7 +50,7 @@ const SALE_REGISTRY: Record<PRContractStep, StepMeta> = {
   PLACE_INFORMATION:    { label: 'اطلاعات ملک',      component: PlaceInfoStep },
   DATING:               { label: 'تاریخ‌ها',          component: DatingStep },
   MORTGAGE:             { label: 'قیمت فروش',        component: SalePriceStep },
-  RENTING:              { label: 'شرایط پرداخت',     component: Placeholder as ComponentType<StepProps> },
+  RENTING:              { label: 'تأیید پرداخت',     component: SaleRentingBridgeStep },
   SIGNING:              { label: 'امضا',              component: SigningStep },
   WITNESS:              { label: 'شاهد',              component: WitnessStep },
   FINISH:               { label: 'پایان',             component: FinishStep },

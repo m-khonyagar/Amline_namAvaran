@@ -1,254 +1,158 @@
-# Agent Windsurf Amline
+# Amline — پلتفرم هوشمند قرارداد ملکی
 
-پلتفرم جامع مدیریت املاک و قراردادها
+## ساختار پروژه
 
-## 📁 فهرست پروژه‌ها
+| پروژه | تکنولوژی | پورت | وضعیت |
+|-------|----------|------|--------|
+| `admin-ui/` | React + Vite | 3002 | ✅ کامل |
+| `amline-ui/` | Next.js 14 (App Router) | 3000 | ✅ کامل |
+| `site/` | Next.js 15 (Static Export) | 3001 | ✅ کامل |
+| `dev-mock-api/` | FastAPI | 8080 | ✅ کامل |
+| `pdf-generator/` | FastAPI | 8001 | ✅ موجود |
+| `seo-dashboard/` | — | 3003 | ✅ موجود |
+| `backend/backend/` | FastAPI + PostgreSQL | 8080 | ✅ آماده |
 
-| پروژه | مسیر | پورت |
-|-------|------|------|
-| Backend API | `backend/backend/` | 8080 |
-| PDF Generator | `pdf-generator/` | 8001 |
-| Admin UI | `admin-ui/` | 3002 |
-| Amline UI | `amline-ui/` | 3000 |
-| Site | `site/` | 3001 |
-| SEO Dashboard | `seo-dashboard/` | 3003 |
-
-📄 **ساختار کامل:** [REPOSITORY_STRUCTURE.md](./REPOSITORY_STRUCTURE.md)
-
-## 🧭 مدیریت Workspace
-
-- `workspace.manifest.json` مرجع مرکزی پروژه‌ها، دسته‌بندی‌ها و دستورهای رایج است.
-- `docs/WORKSPACE_OPERATIONS.md` راهنمای راه‌اندازی و اعتبارسنجی کل workspace را توضیح می‌دهد.
-- `scripts/bootstrap-workspace.ps1` وابستگی‌های پروژه‌های Node/Python را به‌صورت گروهی نصب می‌کند.
-- `scripts/validate-workspace.ps1` برای اجرای lint/build/check در پروژه‌های اصلی استفاده می‌شود.
-- `.github/` شامل `CODEOWNERS`، قالب Pull Request، Issue Formها و workflowهای CI/Hygiene است.
+> **توجه:** `amline-ui` از **App Router** استفاده می‌کند (نه Pages Router).
 
 ---
 
-## 📋 معماری سیستم
+## شروع سریع — توسعه با backend واقعی
 
-این پروژه شامل سرویس‌های زیر است:
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                  Agent Windsurf Amline                           │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
-│  │   Site       │  │  Amline UI   │  │  Admin UI    │          │
-│  │  (Next.js    │  │  (Next.js    │  │  (React +    │          │
-│  │   15 App)    │  │  Pages)      │  │   Vite)      │          │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘          │
-│         │                 │                  │                   │
-│         └─────────────────┼──────────────────┘                   │
-│                           ▼                                      │
-│                  ┌──────────────────┐                           │
-│                  │   Backend API    │                           │
-│                  │   (FastAPI)      │                           │
-│                  └────────┬─────────┘                           │
-│                           │                                      │
-│    ┌──────────────────────┼──────────────────────┐             │
-│    │                      │                      │             │
-│    ▼                      ▼                      ▼             │
-│ ┌──────┐           ┌──────────┐         ┌──────────┐          │
-│ │Postgres│          │  Redis   │         │  MinIO   │          │
-│ └──────┘           └──────────┘         └──────────┘          │
-│                                                             │
-│  ┌──────────────────────────────────────────────────┐        │
-│  │            PDF Generator (FastAPI)               │        │
-│  └──────────────────────────────────────────────────┘        │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-## 🚀 شروع سریع
-
-### پیش‌نیازها
-
-- Docker و Docker Compose
-- حداقل 4GB RAM
-- پورت‌های آزاد: 3000, 3001, 3002, 5432, 6379, 9000, 9001, 8080
-
-### اجرای سریع
-
-```bash
-# 1. کپی فایل متغیرهای محیطی
+```powershell
+# ۱. کپی env و اجرای همه سرویس‌ها با Docker
 cp .env.example .env
+docker-compose up -d postgres redis minio
 
-# 2. اجرای تمام سرویس‌ها
-docker-compose up -d
-
-# 3. بررسی وضعیت سرویس‌ها
-docker-compose ps
-
-# 4. دسترسی به سرویس‌ها
-# Backend API:    http://localhost:8080
-# Admin UI:      http://localhost:3002
-# Amline UI:     http://localhost:3000
-# Site:          http://localhost:3001
-# MinIO Console:  http://localhost:9001
-```
-
-## 📦 سرویس‌ها
-
-### 1. Backend (FastAPI)
-- **پورت**: 8080
-- **مسیر کد**: `backend/backend/src`
-- **مستندات API**: http://localhost:8080/openapi.json
-
-### 2. PDF Generator
-- **پورت**: 8001
-- **مسیر کد**: `pdf-generator/src`
-- **ویژگی‌ها**:
-  - تولید PDF قراردادها
-  - پشتیبانی از فارسی و تاریخ جلالی
-  - ذخیره‌سازی در MinIO
-
-### 3. Admin UI (React + Vite)
-- **پورت**: 3002
-- **مسیر کد**: `admin-ui/src`
-- **ویژگی‌ها**:
-  - مدیریت کاربران
-  - مدیریت آگهی‌ها
-  - مدیریت قراردادها
-  - مدیریت کیف پول
-
-### 4. Amline UI (Next.js Pages Router)
-- **پورت**: 3000
-- **مسیر کد**: `amline-ui`
-- **ویژگی‌ها**:
-  - داشبورد کاربری
-  - آگهی‌ها و قراردادها
-  - چت و پیام‌رسانی
-
-### 5. Site (Next.js 15 App Router)
-- **پورت**: 3001
-- **مسیر کد**: `site`
-- **ویژگی‌ها**:
-  - صفحات بازاریابی
-  - فرود و معرفی
-  - Static Export
-
-## 🗄️ دیتابیس
-
-### جداول اصلی
-
-| جدول | توضیحات |
-|------|---------|
-| users | کاربران سیستم |
-| organizations | سازمان‌ها |
-| roles | نقش‌ها |
-| permissions | مجوزها |
-| properties | املاک |
-| ads | آگهی‌ها |
-| contracts | قراردادها |
-| pr_contracts | پیش‌قراردادها |
-| wallets | کیف پول |
-| transactions | تراکنش‌ها |
-
-## 🔧 توسعه
-
-### اجرای محلی Backend
-
-```bash
+# ۲. اجرای backend (پورت 8080)
 cd backend/backend
-
-# نصب وابستگی‌ها
-poetry install
-
-# اجرای مایگریشن‌ها
+cp .env.example .env   # مقادیر را تنظیم کنید
+pip install -r requirements.txt
 alembic upgrade head
+uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
 
-# اجرای سرور
-python -m uvicorn src.main:app --reload
+# ۳. admin-ui (پورت 3002)
+cd admin-ui
+npm install
+# در .env.local: VITE_USE_MSW=false و VITE_DEV_PROXY_TARGET=http://127.0.0.1:8080
+npm run dev
 ```
 
-### اجرای تست‌ها
+## شروع سریع — توسعه بدون backend (mock)
 
-```bash
-# Backend tests
-cd backend/backend
-pytest tests/
+```powershell
+# ۱. اجرای mock API (پورت 8080)
+cd dev-mock-api
+.\run.ps1
 
-# با coverage
-pytest --cov=src tests/
+# ۲. admin-ui (پورت 3002) — در ترمینال جداگانه
+cd admin-ui
+npm install
+npm run dev
+
+# ۳. amline-ui (پورت 3000) — در ترمینال جداگانه
+cd amline-ui
+npm install
+npm run dev
 ```
 
-## 📝 متغیرهای محیطی
+### متغیرهای محیطی
 
-متغیرهای محیطی اصلی را در `.env.example` مشاهده می‌کنید:
-
+`admin-ui/.env.local` (پیش‌فرض آماده است):
 ```env
-# دیتابیس
-DATABASE_URL=postgresql://amline:amline_secret@postgres:5432/amline
-
-# Redis
-REDIS_HOST=redis
-REDIS_PORT=6379
-REDIS_PASSWORD=amline_redis_secret
-
-# MinIO
-MINIO_ENDPOINT=minio:9000
-MINIO_ACCESS_KEY=amline
-MINIO_SECRET_KEY=amline_minio_secret
-
-# JWT
-JWT_SECRET=your-jwt-secret
-JWT_ALGORITHM=HS256
+VITE_USE_MSW=true          # MSW برای mock در مرورگر
+VITE_ENABLE_DEV_BYPASS=false  # ورود آزمایشی — فقط برای dev و صریحاً true
+VITE_DEV_PROXY_TARGET=http://127.0.0.1:8080
+VITE_API_URL=
+VITE_USE_CRM_API=false
 ```
 
-## 🔐 امنیت
+`amline-ui/.env.local`:
+```env
+NEXT_PUBLIC_DEV_PROXY_TARGET=http://localhost:8080
+NEXT_PUBLIC_ENABLE_DEV_BYPASS=false
+```
 
-- احراز هویت با JWT
-- OTP برای ورود
-- کنترل دسترسی مبتنی بر نقش (RBAC)
-- رمزنگاری رمزهای عبور
+---
 
-## 📱 API های اصلی
-
-### احراز هویت
-- `POST /admin/login` - ورود ادمین
-- `POST /admin/otp/send` - ارسال OTP
-- `POST /admin/otp/verify` - تأیید OTP
-
-### کاربران
-- `GET /admin/users` - لیست کاربران
-- `GET /admin/users/{id}` - جزئیات کاربر
-- `POST /admin/users/create-or-update` - ایجاد/ویرایش
-
-### آگهی‌ها
-- `POST /ads/properties` - ایجاد آگهی
-- `GET /ads/properties` - لیست آگهی‌ها
-- `POST /ads/visit-requests` - درخواست بازدید
-
-### قراردادها
-- `POST /admin/contracts/start` - شروع قرارداد
-- `POST /admin/pr-contracts/{id}/parties` - اضافه کردن طرفین
-- `POST /admin/contracts/{id}/pdf-file` - تولید PDF
-
-### مالی
-- `GET /users/wallet` - موجودی کیف پول
-- `POST /users/payments` - ایجاد پرداخت
-- `POST /users/calculate/rent-commission` - محاسبه کمیسیون
-
-## 🐳 Docker Compose
-
-برای اجرای production:
+## اجرا با Docker Compose (همه سرویس‌ها)
 
 ```bash
-# ساخت و اجرا
-docker-compose up -d --build
-
-# مشاهده لاگ‌ها
-docker-compose logs -f
-
-# توقف
-docker-compose down
-
-# حذف volumes
-docker-compose down -v
+cp .env.example .env
+docker-compose up -d
 ```
 
-## 📄 مجوز
+> **نکته:** قبل از اجرا یک `.env` از `.env.example` بساز و مقادیر را تنظیم کن.
 
-تمامی حقوق محفوظ است © ۱۴۰۳ - اَملاین
+---
+
+## معماری
+
+```
+site (3001)          amline-ui (3000)       admin-ui (3002)
+  │                       │                      │
+  └───────────────────────┴──────────────────────┘
+                           │
+              dev-mock-api (8080) ← توسعه
+              backend/backend    ← production
+                           │
+              postgres / redis / minio
+```
+
+---
+
+## ماژول‌های admin-ui
+
+| مسیر | مجوز | توضیح |
+|------|------|-------|
+| `/dashboard` | — | KPI، دسترسی سریع |
+| `/contracts` | `contracts:read` | لیست و جزئیات قراردادها |
+| `/contracts/wizard` | `contracts:read` | ویزارد انعقاد قرارداد |
+| `/crm` | — | مدیریت لیدها (Kanban) |
+| `/users` | `users:read` | مدیریت کاربران |
+| `/wallets` | `wallets:read` | کیف پول |
+| `/admin/roles` | `roles:read` | نقش‌ها و مجوزها |
+| `/admin/audit` | `audit:read` | لاگ ممیزی |
+| `/admin/activity` | `reports:read` | گزارش فعالیت کارشناس |
+| `/settings` | `settings:read` | تنظیمات پروفایل و سیستم |
+
+---
+
+## Endpoints اصلی dev-mock-api
+
+| گروه | Endpoint | توضیح |
+|------|----------|-------|
+| Auth | `GET /auth/me` | اطلاعات کاربر + permissions |
+| Auth | `POST /admin/otp/send` | ارسال OTP |
+| Auth | `POST /admin/login` | ورود |
+| Roles | `GET/POST /admin/roles` | نقش‌ها |
+| Roles | `PATCH /admin/roles/{id}` | ویرایش نقش |
+| Audit | `GET/POST /admin/audit` | لاگ ممیزی |
+| Activity | `GET /admin/staff/activity` | فعالیت کارشناس |
+| Metrics | `GET /admin/metrics/summary` | KPI داشبورد |
+| Notifications | `GET /admin/notifications` | اعلان‌ها |
+| CRM | `GET/POST /admin/crm/leads` | لیدها |
+| CRM | `PATCH /admin/crm/leads/{id}` | ویرایش لید |
+| CRM | `GET/POST /admin/crm/leads/{id}/activities` | فعالیت لید |
+| Contracts | `POST /contracts/start` | شروع قرارداد |
+| Contracts | `GET /contracts/list` | لیست قراردادها |
+
+---
+
+## تست
+
+```bash
+# unit tests (admin-ui)
+cd admin-ui && npm test
+
+# e2e (نیاز به mock API روی 8080)
+cd admin-ui && npx playwright test
+
+# e2e (amline-ui)
+cd amline-ui && npx playwright test
+```
+
+---
+
+## مجوز
+
+© ۱۴۰۳ اَملاین — تمامی حقوق محفوظ است

@@ -3,6 +3,8 @@ import { contractApi } from '../../api/contractApi';
 import type { StepProps } from '../../types/wizard';
 import { OtpForm } from '../OtpForm';
 import { StepErrorBanner } from '../StepErrorBanner';
+import { ensureMappedError } from '../../../../lib/errorMapper';
+import { useMappedStepError } from '../../hooks/useMappedStepError';
 
 type SigningPhase = 'idle' | 'otp_sent' | 'waiting_other_party';
 
@@ -13,15 +15,11 @@ interface PartySignState {
   salt?: string;
 }
 
-interface SigningStepProps extends StepProps {
-  parties?: Array<{ id: string; mobile: string; label: string }>;
-}
-
-export function SigningStep({ contractId, onComplete, parties = [] }: SigningStepProps) {
+export function SigningStep({ contractId, onComplete, signingParties = [] }: StepProps) {
   const [partyStates, setPartyStates] = useState<Record<string, PartySignState>>({});
   const [activePartyId, setActivePartyId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { error, details, hint, setFromError, clear } = useMappedStepError();
   const [otpError, setOtpError] = useState<string | null>(null);
 
   function getPartyState(partyId: string): PartySignState {
@@ -30,7 +28,7 @@ export function SigningStep({ contractId, onComplete, parties = [] }: SigningSte
 
   async function handleRequestSign(partyId: string, mobile: string) {
     setIsLoading(true);
-    setError(null);
+    clear();
     try {
       await contractApi.sendSign(contractId, {
         party_id: Number(partyId),
@@ -44,8 +42,7 @@ export function SigningStep({ contractId, onComplete, parties = [] }: SigningSte
       }));
       setActivePartyId(partyId);
     } catch (err: unknown) {
-      const e = err as { message?: string };
-      setError(e.message ?? 'خطا در ارسال OTP');
+      setFromError(err);
     } finally {
       setIsLoading(false);
     }
@@ -62,12 +59,12 @@ export function SigningStep({ contractId, onComplete, parties = [] }: SigningSte
       });
       if (verifyRes.data.ok) {
         // بررسی آیا همه طرفین امضا کرده‌اند
-        const allSigned = parties.every((p) => {
+        const allSigned = signingParties.every((p) => {
           const s = partyStates[p.id];
           return p.id === partyId || s?.phase === 'waiting_other_party';
         });
 
-        if (allSigned || parties.length <= 1) {
+        if (allSigned || signingParties.length <= 1) {
           const setRes = await contractApi.setSign(contractId, { next_step: 'WITNESS' });
           const nextStep = (setRes.data as { next_step?: string })?.next_step ?? 'WITNESS';
           onComplete(nextStep as import('../../types/wizard').PRContractStep);
@@ -80,23 +77,22 @@ export function SigningStep({ contractId, onComplete, parties = [] }: SigningSte
         }
       }
     } catch (err: unknown) {
-      const e = err as { message?: string };
-      setOtpError(e.message ?? 'کد وارد شده نادرست است');
+      setOtpError(ensureMappedError(err).message);
     } finally {
       setIsLoading(false);
     }
   }
 
-  const activeParty = parties.find((p) => p.id === activePartyId);
+  const activeParty = signingParties.find((p) => p.id === activePartyId);
 
   return (
     <div dir="rtl" className="space-y-6">
       <h2 className="text-lg font-bold text-gray-800">امضای قرارداد</h2>
-      <StepErrorBanner message={error} onDismiss={() => setError(null)} />
+      <StepErrorBanner message={error} details={details} hint={hint} onDismiss={() => clear()} />
 
       {/* نمایش وضعیت امضای هر طرف */}
       <div className="space-y-3">
-        {parties.map((party) => {
+        {signingParties.map((party) => {
           const state = getPartyState(party.id);
           return (
             <div
@@ -147,7 +143,7 @@ export function SigningStep({ contractId, onComplete, parties = [] }: SigningSte
       )}
 
       {/* حالت بدون parties (fallback) */}
-      {parties.length === 0 && (
+      {signingParties.length === 0 && (
         <div className="text-center py-8 text-gray-500 text-sm">
           اطلاعات طرفین قرارداد بارگذاری نشده است.
         </div>

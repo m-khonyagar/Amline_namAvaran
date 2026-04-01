@@ -33,3 +33,7 @@ security:
 logging:
   level: "INFO"
   format: "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+
+# API املاین — با AMLINE_API_BASE_URL در runtime بازنویسی می‌شود (runtime.merge_amline_from_env)
+amline:
+  api_base_url: "https://api.amline.ir"
