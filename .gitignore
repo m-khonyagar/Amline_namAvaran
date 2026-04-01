@@ -81,6 +81,16 @@ id_ed25519*
 # SEO Dashboard secrets
 seo-dashboard/.env.local
 
+# Playwright / E2E (regenerated locally; do not version screenshots or traces)
+admin-ui/test-results/
+amline-ui/test-results/
+
+# QA Playwright HTML report output
+qa-amline-tests/playwright-report/
+
+# Scratch / temporary backend checkout (not part of monorepo source)
+_temp_backend/
+
 # Deploy artifacts
 node-linux.tar.xz
 paramiko_debug.log
