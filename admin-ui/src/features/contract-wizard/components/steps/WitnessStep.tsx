@@ -6,6 +6,8 @@ import { contractApi } from '../../api/contractApi';
 import type { StepProps } from '../../types/wizard';
 import { OtpForm } from '../OtpForm';
 import { StepErrorBanner } from '../StepErrorBanner';
+import { ensureMappedError } from '../../../../lib/errorMapper';
+import { useMappedStepError } from '../../hooks/useMappedStepError';
 import { validateIranianNationalCode } from '../../schemas/partySchema';
 
 const witnessSchema = z.object({
@@ -22,7 +24,7 @@ export function WitnessStep({ contractId, contractType, onComplete }: StepProps)
   const [phase, setPhase] = useState<WitnessPhase>('form');
   const [witnessData, setWitnessData] = useState<WitnessFormData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { error, details, hint, setFromError, clear } = useMappedStepError();
   const [otpError, setOtpError] = useState<string | null>(null);
 
   const { register, handleSubmit, formState: { errors } } = useForm<WitnessFormData>({
@@ -32,7 +34,7 @@ export function WitnessStep({ contractId, contractType, onComplete }: StepProps)
 
   async function handleAddWitness(data: WitnessFormData) {
     setIsLoading(true);
-    setError(null);
+    clear();
     try {
       await contractApi.addWitness(contractId, { next_step: 'WITNESS' });
       await contractApi.sendWitnessOtp(contractId, {
@@ -44,8 +46,7 @@ export function WitnessStep({ contractId, contractType, onComplete }: StepProps)
       setWitnessData(data);
       setPhase('otp_sent');
     } catch (err: unknown) {
-      const e = err as { message?: string };
-      setError(e.message ?? 'خطا در ثبت شاهد');
+      setFromError(err);
     } finally {
       setIsLoading(false);
     }
@@ -68,8 +69,7 @@ export function WitnessStep({ contractId, contractType, onComplete }: StepProps)
         onComplete('FINISH');
       }
     } catch (err: unknown) {
-      const e = err as { message?: string };
-      setOtpError(e.message ?? 'کد وارد شده نادرست است');
+      setOtpError(ensureMappedError(err).message);
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +90,7 @@ export function WitnessStep({ contractId, contractType, onComplete }: StepProps)
   return (
     <div dir="rtl" className="space-y-4">
       <h2 className="text-lg font-bold text-gray-800">شاهد قرارداد</h2>
-      <StepErrorBanner message={error} onDismiss={() => setError(null)} />
+      <StepErrorBanner message={error} details={details} hint={hint} onDismiss={() => clear()} />
 
       {phase === 'form' && (
         <form onSubmit={handleSubmit(handleAddWitness)} className="space-y-4" noValidate>

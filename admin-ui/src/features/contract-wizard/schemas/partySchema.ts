@@ -15,17 +15,40 @@ export function validateIranianNationalCode(code: string): boolean {
   return remainder < 2 ? check === remainder : check === 11 - remainder;
 }
 
+function isValidJalaliDate(value: string): boolean {
+  // Accepts YYYY/MM/DD with basic Jalali range checks.
+  const m = /^(\d{4})\/(\d{2})\/(\d{2})$/.exec(value);
+  if (!m) return false;
+  const year = Number(m[1]);
+  const month = Number(m[2]);
+  const day = Number(m[3]);
+  if (year < 1200 || year > 1500) return false;
+  if (month < 1 || month > 12) return false;
+  if (day < 1 || day > 31) return false;
+  // Months 7..12 have max 30 days in Jalali calendar.
+  if (month >= 7 && day > 30) return false;
+  return true;
+}
+
 export const naturalPersonSchema = z.object({
   national_code: z
     .string()
-    .length(10, 'کد ملی باید ۱۰ رقم باشد')
-    .refine(validateIranianNationalCode, 'کد ملی نامعتبر است'),
-  mobile: z.string().regex(/^09\d{9}$/, 'شماره موبایل نامعتبر است'),
-  birth_date: z.string().min(1, 'تاریخ تولد الزامی است'),
+    .length(10, 'کد ملی باید دقیقاً ۱۰ رقم باشد (بدون خط تیره).')
+    .refine(validateIranianNationalCode, 'کد ملی با الگوریتم اعتبارسنجی همخوان نیست؛ رقم‌ها را دوباره بررسی کنید.'),
+  mobile: z
+    .string()
+    .regex(/^09\d{9}$/, 'موبایل باید ۱۱ رقم با پیش‌شماره ۰۹ باشد (مثلاً 09121234567).'),
+  birth_date: z
+    .string()
+    .trim()
+    .refine(isValidJalaliDate, 'تاریخ تولد را شمسی وارد کنید؛ فرمت: ۱۳۷۰/۰۱/۰۱ (سال چهار رقم، ماه و روز دو رقم).'),
   bank_account: z
     .string()
-    .regex(/^IR\d{24}$/, 'شماره شبا باید با IR شروع شود و ۲۴ رقم داشته باشد'),
-  postal_code: z.string().length(10, 'کد پستی باید ۱۰ رقم باشد'),
+    .regex(
+      /^IR\d{24}$/,
+      'شبا باید با IR شروع شود و دقیقاً ۲۴ رقم بعد از آن داشته باشد (بدون فاصله؛ مثال: IR120000000000000000000001).'
+    ),
+  postal_code: z.string().regex(/^\d{10}$/, 'کد پستی باید دقیقاً ۱۰ رقم عددی باشد.'),
   is_forigen_citizen: z.boolean(),
   family_members_count: z.number().min(0).nullable(),
   home_electricy_bill: z.string().optional(),
@@ -37,16 +60,19 @@ export const legalPersonSignerSchema = z.object({
     .length(10)
     .refine(validateIranianNationalCode, 'کد ملی امضاکننده نامعتبر است'),
   mobile: z.string().regex(/^09\d{9}$/, 'شماره موبایل نامعتبر است'),
-  birth_date: z.string().min(1, 'تاریخ تولد الزامی است'),
+  birth_date: z
+    .string()
+    .trim()
+    .refine(isValidJalaliDate, 'تاریخ تولد باید به فرمت 1370/01/01 باشد'),
   title: z.string().min(1, 'سمت الزامی است'),
 });
 
 export const legalPersonSchema = z.object({
-  national_nc: z.string().length(11, 'شناسه ملی شرکت باید ۱۱ رقم باشد'),
+  national_nc: z.string().regex(/^\d{11}$/, 'شناسه ملی شرکت باید ۱۱ رقم باشد'),
   ceo_mobile: z.string().regex(/^09\d{9}$/, 'شماره موبایل مدیرعامل نامعتبر است'),
   ownership_type: z.enum(['PRIVATE_DEED', 'LONG_TERM_LEASE']),
   is_knowledge_based: z.boolean(),
-  postal_code: z.string().length(10, 'کد پستی باید ۱۰ رقم باشد'),
+  postal_code: z.string().regex(/^\d{10}$/, 'کد پستی باید ۱۰ رقم باشد'),
   bank_account: z
     .string()
     .regex(/^IR\d{24}$/, 'شماره شبا باید با IR شروع شود و ۲۴ رقم داشته باشد'),

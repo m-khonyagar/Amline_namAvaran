@@ -1,13 +1,13 @@
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { datingSchema, type DatingFormData } from '../../schemas/contractSchemas';
 import { contractApi } from '../../api/contractApi';
 import type { StepProps } from '../../types/wizard';
 import { StepErrorBanner } from '../StepErrorBanner';
+import { useMappedStepError } from '../../hooks/useMappedStepError';
 
 export function DatingStep({ contractId, onComplete }: StepProps) {
-  const [serverError, setServerError] = useState<string | null>(null);
+  const { error: serverError, details, hint, setFromError, clear } = useMappedStepError();
 
   const {
     register,
@@ -16,7 +16,7 @@ export function DatingStep({ contractId, onComplete }: StepProps) {
   } = useForm<DatingFormData>({ resolver: zodResolver(datingSchema) });
 
   async function onSubmit(data: DatingFormData) {
-    setServerError(null);
+    clear();
     try {
       const res = await contractApi.addDating(contractId, {
         start_date: data.start_date,
@@ -27,15 +27,14 @@ export function DatingStep({ contractId, onComplete }: StepProps) {
       const nextStep = (res.data as { next_step?: string })?.next_step ?? 'MORTGAGE';
       onComplete(nextStep as import('../../types/wizard').PRContractStep);
     } catch (err: unknown) {
-      const e = err as { type?: string; message?: string };
-      setServerError(e.message ?? 'خطا در ثبت تاریخ‌ها');
+      setFromError(err);
     }
   }
 
   return (
     <div dir="rtl" className="space-y-4">
       <h2 className="text-lg font-bold text-gray-800">تاریخ‌های قرارداد</h2>
-      <StepErrorBanner message={serverError} onDismiss={() => setServerError(null)} />
+      <StepErrorBanner message={serverError} details={details} hint={hint} onDismiss={() => clear()} />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div>

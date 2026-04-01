@@ -194,6 +194,8 @@ export function LegalPersonForm({
               <input
                 {...register(`signers.${index}.birth_date`)}
                 type="text"
+                inputMode="numeric"
+                maxLength={10}
                 placeholder="1370/01/01"
                 className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary ${errors.signers?.[index]?.birth_date ? 'border-red-500' : 'border-gray-300'}`}
               />

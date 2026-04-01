@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { apiClient } from '../../api/contractApi';
 import type { StepProps } from '../../types/wizard';
 import { StepErrorBanner } from '../StepErrorBanner';
+import { ensureMappedError } from '../../../../lib/errorMapper';
 
 interface CommissionInvoice {
   total_amount: number;
@@ -19,13 +20,20 @@ export function CommissionStep({ contractId }: StepProps) {
   const [invoice, setInvoice] = useState<CommissionInvoice | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<string[]>([]);
+  const [errorHint, setErrorHint] = useState<string | null>(null);
 
   useEffect(() => {
     setIsLoading(true);
     apiClient
       .get<CommissionInvoice>(`/contracts/${contractId}/commission/invoice`)
       .then((res) => setInvoice(res.data))
-      .catch(() => setError('خطا در دریافت اطلاعات کمیسیون'))
+      .catch((err: unknown) => {
+        const m = ensureMappedError(err);
+        setError(m.message);
+        setErrorDetails(m.detailLines);
+        setErrorHint(m.hint ?? null);
+      })
       .finally(() => setIsLoading(false));
   }, [contractId]);
 
@@ -44,7 +52,16 @@ export function CommissionStep({ contractId }: StepProps) {
   return (
     <div dir="rtl" className="space-y-6">
       <h2 className="text-lg font-bold text-gray-800">کمیسیون</h2>
-      <StepErrorBanner message={error} onDismiss={() => setError(null)} />
+      <StepErrorBanner
+        message={error}
+        details={errorDetails}
+        hint={errorHint}
+        onDismiss={() => {
+          setError(null);
+          setErrorDetails([]);
+          setErrorHint(null);
+        }}
+      />
 
       {invoice && (
         <div className="space-y-4">

@@ -1,6 +1,12 @@
 import { test, expect, type Page } from '@playwright/test';
+import { clearAmlineBrowserStorage } from './storage-helpers';
 
-const BASE = 'http://localhost:3002';
+const BASE = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3002';
+
+test.beforeEach(async ({ page }) => {
+  await page.goto(`${BASE}/login`);
+  await clearAmlineBrowserStorage(page);
+});
 
 async function screenshot(page: Page, name: string) {
   await page.screenshot({ path: `test-results/screenshots/${name}.png`, fullPage: false });
@@ -35,8 +41,8 @@ test('فلو ۱: ورود به سیستم و مشاهده داشبورد', async
   await expect(page.locator('body')).not.toBeEmpty();
   await screenshot(page, '02-dashboard');
 
-  // sidebar باید نمایش داده شود
-  await expect(page.getByText('اَملاین')).toBeVisible();
+  // sidebar باید نمایش داده شود (دو لوگوی هم‌نام در هدر موبایل + سایدبار — یکی را مشخص می‌کنیم)
+  await expect(page.locator('#app-sidebar').getByText('اَملاین')).toBeVisible();
   await expect(page.getByRole('link', { name: /داشبورد/i })).toBeVisible();
   await expect(page.getByRole('link', { name: /قراردادها/i })).toBeVisible();
   await expect(page.getByRole('link', { name: /CRM/i })).toBeVisible();
@@ -103,28 +109,48 @@ test('فلو ۳: Contract Wizard — شروع قرارداد رهن و اجار�
   // بررسی دکمه شروع
   await expect(page.getByRole('button', { name: 'شروع قرارداد', exact: true })).toBeVisible();
 
-  // کلیک شروع — نیاز به backend دارد، فقط UI رو تست می‌کنیم
+  // MSW پاسخ می‌دهد — باید به مرحله اطلاعات مالک برسیم
   await page.getByRole('button', { name: 'شروع قرارداد', exact: true }).click();
-  await page.waitForTimeout(2000);
+  await expect(page.getByRole('heading', { name: /اطلاعات مالک/ })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole('button', { name: 'شخص حقیقی' })).toBeVisible();
   await screenshot(page, '10-wizard-after-start');
-  // خطای API انتظار داریم چون backend staging ممکنه جواب نده
-  // ولی UI باید error state رو نشون بده نه crash
-  await expect(page.locator('body')).not.toBeEmpty();
 });
 
 // ================================================================
-// فلو ۴: Contract Wizard — خرید و فروش
+// فلو ۳ب: Contract Wizard — شروع قرارداد خرید و فروش
 // ================================================================
-test('فلو ۴: Contract Wizard — انتخاب خرید و فروش', async ({ page }) => {
+test('فلو ۳ب: Contract Wizard — شروع قرارداد خرید و فروش', async ({ page }) => {
   await devLogin(page);
   await page.goto(`${BASE}/contracts/wizard`);
   await expect(page.getByText('خرید و فروش')).toBeVisible({ timeout: 10000 });
-
   await page.getByText('خرید و فروش').click();
   await page.getByText('برای خودم').click();
-  await screenshot(page, '11-wizard-sale-selected');
+  await page.getByRole('button', { name: 'شروع قرارداد', exact: true }).click();
+  await expect(page.getByRole('heading', { name: /اطلاعات فروشنده/ })).toBeVisible({ timeout: 15000 });
+});
 
-  await expect(page.getByRole('button', { name: 'شروع قرارداد', exact: true })).toBeVisible();
+// ================================================================
+// فلو ۴: Contract Wizard — DraftBanner و شروع قرارداد جدید
+// ================================================================
+test('فلو ۴: Contract Wizard — DraftBanner و شروع قرارداد جدید', async ({ page }) => {
+  await devLogin(page);
+  await page.goto(`${BASE}/contracts/wizard`);
+  await page.waitForTimeout(2000);
+  await screenshot(page, '11-wizard-after-flow3');
+
+  // اگه DraftBanner نمایش داده شد، دکمه «شروع قرارداد جدید» رو بزن
+  const newContractBtn = page.getByRole('button', { name: /شروع قرارداد جدید/i });
+  const startBtn = page.getByRole('button', { name: 'شروع قرارداد', exact: true });
+
+  const hasDraft = await newContractBtn.isVisible({ timeout: 3000 }).catch(() => false);
+  if (hasDraft) {
+    await newContractBtn.click();
+    await page.waitForTimeout(1000);
+  }
+
+  // حالا باید StartStep نمایش داده شود
+  await expect(startBtn).toBeVisible({ timeout: 10000 });
+  await screenshot(page, '11-wizard-new-contract');
 });
 
 // ================================================================

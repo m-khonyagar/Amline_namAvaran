@@ -11,19 +11,24 @@ import ContractDetailPage from './pages/contracts/ContractDetailPage'
 import PRContractsPage from './pages/contracts/PRContractsPage'
 import WalletsPage from './pages/wallets/WalletsPage'
 import SettingsPage from './pages/settings/SettingsPage'
+import RolesPage from './pages/admin/RolesPage'
+import AuditLogPage from './pages/admin/AuditLogPage'
+import ActivityReportPage from './pages/admin/ActivityReportPage'
 import CRMPage from './pages/crm/CRMPage'
 import LeadDetailPage from './pages/crm/LeadDetailPage'
 import { useAuth } from './hooks/useAuth'
 import { PermissionGuard } from './components/auth/PermissionGuard'
 import { ContractWizardPage } from './features/contract-wizard/ContractWizardPage'
 import type { ReactNode } from 'react'
+import { ThemeProvider } from './theme/ThemeProvider'
+import { useTheme } from './theme/useTheme'
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-slate-950">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
       </div>
     )
@@ -36,16 +41,29 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   return <>{children}</>
 }
 
-function App() {
+function ThemedToaster() {
+  const { resolved } = useTheme()
+  return (
+    <Toaster
+      position="top-left"
+      dir="rtl"
+      theme={resolved === 'dark' ? 'dark' : 'light'}
+      toastOptions={{
+        classNames: {
+          toast:
+            resolved === 'dark'
+              ? 'bg-slate-900 text-slate-100 border border-slate-700'
+              : 'bg-white text-slate-900 border border-slate-200',
+        },
+      }}
+    />
+  )
+}
+
+function AppRoutes() {
   return (
     <>
-      <Toaster
-        position="top-left"
-        dir="rtl"
-        toastOptions={{
-          style: { background: '#333', color: '#fff' },
-        }}
-      />
+      <ThemedToaster />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
 
@@ -118,6 +136,22 @@ function App() {
             </PermissionGuard>
           } />
 
+          <Route path="admin/roles" element={
+            <PermissionGuard permission="roles:read">
+              <RolesPage />
+            </PermissionGuard>
+          } />
+          <Route path="admin/audit" element={
+            <PermissionGuard permission="audit:read">
+              <AuditLogPage />
+            </PermissionGuard>
+          } />
+          <Route path="admin/activity" element={
+            <PermissionGuard permission="reports:read">
+              <ActivityReportPage />
+            </PermissionGuard>
+          } />
+
           <Route path="crm">
             <Route index element={<CRMPage />} />
             <Route path=":id" element={<LeadDetailPage />} />
@@ -127,6 +161,14 @@ function App() {
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </>
+  )
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <AppRoutes />
+    </ThemeProvider>
   )
 }
 

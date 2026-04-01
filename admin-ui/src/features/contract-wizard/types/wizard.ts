@@ -36,6 +36,14 @@ export type ContractStatus =
   | 'PDF_GENERATED'
   | 'PDF_GENERATING_FAILED';
 
+export interface SigningParty {
+  id: string;
+  label: string;
+  mobile: string;
+  partyType: 'LANDLORD' | 'TENANT';
+  personType: 'NATURAL_PERSON' | 'LEGAL_PERSON';
+}
+
 export interface WizardState {
   contractId: string | null;
   contractType: ContractType | null;
@@ -73,13 +81,15 @@ export type WizardAction =
         contractType: ContractType;
         isScribeMode: boolean;
       };
-    };
+    }
+  | { type: 'RESET_WIZARD' };
 
 export interface StepProps {
   contractId: string;
   contractType: ContractType;
   platform: 'admin' | 'user';
   isScribeMode: boolean;
+  signingParties?: SigningParty[];
   onComplete: (nextStep: PRContractStep) => void;
 }
 

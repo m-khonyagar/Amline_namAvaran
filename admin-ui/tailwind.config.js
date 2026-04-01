@@ -1,30 +1,43 @@
+import { amlineThemeTokens } from '../packages/amline-ui-core/theme-tokens.js';
+
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  darkMode: 'class',
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      screens: {
+        xs: '380px',
+      },
+      fontFamily: {
+        sans: ['Vazirmatn', 'Vazir', 'Tahoma', 'system-ui', 'sans-serif'],
+      },
+      fontSize: {
+        'display': ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
+        'title': ['1.125rem', { lineHeight: '1.75rem', fontWeight: '600' }],
+      },
       colors: {
-        primary: {
-          DEFAULT: '#1a73e8',
-          dark: '#1557b0',
-          light: '#4a9ff5',
-        },
+        primary: amlineThemeTokens.colors.primary,
         secondary: {
           DEFAULT: '#64748b',
           dark: '#475569',
         },
-        success: '#22c55e',
-        warning: '#f59e0b',
-        error: '#ef4444',
-        info: '#3b82f6',
+        accent: amlineThemeTokens.colors.accent,
+        surface: amlineThemeTokens.colors.surface,
+        success: amlineThemeTokens.colors.success,
+        warning: amlineThemeTokens.colors.warning,
+        error: amlineThemeTokens.colors.error,
+        info: amlineThemeTokens.colors.info,
       },
-      fontFamily: {
-        sans: ['Vazir', 'Tahoma', 'Arial', 'sans-serif'],
+      borderRadius: {
+        amline: amlineThemeTokens.radius.amline,
+        'amline-md': amlineThemeTokens.radius.amlineMd,
+      },
+      boxShadow: {
+        amline: amlineThemeTokens.shadow.amline,
+        'amline-lg': amlineThemeTokens.shadow.amlineLg,
       },
     },
   },
   plugins: [],
-}
+};

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+  import { useEffect, useState } from 'react';
 import { localDraftStorage, type DraftEntry } from '../storage/draftStorage';
 
 const contractTypeLabel: Record<string, string> = {

@@ -43,4 +43,10 @@ export const localDraftStorage = {
   remove(contractId: string): void {
     localStorage.removeItem(`${DRAFT_KEY_PREFIX}${contractId}`);
   },
+
+  clearAll(): void {
+    for (const k of Object.keys(localStorage)) {
+      if (k.startsWith(DRAFT_KEY_PREFIX)) localStorage.removeItem(k);
+    }
+  },
 };

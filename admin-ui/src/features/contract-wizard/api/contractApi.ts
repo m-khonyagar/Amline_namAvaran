@@ -1,4 +1,10 @@
+/**
+ * API قرارداد — املاین
+ * نکته عملیاتی: در محیط واقعی، backend مقدار `Authorization: Bearer <token>` را می‌پذیرد.
+ * برای httpOnly-only در آینده باید توکن فقط از Set-Cookie هدر خوانده شود — بخش useAuth/backend.
+ */
 import axios from 'axios';
+import { mapAxiosLikeError, parseFastApiValidationDetail } from '../../../lib/errorMapper';
 import type {
   AddDatingDto,
   AddHomeInfoDto,
@@ -7,6 +13,7 @@ import type {
   AddWithnessDto,
   ContractResponse,
   FileResponse,
+  ContractStatusApiResponse,
   ResolveInfoResponse,
   SendSignRequestDto,
   SendWitnessOtpDto,
@@ -18,7 +25,20 @@ import type {
   VerifyWitnessOtpDto,
 } from '../types/api';
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'https://api.amline.ir';
+function resolveApiBaseUrl(): string {
+  try {
+    const v = (import.meta as unknown as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL;
+    if (v !== undefined && v !== null) return v;
+  } catch {
+    /* non-Vite */
+  }
+  if (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_API_URL != null) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  return '';
+}
+
+const BASE_URL = resolveApiBaseUrl();
 
 export const apiClient = axios.create({ baseURL: BASE_URL });
 
@@ -28,34 +48,17 @@ apiClient.interceptors.request.use((config) => {
     .split('; ')
     .find((r) => r.startsWith('access_token='))
     ?.split('=')[1];
-  if (token) config.headers['Authorization'] = token;
+  if (token) {
+    const normalized = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+    config.headers['Authorization'] = normalized;
+  }
   return config;
 });
 
-// ---- Error interceptor ----
+// ---- Error interceptor: همیشه MappedApiError یکنواخت ----
 apiClient.interceptors.response.use(
   (res) => res,
-  (err) => {
-    if (err.response?.status === 422) {
-      return Promise.reject({
-        type: 'VALIDATION' as const,
-        fieldErrors: err.response.data?.detail ?? {},
-      });
-    }
-    if (err.response?.status >= 500) {
-      return Promise.reject({
-        type: 'SERVER' as const,
-        message: 'خطای سرور. لطفاً دوباره تلاش کنید.',
-      });
-    }
-    if (!err.response) {
-      return Promise.reject({
-        type: 'NETWORK' as const,
-        message: 'اتصال به اینترنت را بررسی کنید.',
-      });
-    }
-    return Promise.reject(err);
-  }
+  (err) => Promise.reject(mapAxiosLikeError(err))
 );
 
 export const contractApi = {
@@ -111,7 +114,7 @@ export const contractApi = {
     apiClient.post<UpdateStatus>(`/contracts/${id}/witness/verify`, dto),
 
   getStatus: (id: string) =>
-    apiClient.get<{ status: string; step: string }>(`/contracts/${id}/status`),
+    apiClient.get<ContractStatusApiResponse>(`/contracts/${id}/status`),
 
   getList: () =>
     apiClient.get<ContractResponse[]>('/contracts/list'),
@@ -129,19 +132,14 @@ export const contractApi = {
   },
 };
 
-/**
- * تبدیل خطاهای 422 API به Record<fieldName, errorMessage>
- */
-export function mapApiErrorToFields(
-  detail: unknown
-): Record<string, string> {
-  if (!detail || !Array.isArray(detail)) return {};
-  const result: Record<string, string> = {};
-  for (const err of detail as Array<{ loc: string[]; msg: string }>) {
-    if (err.loc && err.loc.length > 1) {
-      const field = err.loc[err.loc.length - 1];
-      result[field] = err.msg;
-    }
+/** @deprecated ترجیحاً از mapAxiosLikeError / parseFastApiValidationDetail استفاده کنید */
+export function mapApiErrorToFields(detail: unknown): Record<string, string> {
+  const { fieldErrors } = parseFastApiValidationDetail(detail);
+  const flat: Record<string, string> = {};
+  for (const [k, msgs] of Object.entries(fieldErrors)) {
+    const arr = Array.isArray(msgs) ? msgs : [];
+    const first = arr[0];
+    if (first) flat[k] = first;
   }
-  return result;
+  return flat;
 }
