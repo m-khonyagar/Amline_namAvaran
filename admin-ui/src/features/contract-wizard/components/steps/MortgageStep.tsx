@@ -5,6 +5,8 @@ import { contractApi } from '../../api/contractApi';
 import type { StepProps } from '../../types/wizard';
 import { StepErrorBanner } from '../StepErrorBanner';
 import { useMappedStepError } from '../../hooks/useMappedStepError';
+import { ChequeImageField } from '../ChequeImageField';
+import type { PaymentStage } from '../../types/api';
 
 function toToman(rial: number): string {
   if (!rial || isNaN(rial)) return '۰';
@@ -18,6 +20,7 @@ export function MortgageStep({ contractId, onComplete }: StepProps) {
     register,
     handleSubmit,
     watch,
+    setValue,
     control,
     formState: { errors, isSubmitting },
   } = useForm<MortgageFormData>({
@@ -31,9 +34,20 @@ export function MortgageStep({ contractId, onComplete }: StepProps) {
   async function onSubmit(data: MortgageFormData) {
     clear();
     try {
+      const stages: PaymentStage[] = data.stages.map((s) => {
+        const base: PaymentStage = {
+          due_date: s.due_date,
+          payment_type: s.payment_type,
+          amount: s.amount,
+        };
+        if (s.payment_type === 'CHEQUE' && s.cheque_image_file_id != null) {
+          base.cheque_image_file_id = s.cheque_image_file_id;
+        }
+        return base;
+      });
       const res = await contractApi.addMortgage(contractId, {
         total_amount: data.total_amount,
-        stages: data.stages,
+        stages,
         next_step: 'RENTING',
       });
       const nextStep = (res.data as { next_step?: string })?.next_step ?? 'RENTING';
@@ -80,7 +94,9 @@ export function MortgageStep({ contractId, onComplete }: StepProps) {
             </button>
           </div>
 
-          {fields.map((field, index) => (
+          {fields.map((field, index) => {
+            const payType = watch(`stages.${index}.payment_type`);
+            return (
             <div key={field.id} className="border border-gray-200 rounded-lg p-3 space-y-3 bg-gray-50">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium text-gray-600">مرحله {index + 1}</span>
@@ -109,7 +125,11 @@ export function MortgageStep({ contractId, onComplete }: StepProps) {
               <div>
                 <label className="block text-xs text-gray-600 mb-1">نوع پرداخت *</label>
                 <select
-                  {...register(`stages.${index}.payment_type`)}
+                  {...register(`stages.${index}.payment_type`, {
+                    onChange: () => {
+                      setValue(`stages.${index}.cheque_image_file_id`, null);
+                    },
+                  })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-white"
                 >
                   <option value="CASH">نقدی</option>
@@ -130,8 +150,20 @@ export function MortgageStep({ contractId, onComplete }: StepProps) {
                   <p className="mt-1 text-xs text-red-600">{errors.stages[index]?.amount?.message}</p>
                 )}
               </div>
+
+              {payType === 'CHEQUE' && (
+                <ChequeImageField
+                  value={watch(`stages.${index}.cheque_image_file_id`)}
+                  onChange={(id) =>
+                    setValue(`stages.${index}.cheque_image_file_id`, id, { shouldValidate: true })
+                  }
+                  errorMessage={errors.stages?.[index]?.cheque_image_file_id?.message as string | undefined}
+                  disabled={isSubmitting}
+                />
+              )}
             </div>
-          ))}
+            );
+          })}
         </div>
 
         <button

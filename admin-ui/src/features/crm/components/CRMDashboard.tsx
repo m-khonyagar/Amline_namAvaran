@@ -68,7 +68,7 @@ export function CRMDashboard() {
 
       {/* Bar Chart */}
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-        <h3 className="mb-4 text-base font-semibold text-gray-800">توزیع Lead بر اساس وضعیت</h3>
+        <h2 className="mb-4 text-base font-semibold text-gray-800">توزیع Lead بر اساس وضعیت</h2>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={chartData} barSize={40}>
             <XAxis dataKey="name" tick={{ fontSize: 12 }} />

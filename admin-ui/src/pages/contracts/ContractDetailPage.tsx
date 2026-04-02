@@ -7,6 +7,7 @@ import type { ContractResponse } from '../../features/contract-wizard/types/api'
 import type { ContractStatus } from '../../features/contract-wizard/types/wizard'
 import { AddendumForm } from '../../features/contract-wizard/components/AddendumForm'
 import { AddendumList } from '../../features/contract-wizard/components/AddendumList'
+import { formatShamsiDate } from '../../lib/persianDateTime'
 
 const STATUS_LABELS: Record<string, string> = {
   ADMIN_STARTED: 'شروع شده توسط ادمین',
@@ -30,6 +31,13 @@ const STATUS_LABELS: Record<string, string> = {
 const TYPE_LABELS: Record<string, string> = {
   PROPERTY_RENT: 'رهن و اجاره',
   BUYING_AND_SELLING: 'خرید و فروش',
+}
+
+const LEGAL_REVIEW_LABELS: Record<string, string> = {
+  NONE: 'بدون بررسی',
+  AWAITING_STAFF: 'در انتظار بررسی حقوقی',
+  APPROVED: 'تأیید حقوقی',
+  REJECTED: 'رد حقوقی',
 }
 
 const PARTY_TYPE_LABELS: Record<string, string> = {
@@ -147,7 +155,7 @@ export default function ContractDetailPage() {
               <div>
                 <dt className="text-sm text-gray-500">تاریخ ایجاد</dt>
                 <dd className="mt-1 text-sm">
-                  {new Date(contract.created_at).toLocaleDateString('fa-IR')}
+                  {formatShamsiDate(contract.created_at)}
                 </dd>
               </div>
               {contract.step && (
@@ -156,6 +164,18 @@ export default function ContractDetailPage() {
                   <dd className="mt-1 text-sm">{contract.step}</dd>
                 </div>
               )}
+              <div>
+                <dt className="text-sm text-gray-500">کد رهگیری</dt>
+                <dd className="mt-1 font-mono text-sm">{contract.tracking_code ?? '—'}</dd>
+              </div>
+              <div>
+                <dt className="text-sm text-gray-500">وضعیت بررسی حقوقی</dt>
+                <dd className="mt-1 text-sm">
+                  {LEGAL_REVIEW_LABELS[contract.legal_review_status ?? 'NONE'] ??
+                    contract.legal_review_status ??
+                    '—'}
+                </dd>
+              </div>
             </dl>
           </div>
 

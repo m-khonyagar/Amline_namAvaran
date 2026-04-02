@@ -25,6 +25,7 @@ export default function LoginPage() {
       mobile: '09120000000',
       full_name: 'کاربر آزمایشی',
       role: 'admin',
+      role_id: 'role-admin',
       permissions: [
         'users:read',
         'users:write',
@@ -36,6 +37,13 @@ export default function LoginPage() {
         'wallets:write',
         'settings:read',
         'settings:write',
+        'audit:read',
+        'roles:read',
+        'roles:write',
+        'reports:read',
+        'notifications:read',
+        'crm:read',
+        'crm:write',
       ],
     };
     setCookie(CookieNames.ACCESS_TOKEN, 'dev-token-12345', 1);

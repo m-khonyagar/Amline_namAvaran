@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import type { Lead, LeadStatus } from '../types'
-import { loadLeads, saveLeadStatus, createLeadRecord } from '../crmService'
+import { bulkSaveLeadStatus, loadLeads, saveLeadStatus, createLeadRecord } from '../crmService'
 import { logAudit } from '../../../lib/auditLog'
 import { LeadCard } from './LeadCard'
 import { LeadForm } from './LeadForm'
+import { EmptyState } from '../../../components/patterns/EmptyState'
 
 const COLUMNS: { status: LeadStatus; label: string; color: string }[] = [
   { status: 'NEW', label: 'جدید', color: 'bg-blue-50 border-blue-200' },
@@ -20,6 +21,9 @@ export function KanbanBoard() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [draggingId, setDraggingId] = useState<string | null>(null)
   const [showNewLeadForm, setShowNewLeadForm] = useState(false)
+  const [bulkMode, setBulkMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkTarget, setBulkTarget] = useState<LeadStatus>('NEW')
 
   const refresh = () => {
     void loadLeads().then(setLeads)
@@ -54,6 +58,30 @@ export function KanbanBoard() {
     })()
   }
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const n = new Set(prev)
+      if (n.has(id)) n.delete(id)
+      else n.add(id)
+      return n
+    })
+  }
+
+  const applyBulkMove = () => {
+    const ids = [...selectedIds]
+    if (ids.length === 0) return
+    if (!window.confirm(`وضعیت ${ids.length} Lead به «${COLUMNS.find((c) => c.status === bulkTarget)?.label ?? bulkTarget}» تغییر کند؟`))
+      return
+    void (async () => {
+      const n = await bulkSaveLeadStatus(ids, bulkTarget)
+      void logAudit('crm.lead.bulk_status', 'lead', { count: n, status: bulkTarget, ids })
+      toast.success(n ? `${n} مورد به‌روز شد` : 'به‌روزرسانی انجام نشد')
+      setSelectedIds(new Set())
+      setBulkMode(false)
+      refresh()
+    })()
+  }
+
   const handleCreateLead = (values: {
     full_name: string
     mobile: string
@@ -83,6 +111,73 @@ export function KanbanBoard() {
           </div>
         </div>
       )}
+
+      {leads.length === 0 && !showNewLeadForm ? (
+        <div className="mb-6">
+          <EmptyState
+            title="هنوز Leadای ثبت نشده"
+            description="برای شروع فروش، اولین Lead را اضافه کنید."
+            action={
+              <button
+                type="button"
+                onClick={() => setShowNewLeadForm(true)}
+                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              >
+                افزودن Lead
+              </button>
+            }
+          />
+        </div>
+      ) : null}
+
+      {leads.length > 0 ? (
+        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-gray-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
+          <button
+            type="button"
+            onClick={() => {
+              setBulkMode((v) => {
+                if (v) setSelectedIds(new Set())
+                return !v
+              })
+            }}
+            className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-slate-600"
+          >
+            {bulkMode ? 'خروج از حالت گروهی' : 'عملیات گروهی روی Leadها'}
+          </button>
+          {bulkMode ? (
+            <>
+              <span className="text-sm text-gray-600 dark:text-slate-400">{selectedIds.size} انتخاب‌شده</span>
+              <select
+                aria-label="وضعیت مقصد برای انتقال گروهی"
+                value={bulkTarget}
+                onChange={(e) => setBulkTarget(e.target.value as LeadStatus)}
+                className="rounded-lg border border-gray-300 px-2 py-2 text-sm dark:border-slate-600 dark:bg-slate-900"
+              >
+                {COLUMNS.map((c) => (
+                  <option key={c.status} value={c.status}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                disabled={selectedIds.size === 0}
+                onClick={applyBulkMove}
+                className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-40 hover:bg-blue-700"
+              >
+                اعمال انتقال
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedIds(new Set())}
+                className="text-sm text-gray-600 underline dark:text-slate-400"
+              >
+                لغو انتخاب
+              </button>
+            </>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="flex gap-4 pb-4" style={{ minWidth: '900px' }}>
         {COLUMNS.map((col) => {
@@ -117,6 +212,9 @@ export function KanbanBoard() {
                     draggable
                     onDragStart={handleDragStart}
                     onView={(lid) => navigate(`/crm/${lid}`)}
+                    selectMode={bulkMode}
+                    selected={selectedIds.has(lead.id)}
+                    onToggleSelect={toggleSelect}
                   />
                 ))}
               </div>
