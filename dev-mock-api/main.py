@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -16,9 +16,13 @@ app.add_middleware(
         "http://localhost:3000",
         "http://localhost:3001",
         "http://localhost:3002",
+        "http://localhost:3003",
+        "http://localhost:3004",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:3001",
         "http://127.0.0.1:3002",
+        "http://127.0.0.1:3003",
+        "http://127.0.0.1:3004",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -219,12 +223,11 @@ def admin_login(_body: LoginBody) -> Dict[str, Any]:
 class StartBody(BaseModel):
     contract_type: Optional[str] = "PROPERTY_RENT"
     party_type: Optional[str] = None
+    is_guaranteed: Optional[bool] = False
 
 
 @app.post("/contracts/start", status_code=201)
 def contracts_start(body: StartBody) -> Dict[str, Any]:
-    if not body.party_type:
-        raise HTTPException(status_code=422, detail="party_type is required")
     ctype = body.contract_type or "PROPERTY_RENT"
     cid = _next_id()
     now = datetime.now(timezone.utc).isoformat()
@@ -269,6 +272,23 @@ def commission_invoice(contract_id: str) -> Dict[str, Any]:
         "landlord_share": 2_500_000,
         "tenant_share": 2_500_000,
         "invoice_id": f"inv-{c['id']}",
+    }
+
+
+class CommissionPayBody(BaseModel):
+    use_wallet_credit: bool = False
+    use_all_wallet_credits: bool = False
+    wallet_credits: Optional[int] = None
+
+
+@app.post("/contracts/{contract_id}/commission/pay")
+def commission_pay(contract_id: str, body: CommissionPayBody) -> Dict[str, Any]:
+    _get(contract_id)
+    use_wallet = bool(body.use_wallet_credit or body.use_all_wallet_credits)
+    return {
+        "ok": True,
+        "redirect_url": "/financials/bank/gateway",
+        "used_wallet": use_wallet,
     }
 
 
@@ -427,22 +447,8 @@ def resolve_info() -> Dict[str, str]:
 
 @app.post("/files/upload", status_code=201)
 def files_upload() -> Dict[str, Any]:
-    return {"id": "file-001", "url": None}
-
-
-@app.get("/admin/users")
-def admin_users() -> Dict[str, Any]:
-    return {
-        "total_count": 1,
-        "start_index": 0,
-        "end_index": 1,
-        "data": [MOCK_USER],
-    }
-
-
-@app.get("/admin/users/{user_id}")
-def admin_user(user_id: str) -> Dict[str, Any]:
-    return MOCK_USER
+    # id عددی برای سازگاری با cheque_image_file_id در DTO مراحل پرداخت
+    return {"id": "10001", "url": None}
 
 
 @app.get("/provinces/cities")
@@ -459,7 +465,7 @@ def provinces() -> List[Any]:
 def wallets() -> Dict[str, Any]:
     return {
         "id": "wallet-001",
-        "credit": 0,
+        "credit": 3_000_000,
         "user_id": "mock-001",
         "status": "ACTIVE",
     }
@@ -732,3 +738,196 @@ def crm_activity_create(lead_id: str, body: CrmActivityBody) -> Dict[str, Any]:
     }
     crm_activities.setdefault(lead_id, []).append(act)
     return act
+
+
+# ---- Consultant platform (هم‌راستا با MSW consultantPlatformHandlers؛ برای consultant-ui + dev-mock-api) ----
+CONSULTANT_TOKEN_PREFIX = "mock-consultant-"
+consultant_profiles: Dict[str, Dict[str, Any]] = {}
+consultant_applications_list: List[Dict[str, Any]] = []
+consultant_leads_map: Dict[str, List[Dict[str, Any]]] = {}
+_consultant_reg_seq = 1
+
+
+def _consultant_seed() -> None:
+    ts = datetime.now(timezone.utc).isoformat()
+    consultant_profiles["cons-demo-001"] = {
+        "id": "cons-demo-001",
+        "full_name": "مشاور نمونه املاین",
+        "mobile": "09121112233",
+        "verification_tier": "VERIFIED",
+        "application_status": "APPROVED",
+        "credit_score": 82,
+        "active_contracts_count": 4,
+        "assigned_leads_count": 2,
+    }
+    consultant_applications_list.append(
+        {
+            "id": "cap-demo-001",
+            "consultant_user_id": "cons-demo-001",
+            "full_name": "مشاور نمونه املاین",
+            "mobile": "09121112233",
+            "national_code": "0012345678",
+            "license_no": "نظام-۱۴۰۲-۰۰۱",
+            "city": "تهران",
+            "agency_name": "املاک نمونه",
+            "status": "APPROVED",
+            "reviewer_note": "تأیید اولیه",
+            "submitted_at": ts,
+            "updated_at": ts,
+        }
+    )
+    consultant_leads_map["cons-demo-001"] = [
+        {
+            "id": "lead-c1",
+            "title": "خرید آپارتمان ۱۲۰ متری",
+            "city": "تهران",
+            "stage": "تماس اولیه",
+            "created_at": ts,
+        },
+        {
+            "id": "lead-c2",
+            "title": "اجاره دفتر کار",
+            "city": "تهران",
+            "stage": "بازدید",
+            "created_at": ts,
+        },
+    ]
+
+
+_consultant_seed()
+
+
+def _consultant_id_from_auth(authorization: Optional[str]) -> Optional[str]:
+    if not authorization or not authorization.startswith("Bearer "):
+        return None
+    t = authorization[7:].strip()
+    if not t.startswith(CONSULTANT_TOKEN_PREFIX):
+        return None
+    return t[len(CONSULTANT_TOKEN_PREFIX) :]
+
+
+class ConsultantLoginBody(BaseModel):
+    mobile: str
+
+
+class ConsultantRegisterBody(BaseModel):
+    full_name: str
+    mobile: str
+    national_code: str
+    license_no: str
+    city: str
+    agency_name: Optional[str] = None
+
+
+@app.post("/consultant/auth/login")
+def consultant_auth_login(body: ConsultantLoginBody) -> Dict[str, Any]:
+    if not (body.mobile or "").strip():
+        raise HTTPException(status_code=422, detail="mobile_required")
+    for p in consultant_profiles.values():
+        if p.get("mobile") == body.mobile:
+            token = f"{CONSULTANT_TOKEN_PREFIX}{p['id']}"
+            return {"access_token": token, "user": p}
+    raise HTTPException(status_code=404, detail="not_found")
+
+
+@app.post("/consultant/auth/register")
+def consultant_auth_register(body: ConsultantRegisterBody) -> Dict[str, Any]:
+    global _consultant_reg_seq
+    if not all([body.full_name, body.mobile, body.national_code, body.license_no, body.city]):
+        raise HTTPException(status_code=422, detail="validation_error")
+    uid = f"cons-reg-{_consultant_reg_seq}"
+    _consultant_reg_seq += 1
+    ts = datetime.now(timezone.utc).isoformat()
+    consultant_profiles[uid] = {
+        "id": uid,
+        "full_name": body.full_name,
+        "mobile": body.mobile,
+        "verification_tier": "NONE",
+        "application_status": "SUBMITTED",
+        "credit_score": 0,
+        "active_contracts_count": 0,
+        "assigned_leads_count": 0,
+    }
+    app_id = f"cap-{uid}"
+    consultant_applications_list.insert(
+        0,
+        {
+            "id": app_id,
+            "consultant_user_id": uid,
+            "full_name": body.full_name,
+            "mobile": body.mobile,
+            "national_code": body.national_code,
+            "license_no": body.license_no,
+            "city": body.city,
+            "agency_name": body.agency_name,
+            "status": "SUBMITTED",
+            "submitted_at": ts,
+            "updated_at": ts,
+        },
+    )
+    token = f"{CONSULTANT_TOKEN_PREFIX}{uid}"
+    return {"access_token": token, "user": consultant_profiles[uid]}
+
+
+@app.get("/consultant/me")
+def consultant_me(
+    authorization: Optional[str] = Header(default=None, alias="Authorization"),
+) -> Dict[str, Any]:
+    cid = _consultant_id_from_auth(authorization)
+    if not cid:
+        raise HTTPException(status_code=401, detail="unauthorized")
+    p = consultant_profiles.get(cid)
+    if not p:
+        raise HTTPException(status_code=404, detail="not_found")
+    return p
+
+
+@app.get("/consultant/application")
+def consultant_application_get(
+    authorization: Optional[str] = Header(default=None, alias="Authorization"),
+) -> Any:
+    cid = _consultant_id_from_auth(authorization)
+    if not cid:
+        raise HTTPException(status_code=401, detail="unauthorized")
+    row = next((a for a in consultant_applications_list if a.get("consultant_user_id") == cid), None)
+    return row
+
+
+@app.get("/consultant/dashboard/summary")
+def consultant_dashboard_summary(
+    authorization: Optional[str] = Header(default=None, alias="Authorization"),
+) -> Dict[str, Any]:
+    cid = _consultant_id_from_auth(authorization)
+    if not cid:
+        raise HTTPException(status_code=401, detail="unauthorized")
+    p = consultant_profiles.get(cid)
+    if not p:
+        raise HTTPException(status_code=404, detail="not_found")
+    tier = p.get("verification_tier")
+    benefits = {
+        "commission_boost_percent": 5 if tier == "PREMIUM" else (2 if tier == "VERIFIED" else 0),
+        "crm_priority": tier != "NONE",
+        "featured_listing_slots": 3 if tier == "PREMIUM" else (1 if tier == "VERIFIED" else 0),
+    }
+    next_steps: List[Dict[str, str]] = []
+    if p.get("application_status") != "APPROVED":
+        next_steps = [
+            {"title": "تکمیل پرونده", "description": "مدارک و تأیید هویت توسط کارشناس املاین"}
+        ]
+    return {"profile": p, "benefits": benefits, "next_steps": next_steps}
+
+
+@app.get("/consultant/leads")
+def consultant_leads_list(
+    authorization: Optional[str] = Header(default=None, alias="Authorization"),
+) -> Dict[str, Any]:
+    cid = _consultant_id_from_auth(authorization)
+    if not cid:
+        raise HTTPException(status_code=401, detail="unauthorized")
+    items = list(consultant_leads_map.get(cid, []))
+    return {"items": items, "total": len(items)}
+
+
+from mock_extended import register_extended_routes
+
+register_extended_routes(app)

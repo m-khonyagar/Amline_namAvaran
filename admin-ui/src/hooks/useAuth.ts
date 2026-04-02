@@ -52,7 +52,7 @@ export function useAuth() {
         full_name: 'کاربر آزمایشی', role: 'admin', role_id: 'role-admin',
         permissions: ['users:read','users:write','contracts:read','contracts:write',
           'ads:read','ads:write','wallets:read','wallets:write','settings:read','settings:write',
-          'audit:read','roles:read','roles:write','reports:read','notifications:read'],
+          'audit:read','roles:read','roles:write','reports:read','notifications:read','crm:read','crm:write'],
       }
       setCookie(CookieNames.USER, JSON.stringify(mockUser), 1)
       setAuthState({ user: mockUser, isAuthenticated: true, isLoading: false })

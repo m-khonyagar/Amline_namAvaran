@@ -1,4 +1,4 @@
-﻿/// <reference types="vite/client" />
+/// <reference types="vite/client" />
 
 interface ImportMetaEnv {
   /** خالی = همان origin (مسیر نسبی)؛ برای dev با proxy معمولاً خالی بماند */
@@ -14,8 +14,14 @@ interface ImportMetaEnv {
   readonly VITE_USE_CRM_API: string
   /** فعال/غیرفعال کردن ورود آزمایشی فقط در DEV */
   readonly VITE_ENABLE_DEV_BYPASS: string
+  /** DSN سنتری؛ فقط در استقرار */
+  readonly VITE_SENTRY_DSN: string
+  /** true = ارسال خطا به سنتری حتی در dev */
+  readonly VITE_SENTRY_DEV: string
 }
 
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+declare module 'jalaali-js';

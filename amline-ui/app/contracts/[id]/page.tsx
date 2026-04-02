@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { hasAccessToken } from '../../../lib/auth'
 import { ensureMappedError } from '../../../lib/errorMapper'
 import { fetchJson } from '../../../lib/fetchJson'
+import { labelPartyType, labelPersonType, labelStatus, labelStep } from '../../../lib/contractLabels'
 
 interface ContractDetail {
   id: string
@@ -14,6 +15,8 @@ interface ContractDetail {
   step: string | null
   created_at: string
   parties: Record<string, Array<{ id: string; party_type: string; person_type: string }>>
+  pdf_file?: string | null
+  tracking_code?: string | null
 }
 
 export default function ContractDetailPage() {
@@ -102,16 +105,39 @@ export default function ContractDetailPage() {
               <span className="font-mono">{data.id}</span>
             </div>
             <div>
-              <span className="text-gray-500 dark:text-slate-400">وضعیت:</span> {data.status}
+              <span className="text-gray-500 dark:text-slate-400">وضعیت:</span>{' '}
+              <span title={data.status}>{labelStatus(data.status)}</span>
             </div>
             <div>
-              <span className="text-gray-500 dark:text-slate-400">مرحله:</span> {data.step ?? '—'}
+              <span className="text-gray-500 dark:text-slate-400">مرحله:</span>{' '}
+              <span title={data.step ?? ''}>{labelStep(data.step)}</span>
             </div>
             <div>
               <span className="text-gray-500 dark:text-slate-400">تاریخ ایجاد:</span>{' '}
               {new Date(data.created_at).toLocaleDateString('fa-IR')}
             </div>
+            {data.tracking_code ? (
+              <div className="col-span-2">
+                <span className="text-gray-500 dark:text-slate-400">کد رهگیری:</span>{' '}
+                <span className="font-mono">{data.tracking_code}</span>
+              </div>
+            ) : null}
           </div>
+
+          {data.pdf_file ? (
+            <div>
+              <a
+                href={data.pdf_file}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-[44px] items-center rounded-lg bg-[var(--amline-primary)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+              >
+                دانلود / مشاهدهٔ PDF قرارداد
+              </a>
+            </div>
+          ) : (
+            <p className="text-xs text-gray-500 dark:text-slate-400">فایل PDF هنوز در دسترس نیست.</p>
+          )}
 
           <div>
             <h2 className="mb-2 text-sm font-semibold text-gray-700 dark:text-slate-200">طرفین</h2>
@@ -123,7 +149,8 @@ export default function ContractDetailPage() {
                     key={p.id}
                     className="rounded-lg bg-gray-50 px-3 py-2 text-sm dark:bg-slate-800 dark:text-slate-100"
                   >
-                    {p.party_type} — {p.person_type} ({p.id})
+                    {labelPartyType(p.party_type)} — {labelPersonType(p.person_type)}{' '}
+                    <span className="font-mono text-xs text-gray-500">({p.id})</span>
                   </div>
                 ))}
             </div>

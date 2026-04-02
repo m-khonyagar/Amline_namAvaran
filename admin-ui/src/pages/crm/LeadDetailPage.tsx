@@ -4,8 +4,10 @@ import { toast } from 'sonner'
 import { loadLead, updateLeadRecord } from '../../features/crm/crmService'
 import { logAudit } from '../../lib/auditLog'
 import { ActivityTimeline } from '../../features/crm/components/ActivityTimeline'
+import { LeadTasksPanel } from '../../features/crm/components/LeadTasksPanel'
 import { LeadForm } from '../../features/crm/components/LeadForm'
 import type { Lead } from '../../features/crm/types'
+import { formatShamsiDate } from '../../lib/persianDateTime'
 
 const NEED_TYPE_LABELS: Record<string, string> = {
   RENT: 'اجاره', BUY: 'خرید', SELL: 'فروش',
@@ -127,7 +129,7 @@ export default function LeadDetailPage() {
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-sm text-gray-500">تاریخ ایجاد</dt>
-                  <dd className="text-sm">{new Date(lead.created_at).toLocaleDateString('fa-IR')}</dd>
+                  <dd className="text-sm">{formatShamsiDate(lead.created_at)}</dd>
                 </div>
                 {lead.notes && (
                   <div>
@@ -140,8 +142,9 @@ export default function LeadDetailPage() {
           )}
         </div>
 
-        <div>
+        <div className="space-y-6">
           <ActivityTimeline leadId={lead.id} />
+          <LeadTasksPanel leadId={lead.id} />
         </div>
       </div>
     </div>

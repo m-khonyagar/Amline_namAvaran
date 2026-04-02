@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import path from 'path'
 import fs from 'fs'
 
-const DEFAULT_PATH = path.resolve(process.cwd(), '..', 'docs', 'gsc_data', 'gsc_full_export.json')
+const DEFAULT_PATH = path.resolve(process.cwd(), 'data', 'gsc', 'gsc_full_export.json')
 const GSC_DATA_PATH = process.env.GSC_DATA_PATH || DEFAULT_PATH
 
 export async function GET() {

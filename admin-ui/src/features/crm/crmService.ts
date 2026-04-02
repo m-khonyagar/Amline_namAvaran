@@ -26,6 +26,22 @@ export async function saveLeadStatus(
   return local.updateLeadStatus(id, status)
 }
 
+export async function bulkSaveLeadStatus(ids: string[], status: LeadStatus): Promise<number> {
+  if (ids.length === 0) return 0
+  if (useRemote()) {
+    const results = await Promise.all(
+      ids.map((id) =>
+        remote.remotePatchLead(id, { status }).then(
+          () => 1,
+          () => 0
+        )
+      )
+    )
+    return results.reduce((a, b) => a + b, 0)
+  }
+  return local.bulkUpdateLeadStatus(ids, status)
+}
+
 export async function createLeadRecord(data: {
   full_name: string
   mobile: string

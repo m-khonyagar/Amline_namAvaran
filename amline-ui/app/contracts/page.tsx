@@ -11,12 +11,47 @@ interface ContractRow {
   id: string
   type: string
   status: string
+  step?: string | null
   created_at: string
+  is_owner?: boolean
+  key?: string
 }
+
+// API ممکنه آرایه مستقیم یا { items, total } برگردونه
+type ContractsApiResponse = ContractRow[] | { items: ContractRow[]; total: number; page?: number; limit?: number }
 
 const TYPE_LABEL: Record<string, string> = {
   PROPERTY_RENT: 'رهن و اجاره',
   BUYING_AND_SELLING: 'خرید و فروش',
+}
+
+const STATUS_LABEL: Record<string, string> = {
+  DRAFT: 'پیش‌نویس',
+  ADMIN_STARTED: 'شروع‌شده توسط ادمین',
+  ONE_PARTY_SIGNED: 'یک طرف امضا کرده',
+  FULLY_SIGNED: 'همه امضا کردند',
+  LANDLORDS_FULLY_SIGNED: 'مالک امضا کرده',
+  TENANTS_FULLY_SIGNED: 'مستاجر امضا کرده',
+  ACTIVE: 'فعال',
+  PENDING_COMMISSION: 'در انتظار پرداخت کمیسیون',
+  EDIT_REQUESTED: 'درخواست ویرایش',
+  PARTY_REJECTED: 'رد شده توسط طرف',
+  PENDING_ADMIN_APPROVAL: 'در انتظار تأیید ادمین',
+  ADMIN_REJECTED: 'رد شده توسط ادمین',
+  COMPLETED: 'تکمیل‌شده',
+  REVOKED: 'فسخ‌شده',
+  PDF_GENERATED: 'PDF آماده',
+  PDF_GENERATING_FAILED: 'خطا در تولید PDF',
+}
+
+const STATUS_COLOR: Record<string, string> = {
+  ACTIVE: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
+  COMPLETED: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
+  REVOKED: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
+  ADMIN_REJECTED: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
+  PENDING_COMMISSION: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+  PENDING_ADMIN_APPROVAL: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+  DRAFT: 'bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-slate-300',
 }
 
 export default function ContractsListPage() {
@@ -38,10 +73,12 @@ export default function ContractsListPage() {
         setLoading(true)
         setErrorDetails([])
         setErrorHint(null)
-        const data = await fetchJson<ContractRow[]>('/contracts/list', {
+        const raw = await fetchJson<ContractsApiResponse>('/contracts/list', {
           headers: { 'Content-Type': 'application/json' },
         })
-        if (mounted) setItems(Array.isArray(data) ? data : [])
+        // هر دو شکل response رو handle می‌کنیم: آرایه مستقیم یا { items, total }
+        const rows = Array.isArray(raw) ? raw : (raw as { items: ContractRow[] }).items ?? []
+        if (mounted) setItems(rows)
       } catch (e) {
         if (mounted) {
           const m = ensureMappedError(e)
@@ -131,7 +168,11 @@ export default function ContractsListPage() {
                 <tr key={c.id} className="border-t border-gray-100 dark:border-slate-700">
                   <td className="px-4 py-3 font-mono text-xs">{c.id}</td>
                   <td className="px-4 py-3">{TYPE_LABEL[c.type] ?? c.type}</td>
-                  <td className="px-4 py-3">{c.status}</td>
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLOR[c.status] ?? 'bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-slate-300'}`}>
+                      {STATUS_LABEL[c.status] ?? c.status}
+                    </span>
+                  </td>
                   <td className="px-4 py-3">{new Date(c.created_at).toLocaleDateString('fa-IR')}</td>
                   <td className="px-4 py-3">
                     <Link href={`/contracts/${c.id}`} className="text-blue-600 hover:underline dark:text-blue-400">

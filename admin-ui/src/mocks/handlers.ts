@@ -1,4 +1,8 @@
 import { http, HttpResponse } from 'msw';
+import type { ContractResponse, Party } from '../features/contract-wizard/types/api';
+import { userAdminHandlers } from './userAdminHandlers';
+import { consultantPlatformHandlers } from './consultantPlatformHandlers'; // self + admin review
+import { workspaceOrgHandlers } from './workspaceOrgHandlers';
 
 // ---- Mock user & shared fixtures ----
 const MSW_FULL_PERMS = [
@@ -17,6 +21,12 @@ const MSW_FULL_PERMS = [
   'roles:write',
   'reports:read',
   'notifications:read',
+  'crm:read',
+  'crm:write',
+  'consultants:read',
+  'consultants:write',
+  'workspace:read',
+  'workspace:write',
 ];
 
 const mockUser = {
@@ -55,7 +65,17 @@ const mswRoles: Array<{ id: string; name: string; description: string; permissio
     id: 'role-support',
     name: 'پشتیبانی',
     description: 'پشتیبانی',
-    permissions: ['contracts:read', 'contracts:write', 'users:read', 'crm:read', 'crm:write', 'reports:read'],
+    permissions: [
+      'contracts:read',
+      'contracts:write',
+      'users:read',
+      'crm:read',
+      'crm:write',
+      'reports:read',
+      'notifications:read',
+      'consultants:read',
+      'workspace:read',
+    ],
   },
 ];
 let mswAuditSeq = 1;
@@ -83,6 +103,41 @@ const mswNotifications: Array<{ id: string; title: string; body: string; read: b
     read: false,
     created_at: new Date().toISOString(),
   },
+  {
+    id: 'n2',
+    title: 'به‌روزرسانی سیستم',
+    body: 'نسخهٔ جدید پنل در دسترس است.',
+    read: true,
+    created_at: new Date().toISOString(),
+  },
+];
+
+const mswAds: Array<{ id: string; title: string; status: string; city?: string; created_at: string }> = [
+  {
+    id: 'ad-1',
+    title: 'آگهی نمونه — اجاره منزل',
+    status: 'PUBLISHED',
+    city: 'تهران',
+    created_at: new Date().toISOString(),
+  },
+];
+
+const mswAdminWallets: Array<{
+  id: string
+  user_id: string
+  mobile: string
+  balance: number
+  currency: string
+  status: string
+}> = [
+  {
+    id: 'w1',
+    user_id: 'mock-001',
+    mobile: '09120000000',
+    balance: 0,
+    currency: 'IRR',
+    status: 'ACTIVE',
+  },
 ];
 
 function mswRecordAudit(userId: string, action: string, entity: string, metadata: Record<string, unknown>) {
@@ -108,10 +163,63 @@ interface MockContract {
   status: string;
   step: string;
   parties: Record<string, unknown[]>;
+  created_at: string;
+  owner_id?: string;
+  /** نمایش در لیست ادمین (نام طرف‌ها) */
+  party_preview?: { full_name?: string }[];
+  tracking_code?: string | null;
+  legal_review_status?: 'NONE' | 'AWAITING_STAFF' | 'APPROVED' | 'REJECTED';
 }
 
 const contracts = new Map<string, MockContract>();
-let idCounter = 1;
+let idCounter = 10;
+
+function seedDemoContracts() {
+  const t0 = new Date(Date.now() - 86400000 * 5).toISOString();
+  const t1 = new Date(Date.now() - 86400000 * 2).toISOString();
+  const t2 = new Date(Date.now() - 86400000 * 30).toISOString();
+  const samples: MockContract[] = [
+    {
+      id: 'contract-demo-001',
+      type: 'PROPERTY_RENT',
+      status: 'PENDING_ADMIN_APPROVAL',
+      step: 'FINISH',
+      parties: {},
+      created_at: t0,
+      owner_id: 'mock-001',
+      party_preview: [{ full_name: 'احمد کریمی' }, { full_name: 'سارا محمدی' }],
+      tracking_code: null,
+      legal_review_status: 'AWAITING_STAFF',
+    },
+    {
+      id: 'contract-demo-002',
+      type: 'PROPERTY_RENT',
+      status: 'ACTIVE',
+      step: 'FINISH',
+      parties: {},
+      created_at: t1,
+      owner_id: 'user-002',
+      party_preview: [{ full_name: 'علی رضایی' }, { full_name: 'نرگس حسینی' }],
+      tracking_code: 'RG-1403-009812',
+      legal_review_status: 'APPROVED',
+    },
+    {
+      id: 'contract-demo-003',
+      type: 'BUYING_AND_SELLING',
+      status: 'COMPLETED',
+      step: 'FINISH',
+      parties: {},
+      created_at: t2,
+      owner_id: 'mock-001',
+      party_preview: [{ full_name: 'کاربر آزمایشی' }, { full_name: 'خریدار نمونه' }],
+      tracking_code: 'RG-1402-004421',
+      legal_review_status: 'APPROVED',
+    },
+  ];
+  for (const c of samples) contracts.set(c.id, c);
+}
+
+seedDemoContracts();
 
 function adminEnterpriseHandlers() {
   return [
@@ -141,6 +249,16 @@ function adminEnterpriseHandlers() {
       if (body.permissions !== undefined) r.permissions = [...body.permissions];
       return HttpResponse.json(r);
     }),
+    http.delete('*/admin/roles/:roleId', ({ params }) => {
+      const id = params.roleId as string;
+      if (id === 'role-admin') {
+        return HttpResponse.json({ detail: 'cannot_delete_system_role' }, { status: 403 });
+      }
+      const idx = mswRoles.findIndex((x) => x.id === id);
+      if (idx < 0) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
+      mswRoles.splice(idx, 1);
+      return HttpResponse.json({ ok: true });
+    }),
     http.post('*/admin/audit', async ({ request }) => {
       const body = (await request.json()) as {
         action: string;
@@ -156,8 +274,14 @@ function adminEnterpriseHandlers() {
       const u = new URL(request.url);
       const skip = Math.max(0, parseInt(u.searchParams.get('skip') ?? '0', 10) || 0);
       const limit = Math.min(200, Math.max(1, parseInt(u.searchParams.get('limit') ?? '50', 10) || 50));
-      const items = mswAuditLogs.slice(skip, skip + limit);
-      return HttpResponse.json({ total: mswAuditLogs.length, items, skip, limit });
+      const actionQ = (u.searchParams.get('action') ?? '').trim().toLowerCase();
+      const entityQ = (u.searchParams.get('entity') ?? '').trim().toLowerCase();
+      let logs = mswAuditLogs;
+      if (actionQ) logs = logs.filter((l) => l.action.toLowerCase().includes(actionQ));
+      if (entityQ) logs = logs.filter((l) => l.entity.toLowerCase().includes(entityQ));
+      const total = logs.length;
+      const items = logs.slice(skip, skip + limit);
+      return HttpResponse.json({ total, items, skip, limit });
     }),
     http.post('*/admin/auth/heartbeat', () => HttpResponse.json({ ok: 'true' })),
     http.get('*/admin/staff/activity', ({ request }) => {
@@ -196,6 +320,24 @@ function adminEnterpriseHandlers() {
     ),
     http.get('*/admin/notifications', () =>
       HttpResponse.json({ items: [...mswNotifications], total: mswNotifications.length })
+    ),
+    http.patch('*/admin/notifications/:notificationId', async ({ params, request }) => {
+      const id = params.notificationId as string;
+      const body = (await request.json().catch(() => ({}))) as { read?: boolean };
+      const n = mswNotifications.find((x) => x.id === id);
+      if (!n) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
+      if (typeof body.read === 'boolean') n.read = body.read;
+      return HttpResponse.json({ ...n });
+    }),
+    http.post('*/admin/notifications/read-all', () => {
+      for (const n of mswNotifications) n.read = true;
+      return HttpResponse.json({ ok: true, updated: mswNotifications.length });
+    }),
+    http.get('*/admin/ads', () =>
+      HttpResponse.json({ items: [...mswAds], total: mswAds.length })
+    ),
+    http.get('*/admin/wallets', () =>
+      HttpResponse.json({ items: [...mswAdminWallets], total: mswAdminWallets.length })
     ),
   ];
 }
@@ -268,11 +410,47 @@ function contractJson(c: MockContract) {
     type: c.type,
     status: c.status,
     step: c.step,
-    parties: c.parties,
+    parties: c.party_preview?.length ? c.party_preview : c.parties,
     is_owner: true,
     key: 'mock-key',
     password: null,
-    created_at: new Date().toISOString(),
+    created_at: c.created_at ?? new Date().toISOString(),
+    user_id: c.owner_id ?? 'mock-001',
+    tracking_code: c.tracking_code ?? null,
+    legal_review_status: c.legal_review_status ?? 'NONE',
+  };
+}
+
+function contractDetailResponse(c: MockContract): ContractResponse {
+  const j = contractJson(c);
+  const fromWizard = c.parties as Record<string, Party[]>;
+  let parties: Record<string, Party[]> = { ...fromWizard };
+  if (c.party_preview?.length) {
+    const list: Party[] = c.party_preview.map((_p, i) => ({
+      id: `pv-${c.id}-${i}`,
+      party_type: i === 0 ? 'LANDLORD' : 'TENANT',
+      person_type: 'NATURAL_PERSON',
+      contract: j as unknown as Record<string, unknown>,
+    }));
+    parties = {
+      landlords: list[0] ? [list[0]] : [],
+      tenants: list.slice(1),
+    };
+  }
+  const hasAny = Object.values(parties).some((arr) => Array.isArray(arr) && arr.length > 0);
+  if (!hasAny) parties = { landlords: [], tenants: [] };
+  return {
+    id: j.id,
+    type: j.type as ContractResponse['type'],
+    status: j.status as ContractResponse['status'],
+    step: j.step as ContractResponse['step'],
+    parties,
+    is_owner: j.is_owner,
+    key: j.key,
+    password: j.password,
+    created_at: j.created_at,
+    tracking_code: j.tracking_code,
+    legal_review_status: j.legal_review_status as ContractResponse['legal_review_status'],
   };
 }
 
@@ -306,15 +484,10 @@ export const handlers = [
   }),
 
   ...adminEnterpriseHandlers(),
+  ...userAdminHandlers(),
 
   http.post('*/contracts/start', async ({ request }) => {
-    const body = (await request.json().catch(() => ({}))) as { contract_type?: string; party_type?: string };
-    if (!body.party_type) {
-      return HttpResponse.json(
-        { detail: 'party_type is required' },
-        { status: 422 }
-      );
-    }
+    const body = (await request.json().catch(() => ({}))) as { contract_type?: string; party_type?: string; is_guaranteed?: boolean };
     const type = body.contract_type ?? 'PROPERTY_RENT';
     const id = nextId();
     const c: MockContract = {
@@ -323,14 +496,64 @@ export const handlers = [
       status: 'DRAFT',
       step: 'LANDLORD_INFORMATION',
       parties: {},
+      created_at: new Date().toISOString(),
+      owner_id: 'mock-001',
     };
     contracts.set(id, c);
     return HttpResponse.json(contractJson(c), { status: 201 });
   }),
 
-  http.get('*/contracts/list', () =>
-    HttpResponse.json(Array.from(contracts.values()).map(contractJson))
-  ),
+  http.get('*/contracts/list', ({ request }) => {
+    const u = new URL(request.url);
+    const userId = u.searchParams.get('user_id');
+    const statusQ = (u.searchParams.get('status') ?? '').trim();
+    const typeQ = (u.searchParams.get('type') ?? '').trim();
+    const page = Math.max(1, parseInt(u.searchParams.get('page') || '1', 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(u.searchParams.get('limit') || '20', 10) || 20));
+    let list = Array.from(contracts.values()).map((c) => contractJson(c));
+    if (userId) list = list.filter((row) => (row as { user_id?: string }).user_id === userId);
+    if (statusQ) list = list.filter((row) => (row as { status?: string }).status === statusQ);
+    if (typeQ) list = list.filter((row) => (row as { type?: string }).type === typeQ);
+    const total = list.length;
+    const start = (page - 1) * limit;
+    const items = list.slice(start, start + limit);
+    return HttpResponse.json({
+      items,
+      total,
+      page,
+      limit,
+    });
+  }),
+
+  http.get('*/contracts/:id', ({ params }) => {
+    const c = getContract(params.id as string);
+    if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
+    return HttpResponse.json(contractDetailResponse(c));
+  }),
+
+  http.post('*/admin/contracts/:id/approve', ({ params }) => {
+    const c = contracts.get(params.id as string);
+    if (!c) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
+    c.status = 'ACTIVE';
+    c.legal_review_status = 'APPROVED';
+    if (!c.tracking_code) c.tracking_code = `AML-${String(Date.now()).slice(-8)}`;
+    return HttpResponse.json(contractJson(c));
+  }),
+
+  http.post('*/admin/contracts/:id/reject', ({ params }) => {
+    const c = contracts.get(params.id as string);
+    if (!c) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
+    c.status = 'ADMIN_REJECTED';
+    c.legal_review_status = 'REJECTED';
+    return HttpResponse.json(contractJson(c));
+  }),
+
+  http.post('*/admin/contracts/:id/revoke', ({ params }) => {
+    const c = contracts.get(params.id as string);
+    if (!c) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
+    c.status = 'REVOKED';
+    return HttpResponse.json(contractJson(c));
+  }),
 
   http.get('*/contracts/:id/status', ({ params }) => {
     const c = getContract(params.id as string);
@@ -351,6 +574,16 @@ export const handlers = [
       landlord_share: 2_500_000,
       tenant_share: 2_500_000,
       invoice_id: `inv-${c.id}`,
+    });
+  }),
+
+  http.post('*/contracts/:id/commission/pay', ({ params }) => {
+    const c = getContract(params.id as string);
+    if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
+    return HttpResponse.json({
+      ok: true,
+      redirect_url: '/financials/bank/gateway',
+      used_wallet: true,
     });
   }),
 
@@ -497,18 +730,7 @@ export const handlers = [
 
   http.get('*/contracts/resolve-info', () => HttpResponse.json({ result: 'اطلاعات تأیید شد' })),
 
-  http.post('*/files/upload', () => HttpResponse.json({ id: 'file-001', url: null }, { status: 201 })),
-
-  http.get('*/admin/users', () =>
-    HttpResponse.json({
-      total_count: 1,
-      start_index: 0,
-      end_index: 1,
-      data: [mockUser],
-    })
-  ),
-
-  http.get('*/admin/users/:id', () => HttpResponse.json(mockUser)),
+  http.post('*/files/upload', () => HttpResponse.json({ id: '10001', url: null }, { status: 201 })),
 
   // ---- CRM in-memory (وقتی VITE_USE_CRM_API=true + MSW) ----
   ...crmLeadHandlers(),
@@ -519,9 +741,13 @@ export const handlers = [
   http.get('*/financials/wallets', () =>
     HttpResponse.json({
       id: 'wallet-001',
-      credit: 0,
+      credit: 3_000_000,
       user_id: 'mock-001',
       status: 'ACTIVE',
     })
   ),
+
+  ...consultantPlatformHandlers(),
+
+  ...workspaceOrgHandlers(),
 ];

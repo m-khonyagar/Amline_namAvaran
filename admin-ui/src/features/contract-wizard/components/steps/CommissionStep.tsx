@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { apiClient } from '../../api/contractApi';
+import { apiClient, contractApi } from '../../api/contractApi';
 import type { StepProps } from '../../types/wizard';
 import { StepErrorBanner } from '../StepErrorBanner';
 import { ensureMappedError } from '../../../../lib/errorMapper';
@@ -11,6 +11,12 @@ interface CommissionInvoice {
   invoice_id: string;
 }
 
+interface WalletSummary {
+  id?: string;
+  credit?: number;
+  status?: string;
+}
+
 function toToman(rial: number): string {
   if (!rial || isNaN(rial)) return '۰';
   return (rial / 10).toLocaleString('fa-IR');
@@ -18,7 +24,10 @@ function toToman(rial: number): string {
 
 export function CommissionStep({ contractId }: StepProps) {
   const [invoice, setInvoice] = useState<CommissionInvoice | null>(null);
+  const [wallet, setWallet] = useState<WalletSummary | null>(null);
+  const [useWallet, setUseWallet] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<string[]>([]);
   const [errorHint, setErrorHint] = useState<string | null>(null);
@@ -37,8 +46,36 @@ export function CommissionStep({ contractId }: StepProps) {
       .finally(() => setIsLoading(false));
   }, [contractId]);
 
-  function handlePayment() {
-    window.location.href = '/financials/bank/gateway';
+  useEffect(() => {
+    apiClient
+      .get<WalletSummary>('/financials/wallets')
+      .then((res) => setWallet(res.data))
+      .catch(() => setWallet(null));
+  }, []);
+
+  async function handlePayment() {
+    setPaying(true);
+    setError(null);
+    setErrorDetails([]);
+    setErrorHint(null);
+    try {
+      const credit = wallet?.credit ?? 0;
+      const applyWallet = useWallet && credit > 0;
+      const res = await contractApi.payCommission(contractId, {
+        use_wallet_credit: applyWallet,
+        use_all_wallet_credits: applyWallet,
+        wallet_credits: applyWallet ? credit : undefined,
+      });
+      const url = res.data.redirect_url ?? '/financials/bank/gateway';
+      window.location.href = url;
+    } catch (err: unknown) {
+      const m = ensureMappedError(err);
+      setError(m.message);
+      setErrorDetails(m.detailLines);
+      setErrorHint(m.hint ?? null);
+    } finally {
+      setPaying(false);
+    }
   }
 
   if (isLoading) {
@@ -48,6 +85,8 @@ export function CommissionStep({ contractId }: StepProps) {
       </div>
     );
   }
+
+  const creditRial = wallet?.credit ?? 0;
 
   return (
     <div dir="rtl" className="space-y-6">
@@ -81,12 +120,30 @@ export function CommissionStep({ contractId }: StepProps) {
             </div>
           </div>
 
+          {creditRial > 0 && (
+            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 bg-white p-3 dark:border-slate-600 dark:bg-slate-900">
+              <input
+                type="checkbox"
+                checked={useWallet}
+                onChange={(e) => setUseWallet(e.target.checked)}
+                className="mt-1"
+              />
+              <span className="text-sm text-gray-700 dark:text-slate-200">
+                استفاده از موجودی کیف پول در این پرداخت
+                <span className="mr-1 block text-xs text-gray-500">
+                  موجودی: {toToman(creditRial)} تومان (سمت سرور نحوهٔ تسویه را تعیین می‌کند)
+                </span>
+              </span>
+            </label>
+          )}
+
           <button
             type="button"
-            onClick={handlePayment}
-            className="w-full bg-primary text-white rounded-lg py-2.5 font-medium"
+            onClick={() => void handlePayment()}
+            disabled={paying}
+            className="w-full bg-primary text-white rounded-lg py-2.5 font-medium disabled:opacity-50"
           >
-            پرداخت کمیسیون
+            {paying ? 'در حال انتقال…' : 'ادامهٔ پرداخت کمیسیون'}
           </button>
         </div>
       )}

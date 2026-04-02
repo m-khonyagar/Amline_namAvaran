@@ -1,103 +1,33 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { ErrorBoundary } from '../components/ErrorBoundary';
+import { CommandPalette } from '../components/CommandPalette';
+import { NotificationsBell } from '../components/NotificationsBell';
 import { cn } from '../lib/cn';
-import { apiClient } from '../lib/api';
-
-type NavConfig = {
-  to: string;
-  label: string;
-  icon: string;
-  permission?: string;
-};
-
-const NAV_CONFIG: NavConfig[] = [
-  { to: '/dashboard', label: 'داشبورد', icon: '🏠' },
-  { to: '/contracts', label: 'قراردادها', icon: '📄', permission: 'contracts:read' },
-  { to: '/contracts/wizard', label: 'قرارداد جدید', icon: '✍️', permission: 'contracts:write' },
-  { to: '/crm', label: 'CRM', icon: '📊' },
-  { to: '/users', label: 'کاربران', icon: '👥', permission: 'users:read' },
-  { to: '/wallets', label: 'کیف پول', icon: '💳', permission: 'wallets:read' },
-  { to: '/settings', label: 'تنظیمات', icon: '⚙️', permission: 'settings:read' },
-  { to: '/admin/roles', label: 'نقش‌ها', icon: '🔐', permission: 'roles:read' },
-  { to: '/admin/audit', label: 'ممیزی', icon: '📋', permission: 'audit:read' },
-  { to: '/admin/activity', label: 'گزارش فعالیت', icon: '📈', permission: 'reports:read' },
-];
-
-function NotificationsBell() {
-  const { hasPermission } = useAuth();
-  const [open, setOpen] = useState(false);
-  const canRead = hasPermission('notifications:read');
-  const { data } = useQuery({
-    queryKey: ['admin-notifications'],
-    queryFn: async () => {
-      const res = await apiClient.get<{
-        items: { id: string; title: string; body?: string; read: boolean; created_at?: string }[];
-      }>('/admin/notifications');
-      return res.data;
-    },
-    enabled: canRead,
-  });
-  if (!canRead) return null;
-  const items = data?.items ?? [];
-  const unread = items.filter((i) => !i.read).length;
-  return (
-    <div className="relative z-50">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="relative flex h-10 w-10 items-center justify-center rounded-amline-md border border-[var(--amline-border)] text-lg hover:bg-[var(--amline-surface-muted)] dark:border-slate-600"
-        aria-expanded={open}
-        aria-label="اعلان‌ها"
-      >
-        🔔
-        {unread > 0 ? (
-          <span className="absolute -left-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-            {unread > 9 ? '9+' : unread}
-          </span>
-        ) : null}
-      </button>
-      {open ? (
-        <>
-          <button
-            type="button"
-            className="fixed inset-0 z-40 cursor-default"
-            aria-label="بستن اعلان‌ها"
-            onClick={() => setOpen(false)}
-          />
-          <div className="absolute left-0 top-full z-50 mt-2 w-[min(22rem,calc(100vw-2rem))] rounded-amline-md border border-[var(--amline-border)] bg-[var(--amline-surface)] p-2 shadow-amline dark:border-slate-700">
-            {items.length === 0 ? (
-              <p className="px-3 py-4 text-center text-sm text-[var(--amline-fg-muted)]">اعلانی نیست</p>
-            ) : (
-              <ul className="max-h-72 space-y-1 overflow-y-auto">
-                {items.map((n) => (
-                  <li
-                    key={n.id}
-                    className={cn(
-                      'rounded-lg px-3 py-2 text-sm',
-                      n.read ? 'text-[var(--amline-fg-muted)]' : 'bg-[var(--amline-primary-muted)] font-medium text-[var(--amline-fg)]'
-                    )}
-                  >
-                    <p className="font-medium">{n.title}</p>
-                    {n.body ? <p className="mt-0.5 text-xs opacity-90">{n.body}</p> : null}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </>
-      ) : null}
-    </div>
-  );
-}
+import { APP_NAV_ITEMS } from '../config/navigation';
+import { useSessionIdle } from '../hooks/useSessionIdle';
+import { featureEnabled } from '../lib/featureFlags';
+import { TehranClock } from '../components/TehranClock';
 
 export default function MainLayout() {
   const { user, logout, hasPermission } = useAuth();
   const navigate = useNavigate();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const navItems = NAV_CONFIG.filter((item) => !item.permission || hasPermission(item.permission));
+  const navItems = APP_NAV_ITEMS.filter(
+    (item) =>
+      (!item.featureFlag || featureEnabled(item.featureFlag)) &&
+      (!item.permission || hasPermission(item.permission))
+  );
+
+  const { showWarn, dismissWarn } = useSessionIdle({
+    enabled: import.meta.env.PROD,
+    onLogout: () => {
+      logout();
+      navigate('/login');
+    },
+  });
 
   function handleLogout() {
     logout();
@@ -105,7 +35,35 @@ export default function MainLayout() {
   }
 
   return (
-    <div dir="rtl" className="flex min-h-screen bg-[var(--amline-bg)] text-[var(--amline-fg)] transition-colors">
+    <div dir="rtl" lang="fa" className="flex min-h-screen bg-[var(--amline-bg)] text-[var(--amline-fg)] transition-colors">
+      <CommandPalette />
+      {showWarn ? (
+        <div
+          className="fixed inset-x-4 bottom-4 z-[190] rounded-xl border border-amber-300 bg-amber-50 p-4 shadow-lg dark:border-amber-800 dark:bg-amber-950/95 sm:left-auto sm:right-4 sm:max-w-md"
+          role="status"
+        >
+          <p className="text-sm font-medium text-amber-900 dark:text-amber-100">به‌خاطر بیکاری، نشست به‌زودی قطع می‌شود.</p>
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              className="rounded-lg bg-amber-800 px-3 py-1.5 text-sm text-white dark:bg-amber-600"
+              onClick={dismissWarn}
+            >
+              ادامه کار
+            </button>
+            <button
+              type="button"
+              className="rounded-lg border border-amber-400 px-3 py-1.5 text-sm dark:border-amber-700"
+              onClick={() => {
+                logout();
+                navigate('/login');
+              }}
+            >
+              خروج
+            </button>
+          </div>
+        </div>
+      ) : null}
       {/* نوار بالا — موبایل و تبلت */}
       <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b border-[var(--amline-border)] bg-[var(--amline-surface)]/95 px-4 shadow-[var(--amline-shadow-sm)] backdrop-blur-md dark:border-slate-700 dark:bg-slate-900/95 lg:hidden">
         <button
@@ -122,9 +80,12 @@ export default function MainLayout() {
           <span className="text-base font-bold text-[var(--amline-primary)]">اَملاین</span>
           <span className="text-[10px] text-[var(--amline-fg-muted)]">پنل مدیریت</span>
         </div>
-        <div className="flex items-center gap-2">
-          <NotificationsBell />
-          <ThemeToggle />
+        <div className="flex flex-col items-end gap-0.5">
+          <TehranClock />
+          <div className="flex items-center gap-2">
+            <NotificationsBell />
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
@@ -152,9 +113,12 @@ export default function MainLayout() {
             <span className="text-xl font-bold text-[var(--amline-primary)]">اَملاین</span>
             <span className="mr-2 text-xs text-[var(--amline-fg-muted)]">پنل مدیریت</span>
           </div>
-          <div className="hidden items-center gap-2 lg:flex">
-            <NotificationsBell />
-            <ThemeToggle />
+          <div className="hidden flex-col items-end gap-1 lg:flex">
+            <TehranClock />
+            <div className="flex items-center gap-2">
+              <NotificationsBell />
+              <ThemeToggle />
+            </div>
           </div>
           <button
             type="button"
@@ -210,9 +174,11 @@ export default function MainLayout() {
         </div>
       </aside>
 
-      <main className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-14 lg:pt-0">
+      <main className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-14 lg:pt-0" id="main-content">
         <div className="container-amline flex-1 py-4 sm:py-6 lg:py-8">
-          <Outlet />
+          <ErrorBoundary fallbackTitle="خطا در بارگذاری این صفحه">
+            <Outlet />
+          </ErrorBoundary>
         </div>
       </main>
     </div>

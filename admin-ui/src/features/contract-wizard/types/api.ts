@@ -13,6 +13,8 @@ export type LegalPersonOwnershipType = 'PRIVATE_DEED' | 'LONG_TERM_LEASE';
 
 // ---- Response Types ----
 
+export type LegalReviewStatus = 'NONE' | 'AWAITING_STAFF' | 'APPROVED' | 'REJECTED';
+
 export interface ContractResponse {
   id: string;
   type: ContractType;
@@ -23,6 +25,8 @@ export interface ContractResponse {
   key: string;
   password: string | null;
   created_at: string;
+  tracking_code?: string | null;
+  legal_review_status?: LegalReviewStatus;
 }
 
 /** پاسخ GET /contracts/{id}/status — با OpenAPI رسمی align شود در openapi-sync */
@@ -64,7 +68,8 @@ export interface FileResponse {
 
 export interface StartContractDto {
   contract_type: ContractType;
-  party_type: PartyType;
+  /** party_type در OpenAPI رسمی نیست — فقط برای mock/dev استفاده می‌شه */
+  party_type?: PartyType;
   is_guaranteed?: boolean;
 }
 
@@ -191,4 +196,16 @@ export interface VerifyWitnessOtpDto {
 
 export interface EmptyNextStepDto {
   next_step: PRContractStep;
+}
+
+export interface CommissionPayDto {
+  use_wallet_credit?: boolean;
+  use_all_wallet_credits?: boolean;
+  wallet_credits?: number | null;
+}
+
+export interface CommissionPayResponse {
+  ok: boolean;
+  redirect_url?: string;
+  used_wallet?: boolean;
 }

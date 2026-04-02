@@ -60,6 +60,21 @@ export function updateLeadStatus(id: string, status: LeadStatus): Lead | null {
   return updateLead(id, { status })
 }
 
+/** به‌روزرسانی دسته‌ای وضعیت (یک بار نوشتن localStorage) */
+export function bulkUpdateLeadStatus(ids: string[], status: LeadStatus): number {
+  const idSet = new Set(ids)
+  const leads = getLeads()
+  let n = 0
+  const now = new Date().toISOString()
+  const next = leads.map((l) => {
+    if (!idSet.has(l.id)) return l
+    n += 1
+    return { ...l, status, updated_at: now }
+  })
+  if (n > 0) localStorage.setItem(LEADS_KEY, JSON.stringify(next))
+  return n
+}
+
 // ---- Activities ----
 
 export function getActivities(leadId?: string): LeadActivity[] {

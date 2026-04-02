@@ -23,6 +23,8 @@ import type {
   UpdateStatus,
   VerifySignOtpDto,
   VerifyWitnessOtpDto,
+  CommissionPayDto,
+  CommissionPayResponse,
 } from '../types/api';
 
 function resolveApiBaseUrl(): string {
@@ -118,6 +120,9 @@ export const contractApi = {
 
   getList: () =>
     apiClient.get<ContractResponse[]>('/contracts/list'),
+
+  payCommission: (id: string, dto: CommissionPayDto) =>
+    apiClient.post<CommissionPayResponse>(`/contracts/${id}/commission/pay`, dto),
 
   resolveInfo: (type: string, text: string) =>
     apiClient.get<ResolveInfoResponse>(`/contracts/resolve-info?type=${type}&text=${encodeURIComponent(text)}`),
