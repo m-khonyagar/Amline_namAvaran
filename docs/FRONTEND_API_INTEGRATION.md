@@ -46,7 +46,8 @@ python scripts/inventory_frontend_http_calls.py
 
 ## E2E
 
-- **amline-ui:** [`amline-ui/playwright.config.ts`](../amline-ui/playwright.config.ts) — `backend/backend/scripts/run_e2e_server.py` (uvicorn واقعی + alembic)، نه `dev-mock-api`.
+- **amline-ui:** [`amline-ui/playwright.config.ts`](../amline-ui/playwright.config.ts) — برای سناریوی mock، `dev-mock-api` روی ۸۰۸۰ و `npm run dev` با `NEXT_PUBLIC_ENABLE_DEV_BYPASS` / `NEXT_PUBLIC_E2E_DEV_BYPASS` و `NODE_ENV=development`؛ دکمهٔ ورود آزمایشی دارای `data-testid="e2e-dev-login"` است. در CI، job `amline-ui-e2e` همان مسیر را با Playwright اجرا می‌کند.
+- **سرور واقعی (اختیاری):** `backend/backend/scripts/run_e2e_server.py` (uvicorn + alembic)، جایگزین mock.
 
 ## قرارداد — New Flow (SwaggerHub 0.1.3)
 

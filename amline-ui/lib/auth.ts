@@ -25,9 +25,13 @@ export function logout(): void {
 }
 
 export function isDevBypassEnabled(): boolean {
+  if (process.env.NEXT_PUBLIC_ENABLE_DEV_BYPASS !== 'true') return false
+  if (process.env.NODE_ENV === 'production') return false
+  // Playwright گاهی NODE_ENV والد را `test` می‌گذارد؛ سرور Next آن را به ارث می‌برد.
   return (
-    process.env.NODE_ENV === 'development' &&
-    process.env.NEXT_PUBLIC_ENABLE_DEV_BYPASS === 'true'
+    process.env.NODE_ENV === 'development' ||
+    process.env.NODE_ENV === 'test' ||
+    process.env.NEXT_PUBLIC_E2E_DEV_BYPASS === 'true'
   )
 }
 
