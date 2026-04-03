@@ -1,9 +1,20 @@
 # معماری پروداکشن — پلتفرم قراردادمحور املاین
 
-**نسخه:** ۱.۰  
+**نسخه:** ۱.۱  
 **تاریخ:** ۲۰۲۶-۰۴-۰۴  
-**وضعیت:** سند هدف (Target) — مکمل [`AMLINE_MASTER_SPEC.md`](./AMLINE_MASTER_SPEC.md) و [`REPO_SPEC_ALIGNMENT.md`](./REPO_SPEC_ALIGNMENT.md)  
+**وضعیت:** **سند هدف (Target) - نقشه راه معماری**  
 **دامنه:** قرارداد اجاره/فروش، طرف‌ها، امضای OTP، کمیسیون ۵۰/۵۰، تخفیف، بازبینی حقوقی، ردیاب رسمی
+
+> ⚠️ **هشدار برای توسعه‌دهنده جدید**
+>
+> این سند، معماری **مطلوب و نهایی** سامانه قراردادها است و به عنوان **نقشه راه** عمل می‌کند.
+>
+> **در کد فعلی شاخه `main` بسیاری از اجزای آن هنوز پیاده‌سازی نشده‌اند.**
+>
+> برای دیدن وضعیت واقعی و "As-built" حتماً به این اسناد مراجعه کنید:
+>
+> 1. [`AMLINE_MASTER_SPEC.md`](./AMLINE_MASTER_SPEC.md) (بخش وضعیت اجرایی)
+> 2. [`REPO_SPEC_ALIGNMENT.md`](./REPO_SPEC_ALIGNMENT.md) (جدول Gap Analysis بین Target و As-built)
 
 **اصول:** قرارداد در مرکز aggregate؛ پرداخت و امضا به‌صورت **Saga** با **ledger idempotent**؛ بدون میکروسرویس غیرضروری؛ طراحی برای کاربر ایرانی (اعتماد پایین، اصطکاک بالا — شفافیت، SMS، رسید).
 
@@ -26,7 +37,8 @@
 13. [مدل داده (جداول/clusters)](#۱۳-به‌روزرسانی-مدل-داده)  
 14. [نمودارهای توالی](#۱۴-نمودارهای-توالی-sequence)  
 15. [کاهش ریسک](#۱۵-استراتژی-کاهش-ریسک)  
-16. [پیوست: بک‌لاگ اجرا (Epic)](#پیوست-بک‌لاگ-اولویت‌بندی‌شدهٔ-اجرا)
+16. [مسیریابی اجزای معماری در کد فعلی](#۱۶-مسیریابی-اجزای-معماری-در-کد-فعلی)  
+پیوست: [بک‌لاگ اولویت‌بندی‌شدهٔ اجرا](#appendix-contract-backlog)
 
 ---
 
@@ -417,19 +429,43 @@ sequenceDiagram
 
 ---
 
+## ۱۶. مسیریابی اجزای معماری در کد فعلی
+
+این بخش به شما نشان می‌دهد هر جزء از معماری هدف، در کجای کد فعلی قرار دارد یا باید قرار بگیرد. مسیرها نسبت به ریشهٔ `backend/backend/` هستند (بازبینی شده با as-built شاخهٔ `main`).
+
+| نام در سند (Target) | مسیر / محل در کد فعلی | وضعیت فعلی |
+| :--- | :--- | :--- |
+| `ContractAggregateService` | `app/services/v1/contract_flow_service.py` (`ContractFlowService`) | **بخشی** — جریان New Flow و حافظه/DB در حال هم‌ترازی؛ نیاز به توسعه مطابق Saga و state این سند |
+| `PartyInvitationService` | دعوت بتا: `app/repositories/v1/launch_repository.py`؛ طرف‌های قرارداد در flow قرارداد | **بخشی** — سرویس مجزا با این نام وجود ندارد؛ دعوت طرف قرارداد در همان ماژول flow |
+| `OtpSignatureService` | `app/services/v1/otp_service.py` + `signature_service.py` | **پیاده‌سازی شده** (با محدودیت‌های پروداکشن طبق Master) |
+| `PaymentSagaOrchestrator` | `app/services/v1/psp_payment_service.py`، `app/api/v1/payment_routes.py` | **بخشی** — PSP و idempotency موجود؛ **orchestrator split ۵۰/۵۰ و Saga کامل این سند نیست** |
+| `DiscountService` | سرویس اختصاصی با این نام در کد یافت نشد | **نامشخص / نیاز به پیاده‌سازی** مطابق بک‌لاگ |
+| `DisputeService` | — | **پیاده‌سازی نشده** — اولویت P1 |
+| `SettlementEngine` | — | **پیاده‌سازی نشده** — اولویت P2 |
+| `LedgerHoldService` | — | **پیاده‌سازی نشده** — اولویت P1 |
+| `LegalAuditService` | `app/models/audit_log.py` (`AuditLogEntry`) + مصرف در API ادمین | **بخشی** — export حقوقی / hash chain این سند نیست |
+| جدول ممیزی (معادل `audit_events`) | `app/models/audit_log.py` — جدول `audit_log_entries` | **پیاده‌سازی شده** — مدل **`AuditLogEntry`** (نه `AuditEvent`) |
+| معادل `financial_ledger_entries` | `app/models/wallet.py` — جدول `wallet_ledger_entries` | **بخشی** — دارای `idempotency_key`؛ فیلد **`reversal_of_entry_id`** طبق این سند هنوز نیست |
+| وضعیت / رکورد flow قرارداد | `app/models/contract_flow.py` (`ContractFlowRecord` و وابسته‌ها) | **اسکیما موجود** — اتصال کامل به مسیر اجرای production در پیشرفت |
+| `disputes` (جدول) | — | **پیاده‌سازی نشده** — اولویت P1 |
+
+> **نکته:** اگر جزئی از معماری در این جدول نیست، به این معناست که هنوز در کد پیاده‌سازی نشده و باید بر اساس اولویت‌بندی پیوست این سند توسعه داده شود.
+
+<a id="appendix-contract-backlog"></a>
+
 ## پیوست: بک‌لاگ اولویت‌بندی‌شدهٔ اجرا
 
 برای تبدیل به Issue/GitHub Epic می‌توان از برچسب‌های `epic:contract-production` استفاده کرد.
 
-| اولویت | Epic | خروجی قابل تحویل |
-|--------|------|-------------------|
-| **P0** | Ledger + idempotency + split ۵۰/۵۰ + تخفیف | migration + تست واحد + هم‌خوانی PSP فعلی |
-| **P0** | State machine + SLA job | جدول deadline + worker |
-| **P1** | Audit append-only + export حقوقی پایه | API ادمین + ذخیرهٔ object |
-| **P1** | Dispute + hold | API + UI حداقلی ادمین |
-| **P2** | SettlementEngine (refund/reversal) | commands + تست سناریو |
-| **P2** | Versioning + diff | جدول + قوانین immutable |
-| **P3** | Referral + fraud signals | attribution + metrics |
+| اولویت | Epic | وضعیت / لینک |
+| :--- | :--- | :--- |
+| P0 | Ledger + idempotency + split ۵۰/۵۰ + تخفیف | `TODO: ایجاد Issue` |
+| P0 | State machine + SLA job | `TODO: ایجاد Issue` |
+| P1 | Audit append-only + export حقوقی پایه | `TODO: ایجاد Issue` |
+| P1 | Dispute + hold | `TODO: ایجاد Issue` |
+| P2 | SettlementEngine (refund/reversal) | `TODO: ایجاد Issue` |
+| P2 | Versioning + diff | `TODO: ایجاد Issue` |
+| P3 | Referral + fraud signals | `TODO: ایجاد Issue` |
 
 ---
 
