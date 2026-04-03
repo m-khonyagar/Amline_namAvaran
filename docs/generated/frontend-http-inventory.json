@@ -331,6 +331,12 @@
       "surface": "legacy_mount"
     },
     {
+      "file": "amline-ui/e2e/user-wizard.spec.ts",
+      "line": 30,
+      "path": "/contracts",
+      "surface": "legacy_mount"
+    },
+    {
       "file": "admin-ui/src/pages/contracts/ContractsPage.tsx",
       "line": 178,
       "path": "/contracts/${c.id}",
@@ -560,7 +566,7 @@
     },
     {
       "file": "amline-ui/e2e/user-wizard.spec.ts",
-      "line": 11,
+      "line": 42,
       "path": "/contracts/wizard",
       "surface": "legacy_mount"
     },
@@ -728,7 +734,7 @@
     },
     {
       "file": "amline-ui/e2e/user-wizard.spec.ts",
-      "line": 5,
+      "line": 22,
       "path": "/login",
       "surface": "other_slash"
     },
@@ -787,7 +793,7 @@
       "surface": "other_slash"
     }
   ],
-  "entry_count": 131,
+  "entry_count": 132,
   "generator": "scripts/inventory_frontend_http_calls.py",
   "repo_root_hint": "Amline_namAvaran",
   "scan_roots": [
@@ -796,6 +802,6 @@
     "site/app",
     "packages/amline-ui-core/src"
   ],
-  "sha256_prefix": "2cfe1c27e58043f8",
+  "sha256_prefix": "529dd27b856f8c37",
   "version": 1
 }
