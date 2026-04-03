@@ -11,6 +11,10 @@ export interface Lead {
   created_at: string
   updated_at: string
   contract_id: string | null
+  province_id: string | null
+  city_id: string | null
+  province_name_fa?: string | null
+  city_name_fa?: string | null
 }
 
 export interface LeadActivity {

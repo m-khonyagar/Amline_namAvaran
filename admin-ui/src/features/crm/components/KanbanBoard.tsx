@@ -5,7 +5,7 @@ import type { Lead, LeadStatus } from '../types'
 import { loadLeads, saveLeadStatus, createLeadRecord } from '../crmService'
 import { logAudit } from '../../../lib/auditLog'
 import { LeadCard } from './LeadCard'
-import { LeadForm } from './LeadForm'
+import { LeadForm, type LeadFormValues } from './LeadForm'
 
 const COLUMNS: { status: LeadStatus; label: string; color: string }[] = [
   { status: 'NEW', label: 'جدید', color: 'bg-blue-50 border-blue-200' },
@@ -54,15 +54,17 @@ export function KanbanBoard() {
     })()
   }
 
-  const handleCreateLead = (values: {
-    full_name: string
-    mobile: string
-    need_type: 'RENT' | 'BUY' | 'SELL'
-    notes: string
-    assigned_to: string | null
-  }) => {
+  const handleCreateLead = (values: LeadFormValues) => {
     void (async () => {
-      await createLeadRecord(values)
+      await createLeadRecord({
+        full_name: values.full_name,
+        mobile: values.mobile,
+        need_type: values.need_type,
+        notes: values.notes,
+        assigned_to: values.assigned_to,
+        province_id: values.province_id || null,
+        city_id: values.city_id || null,
+      })
       void logAudit('crm.lead.create', 'lead', { full_name: values.full_name })
       refresh()
       setShowNewLeadForm(false)

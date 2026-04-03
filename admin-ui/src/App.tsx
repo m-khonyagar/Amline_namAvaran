@@ -10,10 +10,13 @@ import ContractsPage from './pages/contracts/ContractsPage'
 import ContractDetailPage from './pages/contracts/ContractDetailPage'
 import PRContractsPage from './pages/contracts/PRContractsPage'
 import WalletsPage from './pages/wallets/WalletsPage'
+import PaymentsPage from './pages/payments/PaymentsPage'
 import SettingsPage from './pages/settings/SettingsPage'
 import RolesPage from './pages/admin/RolesPage'
 import AuditLogPage from './pages/admin/AuditLogPage'
 import ActivityReportPage from './pages/admin/ActivityReportPage'
+import IntegrationsPage from './pages/integrations/IntegrationsPage'
+import BillingPage from './pages/billing/BillingPage'
 import CRMPage from './pages/crm/CRMPage'
 import LeadDetailPage from './pages/crm/LeadDetailPage'
 import { useAuth } from './hooks/useAuth'
@@ -130,9 +133,29 @@ function AppRoutes() {
             } />
           </Route>
 
+          <Route path="payments">
+            <Route index element={
+              <PermissionGuard permission="wallets:read">
+                <PaymentsPage />
+              </PermissionGuard>
+            } />
+          </Route>
+
+          <Route path="billing" element={
+            <PermissionGuard permission="wallets:read">
+              <BillingPage />
+            </PermissionGuard>
+          } />
+
           <Route path="settings" element={
             <PermissionGuard permission="settings:read">
               <SettingsPage />
+            </PermissionGuard>
+          } />
+
+          <Route path="integrations" element={
+            <PermissionGuard permission="settings:read">
+              <IntegrationsPage />
             </PermissionGuard>
           } />
 
