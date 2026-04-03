@@ -47,12 +47,26 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 body {
   font-family: var(--font-vazirmatn), 'Vazir', system-ui, sans-serif;
   font-size: 16px;
   line-height: 1.65;
   background-color: var(--amline-bg);
   color: var(--amline-fg);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+@layer base {
+  :where(a, button, input, textarea, select, summary, [tabindex]:not([tabindex='-1'])):focus-visible {
+    outline: 2px solid var(--amline-ring);
+    outline-offset: 2px;
+  }
 }
 
 .amline-display {
