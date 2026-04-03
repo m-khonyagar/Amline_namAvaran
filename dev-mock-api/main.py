@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Body, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -139,7 +139,7 @@ def _next_id() -> str:
 
 
 def _contract_json(c: Dict[str, Any]) -> Dict[str, Any]:
-    return {
+    out: Dict[str, Any] = {
         "id": c["id"],
         "type": c["type"],
         "status": c["status"],
@@ -149,7 +149,20 @@ def _contract_json(c: Dict[str, Any]) -> Dict[str, Any]:
         "key": "mock-key",
         "password": None,
         "created_at": c.get("created_at", datetime.now(timezone.utc).isoformat()),
+        "next_step": c.get("step"),
     }
+    for k in (
+        "flow_version",
+        "home_info",
+        "dating_info",
+        "mortgage_info",
+        "renting_info",
+        "signings",
+        "witness",
+    ):
+        if k in c:
+            out[k] = c[k]
+    return out
 
 
 def _get(cid: str) -> Dict[str, Any]:
@@ -235,6 +248,7 @@ def contracts_start(body: StartBody) -> Dict[str, Any]:
         "step": "LANDLORD_INFORMATION",
         "parties": {},
         "created_at": now,
+        "flow_version": "0.1.3",
     }
     contracts[cid] = c
     return _contract_json(c)
@@ -258,6 +272,7 @@ def contracts_status(contract_id: str) -> Dict[str, Any]:
         "step": c["step"],
         "contract_id": c["id"],
         "type": c["type"],
+        "next_step": c["step"],
     }
 
 
@@ -309,6 +324,35 @@ class SetStepBody(BaseModel):
     next_step: Optional[str] = None
 
 
+class SectionPatchBody(BaseModel):
+    next_step: Optional[str] = None
+    payload: Optional[Dict[str, Any]] = None
+
+
+class SignRequestMock(BaseModel):
+    model_config = {"extra": "ignore"}
+    mobile: Optional[str] = None
+    party_id: Optional[str] = None
+
+
+class WitnessRequestMock(BaseModel):
+    model_config = {"extra": "ignore"}
+    national_code: str = ""
+    mobile: str = ""
+    witness_type: Optional[str] = None
+    witness_name: Optional[str] = None
+
+
+class WitnessVerifyMock(BaseModel):
+    model_config = {"extra": "ignore"}
+    otp: str = ""
+    mobile: str = ""
+    national_code: str = ""
+    salt: str = ""
+    witness_type: Optional[str] = None
+    next_step: Optional[str] = None
+
+
 @app.post("/contracts/{contract_id}/party/landlord/set")
 def landlord_set(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
     c = _get(contract_id)
@@ -342,29 +386,49 @@ def tenant_set(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
 
 @app.delete("/contracts/{contract_id}/party/{party_id}")
 def party_delete(contract_id: str, party_id: str) -> Dict[str, bool]:
-    _get(contract_id)
+    c = _get(contract_id)
+    parties = c.get("parties") or {}
+    for bucket in ("landlords", "tenants"):
+        lst = parties.get(bucket) or []
+        parties[bucket] = [p for p in lst if str(p.get("id")) != str(party_id)]
+    c["parties"] = parties
     return {"ok": True}
 
 
 @app.post("/contracts/{contract_id}/home-info", status_code=201)
-def home_info(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
+def home_info(
+    contract_id: str,
+    body: SectionPatchBody = Body(default_factory=SectionPatchBody),
+) -> Dict[str, Any]:
     c = _get(contract_id)
+    if body.payload is not None:
+        c["home_info"] = body.payload
     nxt = body.next_step or "DATING"
     c["step"] = nxt
     return {"next_step": nxt}
 
 
 @app.post("/contracts/{contract_id}/dating", status_code=201)
-def dating(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
+def dating(
+    contract_id: str,
+    body: SectionPatchBody = Body(default_factory=SectionPatchBody),
+) -> Dict[str, Any]:
     c = _get(contract_id)
+    if body.payload is not None:
+        c["dating_info"] = body.payload
     nxt = body.next_step or "MORTGAGE"
     c["step"] = nxt
     return {"next_step": nxt}
 
 
 @app.post("/contracts/{contract_id}/mortgage", status_code=201)
-def mortgage(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
+def mortgage(
+    contract_id: str,
+    body: SectionPatchBody = Body(default_factory=SectionPatchBody),
+) -> Dict[str, Any]:
     c = _get(contract_id)
+    if body.payload is not None:
+        c["mortgage_info"] = body.payload
     nxt = body.next_step or (
         "SIGNING" if c["type"] == "BUYING_AND_SELLING" else "RENTING"
     )
@@ -373,16 +437,48 @@ def mortgage(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
 
 
 @app.post("/contracts/{contract_id}/renting", status_code=201)
-def renting(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
+def renting(
+    contract_id: str,
+    body: SectionPatchBody = Body(default_factory=SectionPatchBody),
+) -> Dict[str, Any]:
     c = _get(contract_id)
+    if c["type"] == "BUYING_AND_SELLING":
+        raise HTTPException(status_code=422, detail="renting_not_applicable_for_buy_sell")
+    if body.payload is not None:
+        c["renting_info"] = body.payload
     nxt = body.next_step or "SIGNING"
     c["step"] = nxt
     return {"next_step": nxt}
 
 
+@app.post("/contracts/{contract_id}/sign/request", status_code=201)
+def sign_request(
+    contract_id: str,
+    body: SignRequestMock = Body(default_factory=SignRequestMock),
+) -> Dict[str, Any]:
+    _get(contract_id)
+    return {
+        "ok": True,
+        "challenge_id": "mock-challenge",
+        "expires_in_seconds": 300,
+        "masked_phone": "0912***0000",
+        "debug_code": "424242",
+    }
+
+
 @app.post("/contracts/{contract_id}/sign", status_code=201)
-def sign(_contract_id: str) -> Dict[str, Any]:
-    return {}
+def sign(
+    contract_id: str,
+    body: SignRequestMock = Body(default_factory=SignRequestMock),
+) -> Dict[str, Any]:
+    _get(contract_id)
+    return {
+        "ok": True,
+        "challenge_id": "mock-challenge",
+        "expires_in_seconds": 300,
+        "masked_phone": "0912***0000",
+        "debug_code": "424242",
+    }
 
 
 @app.post("/contracts/{contract_id}/sign/verify")
@@ -391,15 +487,28 @@ def sign_verify(_contract_id: str) -> Dict[str, Any]:
 
 
 @app.post("/contracts/{contract_id}/sign/set")
-def sign_set(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
+def sign_set(
+    contract_id: str,
+    body: SectionPatchBody = Body(default_factory=SectionPatchBody),
+) -> Dict[str, Any]:
     c = _get(contract_id)
     nxt = body.next_step or "WITNESS"
     c["step"] = nxt
+    if body.payload is not None:
+        rec = {
+            "id": f"sign-mock-{int(datetime.now().timestamp() * 1000)}",
+            "status": "SECTION_DONE",
+            "payload": body.payload,
+        }
+        c.setdefault("signings", []).append(rec)
     return {"next_step": nxt}
 
 
 @app.post("/contracts/{contract_id}/add-witness")
-def add_witness(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
+def add_witness(
+    contract_id: str,
+    body: SectionPatchBody = Body(default_factory=SectionPatchBody),
+) -> Dict[str, Any]:
     c = _get(contract_id)
     nxt = body.next_step or "WITNESS"
     c["step"] = nxt
@@ -407,16 +516,34 @@ def add_witness(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
 
 
 @app.post("/contracts/{contract_id}/witness/send-otp", status_code=201)
-def witness_send_otp(_contract_id: str) -> Dict[str, Any]:
-    return {}
+def witness_send_otp(
+    contract_id: str,
+    body: WitnessRequestMock = Body(default_factory=WitnessRequestMock),
+) -> Dict[str, Any]:
+    _get(contract_id)
+    return {
+        "ok": True,
+        "challenge_id": "mock-witness",
+        "expires_in_seconds": 300,
+        "masked_phone": (body.mobile or "")[:4] + "***" if body.mobile else "***",
+        "debug_code": "131313",
+    }
 
 
 @app.post("/contracts/{contract_id}/witness/verify")
-def witness_verify(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
+def witness_verify(
+    contract_id: str,
+    body: WitnessVerifyMock = Body(default_factory=WitnessVerifyMock),
+) -> Dict[str, Any]:
     c = _get(contract_id)
     nxt = body.next_step or "FINISH"
     c["step"] = nxt
     c["status"] = "COMPLETED"
+    c["witness"] = {
+        "verified": True,
+        "national_code": body.national_code,
+        "witness_type": body.witness_type,
+    }
     return {"ok": True, "next_step": nxt}
 
 

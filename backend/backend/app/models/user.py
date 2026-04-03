@@ -1,18 +1,30 @@
 from enum import Enum
 
+
 class UserRole(Enum):
-    USER = 'USER'
-    CONSULTANT = 'CONSULTANT'
-    EXPERT = 'EXPERT'
-    ADMIN = 'ADMIN'
+    USER = "USER"
+    CONSULTANT = "CONSULTANT"
+    EXPERT = "EXPERT"
+    ADMIN = "ADMIN"
+
 
 class UserStatus(Enum):
-    ACTIVE = 'ACTIVE'
-    SUSPENDED = 'SUSPENDED'
-    DELETED = 'DELETED'
+    ACTIVE = "ACTIVE"
+    SUSPENDED = "SUSPENDED"
+    DELETED = "DELETED"
+
 
 class User:
-    def __init__(self, phone_number, email, profile_picture, national_id, otp, status=UserStatus.ACTIVE, role=UserRole.USER):
+    def __init__(
+        self,
+        phone_number,
+        email,
+        profile_picture,
+        national_id,
+        otp,
+        status=UserStatus.ACTIVE,
+        role=UserRole.USER,
+    ):
         self.phone_number = phone_number
         self.email = email
         self.profile_picture = profile_picture
@@ -24,4 +36,4 @@ class User:
         self.listings = []  # Placeholder for listings relationship
 
     def __repr__(self):
-        return f'<User {self.phone_number}, {self.email}, {self.role}, {self.status}>\nContracts: {self.contracts}\nListings: {self.listings}'
+        return f"<User {self.phone_number}, {self.email}, {self.role}, {self.status}>\nContracts: {self.contracts}\nListings: {self.listings}"
