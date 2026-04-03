@@ -62,7 +62,7 @@
     },
     {
       "file": "amline-ui/lib/auth.ts",
-      "line": 52,
+      "line": 56,
       "path": "/admin/login",
       "surface": "legacy_mount"
     },
@@ -86,7 +86,7 @@
     },
     {
       "file": "amline-ui/lib/auth.ts",
-      "line": 39,
+      "line": 43,
       "path": "/admin/otp/send",
       "surface": "legacy_mount"
     },
@@ -320,13 +320,19 @@
     },
     {
       "file": "amline-ui/app/login/page.tsx",
-      "line": 118,
+      "line": 119,
       "path": "/contracts",
       "surface": "legacy_mount"
     },
     {
       "file": "amline-ui/app/page.tsx",
       "line": 24,
+      "path": "/contracts",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "amline-ui/e2e/user-wizard.spec.ts",
+      "line": 30,
       "path": "/contracts",
       "surface": "legacy_mount"
     },
@@ -560,7 +566,7 @@
     },
     {
       "file": "amline-ui/e2e/user-wizard.spec.ts",
-      "line": 12,
+      "line": 42,
       "path": "/contracts/wizard",
       "surface": "legacy_mount"
     },
@@ -728,7 +734,7 @@
     },
     {
       "file": "amline-ui/e2e/user-wizard.spec.ts",
-      "line": 5,
+      "line": 22,
       "path": "/login",
       "surface": "other_slash"
     },
@@ -787,7 +793,7 @@
       "surface": "other_slash"
     }
   ],
-  "entry_count": 131,
+  "entry_count": 132,
   "generator": "scripts/inventory_frontend_http_calls.py",
   "repo_root_hint": "Amline_namAvaran",
   "scan_roots": [
@@ -796,6 +802,6 @@
     "site/app",
     "packages/amline-ui-core/src"
   ],
-  "sha256_prefix": "5b0280e20741b405",
+  "sha256_prefix": "529dd27b856f8c37",
   "version": 1
 }
