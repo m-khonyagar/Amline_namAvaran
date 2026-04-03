@@ -1,11 +1,11 @@
 # سند آنبوردینگ پلتفرم املاین (Amline)
 
-**نسخه سند:** ۲.۰  
-**تاریخ به‌روزرسانی:** ۲۰۲۶-۰۴-۰۳  
+**نسخه سند:** ۲.۱  
+**تاریخ به‌روزرسانی:** ۲۰۲۶-۰۴-۰۴  
 **ریپوی مرجع:** [Amline_namAvaran](https://github.com/m-khonyagar/Amline_namAvaran)  
 **مخاطب:** توسعه‌دهنده، Tech Lead، DevOps، PM، QA، **و Agentهای خودکار (LLM / Cursor / Sweep)**
 
-> **هدف v2.0:** علاوه بر معرفی پروژه، به **نیروی فنی یا عامل** بگوید *اول از کجا حقیقت را بخواند*، *چه چیزی را بدون هماهنگی دست نزند*، و *چگونه تغییر خود را تأیید کند*.
+> **هدف v2.1:** علاوه بر معرفی پروژه، به **نیروی فنی یا عامل** بگوید *اول از کجا حقیقت را بخواند*، *چه چیزی را بدون هماهنگی دست نزند*، و *چگونه تغییر خود را تأیید کند*.
 
 ---
 
@@ -120,22 +120,35 @@ scripts/           inventory فرانت، بار k6، ML baseline
 
 ## ۵. فرایندها و نحوهٔ کار تیم
 
-### ۵.۱ Git و شاخه‌ها (الزام از `[GIT_AND_BACKEND_POLICY.md](./GIT_AND_BACKEND_POLICY.md)`)
+### ۵.۱ Git و شاخه‌ها
 
-- **توسعهٔ روزمره روی `develop`.**  
-- پس از QA، ادغام در `**main`** و deploy.  
-- قبل از merge به `main`: در فرانت‌ها `**npx tsc --noEmit**` (جایی که applicable است) و **CI سبز**.
+**وضعیت فعلی ریپو (Q2 2026):** در حال حاضر فقط شاخه `main` فعال است و شاخه `develop` وجود خارجی ندارد.
 
-> اگر در ریپوی شما فقط `main` فعال است، با Tech Lead هماهنگ کنید؛ سند رسمی ریپو هنوز `develop` را مرجع می‌داند.
+- همه توسعه‌ها با ایجاد **feature branch از `main`** و سپس Pull Request به سمت `main` انجام می‌شود.
+- پس از تأیید CI و Review، PR مستقیماً در `main` merge می‌شود.
+- قوانین `Mergify` (در `.github/mergify.yml`) برای شاخه `main` پیکربندی شده است.
+
+> **توضیح برای توسعه‌دهنده:** سندهای قدیمی موجود در ریپو (مانند `GIT_AND_BACKEND_POLICY.md`) ممکن است به شاخه `develop` اشاره کنند. این ارجاعات **منسوخ شده** و باید نادیده گرفته شوند. سیاست فوق، مرجع اصلی است.
 
 ### ۵.۲ توسعهٔ روزمره (انسانی)
 
 1. کلون، `.env.example` → `.env` در ریشه و در صورت نیاز `backend/backend/.env`
 2. یا `docker compose` یا سرویس‌های جدا + `uvicorn` + `npm run dev`
-3. تغییر روی برنچ feature از روی `**develop`** (یا سیاست تیم)
-4. هر تغییر مسیر HTTP در فرانت:
-  `python scripts/inventory_frontend_http_calls.py`  
-   سپس commit کردن `docs/generated/frontend-http-inventory.json` در صورت تغییر
+3. تغییر روی **feature branch** از روی `main`
+4. هر تغییری که مسیر یا متد یک فراخوانی HTTP در فرانت‌ها (`admin-ui/` یا `amline-ui/`) را تغییر می‌دهد، **اجرای این کامند الزامی است**:
+
+   ```bash
+   # از ریشه ریپو (همان جایی که فایل docker-compose.yml قرار دارد)
+   python ./scripts/inventory_frontend_http_calls.py
+   ```
+
+   سپس فایل تولید شده را به commit خود اضافه کن:
+
+   ```bash
+   git add docs/generated/frontend-http-inventory.json
+   ```
+
+   اگر این مرحله فراموش شود، CI در مرحله `frontend-http-inventory` با خطا مواجه خواهد شد.
 
 ### ۵.۳ CI/CD (GitHub Actions) — فهرست workflowهای ریشه
 
@@ -158,7 +171,7 @@ scripts/           inventory فرانت، بار k6، ML baseline
 | بک‌اند        | از `backend/backend`: `pytest tests/ -v` (نمونهٔ اخیر: **۵۹** تست collect شده) |
 | ادمین         | `npm test`، `npm run build`، `npx playwright test` در `admin-ui`               |
 | amline-ui E2E | `npm run test:e2e` در `amline-ui`؛ جزئیات env در `FRONTEND_API_INTEGRATION`    |
-| Drift فرانت   | `python scripts/inventory_frontend_http_calls.py --check`                      |
+| Drift فرانت   | `python ./scripts/inventory_frontend_http_calls.py --check` (از ریشه ریپو)      |
 
 
 ### ۵.۵ امنیت و عملیات
@@ -178,9 +191,9 @@ pip install -r requirements.txt
 alembic upgrade head   # وقتی DB واقعی داری
 uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
 
-# Inventory فرانت (بعد از تغییر callهای HTTP)
-python scripts/inventory_frontend_http_calls.py
-python scripts/inventory_frontend_http_calls.py --check
+# Inventory فرانت (بعد از تغییر callهای HTTP؛ از ریشه ریپو)
+python ./scripts/inventory_frontend_http_calls.py
+python ./scripts/inventory_frontend_http_calls.py --check
 
 # تست بک‌اند
 cd backend/backend && pytest tests/ -v
@@ -246,7 +259,7 @@ cd backend/backend && pytest tests/ -v
 
 1. بخوانید: **§۰ و §۱ همین سند** + Master §۰–۳ + `REPO_SPEC_ALIGNMENT`
 2. راه‌اندازی: `[README.md](../README.md)`
-3. باز کنید: `**/docs`** بک‌اند روی پورتی که بالا آورده‌اید
+3. مستندات Swagger (OpenAPI) بک‌اند را در آدرس `http://localhost:8080/docs` (یا پورتی که بک‌اند روی آن اجرا شده) باز کن.
 4. قبل از PR: pytest + تست/بیلد فرانت + `tsc --noEmit` طبق سیاست git
 5. اگر API عمومی عوض شد: inventory و در صورت نیاز مستند قرارداد
 
@@ -324,4 +337,4 @@ cd backend/backend && pytest tests/ -v
 
 ---
 
-*پایان سند آنبوردینگ v2.0.*
+*پایان سند آنبوردینگ v2.1.*
