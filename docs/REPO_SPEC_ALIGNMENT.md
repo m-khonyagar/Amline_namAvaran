@@ -3,7 +3,8 @@
 **ریپوی مرجع عمومی:** [github.com/m-khonyagar/Amline_namAvaran](https://github.com/m-khonyagar/Amline_namAvaran)  
 **Master اجرایی (SSOT هم‌تراز با کد + هدف):** [`docs/AMLINE_MASTER_SPEC.md`](./AMLINE_MASTER_SPEC.md) (v5.0)  
 **سند مرجع عمیق (Target دامنه/Blu/عملیات):** [`docs/AMLINE_REFERENCE_V2_2.md`](./AMLINE_REFERENCE_V2_2.md) (v2.7)  
-**قرارداد خطا (OpenAPI):** [`docs/openapi/amline-v1-errors.openapi.yaml`](./openapi/amline-v1-errors.openapi.yaml)
+**قرارداد خطا (OpenAPI):** [`docs/openapi/amline-v1-errors.openapi.yaml`](./openapi/amline-v1-errors.openapi.yaml)  
+**معماری تکمیل‌شدهٔ قرارداد پروداکشن (Target):** [`ARCHITECTURE_CONTRACT_PLATFORM_PRODUCTION.md`](./ARCHITECTURE_CONTRACT_PLATFORM_PRODUCTION.md) — ماشین حالت، dispute، settlement، audit، SLA، رشد، versioning.
 
 این فایل **تک‌منبع** برای تیم است تا بداند کد فعلی کجاست و هدف سند کجاست.
 
