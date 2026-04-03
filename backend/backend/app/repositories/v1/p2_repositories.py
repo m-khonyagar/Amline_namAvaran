@@ -1,4 +1,5 @@
 """P2 growth — requirements, chat, ratings, analytics."""
+
 from __future__ import annotations
 
 import json
@@ -89,12 +90,17 @@ class ConversationRepository:
     def get(self, cid: str) -> Optional[Conversation]:
         return self.db.get(Conversation, cid)
 
-    def list_for_user(self, user_id: str, *, skip: int, limit: int) -> Tuple[Sequence[Conversation], int]:
+    def list_for_user(
+        self, user_id: str, *, skip: int, limit: int
+    ) -> Tuple[Sequence[Conversation], int]:
         filt = or_(
             Conversation.created_by == user_id,
             Conversation.participants_json.like(f'%"{user_id}"%'),
         )
-        total = int(self.db.scalar(select(func.count()).select_from(Conversation).where(filt)) or 0)
+        total = int(
+            self.db.scalar(select(func.count()).select_from(Conversation).where(filt))
+            or 0
+        )
         stmt = (
             select(Conversation)
             .where(filt)
@@ -126,7 +132,9 @@ class MessageRepository:
         self, conversation_id: str, *, skip: int, limit: int
     ) -> Tuple[Sequence[Message], int]:
         filt = Message.conversation_id == conversation_id
-        total = int(self.db.scalar(select(func.count()).select_from(Message).where(filt)) or 0)
+        total = int(
+            self.db.scalar(select(func.count()).select_from(Message).where(filt)) or 0
+        )
         stmt = (
             select(Message)
             .where(filt)
@@ -179,7 +187,9 @@ class RatingRepository:
         self.db.refresh(row)
         return row
 
-    def aggregate(self, target_type: RatingTargetType, target_id: str) -> Tuple[float, int]:
+    def aggregate(
+        self, target_type: RatingTargetType, target_id: str
+    ) -> Tuple[float, int]:
         stmt = select(func.avg(Rating.stars), func.count()).where(
             Rating.target_type == target_type, Rating.target_id == target_id
         )
@@ -205,7 +215,9 @@ class AnalyticsRepository:
             event_name=event_name,
             user_id=user_id,
             session_id=session_id,
-            properties_json=json.dumps(properties, ensure_ascii=False) if properties else None,
+            properties_json=(
+                json.dumps(properties, ensure_ascii=False) if properties else None
+            ),
             created_at=datetime.now(timezone.utc),
         )
         self.db.add(row)
@@ -220,13 +232,18 @@ class AnalyticsRepository:
         since: Optional[datetime] = None,
         limit_groups: int = 50,
     ) -> list[dict[str, Any]]:
-        stmt = select(AnalyticsEvent.event_name, func.count()).group_by(AnalyticsEvent.event_name)
+        stmt = select(AnalyticsEvent.event_name, func.count()).group_by(
+            AnalyticsEvent.event_name
+        )
         if event_name:
             stmt = stmt.where(AnalyticsEvent.event_name == event_name)
         if since is not None:
             stmt = stmt.where(AnalyticsEvent.created_at >= since)
         stmt = stmt.order_by(func.count().desc()).limit(limit_groups)
-        return [{"event_name": r[0], "count": int(r[1])} for r in self.db.execute(stmt).all()]
+        return [
+            {"event_name": r[0], "count": int(r[1])}
+            for r in self.db.execute(stmt).all()
+        ]
 
 
 def load_matchable_listings(db: Session, *, limit: int = 500) -> Sequence[Listing]:
@@ -234,7 +251,9 @@ def load_matchable_listings(db: Session, *, limit: int = 500) -> Sequence[Listin
         select(Listing)
         .where(
             Listing.status == ListingStatus.PUBLISHED,
-            Listing.visibility.in_([ListingVisibility.PUBLIC, ListingVisibility.NETWORK]),
+            Listing.visibility.in_(
+                [ListingVisibility.PUBLIC, ListingVisibility.NETWORK]
+            ),
         )
         .order_by(Listing.updated_at.desc())
         .limit(limit)

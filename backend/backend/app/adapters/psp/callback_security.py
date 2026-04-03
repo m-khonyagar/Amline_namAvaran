@@ -1,16 +1,24 @@
 """Optional IP allowlist and proxy-aware client extraction for PSP callbacks."""
+
 from __future__ import annotations
 
 import ipaddress
 import os
+
 from fastapi import Request
 
 from app.core.errors import AmlineError
 
 
 def _client_ip(request: Request) -> str:
-    if os.getenv("AMLINE_PSP_TRUST_X_FORWARDED_FOR", "").lower() in ("1", "true", "yes"):
-        xff = request.headers.get("x-forwarded-for") or request.headers.get("X-Forwarded-For")
+    if os.getenv("AMLINE_PSP_TRUST_X_FORWARDED_FOR", "").lower() in (
+        "1",
+        "true",
+        "yes",
+    ):
+        xff = request.headers.get("x-forwarded-for") or request.headers.get(
+            "X-Forwarded-For"
+        )
         if xff:
             return xff.split(",")[0].strip()
     if request.client:

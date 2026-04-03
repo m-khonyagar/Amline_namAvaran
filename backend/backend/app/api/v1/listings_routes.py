@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 from app.core.agency_scope import effective_agency_id
 from app.core.errors import AmlineError
 from app.db.session import get_db
-from app.models.listing import ListingStatus, ListingVisibility
 from app.integrations.listing_search_sync import sync_listing_to_external_search
+from app.models.listing import ListingStatus, ListingVisibility
 from app.repositories.listing_repository import ListingRepository
 from app.schemas.v1.listings import (
     ListingCreate,

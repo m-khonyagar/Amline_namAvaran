@@ -1,4 +1,5 @@
 """Push listing changes to external search (Meilisearch) — best-effort."""
+
 from __future__ import annotations
 
 import logging

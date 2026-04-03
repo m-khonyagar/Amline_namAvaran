@@ -1,4 +1,5 @@
 """Meilisearch REST client for listings index (sync + search + facets)."""
+
 from __future__ import annotations
 
 import logging
@@ -102,12 +103,20 @@ def ensure_index_settings(timeout: float = 10.0) -> None:
     try:
         r = httpx.patch(url, json=body, headers=_headers(), timeout=timeout)
         if r.status_code >= 400:
-            meilisearch_operations_total.labels(operation="settings_patch", result="error").inc()
-            log.warning("meilisearch settings patch failed: %s %s", r.status_code, r.text[:500])
+            meilisearch_operations_total.labels(
+                operation="settings_patch", result="error"
+            ).inc()
+            log.warning(
+                "meilisearch settings patch failed: %s %s", r.status_code, r.text[:500]
+            )
         else:
-            meilisearch_operations_total.labels(operation="settings_patch", result="ok").inc()
+            meilisearch_operations_total.labels(
+                operation="settings_patch", result="ok"
+            ).inc()
     except httpx.HTTPError as e:
-        meilisearch_operations_total.labels(operation="settings_patch", result="error").inc()
+        meilisearch_operations_total.labels(
+            operation="settings_patch", result="error"
+        ).inc()
         log.warning("meilisearch settings unreachable: %s", e)
 
 
@@ -123,7 +132,9 @@ def upsert_listing(row: Listing, timeout: float = 10.0) -> bool:
             timeout=timeout,
         )
         if r.status_code >= 400:
-            meilisearch_operations_total.labels(operation="upsert", result="error").inc()
+            meilisearch_operations_total.labels(
+                operation="upsert", result="error"
+            ).inc()
             log.warning("meilisearch upsert failed: %s %s", r.status_code, r.text[:500])
             return False
         meilisearch_operations_total.labels(operation="upsert", result="ok").inc()
@@ -141,7 +152,9 @@ def delete_listing(listing_id: str, timeout: float = 10.0) -> None:
     try:
         r = httpx.delete(url, headers=_headers(), timeout=timeout)
         if r.status_code >= 400:
-            meilisearch_operations_total.labels(operation="delete", result="error").inc()
+            meilisearch_operations_total.labels(
+                operation="delete", result="error"
+            ).inc()
         else:
             meilisearch_operations_total.labels(operation="delete", result="ok").inc()
     except httpx.HTTPError as e:
@@ -180,9 +193,7 @@ def search_listings_meili(
     if price_max is not None:
         filt.append(f"price_amount <= {float(price_max)}")
     if all(v is not None for v in (min_lat, max_lat, min_lng, max_lng)):
-        filt.append(
-            f"_geoBoundingBox([{min_lat}, {min_lng}], [{max_lat}, {max_lng}])"
-        )
+        filt.append(f"_geoBoundingBox([{min_lat}, {min_lng}], [{max_lat}, {max_lng}])")
     payload: dict[str, Any] = {
         "q": (q or "").strip(),
         "offset": skip,

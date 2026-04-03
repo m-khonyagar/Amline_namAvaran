@@ -1,4 +1,5 @@
 """RBAC roles & user bindings (P1)."""
+
 from __future__ import annotations
 
 import uuid
@@ -17,7 +18,9 @@ class RbacRole(Base):
     label: Mapped[str] = mapped_column(String(128), nullable=False)
     permissions_json: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
     )
 
     bindings: Mapped[list["UserRole"]] = relationship(
@@ -37,7 +40,9 @@ class UserRole(Base):
         String(32), ForeignKey("rbac_roles.code", ondelete="CASCADE"), nullable=False
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
     )
 
     role: Mapped["RbacRole"] = relationship("RbacRole", back_populates="bindings")

@@ -1,4 +1,5 @@
 """P2 Growth Layer — requirements, chat, ratings, analytics."""
+
 from __future__ import annotations
 
 import enum
@@ -6,7 +7,9 @@ import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from sqlalchemy import DateTime, Enum as SAEnum, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy import DateTime
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy import ForeignKey, Integer, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -36,7 +39,9 @@ class PropertyRequirement(Base):
     )
     budget_min: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
     budget_max: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
-    location_keywords: Mapped[str] = mapped_column(String(512), nullable=False, default="")
+    location_keywords: Mapped[str] = mapped_column(
+        String(512), nullable=False, default=""
+    )
     title_hint: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     status: Mapped[RequirementStatus] = mapped_column(
         SAEnum(
@@ -49,7 +54,9 @@ class PropertyRequirement(Base):
         default=RequirementStatus.ACTIVE,
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -71,7 +78,10 @@ class Conversation(Base):
     )
     title: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     listing_id: Mapped[str | None] = mapped_column(
-        String(36), ForeignKey("listings.id", ondelete="SET NULL"), nullable=True, index=True
+        String(36),
+        ForeignKey("listings.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
     )
     requirement_id: Mapped[str | None] = mapped_column(
         String(36),
@@ -82,7 +92,9 @@ class Conversation(Base):
     created_by: Mapped[str] = mapped_column(String(64), nullable=False)
     participants_json: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
     )
 
     requirement: Mapped["PropertyRequirement | None"] = relationship(
@@ -100,16 +112,25 @@ class Message(Base):
         String(36), primary_key=True, default=lambda: str(uuid.uuid4())
     )
     conversation_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False, index=True
+        String(36),
+        ForeignKey("conversations.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     sender_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     body: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
     )
-    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    read_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
-    conversation: Mapped["Conversation"] = relationship("Conversation", back_populates="messages")
+    conversation: Mapped["Conversation"] = relationship(
+        "Conversation", back_populates="messages"
+    )
 
 
 class RatingTargetType(str, enum.Enum):
@@ -139,7 +160,9 @@ class Rating(Base):
     stars: Mapped[int] = mapped_column(Integer, nullable=False)
     comment: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
     )
 
 
@@ -151,8 +174,12 @@ class AnalyticsEvent(Base):
     )
     event_name: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
     user_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
-    session_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    session_id: Mapped[str | None] = mapped_column(
+        String(64), nullable=True, index=True
+    )
     properties_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
     )

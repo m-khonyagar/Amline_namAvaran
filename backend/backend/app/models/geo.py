@@ -1,4 +1,5 @@
 """Iran provinces & cities (P1)."""
+
 from __future__ import annotations
 
 import uuid
@@ -19,7 +20,9 @@ class Province(Base):
     name_fa: Mapped[str] = mapped_column(String(128), nullable=False)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
     )
 
     cities: Mapped[list["City"]] = relationship("City", back_populates="province")
@@ -32,11 +35,16 @@ class City(Base):
         String(36), primary_key=True, default=lambda: str(uuid.uuid4())
     )
     province_id: Mapped[str] = mapped_column(
-        String(8), ForeignKey("provinces.id", ondelete="CASCADE"), nullable=False, index=True
+        String(8),
+        ForeignKey("provinces.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     name_fa: Mapped[str] = mapped_column(String(128), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
     )
 
     province: Mapped["Province"] = relationship("Province", back_populates="cities")

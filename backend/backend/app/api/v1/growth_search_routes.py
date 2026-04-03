@@ -1,4 +1,5 @@
 """Listing search — Postgres FTS/ILIKE or Meilisearch (AMLINE_SEARCH_BACKEND)."""
+
 from __future__ import annotations
 
 from decimal import Decimal
@@ -15,7 +16,6 @@ from app.models.listing import DealType, ListingStatus, ListingVisibility
 from app.repositories.listing_repository import ListingRepository
 from app.schemas.v1.growth_v1 import SearchListingsResponse
 from app.schemas.v1.listings import ListingRead
-
 
 router = APIRouter(prefix="/search", tags=["search"])
 

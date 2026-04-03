@@ -2,6 +2,7 @@
 Matrix (Element) client — optional C-S API when MATRIX_HOMESERVER_URL + MATRIX_ACCESS_TOKEN are set.
 For Synapse deploy steps see docs/MATRIX_SETUP.md.
 """
+
 from __future__ import annotations
 
 import os
@@ -48,7 +49,9 @@ def ensure_room_for_agency(agency_id: str, display_name: str) -> Optional[str]:
         return None
 
 
-def send_matrix_message(room_id: str, body: str, user_id: Optional[str] = None) -> dict[str, Any]:
+def send_matrix_message(
+    room_id: str, body: str, user_id: Optional[str] = None
+) -> dict[str, Any]:
     _ = user_id
     if not matrix_configured() or not (os.getenv("MATRIX_ACCESS_TOKEN") or "").strip():
         return {"ok": False, "reason": "matrix_not_configured"}

@@ -1,4 +1,5 @@
 """In-process WebSocket fan-out for chat (P2); replace with Redis pub/sub at scale."""
+
 from __future__ import annotations
 
 import asyncio

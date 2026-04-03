@@ -1,4 +1,5 @@
 """RBAC enforcement (P1) — off by default; enable with AMLINE_RBAC_ENFORCE=1."""
+
 from __future__ import annotations
 
 import os

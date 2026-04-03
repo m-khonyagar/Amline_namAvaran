@@ -1,4 +1,5 @@
 """In-memory OTP challenges (P0#3); replace with DB/Redis for production."""
+
 from __future__ import annotations
 
 import uuid

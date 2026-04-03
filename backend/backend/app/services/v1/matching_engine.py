@@ -1,4 +1,5 @@
 """Rule-based listing ↔ requirement matching; ML-ready via scorer protocol."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -12,8 +13,7 @@ from app.models.listing import DealType, Listing
 class MatchingScorer(Protocol):
     """Swap implementation for ML model inference without changing callers."""
 
-    def score(self, listing: Listing, requirement: PropertyRequirement) -> float:
-        ...
+    def score(self, listing: Listing, requirement: PropertyRequirement) -> float: ...
 
 
 @dataclass
@@ -44,14 +44,22 @@ class RuleBasedMatchingEngine:
             breakdown["budget"] = 25.0
         elif price < bmin:
             gap = bmin - price
-            breakdown["budget"] = max(0.0, 25.0 - float(gap / (bmin or Decimal("1")) * 5))
+            breakdown["budget"] = max(
+                0.0, 25.0 - float(gap / (bmin or Decimal("1")) * 5)
+            )
         else:
             gap = price - bmax
-            breakdown["budget"] = max(0.0, 25.0 - float(gap / (bmax or Decimal("1")) * 5))
+            breakdown["budget"] = max(
+                0.0, 25.0 - float(gap / (bmax or Decimal("1")) * 5)
+            )
         total += breakdown["budget"]
 
         hay = f"{listing.title} {listing.location_summary} {(listing.description or '')}".lower()
-        kws = [k.strip().lower() for k in requirement.location_keywords.replace(",", " ").split() if k.strip()]
+        kws = [
+            k.strip().lower()
+            for k in requirement.location_keywords.replace(",", " ").split()
+            if k.strip()
+        ]
         if kws:
             hits = sum(1 for k in kws if k in hay)
             breakdown["keywords"] = min(25.0, (hits / len(kws)) * 25.0)
@@ -73,10 +81,16 @@ class RuleBasedMatchingEngine:
             breakdown["metadata_bonus"] = 0.0
 
         total = min(self.max_score, total)
-        return MatchResult(listing_id=listing.id, score=round(total, 2), breakdown=breakdown)
+        return MatchResult(
+            listing_id=listing.id, score=round(total, 2), breakdown=breakdown
+        )
 
     def rank(
-        self, listings: Sequence[Listing], requirement: PropertyRequirement, *, top_n: int = 20
+        self,
+        listings: Sequence[Listing],
+        requirement: PropertyRequirement,
+        *,
+        top_n: int = 20,
     ) -> list[MatchResult]:
         scored = [self.score(li, requirement) for li in listings]
         scored.sort(key=lambda m: m.score, reverse=True)

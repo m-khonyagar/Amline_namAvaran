@@ -1,4 +1,5 @@
 """DB-backed CRM (P1) — canonical `/crm/*` under `/api/v1`; legacy `/admin/crm/*` unchanged."""
+
 from __future__ import annotations
 
 import os
@@ -13,10 +14,10 @@ from app.core.n8n_outbound import n8n_dispatch
 from app.core.posthog_server import posthog_capture
 from app.core.rbac_deps import require_permission
 from app.db.session import get_db
+from app.integrations.temporal_workflows import schedule_crm_lead_workflow
 from app.models.crm import CrmLead, CrmLeadSource
 from app.models.geo import City, Province
 from app.repositories.listing_repository import ListingRepository
-from app.integrations.temporal_workflows import schedule_crm_lead_workflow
 from app.repositories.v1.p1_repositories import AuditDbRepository, CrmV1Repository
 from app.schemas.v1.crm_v1 import (
     CrmActivityCreate,

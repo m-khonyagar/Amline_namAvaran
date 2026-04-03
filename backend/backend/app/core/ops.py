@@ -1,11 +1,11 @@
 """P4 ops: security headers, Prometheus /metrics, OTP path rate limit (in-process)."""
+
 from __future__ import annotations
 
 import os
 import time
-from collections import defaultdict
+from collections import defaultdict, deque
 from typing import Awaitable, Callable, Deque
-from collections import deque
 
 from fastapi import FastAPI, Request, Response
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, generate_latest
@@ -66,13 +66,23 @@ def register_ops(app: FastAPI) -> None:
             resp = await call_next(request)
             resp.headers.setdefault("X-Content-Type-Options", "nosniff")
             resp.headers.setdefault("X-Frame-Options", "DENY")
-            resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+            resp.headers.setdefault(
+                "Referrer-Policy", "strict-origin-when-cross-origin"
+            )
             return resp
 
-    if os.getenv("AMLINE_PROMETHEUS_MIDDLEWARE", "1").lower() not in ("0", "false", "no"):
+    if os.getenv("AMLINE_PROMETHEUS_MIDDLEWARE", "1").lower() not in (
+        "0",
+        "false",
+        "no",
+    ):
         app.add_middleware(_PrometheusMiddleware)
 
-    if os.getenv("AMLINE_OTP_RATE_LIMIT_ENABLED", "1").lower() not in ("0", "false", "no"):
+    if os.getenv("AMLINE_OTP_RATE_LIMIT_ENABLED", "1").lower() not in (
+        "0",
+        "false",
+        "no",
+    ):
         max_r = int(os.getenv("AMLINE_OTP_RATE_PER_MINUTE", "30"))
         app.add_middleware(_OtpRateLimiter, max_per_window=max_r, window_seconds=60.0)
 

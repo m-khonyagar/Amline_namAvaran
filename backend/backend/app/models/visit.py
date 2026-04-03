@@ -1,4 +1,5 @@
 """Visit scheduling & outcomes (P1)."""
+
 from __future__ import annotations
 
 import enum
@@ -6,7 +7,9 @@ import uuid
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import DateTime, Enum as SAEnum, ForeignKey, String, Text
+from sqlalchemy import DateTime
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy import ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -37,15 +40,23 @@ class Visit(Base):
         String(36), primary_key=True, default=lambda: str(uuid.uuid4())
     )
     listing_id: Mapped[str | None] = mapped_column(
-        String(36), ForeignKey("listings.id", ondelete="SET NULL"), nullable=True, index=True
+        String(36),
+        ForeignKey("listings.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
     )
     crm_lead_id: Mapped[str | None] = mapped_column(
-        String(36), ForeignKey("crm_leads.id", ondelete="SET NULL"), nullable=True, index=True
+        String(36),
+        ForeignKey("crm_leads.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
     )
     scheduled_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True, index=True
     )
-    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     status: Mapped[VisitStatus] = mapped_column(
         SAEnum(
             VisitStatus,
@@ -68,7 +79,9 @@ class Visit(Base):
     )
     outcome_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -77,4 +90,6 @@ class Visit(Base):
         onupdate=lambda: datetime.now(timezone.utc),
     )
 
-    crm_lead: Mapped[Optional["CrmLead"]] = relationship("CrmLead", back_populates="visits")
+    crm_lead: Mapped[Optional["CrmLead"]] = relationship(
+        "CrmLead", back_populates="visits"
+    )

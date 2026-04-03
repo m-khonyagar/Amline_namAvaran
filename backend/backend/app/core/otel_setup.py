@@ -1,4 +1,5 @@
 """OpenTelemetry for FastAPI — enabled when OTEL_EXPORTER_OTLP_ENDPOINT is set."""
+
 from __future__ import annotations
 
 import logging
@@ -15,11 +16,13 @@ def register_opentelemetry(app: FastAPI) -> None:
         return
     try:
         from opentelemetry import trace
+        from opentelemetry.exporter.otlp.proto.http.trace_exporter import (
+            OTLPSpanExporter,
+        )
         from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
         from opentelemetry.sdk.resources import Resource
         from opentelemetry.sdk.trace import TracerProvider
         from opentelemetry.sdk.trace.export import BatchSpanProcessor
-        from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 
         service = os.getenv("OTEL_SERVICE_NAME", "amline-api")
         provider = TracerProvider(resource=Resource.create({"service.name": service}))

@@ -1,8 +1,8 @@
 # noqa: F401 — historical reference only; DO NOT import from application code.
 # Migrated from app/models/listing.py (Django orphan). Kept for audit; stack is FastAPI + SQLAlchemy.
 
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 
 
 class Listing(models.Model):

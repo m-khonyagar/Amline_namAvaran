@@ -1,4 +1,5 @@
 """Run Temporal worker: python -m app.temporal.run_worker"""
+
 from __future__ import annotations
 
 import asyncio

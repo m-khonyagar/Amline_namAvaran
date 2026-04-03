@@ -3,6 +3,7 @@
 پس از هر عملیاتِ پیشرفت، ``next_step`` محاسبه و در پاسخ برگردانده می‌شود.
 اعتبارسنجی گام با ``AMLINE_CONTRACT_STRICT_FLOW=1`` فعال می‌شود (پیش‌فرض: غیرفعال برای سازگاری با تست‌های امضا/شاهد بدون طی کامل ویزارد).
 """
+
 from __future__ import annotations
 
 import os
@@ -33,7 +34,11 @@ class FlowStep:
 
 
 def _strict_flow() -> bool:
-    return os.getenv("AMLINE_CONTRACT_STRICT_FLOW", "").strip().lower() in ("1", "true", "yes")
+    return os.getenv("AMLINE_CONTRACT_STRICT_FLOW", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+    )
 
 
 def _now_iso() -> str:
@@ -140,7 +145,9 @@ class ContractFlowService:
         landlords.append(row)
         return row
 
-    def patch_party(self, contract_id: str, party_id: str, body: PartyPatchBody) -> Dict[str, Any]:
+    def patch_party(
+        self, contract_id: str, party_id: str, body: PartyPatchBody
+    ) -> Dict[str, Any]:
         s = get_store()
         c = s.get_contract(contract_id)
         patch = body.model_dump(exclude_none=True)
@@ -154,10 +161,17 @@ class ContractFlowService:
                 break
         if found is not None:
             for k, v in patch.items():
-                if k in ("person_type", "natural_person_detail", "legal_person_detail", "mobile"):
+                if k in (
+                    "person_type",
+                    "natural_person_detail",
+                    "legal_person_detail",
+                    "mobile",
+                ):
                     found[k] = v
         pt = found.get("party_type", "LANDLORD") if found else "LANDLORD"
-        ptype = found.get("person_type", "NATURAL_PERSON") if found else "NATURAL_PERSON"
+        ptype = (
+            found.get("person_type", "NATURAL_PERSON") if found else "NATURAL_PERSON"
+        )
         return {
             "id": party_id,
             "contract": s.contract_json(c),

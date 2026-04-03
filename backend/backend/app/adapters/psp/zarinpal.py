@@ -1,4 +1,5 @@
 """Zarinpal REST: PaymentRequest + PaymentVerification (production)."""
+
 from __future__ import annotations
 
 import json
@@ -20,11 +21,7 @@ def _api_base() -> str:
     if override:
         return override.rstrip("/")
     sandbox = os.getenv("ZARINPAL_SANDBOX", "1").lower() in ("1", "true", "yes")
-    return (
-        "https://sandbox.zarinpal.com"
-        if sandbox
-        else "https://api.zarinpal.com"
-    )
+    return "https://sandbox.zarinpal.com" if sandbox else "https://api.zarinpal.com"
 
 
 def _web_base() -> str:
@@ -32,11 +29,7 @@ def _web_base() -> str:
     if woverride:
         return woverride.rstrip("/")
     sandbox = os.getenv("ZARINPAL_SANDBOX", "1").lower() in ("1", "true", "yes")
-    return (
-        "https://sandbox.zarinpal.com"
-        if sandbox
-        else "https://www.zarinpal.com"
-    )
+    return "https://sandbox.zarinpal.com" if sandbox else "https://www.zarinpal.com"
 
 
 class ZarinpalPspAdapter:
@@ -98,7 +91,9 @@ class ZarinpalPspAdapter:
                 status_code=502,
                 details={"response": data},
             )
-        repo.set_psp_session(intent, provider=self.provider_key, checkout_token=str(authority))
+        repo.set_psp_session(
+            intent, provider=self.provider_key, checkout_token=str(authority)
+        )
         return f"{_web_base()}/pg/StartPay/{authority}"
 
 

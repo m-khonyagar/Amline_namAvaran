@@ -1,4 +1,5 @@
 """Unified API error envelope — aligned with docs/openapi/amline-v1-errors.openapi.yaml §27."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional

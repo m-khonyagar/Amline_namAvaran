@@ -1,4 +1,5 @@
 """Strip/redact PII from PostHog event properties when AMLINE_POSTHOG_STRIP_PII is enabled."""
+
 from __future__ import annotations
 
 import os

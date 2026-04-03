@@ -1,4 +1,5 @@
 """NextPay HTTP gateway: token + verify (amount in Tomans per gateway docs)."""
+
 from __future__ import annotations
 
 import json
@@ -104,7 +105,9 @@ class NextPayPspAdapter:
                 status_code=502,
                 details={"response": data},
             )
-        repo.set_psp_session(intent, provider=self.provider_key, checkout_token=str(trans_id))
+        repo.set_psp_session(
+            intent, provider=self.provider_key, checkout_token=str(trans_id)
+        )
         return f"{_payment_page_base()}/{trans_id}"
 
 

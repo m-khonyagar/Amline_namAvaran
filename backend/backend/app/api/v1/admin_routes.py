@@ -127,9 +127,7 @@ def admin_metrics_summary() -> dict:
     s = get_store()
     today = datetime.now(timezone.utc).date().isoformat()
     contracts_today = sum(
-        1
-        for c in s.contracts.values()
-        if str(c.get("created_at", ""))[:10] == today
+        1 for c in s.contracts.values() if str(c.get("created_at", ""))[:10] == today
     )
     return {
         "contracts_total": len(s.contracts),

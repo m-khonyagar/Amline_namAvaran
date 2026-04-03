@@ -27,7 +27,10 @@ from app.schemas.v1.payments import (
     PaymentIntentListResponse,
     PaymentIntentRead,
 )
-from app.services.v1.psp_payment_service import apply_payment_gateway_result, safe_json_dumps
+from app.services.v1.psp_payment_service import (
+    apply_payment_gateway_result,
+    safe_json_dumps,
+)
 
 router = APIRouter(prefix="/payments", tags=["payments"])
 
@@ -48,7 +51,9 @@ def _public_base() -> str:
     return os.getenv("AMLINE_PUBLIC_API_BASE", "http://127.0.0.1:8080").rstrip("/")
 
 
-def _intent_to_read(row: PaymentIntent, *, checkout: Optional[str] = None) -> PaymentIntentRead:
+def _intent_to_read(
+    row: PaymentIntent, *, checkout: Optional[str] = None
+) -> PaymentIntentRead:
     return PaymentIntentRead(
         id=row.id,
         user_id=row.user_id,
@@ -114,7 +119,9 @@ def list_payment_intents(
     _: None = Depends(require_permission("wallets:read")),
 ) -> PaymentIntentListResponse:
     pay = PaymentRepository(db)
-    rows, total = pay.list_intents(skip=skip, limit=min(limit, 200), status=status, user_id=user_id)
+    rows, total = pay.list_intents(
+        skip=skip, limit=min(limit, 200), status=status, user_id=user_id
+    )
     return PaymentIntentListResponse(
         total=total,
         items=[_intent_to_detail(r) for r in rows],
@@ -146,7 +153,9 @@ def _verify_by_provider(row: PaymentIntent) -> PspVerifyResult:
     if prov == "idpay":
         return verify_idpay_payment(row.psp_checkout_token or "", row.id)
     if prov == "nextpay":
-        return verify_nextpay_payment(row.psp_checkout_token or "", row.id, row.amount_cents)
+        return verify_nextpay_payment(
+            row.psp_checkout_token or "", row.id, row.amount_cents
+        )
     return PspVerifyResult(
         success=False,
         error_code="PSP_UNKNOWN",
@@ -154,7 +163,9 @@ def _verify_by_provider(row: PaymentIntent) -> PspVerifyResult:
     )
 
 
-@router.post("/intents/{intent_id}/verify-retry", response_model=PaymentIntentDetailRead)
+@router.post(
+    "/intents/{intent_id}/verify-retry", response_model=PaymentIntentDetailRead
+)
 def retry_payment_verification(
     intent_id: str,
     db: Session = Depends(get_db),
@@ -306,7 +317,9 @@ def payment_callback_zarinpal(
         pay.bump_verify_attempt(row, vr.error_message or vr.error_code)
         db.commit()
         return HTMLResponse(
-            _callback_html("خطای تأیید", vr.error_message or "تأیید زرین‌پال ناموفق بود.", False),
+            _callback_html(
+                "خطای تأیید", vr.error_message or "تأیید زرین‌پال ناموفق بود.", False
+            ),
             status_code=200,
         )
     apply_payment_gateway_result(
@@ -317,7 +330,9 @@ def payment_callback_zarinpal(
         raw=vr.raw_payload or raw_q,
         audit_action="payment.callback.zarinpal",
     )
-    return HTMLResponse(_callback_html("موفق", "پرداخت با موفقیت ثبت شد.", True), status_code=200)
+    return HTMLResponse(
+        _callback_html("موفق", "پرداخت با موفقیت ثبت شد.", True), status_code=200
+    )
 
 
 @router.get("/callback/idpay", response_class=HTMLResponse)
@@ -369,7 +384,9 @@ def payment_callback_idpay(
         pay.bump_verify_attempt(row, vr.error_message or vr.error_code)
         db.commit()
         return HTMLResponse(
-            _callback_html("خطای تأیید", vr.error_message or "تأیید آیدی‌پی ناموفق بود.", False),
+            _callback_html(
+                "خطای تأیید", vr.error_message or "تأیید آیدی‌پی ناموفق بود.", False
+            ),
             status_code=200,
         )
     apply_payment_gateway_result(
@@ -380,7 +397,9 @@ def payment_callback_idpay(
         raw=vr.raw_payload or raw_q,
         audit_action="payment.callback.idpay",
     )
-    return HTMLResponse(_callback_html("موفق", "پرداخت با موفقیت ثبت شد.", True), status_code=200)
+    return HTMLResponse(
+        _callback_html("موفق", "پرداخت با موفقیت ثبت شد.", True), status_code=200
+    )
 
 
 @router.get("/callback/nextpay", response_class=HTMLResponse)
@@ -424,7 +443,9 @@ def payment_callback_nextpay(
         pay.bump_verify_attempt(row, vr.error_message or vr.error_code)
         db.commit()
         return HTMLResponse(
-            _callback_html("خطای تأیید", vr.error_message or "تأیید نکست‌پی ناموفق بود.", False),
+            _callback_html(
+                "خطای تأیید", vr.error_message or "تأیید نکست‌پی ناموفق بود.", False
+            ),
             status_code=200,
         )
     apply_payment_gateway_result(
@@ -435,7 +456,9 @@ def payment_callback_nextpay(
         raw=vr.raw_payload or raw_q,
         audit_action="payment.callback.nextpay",
     )
-    return HTMLResponse(_callback_html("موفق", "پرداخت با موفقیت ثبت شد.", True), status_code=200)
+    return HTMLResponse(
+        _callback_html("موفق", "پرداخت با موفقیت ثبت شد.", True), status_code=200
+    )
 
 
 @router.get("/callback/mock", response_class=HTMLResponse)
@@ -445,7 +468,11 @@ def payment_callback_mock(
     intent: str = Query(..., description="payment intent UUID"),
     ok: int = Query(1, ge=0, le=1),
 ) -> HTMLResponse:
-    if os.getenv("AMLINE_ALLOW_MOCK_PSP_CALLBACK", "1").lower() not in ("1", "true", "yes"):
+    if os.getenv("AMLINE_ALLOW_MOCK_PSP_CALLBACK", "1").lower() not in (
+        "1",
+        "true",
+        "yes",
+    ):
         raise AmlineError("NOT_FOUND", "غیرفعال", status_code=404)
     assert_psp_callback_ip_allowed(request)
     pay = PaymentRepository(db)

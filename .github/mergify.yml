@@ -1,0 +1,15 @@
+# Mergify — نیازمند نصب اپ Mergify روی سازمان/ریپو و پلن فعال
+# نام دقیق نویسندهٔ ربات Sweep را در صورت تفاوت با sweep-ai[bot] اصلاح کنید.
+pull_request_rules:
+  - name: auto merge Sweep AI (CI سبز)
+    conditions:
+      - author=sweep-ai[bot]
+      - base=main
+      - -draft
+      - check-success=backend-test
+      - check-success=frontend-http-inventory
+      - check-success=amline-ui-e2e
+      - check-success=hygiene
+    actions:
+      merge:
+        method: squash

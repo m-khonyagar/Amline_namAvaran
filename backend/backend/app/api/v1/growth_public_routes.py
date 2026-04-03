@@ -1,9 +1,11 @@
 """P2 — public SEO feed, sitemap, site metadata."""
+
 from __future__ import annotations
 
 import html
 import os
 from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
 
@@ -13,7 +15,6 @@ from app.db.session import get_db
 from app.repositories.listing_repository import ListingRepository
 from app.schemas.v1.growth_v1 import PublicListingFeedResponse, SiteMetaResponse
 from app.schemas.v1.listings import ListingRead
-
 
 router = APIRouter(prefix="/public", tags=["public-seo"])
 

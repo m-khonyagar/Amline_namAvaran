@@ -9,9 +9,9 @@ from app.core.errors import AmlineError
 from app.core.n8n_outbound import n8n_dispatch
 from app.core.rbac_deps import require_permission
 from app.db.session import get_db
+from app.integrations.temporal_workflows import schedule_visit_workflow
 from app.models.visit import VisitStatus
 from app.repositories.listing_repository import ListingRepository
-from app.integrations.temporal_workflows import schedule_visit_workflow
 from app.repositories.v1.p1_repositories import CrmV1Repository, VisitRepository
 from app.schemas.v1.visits import (
     VisitCreate,

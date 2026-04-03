@@ -1,4 +1,5 @@
 """Build Thumbor image URLs (unsafe dev or signed prod)."""
+
 from __future__ import annotations
 
 import base64
@@ -24,7 +25,9 @@ def thumbor_preset_url(path: str, preset: str, smart: bool = True) -> str | None
     return thumbor_image_url(path, width=dims[0], height=dims[1], smart=smart)
 
 
-def thumbor_image_url(path: str, width: int = 400, height: int = 300, smart: bool = True) -> str | None:
+def thumbor_image_url(
+    path: str, width: int = 400, height: int = 300, smart: bool = True
+) -> str | None:
     """
     `path` — path segment after Thumbor host (e.g. s3 key or static path).
     Returns None if Thumbor base URL not configured.
@@ -43,7 +46,11 @@ def thumbor_image_url(path: str, width: int = 400, height: int = 300, smart: boo
     if not secret:
         return f"{base}/unsafe/{size}/{smart_part}{img_path}"
     sig_src = f"{size}/{smart_part}{img_path}"
-    sig = base64.urlsafe_b64encode(
-        hmac.new(secret.encode(), sig_src.encode(), hashlib.sha1).digest()
-    ).decode().rstrip("=")
+    sig = (
+        base64.urlsafe_b64encode(
+            hmac.new(secret.encode(), sig_src.encode(), hashlib.sha1).digest()
+        )
+        .decode()
+        .rstrip("=")
+    )
     return f"{base}/{sig}/{size}/{smart_part}{quote(img_path, safe='/')}"

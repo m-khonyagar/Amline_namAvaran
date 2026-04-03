@@ -3,15 +3,15 @@
 در اجرای فعلی دامنهٔ قرارداد در حافظه (`MemoryStore`) نگه‌داری می‌شود؛ این جداول
 قرار است با `contract_flow_service` هم‌تراز مانده و در فاز اتصال Postgres پر شوند.
 """
+
 from __future__ import annotations
 
 import enum
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from sqlalchemy import DateTime, ForeignKey, String, Text
+from sqlalchemy import JSON, DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.sqlite import JSON as SQLITE_JSON
-from sqlalchemy import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -47,7 +47,9 @@ class ContractFlowRecord(Base):
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="DRAFT")
     current_step: Mapped[str] = mapped_column(String(64), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -84,7 +86,10 @@ class ContractFlowParty(Base):
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     contract_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("contract_flow_contracts.id", ondelete="CASCADE"), nullable=False, index=True
+        String(64),
+        ForeignKey("contract_flow_contracts.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     party_role: Mapped[str] = mapped_column(String(32), nullable=False)
     person_type: Mapped[str] = mapped_column(String(32), nullable=False)
@@ -97,11 +102,15 @@ class HomeInfo(Base):
     __tablename__ = "contract_flow_home_infos"
 
     contract_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("contract_flow_contracts.id", ondelete="CASCADE"), primary_key=True
+        String(64),
+        ForeignKey("contract_flow_contracts.id", ondelete="CASCADE"),
+        primary_key=True,
     )
     payload: Mapped[Optional[dict[str, Any]]] = mapped_column(JsonBlob, nullable=True)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
     )
 
     contract: Mapped["ContractFlowRecord"] = relationship(back_populates="home_info")
@@ -111,11 +120,15 @@ class DatingInfo(Base):
     __tablename__ = "contract_flow_dating_infos"
 
     contract_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("contract_flow_contracts.id", ondelete="CASCADE"), primary_key=True
+        String(64),
+        ForeignKey("contract_flow_contracts.id", ondelete="CASCADE"),
+        primary_key=True,
     )
     payload: Mapped[Optional[dict[str, Any]]] = mapped_column(JsonBlob, nullable=True)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
     )
 
     contract: Mapped["ContractFlowRecord"] = relationship(back_populates="dating_info")
@@ -125,25 +138,35 @@ class MortgageInfo(Base):
     __tablename__ = "contract_flow_mortgage_infos"
 
     contract_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("contract_flow_contracts.id", ondelete="CASCADE"), primary_key=True
+        String(64),
+        ForeignKey("contract_flow_contracts.id", ondelete="CASCADE"),
+        primary_key=True,
     )
     payload: Mapped[Optional[dict[str, Any]]] = mapped_column(JsonBlob, nullable=True)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
     )
 
-    contract: Mapped["ContractFlowRecord"] = relationship(back_populates="mortgage_info")
+    contract: Mapped["ContractFlowRecord"] = relationship(
+        back_populates="mortgage_info"
+    )
 
 
 class RentingInfo(Base):
     __tablename__ = "contract_flow_renting_infos"
 
     contract_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("contract_flow_contracts.id", ondelete="CASCADE"), primary_key=True
+        String(64),
+        ForeignKey("contract_flow_contracts.id", ondelete="CASCADE"),
+        primary_key=True,
     )
     payload: Mapped[Optional[dict[str, Any]]] = mapped_column(JsonBlob, nullable=True)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
     )
 
     contract: Mapped["ContractFlowRecord"] = relationship(back_populates="renting_info")
@@ -154,15 +177,22 @@ class Signing(Base):
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     contract_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("contract_flow_contracts.id", ondelete="CASCADE"), nullable=False, index=True
+        String(64),
+        ForeignKey("contract_flow_contracts.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     party_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     signer_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     user_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
-    status: Mapped[str] = mapped_column(String(32), nullable=False, default=ContractFlowSigningStatus.PENDING.value)
+    status: Mapped[str] = mapped_column(
+        String(32), nullable=False, default=ContractFlowSigningStatus.PENDING.value
+    )
     meta: Mapped[Optional[dict[str, Any]]] = mapped_column(JsonBlob, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
     )
 
     contract: Mapped["ContractFlowRecord"] = relationship(back_populates="signings")
@@ -173,13 +203,18 @@ class Witness(Base):
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     contract_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("contract_flow_contracts.id", ondelete="CASCADE"), nullable=False, index=True
+        String(64),
+        ForeignKey("contract_flow_contracts.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     mobile: Mapped[str] = mapped_column(String(32), nullable=False)
     national_code: Mapped[str] = mapped_column(String(32), nullable=False)
     witness_type: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
     witness_name: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    verified_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    verified_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     audit: Mapped[Optional[dict[str, Any]]] = mapped_column(JsonBlob, nullable=True)
 
     contract: Mapped["ContractFlowRecord"] = relationship(back_populates="witnesses")

@@ -21,7 +21,9 @@ def wallet_balance(
     acct = repo.get_or_create_account(user_id)
     bal = repo.balance_cents(acct.id)
     db.commit()
-    return WalletBalanceResponse(user_id=user_id, currency=acct.currency, balance_cents=bal)
+    return WalletBalanceResponse(
+        user_id=user_id, currency=acct.currency, balance_cents=bal
+    )
 
 
 @router.post("/{user_id}/ledger", status_code=201)

@@ -19,12 +19,15 @@ _nominatim_cache = TtlCache(default_ttl_seconds=120.0)
 
 
 def _nominatim_base() -> str:
-    return (os.getenv("AMLINE_NOMINATIM_URL") or "https://nominatim.openstreetmap.org").rstrip("/")
+    return (
+        os.getenv("AMLINE_NOMINATIM_URL") or "https://nominatim.openstreetmap.org"
+    ).rstrip("/")
 
 
 def _nominatim_headers() -> dict[str, str]:
     ua = (
-        os.getenv("AMLINE_NOMINATIM_USER_AGENT") or "AmlinePlatform/1.0 (+https://amline.local)"
+        os.getenv("AMLINE_NOMINATIM_USER_AGENT")
+        or "AmlinePlatform/1.0 (+https://amline.local)"
     ).strip()
     return {"User-Agent": ua, "Accept": "application/json"}
 
@@ -33,7 +36,10 @@ def _nominatim_headers() -> dict[str, str]:
 def geo_provinces(db: Session = Depends(get_db)) -> list[ProvinceRead]:
     def _load() -> list[dict]:
         repo = GeoRepository(db)
-        return [ProvinceRead.model_validate(p).model_dump(mode="json") for p in repo.list_provinces()]
+        return [
+            ProvinceRead.model_validate(p).model_dump(mode="json")
+            for p in repo.list_provinces()
+        ]
 
     cached = _geo_cache.get_or_set("geo:provinces:v1", _load, ttl_seconds=600.0)
     return [ProvinceRead.model_validate(x) for x in cached]
@@ -42,21 +48,30 @@ def geo_provinces(db: Session = Depends(get_db)) -> list[ProvinceRead]:
 @router.get("/provinces/{province_id}/cities", response_model=list[CityRead])
 def geo_cities(province_id: str, db: Session = Depends(get_db)) -> list[CityRead]:
     key = f"geo:cities:{province_id}"
+
     def _load() -> list[dict]:
         repo = GeoRepository(db)
-        return [CityRead.model_validate(c).model_dump(mode="json") for c in repo.list_cities(province_id)]
+        return [
+            CityRead.model_validate(c).model_dump(mode="json")
+            for c in repo.list_cities(province_id)
+        ]
 
     cached = _geo_cache.get_or_set(key, _load, ttl_seconds=600.0)
     return [CityRead.model_validate(x) for x in cached]
 
 
 @router.get("/provinces-detail", response_model=list[ProvinceWithCitiesRead])
-def geo_provinces_with_cities(db: Session = Depends(get_db)) -> list[ProvinceWithCitiesRead]:
+def geo_provinces_with_cities(
+    db: Session = Depends(get_db),
+) -> list[ProvinceWithCitiesRead]:
     def _load() -> list[dict]:
         repo = GeoRepository(db)
         out: list[dict] = []
         for p in repo.list_provinces():
-            cities = [CityRead.model_validate(c).model_dump(mode="json") for c in repo.list_cities(p.id)]
+            cities = [
+                CityRead.model_validate(c).model_dump(mode="json")
+                for c in repo.list_cities(p.id)
+            ]
             row = ProvinceWithCitiesRead(
                 id=p.id,
                 name_fa=p.name_fa,

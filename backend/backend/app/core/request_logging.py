@@ -1,4 +1,5 @@
 """Structured HTTP request logging (P1 observability)."""
+
 from __future__ import annotations
 
 import json

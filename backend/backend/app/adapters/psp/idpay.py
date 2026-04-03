@@ -1,4 +1,5 @@
 """IDPay REST v1.1: create payment + verify."""
+
 from __future__ import annotations
 
 import json
@@ -24,7 +25,9 @@ class IdpayPspAdapter:
 
     def resume_checkout_url(self, intent: PaymentIntent) -> Optional[str]:
         if intent.psp_checkout_token:
-            base = os.getenv("IDPAY_START_LINK_PREFIX", "https://idpay.ir/p/ws/start").rstrip("/")
+            base = os.getenv(
+                "IDPAY_START_LINK_PREFIX", "https://idpay.ir/p/ws/start"
+            ).rstrip("/")
             return f"{base}/{intent.psp_checkout_token}"
         return None
 
@@ -79,7 +82,9 @@ class IdpayPspAdapter:
                 status_code=502,
                 details={"response": data},
             )
-        repo.set_psp_session(intent, provider=self.provider_key, checkout_token=str(pid))
+        repo.set_psp_session(
+            intent, provider=self.provider_key, checkout_token=str(pid)
+        )
         return str(link)
 
 

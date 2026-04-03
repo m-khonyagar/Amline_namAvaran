@@ -1,4 +1,5 @@
 """RBAC admin — role catalog & user ↔ role bindings."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends

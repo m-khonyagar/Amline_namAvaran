@@ -1,10 +1,11 @@
 """ORM models — import side effects register tables on Base.metadata (Alembic)."""
+
 from app.models.audit_log import AuditLogEntry
 from app.models.contract_flow import (
-    ContractFlowRecord,
     ContractFlowParty,
-    ContractFlowPersonType,
     ContractFlowPartyRole,
+    ContractFlowPersonType,
+    ContractFlowRecord,
     ContractFlowSigningStatus,
     DatingInfo,
     HomeInfo,
@@ -13,7 +14,7 @@ from app.models.contract_flow import (
     Signing,
     Witness,
 )
-from app.models.crm import CrmActivity, CrmLead, CrmActivityType, CrmLeadSource
+from app.models.crm import CrmActivity, CrmActivityType, CrmLead, CrmLeadSource
 from app.models.geo import City, Province
 from app.models.growth import (
     AnalyticsEvent,
@@ -37,12 +38,7 @@ from app.models.launch import (
     UserSubscription,
 )
 from app.models.legal import LegalReview, LegalReviewStatus
-from app.models.listing import (
-    DealType,
-    Listing,
-    ListingStatus,
-    ListingVisibility,
-)
+from app.models.listing import DealType, Listing, ListingStatus, ListingVisibility
 from app.models.notification_event import (
     NotificationChannel,
     NotificationEvent,

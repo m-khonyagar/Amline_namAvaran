@@ -1,10 +1,18 @@
 """P2 — conversations and messages (+ WebSocket)."""
+
 from __future__ import annotations
 
 import json
 import os
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Request, WebSocket, WebSocketDisconnect
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    Request,
+    WebSocket,
+    WebSocketDisconnect,
+)
 from sqlalchemy.orm import Session
 
 from app.api.v1.chat_ws_manager import chat_manager
@@ -12,7 +20,10 @@ from app.core.errors import AmlineError
 from app.core.rbac_deps import require_permission
 from app.db.session import get_db
 from app.models.notification_event import NotificationChannel
-from app.repositories.v1.p2_repositories import ConversationRepository, MessageRepository
+from app.repositories.v1.p2_repositories import (
+    ConversationRepository,
+    MessageRepository,
+)
 from app.schemas.v1.growth_v1 import (
     ConversationCreate,
     ConversationListResponse,
@@ -23,12 +34,13 @@ from app.schemas.v1.growth_v1 import (
 )
 from app.services.v1.notification_dispatch import NotificationDispatchService
 
-
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 
 def _user_id(request: Request) -> str:
-    return request.headers.get("X-User-Id") or os.getenv("AMLINE_DEFAULT_USER_ID", "mock-001")
+    return request.headers.get("X-User-Id") or os.getenv(
+        "AMLINE_DEFAULT_USER_ID", "mock-001"
+    )
 
 
 async def _broadcast_new_message(conversation_id: str, payload: dict) -> None:
@@ -75,7 +87,9 @@ def list_conversations(
     )
 
 
-@router.get("/conversations/{conversation_id}/messages", response_model=MessageListResponse)
+@router.get(
+    "/conversations/{conversation_id}/messages", response_model=MessageListResponse
+)
 def list_messages(
     conversation_id: str,
     skip: int = 0,
@@ -141,7 +155,10 @@ def post_message(
                 channel=NotificationChannel.PUSH,
                 recipient=uid,
                 template_key="CHAT_NEW_MESSAGE",
-                payload={"conversation_id": conversation_id, "preview": body.body[:120]},
+                payload={
+                    "conversation_id": conversation_id,
+                    "preview": body.body[:120],
+                },
             )
     return MessageRead.model_validate(msg)
 

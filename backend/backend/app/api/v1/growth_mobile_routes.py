@@ -1,4 +1,5 @@
 """P2 — mobile client metadata and cursor pagination for listings."""
+
 from __future__ import annotations
 
 from typing import Optional
@@ -12,7 +13,6 @@ from app.models.listing import ListingStatus, ListingVisibility
 from app.repositories.listing_repository import ListingRepository
 from app.schemas.v1.growth_v1 import ListingCursorResponse, MobileMetaResponse
 from app.schemas.v1.listings import ListingRead
-
 
 router = APIRouter(prefix="/mobile", tags=["mobile"])
 

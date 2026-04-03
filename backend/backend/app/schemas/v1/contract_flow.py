@@ -1,4 +1,5 @@
 """اسکیماهای Pydantic جریان قرارداد (هم‌تراز SwaggerHub 0.1.3)."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
@@ -23,7 +24,9 @@ class SectionPatchBody(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     next_step: Optional[str] = None
-    payload: Optional[Dict[str, Any]] = Field(default=None, description="دادهٔ بخش مطابق DTO سوگر")
+    payload: Optional[Dict[str, Any]] = Field(
+        default=None, description="دادهٔ بخش مطابق DTO سوگر"
+    )
 
 
 class LandlordSetBody(BaseModel):
@@ -72,5 +75,6 @@ class ContractStatusResponse(BaseModel):
     contract_id: str
     type: str
     next_step: Optional[str] = Field(
-        default=None, description="همان گام جاری برای مصرف فرانت؛ پس از هر POST نیز برمی‌گردد"
+        default=None,
+        description="همان گام جاری برای مصرف فرانت؛ پس از هر POST نیز برمی‌گردد",
     )

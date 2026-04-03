@@ -1,4 +1,5 @@
 """P1 DB repositories (visits, CRM v1, wallet, payments, legal, registry, notify, geo, rbac, audit)."""
+
 from __future__ import annotations
 
 import json
@@ -11,10 +12,13 @@ from sqlalchemy.orm import Session
 
 from app.models.audit_log import AuditLogEntry
 from app.models.crm import CrmActivity, CrmLead, CrmLeadSource
-from app.models.geo import City
 from app.models.geo import City, Province
 from app.models.legal import LegalReview, LegalReviewStatus
-from app.models.notification_event import NotificationChannel, NotificationEvent, NotificationStatus
+from app.models.notification_event import (
+    NotificationChannel,
+    NotificationEvent,
+    NotificationStatus,
+)
 from app.models.payment import PaymentIntent, PaymentIntentStatus
 from app.models.rbac import RbacRole, UserRole
 from app.models.registry_job import RegistryJob, RegistryJobStatus
@@ -102,7 +106,9 @@ class CrmV1Repository:
         row.updated_at = datetime.now(timezone.utc)
         return row
 
-    def add_activity(self, lead: CrmLead, body: CrmActivityCreate, user_id: str) -> CrmActivity:
+    def add_activity(
+        self, lead: CrmLead, body: CrmActivityCreate, user_id: str
+    ) -> CrmActivity:
         act = CrmActivity(
             lead_id=lead.id,
             type=body.type,
@@ -176,7 +182,9 @@ class VisitRepository:
         row.updated_at = datetime.now(timezone.utc)
         return row
 
-    def complete(self, row: Visit, outcome: VisitOutcome, notes: Optional[str]) -> Visit:
+    def complete(
+        self, row: Visit, outcome: VisitOutcome, notes: Optional[str]
+    ) -> Visit:
         row.status = VisitStatus.COMPLETED
         row.outcome = outcome
         row.outcome_notes = notes
@@ -189,7 +197,9 @@ class WalletRepository:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def get_or_create_account(self, user_id: str, currency: str = "IRR") -> WalletAccount:
+    def get_or_create_account(
+        self, user_id: str, currency: str = "IRR"
+    ) -> WalletAccount:
         stmt = select(WalletAccount).where(WalletAccount.user_id == user_id)
         row = self.db.scalars(stmt).first()
         if row:
@@ -201,7 +211,9 @@ class WalletRepository:
         return row
 
     def balance_cents(self, account_id: str) -> int:
-        stmt = select(WalletLedgerEntry).where(WalletLedgerEntry.account_id == account_id)
+        stmt = select(WalletLedgerEntry).where(
+            WalletLedgerEntry.account_id == account_id
+        )
         total = 0
         for e in self.db.scalars(stmt).all():
             if e.entry_type == LedgerEntryType.CREDIT:
@@ -210,7 +222,9 @@ class WalletRepository:
                 total -= e.amount_cents
         return total
 
-    def find_by_idempotency(self, account_id: str, key: str) -> Optional[WalletLedgerEntry]:
+    def find_by_idempotency(
+        self, account_id: str, key: str
+    ) -> Optional[WalletLedgerEntry]:
         stmt = select(WalletLedgerEntry).where(
             WalletLedgerEntry.account_id == account_id,
             WalletLedgerEntry.idempotency_key == key,
@@ -288,7 +302,9 @@ class PaymentRepository:
         row.updated_at = datetime.now(timezone.utc)
         return row
 
-    def bump_verify_attempt(self, row: PaymentIntent, error: Optional[str] = None) -> PaymentIntent:
+    def bump_verify_attempt(
+        self, row: PaymentIntent, error: Optional[str] = None
+    ) -> PaymentIntent:
         row.verify_attempt_count = int(row.verify_attempt_count or 0) + 1
         row.last_verify_error = error
         row.updated_at = datetime.now(timezone.utc)
@@ -316,9 +332,15 @@ class PaymentRepository:
         return rows, total
 
     def mark_callback(
-        self, row: PaymentIntent, success: bool, psp_ref: Optional[str], raw: Optional[str]
+        self,
+        row: PaymentIntent,
+        success: bool,
+        psp_ref: Optional[str],
+        raw: Optional[str],
     ) -> PaymentIntent:
-        row.status = PaymentIntentStatus.COMPLETED if success else PaymentIntentStatus.FAILED
+        row.status = (
+            PaymentIntentStatus.COMPLETED if success else PaymentIntentStatus.FAILED
+        )
         row.psp_reference = psp_ref
         row.callback_payload = raw
         row.updated_at = datetime.now(timezone.utc)
@@ -362,7 +384,9 @@ class LegalRepository:
         comment: Optional[str],
         reviewer_id: Optional[str],
     ) -> LegalReview:
-        row.status = LegalReviewStatus.APPROVED if approve else LegalReviewStatus.REJECTED
+        row.status = (
+            LegalReviewStatus.APPROVED if approve else LegalReviewStatus.REJECTED
+        )
         row.comment = comment
         row.reviewer_id = reviewer_id
         row.decided_at = datetime.now(timezone.utc)
