@@ -1,9 +1,19 @@
+const path = require('path')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   experimental: {
     externalDir: true,
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, '../admin-ui/src'),
+      '@amline/ui-core': path.resolve(__dirname, '../packages/amline-ui-core/src'),
+    }
+    return config
   },
   eslint: {
     ignoreDuringBuilds: true,

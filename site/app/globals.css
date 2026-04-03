@@ -6,7 +6,27 @@
 :root {
   --brand: #1d4ed8;
   --brand-light: #3b82f6;
+  --brand-muted: rgba(29, 78, 216, 0.08);
 }
 
-html { scroll-behavior: smooth; }
-body { font-family: 'Vazirmatn', sans-serif; }
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: 'Vazirmatn', sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+@layer base {
+  :where(a, button, input, textarea, select, summary, [tabindex]:not([tabindex='-1'])):focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+}

@@ -111,6 +111,20 @@ body {
   @apply text-xs text-[var(--amline-fg-subtle)];
 }
 
+/* دسترسی‌پذیری: فوکوس مرئی برای کنترل‌های تعاملی */
+@layer base {
+  :where(a, button, input, textarea, select, summary, [tabindex]:not([tabindex='-1'])):focus-visible {
+    outline: 2px solid var(--amline-ring);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 /* اسکرول‌بار */
 ::-webkit-scrollbar {
   width: 8px;

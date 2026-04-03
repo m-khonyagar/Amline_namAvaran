@@ -24,6 +24,9 @@ export default defineConfig(({ mode }) => {
         '@amline/ui-core': uiCoreRoot,
       },
     },
+    optimizeDeps: {
+      include: ['lucide-react'],
+    },
     server: {
       port: 3002,
       proxy: {

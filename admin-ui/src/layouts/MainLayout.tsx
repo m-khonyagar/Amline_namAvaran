@@ -1,6 +1,26 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import type { LucideIcon } from 'lucide-react';
+import {
+  Activity,
+  Bell,
+  ClipboardList,
+  FileText,
+  LayoutDashboard,
+  LayoutGrid,
+  Menu,
+  PenLine,
+  Plug,
+  Receipt,
+  ScrollText,
+  Settings,
+  Shield,
+  Tag,
+  Users,
+  Wallet,
+  X,
+} from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { cn } from '../lib/cn';
@@ -9,25 +29,25 @@ import { apiClient } from '../lib/api';
 type NavConfig = {
   to: string;
   label: string;
-  icon: string;
+  icon: LucideIcon;
   permission?: string;
 };
 
 const NAV_CONFIG: NavConfig[] = [
-  { to: '/dashboard', label: 'داشبورد', icon: '🏠' },
-  { to: '/contracts', label: 'قراردادها', icon: '📄', permission: 'contracts:read' },
-  { to: '/contracts/wizard', label: 'قرارداد جدید', icon: '✍️', permission: 'contracts:write' },
-  { to: '/crm', label: 'CRM', icon: '📊' },
-  { to: '/ads', label: 'آگهی‌ها', icon: '🏷️', permission: 'ads:read' },
-  { to: '/users', label: 'کاربران', icon: '👥', permission: 'users:read' },
-  { to: '/wallets', label: 'کیف پول', icon: '💳', permission: 'wallets:read' },
-  { to: '/payments', label: 'پرداخت‌ها', icon: '🧾', permission: 'wallets:read' },
-  { to: '/billing', label: 'اشتراک', icon: '📋', permission: 'wallets:read' },
-  { to: '/settings', label: 'تنظیمات', icon: '⚙️', permission: 'settings:read' },
-  { to: '/integrations', label: 'یکپارچه‌سازی', icon: '🔌', permission: 'settings:read' },
-  { to: '/admin/roles', label: 'نقش‌ها', icon: '🔐', permission: 'roles:read' },
-  { to: '/admin/audit', label: 'ممیزی', icon: '📋', permission: 'audit:read' },
-  { to: '/admin/activity', label: 'گزارش فعالیت', icon: '📈', permission: 'reports:read' },
+  { to: '/dashboard', label: 'داشبورد', icon: LayoutDashboard },
+  { to: '/contracts', label: 'قراردادها', icon: FileText, permission: 'contracts:read' },
+  { to: '/contracts/wizard', label: 'قرارداد جدید', icon: PenLine, permission: 'contracts:write' },
+  { to: '/crm', label: 'CRM', icon: LayoutGrid },
+  { to: '/ads', label: 'آگهی‌ها', icon: Tag, permission: 'ads:read' },
+  { to: '/users', label: 'کاربران', icon: Users, permission: 'users:read' },
+  { to: '/wallets', label: 'کیف پول', icon: Wallet, permission: 'wallets:read' },
+  { to: '/payments', label: 'پرداخت‌ها', icon: Receipt, permission: 'wallets:read' },
+  { to: '/billing', label: 'اشتراک', icon: ClipboardList, permission: 'wallets:read' },
+  { to: '/settings', label: 'تنظیمات', icon: Settings, permission: 'settings:read' },
+  { to: '/integrations', label: 'یکپارچه‌سازی', icon: Plug, permission: 'settings:read' },
+  { to: '/admin/roles', label: 'نقش‌ها', icon: Shield, permission: 'roles:read' },
+  { to: '/admin/audit', label: 'ممیزی', icon: ScrollText, permission: 'audit:read' },
+  { to: '/admin/activity', label: 'گزارش فعالیت', icon: Activity, permission: 'reports:read' },
 ];
 
 function NotificationsBell() {
@@ -52,11 +72,11 @@ function NotificationsBell() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="relative flex h-10 w-10 items-center justify-center rounded-amline-md border border-[var(--amline-border)] text-lg hover:bg-[var(--amline-surface-muted)] dark:border-slate-600"
+        className="relative flex h-10 w-10 items-center justify-center rounded-amline-md border border-[var(--amline-border)] text-[var(--amline-primary)] transition-colors hover:bg-[var(--amline-surface-muted)] dark:border-slate-600"
         aria-expanded={open}
         aria-label="اعلان‌ها"
       >
-        🔔
+        <Bell className="h-5 w-5" strokeWidth={1.75} aria-hidden />
         {unread > 0 ? (
           <span className="absolute -left-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
             {unread > 9 ? '9+' : unread}
@@ -71,7 +91,7 @@ function NotificationsBell() {
             aria-label="بستن اعلان‌ها"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute left-0 top-full z-50 mt-2 w-[min(22rem,calc(100vw-2rem))] rounded-amline-md border border-[var(--amline-border)] bg-[var(--amline-surface)] p-2 shadow-amline dark:border-slate-700">
+          <div className="absolute left-0 top-full z-50 mt-2 w-[min(22rem,calc(100vw-2rem))] animate-fadeIn rounded-amline-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] p-2 shadow-[var(--amline-shadow-lg)] dark:border-slate-700">
             {items.length === 0 ? (
               <p className="px-3 py-4 text-center text-sm text-[var(--amline-fg-muted)]">اعلانی نیست</p>
             ) : (
@@ -111,16 +131,16 @@ export default function MainLayout() {
   return (
     <div dir="rtl" className="flex min-h-screen bg-[var(--amline-bg)] text-[var(--amline-fg)] transition-colors">
       {/* نوار بالا — موبایل و تبلت */}
-      <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b border-[var(--amline-border)] bg-[var(--amline-surface)]/95 px-4 shadow-[var(--amline-shadow-sm)] backdrop-blur-md dark:border-slate-700 dark:bg-slate-900/95 lg:hidden">
+      <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b border-[var(--amline-border)] bg-[var(--amline-surface)]/90 px-4 shadow-[var(--amline-shadow-sm)] backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/90 lg:hidden">
         <button
           type="button"
-          className="flex h-11 w-11 items-center justify-center rounded-amline-md border border-[var(--amline-border)] text-lg text-[var(--amline-fg)] transition-colors hover:bg-[var(--amline-surface-muted)] dark:border-slate-600"
+          className="flex h-11 w-11 items-center justify-center rounded-amline-md border border-[var(--amline-border)] text-[var(--amline-fg)] transition-colors duration-200 hover:bg-[var(--amline-surface-muted)] active:scale-[0.98] dark:border-slate-600"
           onClick={() => setMobileNavOpen(true)}
           aria-expanded={mobileNavOpen}
           aria-controls="app-sidebar"
           aria-label="باز کردن منو"
         >
-          ☰
+          <Menu className="h-5 w-5" strokeWidth={1.75} aria-hidden />
         </button>
         <div className="flex flex-col items-center">
           <span className="text-base font-bold text-[var(--amline-primary)]">اَملاین</span>
@@ -147,7 +167,7 @@ export default function MainLayout() {
       <aside
         id="app-sidebar"
         className={cn(
-          'fixed inset-y-0 right-0 z-50 flex w-[min(20rem,88vw)] flex-col border-l border-[var(--amline-border)] bg-[var(--amline-surface)] shadow-amline transition-transform duration-300 ease-out dark:border-slate-700 dark:shadow-none lg:static lg:z-0 lg:w-64 lg:max-w-none lg:translate-x-0 lg:shadow-none',
+          'fixed inset-y-0 right-0 z-50 flex w-[min(20rem,88vw)] flex-col border-l border-[var(--amline-border)] bg-[var(--amline-surface)] shadow-[var(--amline-shadow-lg)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] dark:border-slate-700 dark:shadow-none lg:static lg:z-0 lg:w-64 lg:max-w-none lg:translate-x-0 lg:shadow-none',
           mobileNavOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
         )}
       >
@@ -162,34 +182,37 @@ export default function MainLayout() {
           </div>
           <button
             type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-amline-md text-xl text-[var(--amline-fg-muted)] hover:bg-[var(--amline-surface-muted)] lg:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-amline-md text-[var(--amline-fg-muted)] transition-colors hover:bg-[var(--amline-surface-muted)] active:scale-95 lg:hidden"
             onClick={() => setMobileNavOpen(false)}
             aria-label="بستن منو"
           >
-            ×
+            <X className="h-5 w-5" strokeWidth={1.75} aria-hidden />
           </button>
         </div>
 
         <nav className="flex-1 overflow-y-auto py-3">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === '/dashboard' || item.to === '/contracts'}
-              onClick={() => setMobileNavOpen(false)}
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-3 px-5 py-3 text-sm transition-colors',
-                  isActive
-                    ? 'border-r-4 border-[var(--amline-primary)] bg-[var(--amline-primary-muted)] font-semibold text-[var(--amline-primary)] dark:bg-blue-950/40'
-                    : 'text-[var(--amline-fg-muted)] hover:bg-[var(--amline-surface-muted)] hover:text-[var(--amline-fg)] dark:hover:bg-slate-800'
-                )
-              }
-            >
-              <span aria-hidden="true">{item.icon}</span>
-              <span>{item.label}</span>
-            </NavLink>
-          ))}
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to === '/dashboard' || item.to === '/contracts'}
+                onClick={() => setMobileNavOpen(false)}
+                className={({ isActive }) =>
+                  cn(
+                    'mx-2 flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition-all duration-200 ease-out',
+                    isActive
+                      ? 'border-r-4 border-[var(--amline-primary)] bg-[var(--amline-primary-muted)] font-semibold text-[var(--amline-primary)] shadow-[var(--amline-shadow-sm)] dark:bg-blue-950/40'
+                      : 'border-r-4 border-transparent text-[var(--amline-fg-muted)] hover:bg-[var(--amline-surface-muted)] hover:text-[var(--amline-fg)] dark:hover:bg-slate-800'
+                  )
+                }
+              >
+                <Icon className="h-5 w-5 shrink-0 opacity-90" strokeWidth={1.75} aria-hidden />
+                <span>{item.label}</span>
+              </NavLink>
+            );
+          })}
         </nav>
 
         <div className="border-t border-[var(--amline-border)] p-4 dark:border-slate-700">
