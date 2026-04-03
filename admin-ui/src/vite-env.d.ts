@@ -1,4 +1,4 @@
-﻿/// <reference types="vite/client" />
+/// <reference types="vite/client" />
 
 interface ImportMetaEnv {
   /** خالی = همان origin (مسیر نسبی)؛ برای dev با proxy معمولاً خالی بماند */
@@ -14,6 +14,10 @@ interface ImportMetaEnv {
   readonly VITE_USE_CRM_API: string
   /** فعال/غیرفعال کردن ورود آزمایشی فقط در DEV */
   readonly VITE_ENABLE_DEV_BYPASS: string
+  readonly VITE_PUBLIC_POSTHOG_KEY: string
+  readonly VITE_PUBLIC_POSTHOG_HOST: string
+  /** `true` فقط در staging — ضبط جلسه PostHog */
+  readonly VITE_PUBLIC_POSTHOG_SESSION_RECORDING: string
 }
 
 interface ImportMeta {

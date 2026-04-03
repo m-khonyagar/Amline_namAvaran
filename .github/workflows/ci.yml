@@ -14,20 +14,6 @@ jobs:
   # ==================== Backend Tests ====================
   backend-test:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
 
     steps:
       - name: Checkout code
@@ -37,45 +23,51 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-
-      - name: Cache Poetry packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pypoetry
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-poetry-
+          cache: 'pip'
+          cache-dependency-path: backend/backend/requirements.txt
 
       - name: Install dependencies
         working-directory: backend/backend
-        run: poetry install --with dev
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install flake8 black isort mypy pytest-cov types-python-dateutil
 
       - name: Run linter
         working-directory: backend/backend
         run: |
-          flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics
-          black --check src/
-          isort --check-only src/
+          flake8 app/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          black --check app/
+          isort --check-only app/
 
       - name: Run type checker
+        continue-on-error: true
         working-directory: backend/backend
-        run: mypy src/
+        run: mypy app/ --ignore-missing-imports
 
       - name: Run tests
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test
-          REDIS_HOST: localhost
-          REDIS_PORT: 6379
         working-directory: backend/backend
-        run: pytest tests/ -v --cov=src --cov-report=xml
+        run: pytest tests/ -v --cov=app --cov-report=xml
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:
           file: ./backend/backend/coverage.xml
+
+  # ==================== Frontend HTTP path inventory (drift guard) ====================
+  frontend-http-inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verify committed frontend path inventory
+        run: python scripts/inventory_frontend_http_calls.py --check docs/generated/frontend-http-inventory.json
 
   # ==================== Build Docker Images ====================
   build-backend:

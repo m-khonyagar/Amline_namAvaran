@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import { loadLead, updateLeadRecord } from '../../features/crm/crmService'
 import { logAudit } from '../../lib/auditLog'
 import { ActivityTimeline } from '../../features/crm/components/ActivityTimeline'
-import { LeadForm } from '../../features/crm/components/LeadForm'
+import { LeadForm, type LeadFormValues } from '../../features/crm/components/LeadForm'
 import type { Lead } from '../../features/crm/types'
 
 const NEED_TYPE_LABELS: Record<string, string> = {
@@ -60,11 +60,17 @@ export default function LeadDetailPage() {
     )
   }
 
-  const handleUpdate = (
-    values: Omit<Lead, 'id' | 'status' | 'created_at' | 'updated_at' | 'contract_id'>
-  ) => {
+  const handleUpdate = (values: LeadFormValues) => {
     void (async () => {
-      const updated = await updateLeadRecord(lead.id, values)
+      const updated = await updateLeadRecord(lead.id, {
+        full_name: values.full_name,
+        mobile: values.mobile,
+        need_type: values.need_type,
+        notes: values.notes,
+        assigned_to: values.assigned_to,
+        province_id: values.province_id || null,
+        city_id: values.city_id || null,
+      })
       if (updated) setLead(updated)
       void logAudit('crm.lead.update', 'lead', { lead_id: lead.id })
       toast.success('اطلاعات Lead به‌روز شد')
@@ -116,6 +122,12 @@ export default function LeadDetailPage() {
                 <div className="flex justify-between">
                   <dt className="text-sm text-gray-500">موبایل</dt>
                   <dd className="font-mono text-sm">{lead.mobile}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-sm text-gray-500">استان / شهر</dt>
+                  <dd className="text-sm">
+                    {[lead.province_name_fa, lead.city_name_fa].filter(Boolean).join('، ') || '—'}
+                  </dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-sm text-gray-500">نوع نیاز</dt>

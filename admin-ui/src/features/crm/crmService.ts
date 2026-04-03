@@ -32,9 +32,13 @@ export async function createLeadRecord(data: {
   need_type: 'RENT' | 'BUY' | 'SELL'
   notes: string
   assigned_to: string | null
+  province_id?: string | null
+  city_id?: string | null
 }): Promise<Lead> {
   const base = {
     ...data,
+    province_id: data.province_id ?? null,
+    city_id: data.city_id ?? null,
     status: 'NEW' as const,
     contract_id: null,
   }

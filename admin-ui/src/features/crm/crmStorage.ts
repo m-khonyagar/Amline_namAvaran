@@ -12,7 +12,13 @@ function generateId(): string {
 export function getLeads(): Lead[] {
   try {
     const raw = localStorage.getItem(LEADS_KEY)
-    return raw ? (JSON.parse(raw) as Lead[]) : []
+    if (!raw) return []
+    const rows = JSON.parse(raw) as Lead[]
+    return rows.map((l) => ({
+      ...l,
+      province_id: l.province_id ?? null,
+      city_id: l.city_id ?? null,
+    }))
   } catch {
     return []
   }

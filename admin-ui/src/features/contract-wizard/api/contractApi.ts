@@ -3,8 +3,11 @@
  * نکته عملیاتی: در محیط واقعی، backend مقدار `Authorization: Bearer <token>` را می‌پذیرد.
  * برای httpOnly-only در آینده باید توکن فقط از Set-Cookie هدر خوانده شود — بخش useAuth/backend.
  */
-import axios from 'axios';
-import { mapAxiosLikeError, parseFastApiValidationDetail } from '../../../lib/errorMapper';
+import { apiClient } from '@/lib/api';
+import { parseFastApiValidationDetail } from '../../../lib/errorMapper';
+
+/** Re-export for wizard components that imported apiClient from this module */
+export { apiClient };
 import type {
   AddDatingDto,
   AddHomeInfoDto,
@@ -24,42 +27,6 @@ import type {
   VerifySignOtpDto,
   VerifyWitnessOtpDto,
 } from '../types/api';
-
-function resolveApiBaseUrl(): string {
-  try {
-    const v = (import.meta as unknown as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL;
-    if (v !== undefined && v !== null) return v;
-  } catch {
-    /* non-Vite */
-  }
-  if (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_API_URL != null) {
-    return process.env.NEXT_PUBLIC_API_URL;
-  }
-  return '';
-}
-
-const BASE_URL = resolveApiBaseUrl();
-
-export const apiClient = axios.create({ baseURL: BASE_URL });
-
-// ---- Auth interceptor ----
-apiClient.interceptors.request.use((config) => {
-  const token = document.cookie
-    .split('; ')
-    .find((r) => r.startsWith('access_token='))
-    ?.split('=')[1];
-  if (token) {
-    const normalized = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-    config.headers['Authorization'] = normalized;
-  }
-  return config;
-});
-
-// ---- Error interceptor: همیشه MappedApiError یکنواخت ----
-apiClient.interceptors.response.use(
-  (res) => res,
-  (err) => Promise.reject(mapAxiosLikeError(err))
-);
 
 export const contractApi = {
   start: (dto: StartContractDto) =>

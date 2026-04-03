@@ -28,7 +28,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# Root-level Python lib artifacts only — keep e.g. admin-ui/src/lib tracked
+/lib/
 lib64/
 parts/
 sdist/

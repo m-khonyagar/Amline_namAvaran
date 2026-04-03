@@ -35,6 +35,14 @@ export default function HomePage() {
             انعقاد قرارداد جدید
           </Link>
         </li>
+        <li>
+          <Link
+            href="/billing"
+            className="flex min-h-[52px] items-center rounded-amline border border-[var(--amline-border)] bg-[var(--amline-surface)] px-4 py-3 font-medium text-[var(--amline-fg)] shadow-[var(--amline-shadow-sm)] transition-colors hover:bg-[var(--amline-surface-muted)] dark:border-slate-700 dark:bg-[var(--amline-surface-elevated)] dark:hover:bg-slate-800"
+          >
+            اشتراک و فاکتور
+          </Link>
+        </li>
       </ul>
     </main>
   )

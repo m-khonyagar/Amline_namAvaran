@@ -1,1 +1,28 @@
-from sqlalchemy import Column, Integer, String, Enum, DateTime, ForeignKey\nfrom sqlalchemy.orm import relationship\nfrom sqlalchemy.ext.declarative import declarative_base\nimport enum\n\nBase = declarative_base()\n\nclass ContractStatus(enum.Enum):\n    ACTIVE = 'active'\n    COMPLETED = 'completed'\n    CANCELLED = 'cancelled'\n\nclass Contract(Base):\n    __tablename__ = 'contracts'\n    id = Column(Integer, primary_key=True, index=True)\n    type = Column(Enum('Rent', 'Sale', 'Mortgage', name='contract_types'))\n    status = Column(Enum(ContractStatus))\n    signature = Column(String)\n    created_at = Column(DateTime)\n    updated_at = Column(DateTime)\n    user_id = Column(Integer, ForeignKey('users.id'))\n    user = relationship('User', back_populates='contracts')\n\n    def __repr__(self):\n        return f'<Contract(id={self.id}, type={self.type}, status={self.status})>'\n
+import enum
+
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+
+Base = declarative_base()
+
+
+class ContractStatus(enum.Enum):
+    ACTIVE = "active"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+
+class Contract(Base):
+    __tablename__ = "contracts"
+    id = Column(Integer, primary_key=True, index=True)
+    type = Column(Enum("Rent", "Sale", "Mortgage", name="contract_types"))
+    status = Column(Enum(ContractStatus))
+    signature = Column(String)
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    user = relationship("User", back_populates="contracts")
+
+    def __repr__(self) -> str:
+        return f"<Contract(id={self.id}, type={self.type}, status={self.status})>"
