@@ -15,6 +15,10 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.db.base import Base
+
+# قبل از create_all باید همهٔ مدل‌ها روی metadata ثبت شوند (ترتیب collection در Linux/CI).
+import app.models  # noqa: F401
+
 from app.db.session import SessionLocal, engine
 
 
