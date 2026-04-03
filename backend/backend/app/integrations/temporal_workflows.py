@@ -1,4 +1,5 @@
 """Temporal workflow hooks — starts AmlineSignalWorkflow when AMLINE_TEMPORAL_HOST is set."""
+
 from __future__ import annotations
 
 import asyncio
@@ -14,7 +15,9 @@ def temporal_configured() -> bool:
     return bool((os.getenv("AMLINE_TEMPORAL_HOST") or "").strip())
 
 
-def _start_workflow(kind: str, entity_id: str, metadata: Optional[dict[str, Any]]) -> None:
+def _start_workflow(
+    kind: str, entity_id: str, metadata: Optional[dict[str, Any]]
+) -> None:
     from temporalio.client import Client
 
     from app.temporal.workflow_defs import AmlineSignalWorkflow
@@ -39,19 +42,25 @@ def _start_workflow(kind: str, entity_id: str, metadata: Optional[dict[str, Any]
         log.warning("temporal workflow start failed: %s", e)
 
 
-def schedule_contract_workflow(contract_id: str, metadata: Optional[dict[str, Any]] = None) -> None:
+def schedule_contract_workflow(
+    contract_id: str, metadata: Optional[dict[str, Any]] = None
+) -> None:
     if not temporal_configured():
         return
     _start_workflow("contract", contract_id, metadata)
 
 
-def schedule_crm_lead_workflow(lead_id: str, metadata: Optional[dict[str, Any]] = None) -> None:
+def schedule_crm_lead_workflow(
+    lead_id: str, metadata: Optional[dict[str, Any]] = None
+) -> None:
     if not temporal_configured():
         return
     _start_workflow("crm_lead", lead_id, metadata)
 
 
-def schedule_visit_workflow(visit_id: str, metadata: Optional[dict[str, Any]] = None) -> None:
+def schedule_visit_workflow(
+    visit_id: str, metadata: Optional[dict[str, Any]] = None
+) -> None:
     if not temporal_configured():
         return
     _start_workflow("visit", visit_id, metadata)

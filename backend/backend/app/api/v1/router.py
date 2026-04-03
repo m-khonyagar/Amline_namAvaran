@@ -1,4 +1,5 @@
 """Aggregates all v1 HTTP routes (same paths as legacy dev-mock-api for dual-mount)."""
+
 from fastapi import APIRouter
 
 from app.api.v1 import (

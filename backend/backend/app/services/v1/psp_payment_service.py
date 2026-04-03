@@ -1,4 +1,5 @@
 """Finalize payment intent + wallet credit (idempotent)."""
+
 from __future__ import annotations
 
 import json
@@ -9,7 +10,11 @@ from sqlalchemy.orm import Session
 
 from app.models.payment import PaymentIntent, PaymentIntentStatus
 from app.models.wallet import LedgerEntryType
-from app.repositories.v1.p1_repositories import AuditDbRepository, PaymentRepository, WalletRepository
+from app.repositories.v1.p1_repositories import (
+    AuditDbRepository,
+    PaymentRepository,
+    WalletRepository,
+)
 
 
 def apply_payment_gateway_result(

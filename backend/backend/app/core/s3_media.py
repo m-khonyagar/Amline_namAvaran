@@ -1,4 +1,5 @@
 """Upload media to S3-compatible storage (MinIO) for listing images."""
+
 from __future__ import annotations
 
 import os

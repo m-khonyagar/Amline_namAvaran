@@ -1,4 +1,5 @@
 """Persistence for beta / onboarding / support / billing / ops error ingest."""
+
 from __future__ import annotations
 
 import hashlib
@@ -56,7 +57,9 @@ class LaunchRepository:
         self.db.flush()
         return raw, row
 
-    def accept_beta_invitation(self, raw_token: str, user_id: str) -> BetaInvitation | None:
+    def accept_beta_invitation(
+        self, raw_token: str, user_id: str
+    ) -> BetaInvitation | None:
         h = _hash_token(raw_token)
         row = self.db.scalars(
             select(BetaInvitation).where(BetaInvitation.token_hash == h)
@@ -73,8 +76,12 @@ class LaunchRepository:
         row.accepted_user_id = user_id
         return row
 
-    def list_beta_invitations(self, skip: int, limit: int) -> tuple[List[BetaInvitation], int]:
-        total = int(self.db.scalar(select(func.count()).select_from(BetaInvitation)) or 0)
+    def list_beta_invitations(
+        self, skip: int, limit: int
+    ) -> tuple[List[BetaInvitation], int]:
+        total = int(
+            self.db.scalar(select(func.count()).select_from(BetaInvitation)) or 0
+        )
         rows = list(
             self.db.scalars(
                 select(BetaInvitation)
@@ -100,7 +107,9 @@ class LaunchRepository:
         self.db.flush()
         return row
 
-    def list_onboarding_events(self, user_id: str, limit: int = 50) -> Sequence[OnboardingEvent]:
+    def list_onboarding_events(
+        self, user_id: str, limit: int = 50
+    ) -> Sequence[OnboardingEvent]:
         return self.db.scalars(
             select(OnboardingEvent)
             .where(OnboardingEvent.user_id == user_id)
@@ -135,7 +144,9 @@ class LaunchRepository:
         self.db.flush()
         return t
 
-    def add_support_message(self, ticket_id: str, author_user_id: str, body: str) -> SupportMessage:
+    def add_support_message(
+        self, ticket_id: str, author_user_id: str, body: str
+    ) -> SupportMessage:
         m = SupportMessage(
             id=str(uuid.uuid4()),
             ticket_id=ticket_id,
@@ -155,7 +166,8 @@ class LaunchRepository:
     ) -> tuple[List[SupportTicket], int]:
         filt = SupportTicket.user_id == user_id
         total = int(
-            self.db.scalar(select(func.count()).select_from(SupportTicket).where(filt)) or 0
+            self.db.scalar(select(func.count()).select_from(SupportTicket).where(filt))
+            or 0
         )
         rows = list(
             self.db.scalars(

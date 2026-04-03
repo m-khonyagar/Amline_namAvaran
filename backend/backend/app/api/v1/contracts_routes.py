@@ -2,6 +2,7 @@
 
 ``get_store`` برای monkeypatch در تست‌ها حفظ شده است.
 """
+
 from __future__ import annotations
 
 from app.api.v1.endpoints.contracts import router

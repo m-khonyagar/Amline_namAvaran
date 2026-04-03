@@ -1,4 +1,5 @@
 """P2 — analytics event ingest and dashboard aggregates."""
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -11,8 +12,11 @@ from app.core.posthog_server import posthog_capture
 from app.core.rbac_deps import require_permission
 from app.db.session import get_db
 from app.repositories.v1.p2_repositories import AnalyticsRepository
-from app.schemas.v1.growth_v1 import AnalyticsEventIngest, AnalyticsEventRead, AnalyticsSummaryResponse
-
+from app.schemas.v1.growth_v1 import (
+    AnalyticsEventIngest,
+    AnalyticsEventRead,
+    AnalyticsSummaryResponse,
+)
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 

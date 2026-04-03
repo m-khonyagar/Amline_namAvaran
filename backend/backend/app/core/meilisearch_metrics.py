@@ -1,4 +1,5 @@
 """Prometheus counters for Meilisearch client operations (optional)."""
+
 from __future__ import annotations
 
 from prometheus_client import Counter

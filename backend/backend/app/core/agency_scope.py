@@ -1,4 +1,5 @@
 """Optional multi-agency scoping via header when AMLINE_AGENCY_SCOPE_ENABLED=1."""
+
 from __future__ import annotations
 
 import os

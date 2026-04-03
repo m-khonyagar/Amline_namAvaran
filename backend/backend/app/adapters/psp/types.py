@@ -1,4 +1,5 @@
 """Shared types for PSP adapters (Zarinpal / IDPay / NextPay)."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

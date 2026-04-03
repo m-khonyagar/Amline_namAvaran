@@ -1,4 +1,5 @@
 """Post-launch: beta, onboarding, support, billing, KPIs, recommendations, ops ingest."""
+
 from __future__ import annotations
 
 import json
@@ -6,28 +7,27 @@ import os
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request
-from starlette.responses import Response
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
+from starlette.responses import Response
 
 from app.core.errors import AmlineError
 from app.core.rbac_deps import require_permission
 from app.db.session import get_db
 from app.models.crm import CrmLead
+from app.models.launch import SubscriptionPlan
 from app.models.listing import Listing
 from app.models.payment import PaymentIntent, PaymentIntentStatus
-from app.models.launch import SubscriptionPlan
 from app.models.visit import Visit
 from app.repositories.listing_repository import ListingRepository
-from app.services.v1.recommendation_cf import listing_recommendations_mixed
 from app.repositories.v1.launch_repository import LaunchRepository
 from app.repositories.v1.p1_repositories import AuditDbRepository
 from app.schemas.v1.launch_v1 import (
     AgentKpiResponse,
-    BillingInvoiceRead,
     BetaAcceptBody,
     BetaInviteCreate,
     BetaInviteRead,
+    BillingInvoiceRead,
     ClientErrorIngest,
     GamificationRead,
     I18nBundleResponse,
@@ -47,12 +47,15 @@ from app.schemas.v1.launch_v1 import (
     SupportTicketRead,
     UserSubscriptionRead,
 )
+from app.services.v1.recommendation_cf import listing_recommendations_mixed
 
 router = APIRouter(tags=["launch-platform"])
 
 
 def _uid(request: Request) -> str:
-    return request.headers.get("X-User-Id") or os.getenv("AMLINE_AUDIT_USER_ID", "mock-001")
+    return request.headers.get("X-User-Id") or os.getenv(
+        "AMLINE_AUDIT_USER_ID", "mock-001"
+    )
 
 
 def _ingest_allowed(request: Request) -> None:
@@ -166,7 +169,9 @@ def onboarding_record_event(
     response_model=OnboardingStatusResponse,
     dependencies=[Depends(require_permission("crm:read"))],
 )
-def onboarding_status(user_id: str, db: Session = Depends(get_db)) -> OnboardingStatusResponse:
+def onboarding_status(
+    user_id: str, db: Session = Depends(get_db)
+) -> OnboardingStatusResponse:
     repo = LaunchRepository(db)
     evs = repo.list_onboarding_events(user_id, limit=100)
     steps = [e.step for e in reversed(evs)]
@@ -325,7 +330,9 @@ def billing_subscribe(
     response_model=UserSubscriptionRead | None,
     dependencies=[Depends(require_permission("wallets:read"))],
 )
-def billing_me(request: Request, db: Session = Depends(get_db)) -> UserSubscriptionRead | None:
+def billing_me(
+    request: Request, db: Session = Depends(get_db)
+) -> UserSubscriptionRead | None:
     repo = LaunchRepository(db)
     row = repo.get_user_subscription(_uid(request))
     return UserSubscriptionRead.model_validate(row) if row else None
@@ -471,7 +478,9 @@ def i18n_bundle(locale: str = Query("fa")) -> I18nBundleResponse:
     response_model=GamificationRead,
     dependencies=[Depends(require_permission("crm:read"))],
 )
-def gamification_me(request: Request, db: Session = Depends(get_db)) -> GamificationRead:
+def gamification_me(
+    request: Request, db: Session = Depends(get_db)
+) -> GamificationRead:
     repo = LaunchRepository(db)
     g = repo.get_or_create_gamification(_uid(request))
     db.commit()
@@ -483,4 +492,6 @@ def gamification_me(request: Request, db: Session = Depends(get_db)) -> Gamifica
                 badges = []
         except json.JSONDecodeError:
             badges = []
-    return GamificationRead(user_id=g.user_id, points=g.points, level=g.level, badges=badges)
+    return GamificationRead(
+        user_id=g.user_id, points=g.points, level=g.level, badges=badges
+    )

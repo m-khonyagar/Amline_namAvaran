@@ -1,4 +1,5 @@
 """Best-effort sync of legal review outcome into in-memory contract (wizard)."""
+
 from __future__ import annotations
 
 import logging

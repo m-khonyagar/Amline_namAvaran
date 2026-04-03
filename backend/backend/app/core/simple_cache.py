@@ -1,4 +1,5 @@
 """Tiny in-process TTL cache (P2 search / public feed); replace with Redis in scale-out."""
+
 from __future__ import annotations
 
 import threading
@@ -31,7 +32,12 @@ class TtlCache(Generic[T]):
         with self._lock:
             self._data[key] = (time.monotonic() + ttl, value)
 
-    def get_or_set(self, key: Hashable, factory: Callable[[], T], ttl_seconds: Optional[float] = None) -> T:
+    def get_or_set(
+        self,
+        key: Hashable,
+        factory: Callable[[], T],
+        ttl_seconds: Optional[float] = None,
+    ) -> T:
         hit = self.get(key)
         if hit is not None:
             return hit

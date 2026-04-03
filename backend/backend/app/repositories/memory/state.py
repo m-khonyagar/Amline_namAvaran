@@ -1,4 +1,5 @@
 """In-memory stores migrated from dev-mock-api (bootstrap until Postgres)."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

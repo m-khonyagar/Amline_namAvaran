@@ -1,4 +1,5 @@
 """P2 — property requirements, rule-based matching, rule-based pricing."""
+
 from __future__ import annotations
 
 import os
@@ -10,7 +11,10 @@ from app.core.errors import AmlineError
 from app.core.rbac_deps import require_permission
 from app.db.session import get_db
 from app.repositories.listing_repository import ListingRepository
-from app.repositories.v1.p2_repositories import RequirementRepository, load_matchable_listings
+from app.repositories.v1.p2_repositories import (
+    RequirementRepository,
+    load_matchable_listings,
+)
 from app.schemas.v1.growth_v1 import (
     MatchSuggestionItem,
     MatchSuggestionsResponse,
@@ -18,10 +22,9 @@ from app.schemas.v1.growth_v1 import (
     RequirementCreate,
     RequirementRead,
 )
+from app.services.v1.composite_pricing import CompositePricingEngine
 from app.services.v1.matching_engine import RuleBasedMatchingEngine
 from app.services.v1.ml_registry import describe_ml_stack
-from app.services.v1.composite_pricing import CompositePricingEngine
-
 
 router = APIRouter(prefix="/ai", tags=["ai-growth"])
 
@@ -32,7 +35,9 @@ def ml_status() -> dict:
 
 
 def _owner_id(request: Request) -> str:
-    return request.headers.get("X-User-Id") or os.getenv("AMLINE_DEFAULT_USER_ID", "mock-001")
+    return request.headers.get("X-User-Id") or os.getenv(
+        "AMLINE_DEFAULT_USER_ID", "mock-001"
+    )
 
 
 @router.post("/requirements", response_model=RequirementRead, status_code=201)
@@ -54,7 +59,10 @@ def create_requirement(
     return RequirementRead.model_validate(row)
 
 
-@router.get("/matching/requirements/{requirement_id}/suggestions", response_model=MatchSuggestionsResponse)
+@router.get(
+    "/matching/requirements/{requirement_id}/suggestions",
+    response_model=MatchSuggestionsResponse,
+)
 def matching_suggestions(
     requirement_id: str,
     top_n: int = 20,
@@ -75,11 +83,18 @@ def matching_suggestions(
     ranked = engine.rank(listings, req, top_n=min(max(top_n, 1), 100))
     return MatchSuggestionsResponse(
         requirement_id=requirement_id,
-        items=[MatchSuggestionItem(listing_id=m.listing_id, score=m.score, breakdown=m.breakdown) for m in ranked],
+        items=[
+            MatchSuggestionItem(
+                listing_id=m.listing_id, score=m.score, breakdown=m.breakdown
+            )
+            for m in ranked
+        ],
     )
 
 
-@router.get("/pricing/listings/{listing_id}/estimate", response_model=PriceEstimateResponse)
+@router.get(
+    "/pricing/listings/{listing_id}/estimate", response_model=PriceEstimateResponse
+)
 def pricing_estimate(
     listing_id: str,
     db: Session = Depends(get_db),

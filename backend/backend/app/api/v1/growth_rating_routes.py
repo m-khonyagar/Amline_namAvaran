@@ -1,4 +1,5 @@
 """P2 — ratings and aggregates."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends
@@ -9,7 +10,6 @@ from app.db.session import get_db
 from app.models.growth import RatingTargetType
 from app.repositories.v1.p2_repositories import RatingRepository
 from app.schemas.v1.growth_v1 import RatingCreate, RatingRead, RatingSummaryResponse
-
 
 router = APIRouter(prefix="/ratings", tags=["ratings"])
 
@@ -40,5 +40,8 @@ def rating_summary(
 ) -> RatingSummaryResponse:
     avg, cnt = RatingRepository(db).aggregate(target_type, target_id)
     return RatingSummaryResponse(
-        target_type=target_type, target_id=target_id, average_stars=round(avg, 2), count=cnt
+        target_type=target_type,
+        target_id=target_id,
+        average_stars=round(avg, 2),
+        count=cnt,
     )

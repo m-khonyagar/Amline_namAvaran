@@ -62,7 +62,7 @@
     },
     {
       "file": "amline-ui/lib/auth.ts",
-      "line": 52,
+      "line": 56,
       "path": "/admin/login",
       "surface": "legacy_mount"
     },
@@ -86,7 +86,7 @@
     },
     {
       "file": "amline-ui/lib/auth.ts",
-      "line": 39,
+      "line": 43,
       "path": "/admin/otp/send",
       "surface": "legacy_mount"
     },
@@ -320,7 +320,7 @@
     },
     {
       "file": "amline-ui/app/login/page.tsx",
-      "line": 118,
+      "line": 119,
       "path": "/contracts",
       "surface": "legacy_mount"
     },
@@ -560,7 +560,7 @@
     },
     {
       "file": "amline-ui/e2e/user-wizard.spec.ts",
-      "line": 12,
+      "line": 11,
       "path": "/contracts/wizard",
       "surface": "legacy_mount"
     },
@@ -796,6 +796,6 @@
     "site/app",
     "packages/amline-ui-core/src"
   ],
-  "sha256_prefix": "5b0280e20741b405",
+  "sha256_prefix": "2cfe1c27e58043f8",
   "version": 1
 }

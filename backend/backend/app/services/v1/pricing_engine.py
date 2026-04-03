@@ -1,4 +1,5 @@
 """Rule-based price suggestion from peer listings; ML-ready via estimator hook."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -12,8 +13,7 @@ from app.models.listing import Listing, ListingStatus
 
 
 class PricingEstimator(Protocol):
-    def estimate(self, db: Session, listing: Listing) -> "PriceEstimate":
-        ...
+    def estimate(self, db: Session, listing: Listing) -> "PriceEstimate": ...
 
 
 @dataclass
@@ -31,14 +31,18 @@ class RuleBasedPricingEngine:
             db.scalar(
                 select(func.count())
                 .select_from(Listing)
-                .where(Listing.deal_type == listing.deal_type, Listing.status == ListingStatus.PUBLISHED)
+                .where(
+                    Listing.deal_type == listing.deal_type,
+                    Listing.status == ListingStatus.PUBLISHED,
+                )
             )
             or 0
         )
 
         avg_val = db.scalar(
             select(func.avg(Listing.price_amount)).where(
-                Listing.deal_type == listing.deal_type, Listing.status == ListingStatus.PUBLISHED
+                Listing.deal_type == listing.deal_type,
+                Listing.status == ListingStatus.PUBLISHED,
             )
         )
 

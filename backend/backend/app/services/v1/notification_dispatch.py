@@ -1,4 +1,5 @@
 """Dispatch notifications (SMS via existing adapter; email/push placeholder)."""
+
 from __future__ import annotations
 
 import json

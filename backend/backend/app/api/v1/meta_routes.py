@@ -1,4 +1,5 @@
 """UI helpers: agency list for multi-tenant header (see AMLINE_AGENCIES_JSON)."""
+
 from __future__ import annotations
 
 import json

@@ -1,4 +1,5 @@
 """Mock PSP — no external HTTP; for tests and local dev."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional

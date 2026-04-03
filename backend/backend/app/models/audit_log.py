@@ -1,4 +1,5 @@
 """DB-backed audit trail (P1 — supplements in-memory admin audit)."""
+
 from __future__ import annotations
 
 import uuid
@@ -21,5 +22,7 @@ class AuditLogEntry(Base):
     entity: Mapped[str] = mapped_column(String(128), nullable=False)
     metadata_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
     )

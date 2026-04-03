@@ -1,4 +1,5 @@
 """Server-side PostHog capture (optional)."""
+
 from __future__ import annotations
 
 import logging
@@ -16,7 +17,9 @@ def _get_client() -> Any:
     global _client
     if _client is not None:
         return _client
-    key = (os.getenv("POSTHOG_API_KEY") or os.getenv("POSTHOG_PROJECT_API_KEY") or "").strip()
+    key = (
+        os.getenv("POSTHOG_API_KEY") or os.getenv("POSTHOG_PROJECT_API_KEY") or ""
+    ).strip()
     host = (os.getenv("POSTHOG_HOST") or "https://app.posthog.com").rstrip("/")
     if not key:
         return None

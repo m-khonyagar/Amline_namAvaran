@@ -1,4 +1,5 @@
 """ML-ready registry: swap rule engines for ONNX/Torch jobs without route churn."""
+
 from __future__ import annotations
 
 import os

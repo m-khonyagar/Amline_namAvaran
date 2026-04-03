@@ -1,4 +1,5 @@
 """Listing media upload → S3/MinIO + optional Thumbor derivative URLs."""
+
 from __future__ import annotations
 
 from typing import Any, Optional
@@ -13,6 +14,8 @@ from app.core.thumbor_urls import thumbor_image_url, thumbor_preset_url
 router = APIRouter(prefix="/media", tags=["media"])
 
 _MAX_BYTES = 12 * 1024 * 1024
+
+
 @router.post("/listing-image", status_code=201)
 def upload_listing_media(
     file: UploadFile = File(...),
@@ -45,7 +48,9 @@ def upload_listing_media(
             details={"max_bytes": _MAX_BYTES},
         )
     fn = file.filename or "upload"
-    key, public_url = upload_listing_image(filename=fn, content_type=ct or "image/jpeg", body=raw)
+    key, public_url = upload_listing_image(
+        filename=fn, content_type=ct or "image/jpeg", body=raw
+    )
     if preset:
         thumb = thumbor_preset_url(key, preset, smart=True)
     else:

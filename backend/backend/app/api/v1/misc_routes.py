@@ -33,7 +33,12 @@ def provinces_cities(
 def provinces(db: Session = Depends(get_db)) -> List[Dict[str, Any]]:
     repo = GeoRepository(db)
     return [
-        {"id": p.id, "name": p.name_fa, "name_fa": p.name_fa, "sort_order": p.sort_order}
+        {
+            "id": p.id,
+            "name": p.name_fa,
+            "name_fa": p.name_fa,
+            "sort_order": p.sort_order,
+        }
         for p in repo.list_provinces()
     ]
 

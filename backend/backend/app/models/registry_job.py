@@ -1,11 +1,14 @@
 """Registry submission jobs — mock adapter persistence (P1)."""
+
 from __future__ import annotations
 
 import enum
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, Enum as SAEnum, String, Text
+from sqlalchemy import DateTime
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -35,10 +38,14 @@ class RegistryJob(Base):
         nullable=False,
         default=RegistryJobStatus.SUBMITTED,
     )
-    tracking_code: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    tracking_code: Mapped[str | None] = mapped_column(
+        String(128), nullable=True, index=True
+    )
     payload_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

@@ -1,4 +1,5 @@
 """Fire-and-forget webhooks to n8n (or compatible) for CRM / visits / contracts."""
+
 from __future__ import annotations
 
 import logging

@@ -1,4 +1,5 @@
 """Lightweight collaborative-filtering style listing recommendations from ratings."""
+
 from __future__ import annotations
 
 from collections import defaultdict
@@ -61,10 +62,7 @@ def recommend_listings_cf(
         candidate_scores[r.target_id] += float(r.stars)
 
     ranked = sorted(candidate_scores.items(), key=lambda x: -x[1])[:limit]
-    return [
-        (lid, score, "collaborative_filtering_ratings")
-        for lid, score in ranked
-    ]
+    return [(lid, score, "collaborative_filtering_ratings") for lid, score in ranked]
 
 
 def fallback_recent_listings(db: Session, limit: int) -> list[tuple[str, float, str]]:
@@ -72,8 +70,7 @@ def fallback_recent_listings(db: Session, limit: int) -> list[tuple[str, float, 
 
     rows, _ = ListingRepository(db).list(skip=0, limit=limit)
     return [
-        (r.id, 1.0 - i * 0.01, "recent_publication_order")
-        for i, r in enumerate(rows)
+        (r.id, 1.0 - i * 0.01, "recent_publication_order") for i, r in enumerate(rows)
     ]
 
 

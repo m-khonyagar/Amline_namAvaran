@@ -1,13 +1,13 @@
 """ML pricing HTTP service with fallback to rule engine."""
+
 from __future__ import annotations
 
 import json
 import logging
 import os
+import time
 from decimal import Decimal
 from typing import Optional
-
-import time
 
 import httpx
 from sqlalchemy.orm import Session

@@ -1,4 +1,5 @@
 """قرارداد — New Flow 0.1.3 (مسیرهای ``/contracts/...``)."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, BackgroundTasks, Request

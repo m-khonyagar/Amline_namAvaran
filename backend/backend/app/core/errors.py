@@ -1,4 +1,5 @@
 """Global exception handlers + domain exception for unified ErrorResponse."""
+
 from __future__ import annotations
 
 import logging
@@ -91,7 +92,9 @@ def _validation_field_errors(errors: Sequence[dict[str, Any]]) -> List[FieldErro
     return out
 
 
-def _http_exception_to_amline(exc: StarletteHTTPException) -> tuple[int, str, str, Optional[dict]]:
+def _http_exception_to_amline(
+    exc: StarletteHTTPException,
+) -> tuple[int, str, str, Optional[dict]]:
     status = exc.status_code
     detail = exc.detail
     if isinstance(detail, dict):
@@ -126,17 +129,34 @@ def _http_exception_to_amline(exc: StarletteHTTPException) -> tuple[int, str, st
         ),
         "otp_expired": ("OTP_INVALID_OR_EXPIRED", "کد تایید منقضی شده است."),
         "otp_invalid": ("OTP_INVALID_OR_EXPIRED", "کد تایید نادرست است."),
-        "otp_locked": ("OTP_INVALID_OR_EXPIRED", "به‌دلیل تلاش‌های مکرر موقتاً قفل شده است."),
+        "otp_locked": (
+            "OTP_INVALID_OR_EXPIRED",
+            "به‌دلیل تلاش‌های مکرر موقتاً قفل شده است.",
+        ),
         "otp_rate_limited": ("OTP_RATE_LIMITED", "ارسال کد تایید بیش از حد مجاز است."),
         "invalid_mobile": ("VALIDATION_FAILED", "شماره موبایل معتبر نیست."),
-        "mobile_mismatch": ("OTP_INVALID_OR_EXPIRED", "شماره موبایل با چالش مطابقت ندارد."),
-        "purpose_mismatch": ("OTP_INVALID_OR_EXPIRED", "نوع عملیات با چالش مطابقت ندارد."),
-        "national_code_mismatch": ("VALIDATION_FAILED", "کد ملی با ثبت‌شده مطابقت ندارد."),
+        "mobile_mismatch": (
+            "OTP_INVALID_OR_EXPIRED",
+            "شماره موبایل با چالش مطابقت ندارد.",
+        ),
+        "purpose_mismatch": (
+            "OTP_INVALID_OR_EXPIRED",
+            "نوع عملیات با چالش مطابقت ندارد.",
+        ),
+        "national_code_mismatch": (
+            "VALIDATION_FAILED",
+            "کد ملی با ثبت‌شده مطابقت ندارد.",
+        ),
         "invalid_otp_format": ("VALIDATION_FAILED", "فرمت کد تایید نامعتبر است."),
     }
     if d in detail_map:
         code, default_msg = detail_map[d]
-    return status, code, default_msg, {"detail": d} if d and d not in detail_map else None
+    return (
+        status,
+        code,
+        default_msg,
+        {"detail": d} if d and d not in detail_map else None,
+    )
 
 
 async def amline_error_handler(request: Request, exc: AmlineError) -> JSONResponse:
@@ -151,7 +171,9 @@ async def amline_error_handler(request: Request, exc: AmlineError) -> JSONRespon
     return JSONResponse(status_code=exc.status_code, content=body)
 
 
-async def http_exception_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
+async def http_exception_handler(
+    request: Request, exc: StarletteHTTPException
+) -> JSONResponse:
     rid = _request_id(request)
     status, code, msg, details = _http_exception_to_amline(exc)
     body = _error_payload(

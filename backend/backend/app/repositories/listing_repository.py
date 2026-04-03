@@ -75,7 +75,9 @@ class ListingRepository:
             area_sqm=Decimal(str(data.area_sqm)) if data.area_sqm is not None else None,
             room_count=data.room_count,
             latitude=Decimal(str(data.latitude)) if data.latitude is not None else None,
-            longitude=Decimal(str(data.longitude)) if data.longitude is not None else None,
+            longitude=(
+                Decimal(str(data.longitude)) if data.longitude is not None else None
+            ),
             search_document=_build_search_document(
                 data.title, data.location_summary, data.description
             ),
@@ -121,7 +123,9 @@ class ListingRepository:
         filt = (Listing.visibility == ListingVisibility.PUBLIC) & (
             Listing.status == ListingStatus.PUBLISHED
         )
-        total = int(self.db.scalar(select(func.count()).select_from(Listing).where(filt)) or 0)
+        total = int(
+            self.db.scalar(select(func.count()).select_from(Listing).where(filt)) or 0
+        )
         stmt = (
             select(Listing)
             .where(filt)
@@ -132,7 +136,9 @@ class ListingRepository:
         return self.db.scalars(stmt).all(), total
 
     def avg_price_published(self, deal_type: DealType) -> Decimal | None:
-        filt = (Listing.status == ListingStatus.PUBLISHED) & (Listing.deal_type == deal_type)
+        filt = (Listing.status == ListingStatus.PUBLISHED) & (
+            Listing.deal_type == deal_type
+        )
         v = self.db.scalar(select(func.avg(Listing.price_amount)).where(filt))
         if v is None:
             return None
@@ -176,7 +182,11 @@ class ListingRepository:
             for f in filters:
                 count_stmt = count_stmt.where(f)
             total = int(self.db.scalar(count_stmt) or 0)
-            stmt = stmt.order_by(rank.desc(), Listing.updated_at.desc()).offset(skip).limit(limit)
+            stmt = (
+                stmt.order_by(rank.desc(), Listing.updated_at.desc())
+                .offset(skip)
+                .limit(limit)
+            )
             return self.db.scalars(stmt).all(), total
 
         if q and q.strip():
@@ -230,13 +240,17 @@ class ListingRepository:
             filters_extra.append(Listing.status == status)
         for f in filters_extra:
             stmt = stmt.where(f)
-        count_stmt = select(func.count()).select_from(Listing).where(
-            Listing.latitude.isnot(None),
-            Listing.longitude.isnot(None),
-            Listing.latitude >= min_lat,
-            Listing.latitude <= max_lat,
-            Listing.longitude >= min_lng,
-            Listing.longitude <= max_lng,
+        count_stmt = (
+            select(func.count())
+            .select_from(Listing)
+            .where(
+                Listing.latitude.isnot(None),
+                Listing.longitude.isnot(None),
+                Listing.latitude >= min_lat,
+                Listing.latitude <= max_lat,
+                Listing.longitude >= min_lng,
+                Listing.longitude <= max_lng,
+            )
         )
         for f in filters_extra:
             count_stmt = count_stmt.where(f)
@@ -269,7 +283,9 @@ class ListingRepository:
                         and_(Listing.created_at == ref.created_at, Listing.id < ref.id),
                     )
                 )
-        stmt = stmt.order_by(Listing.created_at.desc(), Listing.id.desc()).limit(limit + 1)
+        stmt = stmt.order_by(Listing.created_at.desc(), Listing.id.desc()).limit(
+            limit + 1
+        )
         rows = list(self.db.scalars(stmt).all())
         next_cursor: Optional[str] = None
         if len(rows) > limit:

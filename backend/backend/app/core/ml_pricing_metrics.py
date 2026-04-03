@@ -1,4 +1,5 @@
 """Prometheus counters for CompositePricingEngine ML HTTP path."""
+
 from __future__ import annotations
 
 from prometheus_client import Counter
