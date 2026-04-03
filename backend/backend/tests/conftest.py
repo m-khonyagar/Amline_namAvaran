@@ -6,7 +6,8 @@ import os
 import uuid
 from datetime import datetime, timezone
 
-os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
+# اجرای pytest همیشه روی SQLite حافظه‌ای (همراه StaticPool در session.py برای یکسان‌سازی اتصال‌ها).
+os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 os.environ.setdefault("AMLINE_OTP_DEBUG", "1")
 os.environ.setdefault("AMLINE_RBAC_ENFORCE", "0")
 
@@ -15,11 +16,11 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.db.base import Base
-
-# قبل از create_all باید همهٔ مدل‌ها روی metadata ثبت شوند (ترتیب collection در Linux/CI).
-import app.models  # noqa: F401
-
 from app.db.session import SessionLocal, engine
+
+# قبل از create_all: بارگذاری کامل اپ تا همهٔ مدل‌ها روی metadata ثبت شوند (Linux/CI).
+import app.models  # noqa: F401
+import app.main  # noqa: F401
 
 
 def _seed_minimal_rbac_geo(db: Session) -> None:
