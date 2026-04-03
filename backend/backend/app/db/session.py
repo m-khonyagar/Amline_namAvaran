@@ -21,9 +21,7 @@ if DATABASE_URL.startswith("sqlite"):
     if ":memory:" in DATABASE_URL:
         _engine_kwargs["poolclass"] = StaticPool
 
-engine = create_engine(
-    DATABASE_URL, connect_args=_connect_args, **_engine_kwargs
-)
+engine = create_engine(DATABASE_URL, connect_args=_connect_args, **_engine_kwargs)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
