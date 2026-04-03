@@ -48,6 +48,15 @@ python scripts/inventory_frontend_http_calls.py
 
 - **amline-ui:** [`amline-ui/playwright.config.ts`](../amline-ui/playwright.config.ts) — `backend/backend/scripts/run_e2e_server.py` (uvicorn واقعی + alembic)، نه `dev-mock-api`.
 
+## قرارداد — New Flow (SwaggerHub 0.1.3)
+
+- **منبع رسمی قرارداد API:** OpenAPI/Swagger نسخهٔ **0.1.3**؛ هر تغییر مسیر یا DTO باید با همان نسخه هم‌خوان بماند.
+- **پیاده‌سازی بک‌اند:** [`backend/backend/app/api/v1/endpoints/contracts.py`](../backend/backend/app/api/v1/endpoints/contracts.py) و سرویس [`contract_flow_service.py`](../backend/backend/app/services/v1/contract_flow_service.py)؛ مدل‌های ORM پیش‌نویس در [`contract_flow.py`](../backend/backend/app/models/contract_flow.py) (پیشوند جدول `contract_flow_*`)؛ اسکیماهای Pydantic در [`schemas/v1/contract_flow.py`](../backend/backend/app/schemas/v1/contract_flow.py).
+- **فیلدهای کلیدی پاسخ:** `flow_version` (مقدار `0.1.3`) و **`next_step`** پس از شروع قرارداد و پس از هر `POST` گام‌دار (طرف‌ها، بخش‌های `home-info` / `dating` / `mortgage` / `renting`، `sign/set`، و در صورت نیاز پس از تأیید شاهد).
+- **امضا و شاهد:** مسیرهای `sign/*` و `witness/*` علاوه بر state machine، از [`signature_service.py`](../backend/backend/app/services/v1/signature_service.py) برای OTP و رویدادها استفاده می‌کنند.
+- **اعتبارسنجی ترتیب گام (اختیاری):** با `AMLINE_CONTRACT_STRICT_FLOW=1` روی بک‌اند، پرش نامعتبر بین گام‌ها رد می‌شود؛ پیش‌فرض برای توسعه روان‌تر، غیرسخت‌گیر است.
+- **mock توسعه:** [`dev-mock-api/`](../dev-mock-api/) همان مسیرها و شکل بدنهٔ بخش‌ها (`payload` + `next_step`) را تکرار می‌کند؛ برای فهرست شماره‌دار همهٔ endpointها و خلاصهٔ state machine به [`integrations/contract-flow/README.md`](../integrations/contract-flow/README.md) مراجعه کنید.
+
 ## نقشهٔ اجرای چهار مرحله (Cursor)
 
 فایل پلن: `.cursor/plans/amline_four-step_roadmap_e813ce45.plan.md` (در workspace محلی Cursor).
