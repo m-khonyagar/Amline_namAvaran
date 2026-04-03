@@ -18,7 +18,11 @@ test('smoke واقعی: ارسال OTP از فرم لاگین', async ({ page })
   await expect
     .poll(
       async () => {
-        const otpStep = await page.getByText(/کد ارسال شده به/).isVisible().catch(() => false);
+        // در UI متن «کد ارسال‌شده به» با نیم‌فاصله (U+200C) است؛ الگو باید هر دو را بپذیرد
+        const otpStep = await page
+          .getByText(/کد ارسال[\s\u200c]*شده به/)
+          .isVisible()
+          .catch(() => false);
         const mobileAgain = await page
           .getByRole('button', { name: /^ارسال کد تأیید$/ })
           .isVisible()
