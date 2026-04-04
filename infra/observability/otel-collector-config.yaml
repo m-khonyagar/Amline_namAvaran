@@ -1,0 +1,17 @@
+# Profile "otel": docker compose --profile otel up
+# Backend: OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  debug:
+    verbosity: basic
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [debug]
