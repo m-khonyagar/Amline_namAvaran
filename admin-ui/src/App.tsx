@@ -20,6 +20,7 @@ import IntegrationsPage from './pages/integrations/IntegrationsPage'
 import BillingPage from './pages/billing/BillingPage'
 import CRMPage from './pages/crm/CRMPage'
 import LeadDetailPage from './pages/crm/LeadDetailPage'
+import NotificationsPage from './pages/notifications/NotificationsPage'
 import { useAuth } from './hooks/useAuth'
 import { PermissionGuard } from './components/auth/PermissionGuard'
 import { ContractWizardPage } from './features/contract-wizard/ContractWizardPage'
@@ -114,9 +115,9 @@ function AppRoutes() {
                 <LegalReviewQueuePage />
               </PermissionGuard>
             } />
-            <Route path=":id" element={
-              <PermissionGuard permission="contracts:read">
-                <ContractDetailPage />
+            <Route path="wizard" element={
+              <PermissionGuard permission="contracts:write">
+                <ContractWizardPage platform="admin" />
               </PermissionGuard>
             } />
             <Route path="pr-contracts" element={
@@ -124,9 +125,9 @@ function AppRoutes() {
                 <PRContractsPage />
               </PermissionGuard>
             } />
-            <Route path="wizard" element={
+            <Route path=":id" element={
               <PermissionGuard permission="contracts:read">
-                <ContractWizardPage platform="admin" />
+                <ContractDetailPage />
               </PermissionGuard>
             } />
           </Route>
@@ -181,9 +182,23 @@ function AppRoutes() {
             </PermissionGuard>
           } />
 
+          <Route path="notifications" element={
+            <PermissionGuard permission="notifications:read">
+              <NotificationsPage />
+            </PermissionGuard>
+          } />
+
           <Route path="crm">
-            <Route index element={<CRMPage />} />
-            <Route path=":id" element={<LeadDetailPage />} />
+            <Route index element={
+              <PermissionGuard permission="crm:read">
+                <CRMPage />
+              </PermissionGuard>
+            } />
+            <Route path=":id" element={
+              <PermissionGuard permission="crm:read">
+                <LeadDetailPage />
+              </PermissionGuard>
+            } />
           </Route>
         </Route>
 

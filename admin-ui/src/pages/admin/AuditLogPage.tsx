@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
+import { toast } from 'sonner'
 import { apiClient } from '../../lib/api'
 
 interface AuditItem {
@@ -16,6 +17,26 @@ interface AuditListResponse {
   items: AuditItem[]
   skip: number
   limit: number
+}
+
+function csvEscape(s: string): string {
+  if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`
+  return s
+}
+
+function auditRowsToCsv(rows: AuditItem[]): string {
+  const header = 'id,user_id,action,entity,created_at,metadata_json'
+  const lines = rows.map((r) =>
+    [
+      csvEscape(r.id),
+      csvEscape(r.user_id),
+      csvEscape(r.action),
+      csvEscape(r.entity),
+      csvEscape(r.created_at),
+      csvEscape(JSON.stringify(r.metadata)),
+    ].join(',')
+  )
+  return [header, ...lines].join('\n')
 }
 
 export default function AuditLogPage() {
@@ -36,13 +57,43 @@ export default function AuditLogPage() {
   const total = data?.total ?? 0
   const maxPage = Math.max(0, Math.ceil(total / limit) - 1)
 
+  const downloadExport = useCallback(async () => {
+    try {
+      const cap = Math.min(2000, total || 2000)
+      const res = await apiClient.get<AuditListResponse>('/admin/audit', {
+        params: { skip: 0, limit: cap },
+      })
+      const csv = auditRowsToCsv(res.data.items)
+      const blob = new Blob(['\ufeff', csv], { type: 'text/csv;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `audit-export-${new Date().toISOString().slice(0, 10)}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success(`خروجی تا ${res.data.items.length} رکورد اول آماده شد`)
+    } catch {
+      toast.error('خطا در دریافت خروجی')
+    }
+  }, [total])
+
   return (
     <div dir="rtl" className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">لاگ ممیزی</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
-          رویدادهای ثبت‌شده در mock API (صفحه‌بندی ساده).
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">لاگ ممیزی</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
+            رویدادهای ثبت‌شده؛ خروجی CSV برای بازبینی عملیات و انطباق (حداکثر ۲۰۰۰ رکورد اخیر).
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => void downloadExport()}
+          disabled={total === 0}
+          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 dark:bg-emerald-700 dark:hover:bg-emerald-600"
+        >
+          خروجی CSV
+        </button>
       </div>
 
       {isLoading ? (

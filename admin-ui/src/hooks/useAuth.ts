@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { apiClient } from '../lib/api'
 import { ensureMappedError } from '../lib/errorMapper'
 import { CookieNames, getCookie, removeCookie, setCookie } from '../lib/cookies'
+import { EXPLICIT_FULL_DEV_PERMISSIONS, isDevBypassEnv, permissionMatches } from '../lib/permissions'
 
 export interface User {
   id: string
@@ -32,11 +33,7 @@ export function useAuth() {
   const checkAuth = useCallback(async () => {
     const token = getCookie(CookieNames.ACCESS_TOKEN)
     const userData = getCookie(CookieNames.USER)
-    // dev bypass — فقط در توسعه و فقط وقتی VITE_ENABLE_DEV_BYPASS=true صریحاً تنظیم شده
-    const isDevBypassEnabled =
-      import.meta.env.DEV && import.meta.env.VITE_ENABLE_DEV_BYPASS === 'true'
-
-    if (isDevBypassEnabled && token === 'dev-token-12345') {
+    if (isDevBypassEnv() && token === 'dev-token-12345') {
       if (userData) {
         try {
           const user = JSON.parse(userData) as User
@@ -48,11 +45,12 @@ export function useAuth() {
       }
       // اگه userData نبود، mock user بساز
       const mockUser: User = {
-        id: 'dev-001', mobile: '09120000000',
-        full_name: 'کاربر آزمایشی', role: 'admin', role_id: 'role-admin',
-        permissions: ['users:read','users:write','contracts:read','contracts:write',
-          'ads:read','ads:write','wallets:read','wallets:write','settings:read','settings:write',
-          'audit:read','roles:read','roles:write','reports:read','notifications:read'],
+        id: 'dev-001',
+        mobile: '09120000000',
+        full_name: 'کاربر آزمایشی',
+        role: 'admin',
+        role_id: 'role-admin',
+        permissions: [...EXPLICIT_FULL_DEV_PERMISSIONS],
       }
       setCookie(CookieNames.USER, JSON.stringify(mockUser), 1)
       setAuthState({ user: mockUser, isAuthenticated: true, isLoading: false })
@@ -135,7 +133,7 @@ export function useAuth() {
 
   const hasPermission = (permission: string): boolean => {
     if (!authState.user) return false
-    return authState.user.permissions.includes(permission)
+    return permissionMatches(authState.user.permissions, permission)
   }
 
   return {

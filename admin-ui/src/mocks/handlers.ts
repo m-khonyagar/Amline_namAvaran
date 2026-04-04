@@ -2,6 +2,8 @@ import { http, HttpResponse } from 'msw';
 
 // ---- Mock user & shared fixtures ----
 const MSW_FULL_PERMS = [
+  'legal:read',
+  'legal:write',
   'contracts:read',
   'contracts:write',
   'users:read',
@@ -17,6 +19,8 @@ const MSW_FULL_PERMS = [
   'roles:write',
   'reports:read',
   'notifications:read',
+  'crm:read',
+  'crm:write',
 ];
 
 const mockUser = {
@@ -75,7 +79,16 @@ const mswSessions: Array<{
   last_seen_at: string;
   ip: string;
 }> = [];
-const mswNotifications: Array<{ id: string; title: string; body: string; read: boolean; created_at: string }> = [
+const mswNotificationReads = new Set<string>();
+
+const mswNotifications: Array<{
+  id: string;
+  title: string;
+  body: string;
+  read: boolean;
+  created_at: string;
+  type?: string;
+}> = [
   {
     id: 'n1',
     title: 'قرارداد جدید ثبت شد',
@@ -194,9 +207,57 @@ function adminEnterpriseHandlers() {
         audit_events_total: mswAuditLogs.length,
       })
     ),
-    http.get('*/admin/notifications', () =>
-      HttpResponse.json({ items: [...mswNotifications], total: mswNotifications.length })
-    ),
+    http.get('*/admin/metrics/operations', () => {
+      const unread = mswNotifications.filter((x) => !mswNotificationReads.has(x.id)).length;
+      const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+      const audit24 = mswAuditLogs.filter((e) => {
+        const t = Date.parse(e.created_at);
+        return !Number.isNaN(t) && t >= cutoff;
+      }).length;
+      return HttpResponse.json({
+        unread_notifications: unread,
+        open_crm_leads: 3,
+        crm_by_status: { NEW: 1, CONTACTED: 1, QUALIFIED: 1 },
+        contracts_flagged_legal: 0,
+        audit_events_last_24h: audit24,
+      });
+    }),
+    http.get('*/admin/notifications', ({ request }) => {
+      const u = new URL(request.url);
+      const unreadOnly = u.searchParams.get('unread_only') === 'true' || u.searchParams.get('unread_only') === '1';
+      const limit = Math.min(200, Math.max(1, parseInt(u.searchParams.get('limit') ?? '50', 10) || 50));
+      const ordered = [...mswNotifications].reverse();
+      const items: typeof mswNotifications = [];
+      for (const n of ordered) {
+        const read = mswNotificationReads.has(n.id);
+        if (unreadOnly && read) continue;
+        items.push({ ...n, read });
+        if (items.length >= limit) break;
+      }
+      const unread_count = mswNotifications.filter((x) => !mswNotificationReads.has(x.id)).length;
+      return HttpResponse.json({ items, total: mswNotifications.length, unread_count });
+    }),
+    http.post('*/admin/notifications/:id/read', ({ params }) => {
+      mswNotificationReads.add(params.id as string);
+      return new HttpResponse(null, { status: 204 });
+    }),
+    http.post('*/admin/notifications/read-all', () => {
+      mswNotifications.forEach((n) => mswNotificationReads.add(n.id));
+      return new HttpResponse(null, { status: 204 });
+    }),
+    http.post('*/admin/notifications', async ({ request }) => {
+      const body = (await request.json()) as { title: string; body?: string; type?: string };
+      const row = {
+        id: `n-${Date.now()}`,
+        title: body.title,
+        body: body.body ?? '',
+        read: false,
+        created_at: new Date().toISOString(),
+        type: body.type ?? 'system',
+      };
+      mswNotifications.push(row);
+      return HttpResponse.json(row, { status: 201 });
+    }),
   ];
 }
 

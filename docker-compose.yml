@@ -151,10 +151,13 @@ services:
     build:
       context: ./admin-ui
       dockerfile: Dockerfile
+      args:
+        # برای استیجینگ عمومی: https://amline-backend-staging.darkube.app — برای لوکال خالی بگذارید تا nginx/paths نسبی
+        VITE_API_URL: ${VITE_STAGING_API_URL:-}
+        VITE_USE_MSW: ${VITE_ADMIN_USE_MSW:-false}
+        VITE_ENABLE_DEV_BYPASS: ${VITE_ADMIN_DEV_BYPASS:-false}
+        VITE_USE_CRM_API: ${VITE_ADMIN_USE_CRM_API:-true}
     container_name: amline-admin-ui
-    environment:
-      - VITE_API_BASE_URL=http://backend
-      - VITE_API_URL=http://backend
     ports:
       - "3002:80"
     depends_on:
