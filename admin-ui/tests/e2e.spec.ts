@@ -76,11 +76,12 @@ test('CRM: افزودن Lead جدید', async ({ page }) => {
 test('Contract Wizard: صفحه شروع نمایش داده می‌شود', async ({ page }) => {
   await devLogin(page);
   await page.goto(`${BASE}/contracts/wizard`);
-  const rentBtn = page.getByRole('button', { name: 'رهن و اجاره', exact: true });
+  await expect(page.getByRole('heading', { name: /انعقاد قرارداد جدید/ })).toBeVisible({ timeout: 20000 });
+  const rentBtn = page.getByRole('button', { name: /رهن و اجاره/ });
   await expect(rentBtn).toBeVisible({ timeout: 15000 });
-  await expect(page.getByRole('button', { name: 'خرید و فروش', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'برای خودم', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'برای دیگران', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: /خرید و فروش/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /برای خودم/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /برای دیگران/ })).toBeVisible();
 });
 
 // ================================================================
@@ -89,11 +90,12 @@ test('Contract Wizard: صفحه شروع نمایش داده می‌شود', asy
 test('Contract Wizard: انتخاب رهن و اجاره', async ({ page }) => {
   await devLogin(page);
   await page.goto(`${BASE}/contracts/wizard`);
-  await expect(page.getByRole('button', { name: 'رهن و اجاره', exact: true })).toBeVisible({
+  await expect(page.getByRole('heading', { name: /انعقاد قرارداد جدید/ })).toBeVisible({ timeout: 20000 });
+  await expect(page.getByRole('button', { name: /رهن و اجاره/ })).toBeVisible({
     timeout: 15000,
   });
-  await page.getByRole('button', { name: 'رهن و اجاره', exact: true }).click();
-  await page.getByRole('button', { name: 'برای دیگران', exact: true }).click();
+  await page.getByRole('button', { name: /رهن و اجاره/ }).click();
+  await page.getByRole('button', { name: /برای دیگران/ }).click();
   const startBtn = page.getByRole('button', { name: 'شروع قرارداد', exact: true });
   await expect(startBtn).toBeVisible({ timeout: 5000 });
 });

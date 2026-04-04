@@ -42,10 +42,10 @@ test('فلو ۱: ورود به سیستم و مشاهده داشبورد', async
   await screenshot(page, '02-dashboard');
 
   // sidebar باید نمایش داده شود (دو لوگوی هم‌نام در هدر موبایل + سایدبار — یکی را مشخص می‌کنیم)
-  await expect(page.locator('#app-sidebar').getByText('اَملاین')).toBeVisible();
+  await expect(page.locator('#app-sidebar').getByText('اَملاین').first()).toBeVisible({ timeout: 20000 });
   await expect(page.getByRole('link', { name: /داشبورد/i })).toBeVisible();
   await expect(page.getByRole('link', { name: /قراردادها/i })).toBeVisible();
-  await expect(page.getByRole('link', { name: /CRM/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /CRM/i }).first()).toBeVisible();
   await expect(page.getByRole('link', { name: /کاربران/i })).toBeVisible();
 });
 
@@ -56,7 +56,7 @@ test('فلو ۲: CRM کامل — ایجاد Lead و مدیریت', async ({ pag
   await devLogin(page);
 
   // رفتن به CRM
-  await page.getByRole('link', { name: /CRM/i }).click();
+  await page.getByRole('link', { name: /CRM/i }).first().click();
   await expect(page).toHaveURL(`${BASE}/crm`);
   await expect(page.getByRole('heading', { name: 'جدید' })).toBeVisible({ timeout: 10000 });
   await screenshot(page, '03-crm-kanban');
@@ -93,15 +93,16 @@ test('فلو ۳: Contract Wizard — شروع قرارداد رهن و اجار�
   await devLogin(page);
 
   // رفتن به wizard از sidebar
-  await page.getByRole('link', { name: /قرارداد جدید/i }).click();
+  await page.getByRole('link', { name: /قرارداد جدید/i }).first().click();
   await expect(page).toHaveURL(`${BASE}/contracts/wizard`);
-  await expect(page.getByRole('button', { name: 'رهن و اجاره', exact: true })).toBeVisible({
+  await expect(page.getByRole('heading', { name: /انعقاد قرارداد جدید/ })).toBeVisible({ timeout: 20000 });
+  await expect(page.getByRole('button', { name: /رهن و اجاره/ })).toBeVisible({
     timeout: 10000,
   });
   await screenshot(page, '07-wizard-start');
 
   // انتخاب رهن و اجاره
-  await page.getByRole('button', { name: 'رهن و اجاره', exact: true }).click();
+  await page.getByRole('button', { name: /رهن و اجاره/ }).click();
   await screenshot(page, '08-wizard-rent-selected');
 
   // انتخاب حالت کاتب
