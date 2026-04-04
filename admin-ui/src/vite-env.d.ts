@@ -19,6 +19,11 @@ interface ImportMetaEnv {
    * در بیلد production حذف می‌شود (import.meta.env.DEV همیشه false).
    */
   readonly VITE_DEV_VIEW_ALL_PAGES: string
+  /**
+   * فقط DEV + platform ادمین: پیمایش آزاد ویزارد قرارداد و دکمهٔ شروع بدون POST.
+   * در production بدون اثر (isWizardPreviewMode همیشه false).
+   */
+  readonly VITE_WIZARD_PREVIEW_MODE: string
   readonly VITE_PUBLIC_POSTHOG_KEY: string
   readonly VITE_PUBLIC_POSTHOG_HOST: string
   /** `true` فقط در staging — ضبط جلسه PostHog */

@@ -451,7 +451,41 @@ function contractJson(c: MockContract) {
   };
 }
 
+/** شناسهٔ `local-preview__<TYPE>__<ts>` — ویزارد dev بدون POST /contracts/start */
+const MSW_PREVIEW_TYPES = [
+  'PROPERTY_RENT',
+  'BUYING_AND_SELLING',
+  'EXCHANGE',
+  'CONSTRUCTION',
+  'PRE_SALE',
+  'LEASE_TO_OWN',
+] as const;
+
+function parsePreviewContractType(contractId: string): string | null {
+  if (!contractId.startsWith('local-preview__')) return null;
+  const inner = contractId.slice('local-preview__'.length);
+  for (const t of MSW_PREVIEW_TYPES) {
+    if (inner.startsWith(`${t}__`)) return t;
+  }
+  return null;
+}
+
 function getContract(contractId: string): MockContract | null {
+  const previewType = parsePreviewContractType(contractId);
+  if (previewType) {
+    let c = contracts.get(contractId);
+    if (!c) {
+      c = {
+        id: contractId,
+        type: previewType,
+        status: 'DRAFT',
+        step: 'LANDLORD_INFORMATION',
+        parties: {},
+      };
+      contracts.set(contractId, c);
+    }
+    return c;
+  }
   return contracts.get(contractId) ?? null;
 }
 
