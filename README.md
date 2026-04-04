@@ -104,6 +104,45 @@ site (3001)          amline-ui (3000)       admin-ui (3002)
 
 ---
 
+### 🚀 Sweep AI Autonomous Development Layer
+
+این مخزن برای کار با **[Sweep AI](https://github.com/apps/sweep-ai)** و لایهٔ **Mother-Builder** (ارکستراسیون issue/برچسب/automation) پیکربندی شده است.
+
+**فایل‌ها**
+
+- `sweep.yaml` — تنظیمات اصلی که **GitHub App** می‌خواند (الزامی).
+- `.sweep.yaml` — باید با `sweep.yaml` **یکسان** باشد (قرارداد تیم و ابزارهای نقطه‌دار).
+- بخش‌های ساخت‌یافته: `repo_intelligence` (وابستگی، کراس‌سرویس، قرارداد، فرانت-بک، Temporal، ممیزی)، `product_spec_enforcement` (انواع قرارداد، جریان‌های S1–S5 / P1–P4 / T1، دامنه‌ها)، `agent_behavior` (چندفایلی، چندسرویسی، تست/مستندات، سازگاری عقب‌رو، `commit_style: structured`).
+
+**شروع با Sweep**
+
+1. نصب [Sweep AI](https://github.com/apps/sweep-ai) روی حساب/سازمان و اعطای دسترسی به این ریپو.
+2. ساخت Issue با عنوان **`Sweep: ...`** یا افزودن لیبل **`Sweep`**.
+3. در بدنه: مسیر فایل‌ها، رفتار مورد انتظار، و اشاره صریح به SSOT (`docs/AMLINE_MASTER_SPEC.md`، «Amline Complete Product Master Specification v2.0» به‌عنوان قرارداد محصول، و در صورت نیاز `docs/AMLINE_REFERENCE_V2_2.md`).
+
+**الگوهای Issue برای توسعهٔ چندسرویسی**
+
+- صریح بگویید کدام لایه‌ها را لمس می‌کند: `backend/backend`، `amline-ui`، `admin-ui`، `site`، و آیا **Temporal** یا **Audit/Ledger** درگیر است.
+- از Sweep بخواهید قبل از پیاده‌سازی، **وابستگی و مرز دامنه** را در نظر بگیرد (قرارداد، پرداخت، امضا، CRM).
+- برای تغییرات شکننده API، بخواهید **سازگاری عقب‌رو** یا migration/نسخه‌گذاری را در همان PR پوشش دهد.
+
+**نمونه‌های انگلیسی (کپی-پیست در عنوان یا بدنه)**
+
+- `Sweep: Implement SALE contract end-to-end (API in backend/backend, wizard flows in admin-ui + amline-ui per SSOT)`
+- `Sweep: Add signature flow S4 to Contract service and wire admin-ui steps; keep S1–S5 consistent`
+- `Sweep: Refactor Party model to support legal entities; align Terms per contract type and update tests`
+- `Sweep: Implement Temporal workflow for contract lifecycle; do not break audit immutability`
+
+**Mother-Builder**
+
+Mother-Builder می‌تواند Issueهای استاندارد Sweep را از backlog، برچسب‌ها، یا pipeline داخلی تولید کند. Secret اختیاری **`SWEEP_API_KEY`** در GitHub Actions برای اتصال آینده به API اختصاصی تعریف می‌شود؛ workflow `.github/workflows/sweep.yaml` فقط وجود secret را گزارش می‌کند و مقدار را چاپ نمی‌کند.
+
+**SSOT محصول**
+
+منبع حقیقت اجرایی در ریپو: `docs/AMLINE_MASTER_SPEC.md` و مرجع عمیق `docs/AMLINE_REFERENCE_V2_2.md`. قرارداد محصول v2.0 در پیکربندی Sweep به‌عنوان مرجع مفهومی در کنار این فایل‌ها آمده است.
+
+---
+
 ## ماژول‌های admin-ui
 
 | مسیر | مجوز | توضیح |

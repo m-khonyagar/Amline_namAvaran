@@ -1,0 +1,107 @@
+# Validates Sweep configuration on activity; Sweep runs via the GitHub App + root sweep.yaml.
+# Optional: repository secret SWEEP_API_KEY for Mother-Builder / custom API hooks (placeholder).
+
+name: Sweep AI
+
+on:
+  issues:
+    types: [opened, edited, labeled, unlabeled]
+  issue_comment:
+    types: [created]
+  pull_request:
+    types: [opened, reopened, synchronize]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+
+concurrency:
+  group: sweep-ai-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-sweep-config:
+    runs-on: ubuntu-latest
+    env:
+      SWEEP_API_KEY: ${{ secrets.SWEEP_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate sweep.yaml and .sweep.yaml
+        run: |
+          python3 <<'PY'
+          import pathlib
+          import sys
+
+          try:
+              import yaml  # type: ignore
+          except ImportError:
+              import subprocess
+
+              subprocess.check_call(
+                  [sys.executable, "-m", "pip", "install", "--quiet", "pyyaml"],
+                  stdout=subprocess.DEVNULL,
+              )
+              import yaml  # type: ignore
+
+          root = pathlib.Path(".")
+          required_top_level = (
+              "gha_enabled",
+              "branch",
+              "description",
+              "repo_intelligence",
+              "product_spec_enforcement",
+              "agent_behavior",
+              "rules",
+              "blocked_dirs",
+              "include_exts",
+              "docs",
+          )
+          sweep_path = root / "sweep.yaml"
+          dot_path = root / ".sweep.yaml"
+          for path in (sweep_path, dot_path):
+              if not path.is_file():
+                  print(f"ERROR: missing {path.name}", file=sys.stderr)
+                  sys.exit(1)
+          data_sweep = yaml.safe_load(sweep_path.read_text(encoding="utf-8"))
+          data_dot = yaml.safe_load(dot_path.read_text(encoding="utf-8"))
+          if data_sweep != data_dot:
+              print("ERROR: sweep.yaml and .sweep.yaml must be identical", file=sys.stderr)
+              sys.exit(1)
+          for key in required_top_level:
+              if key not in data_sweep:
+                  print(f"ERROR: missing top-level key: {key}", file=sys.stderr)
+                  sys.exit(1)
+          ri = data_sweep["repo_intelligence"]
+          for k in (
+              "enable_dependency_graph",
+              "enable_cross_service_mapping",
+              "enable_contract_model_awareness",
+              "enable_frontend_backend_coupling_awareness",
+              "enable_temporal_workflow_awareness",
+              "enable_audit_immutability_rules",
+          ):
+              if k not in ri or ri[k] is not True:
+                  print(f"ERROR: repo_intelligence.{k} must be true", file=sys.stderr)
+                  sys.exit(1)
+          pse = data_sweep["product_spec_enforcement"]
+          if "contract_types" not in pse or "flows" not in pse or "domain_services" not in pse:
+              print("ERROR: product_spec_enforcement incomplete", file=sys.stderr)
+              sys.exit(1)
+          ab = data_sweep["agent_behavior"]
+          if ab.get("commit_style") != "structured":
+              print("ERROR: agent_behavior.commit_style must be structured", file=sys.stderr)
+              sys.exit(1)
+          print("OK: sweep.yaml == .sweep.yaml, schema checks passed")
+          PY
+
+      - name: Optional secret placeholder (never print value)
+        run: |
+          if [ -n "${SWEEP_API_KEY:-}" ]; then
+            echo "SWEEP_API_KEY secret is configured (value not shown)."
+          else
+            echo "SWEEP_API_KEY not set — optional unless you wire Mother-Builder or a custom API."
+          fi
