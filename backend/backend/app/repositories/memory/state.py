@@ -31,6 +31,26 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _parties_for_api_response(parties: Any) -> Any:
+    """Drop embedded ``contract`` snapshots on party rows to avoid JSON cycles."""
+
+    if not isinstance(parties, dict):
+        return parties
+    out: Dict[str, Any] = {}
+    for bucket, lst in parties.items():
+        if isinstance(lst, list):
+            clean: List[Dict[str, Any]] = []
+            for p in lst:
+                if isinstance(p, dict):
+                    clean.append({k: v for k, v in p.items() if k != "contract"})
+                else:
+                    clean.append(p)  # type: ignore[arg-type]
+            out[bucket] = clean
+        else:
+            out[bucket] = lst
+    return out
+
+
 @dataclass
 class MemoryStore:
     roles: List[Dict[str, Any]] = field(default_factory=list)
@@ -182,12 +202,22 @@ class MemoryStore:
             "type": c["type"],
             "status": c["status"],
             "step": c["step"],
-            "parties": c.get("parties", {}),
+            "parties": _parties_for_api_response(c.get("parties", {})),
             "is_owner": True,
             "key": "mock-key",
             "password": None,
             "created_at": c.get("created_at", _now_iso()),
         }
+        if "ssot_kind" in c:
+            out["ssot_kind"] = c["ssot_kind"]
+        out["external_refs"] = c.get(
+            "external_refs",
+            {"khodnevis_id": None, "katib_id": None, "tracking_code": None},
+        )
+        out["created_by"] = c.get("created_by")
+        out["witnesses"] = c.get("witnesses", [])
+        out["amendments"] = c.get("amendments", [])
+        out["payments"] = c.get("payments", {})
         for k in (
             "flow_version",
             "home_info",
