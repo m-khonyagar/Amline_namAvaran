@@ -740,7 +740,7 @@
     },
     {
       "file": "amline-ui/app/contracts/wizard/page.tsx",
-      "line": 21,
+      "line": 27,
       "path": "/login",
       "surface": "other_slash"
     },
@@ -911,6 +911,6 @@
     "site/components",
     "packages/amline-ui-core/src"
   ],
-  "sha256_prefix": "1914c8de70e6cea8",
+  "sha256_prefix": "3715ac414a67be6b",
   "version": 1
 }

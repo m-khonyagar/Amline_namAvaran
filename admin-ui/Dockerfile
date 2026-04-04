@@ -2,7 +2,7 @@
 # اجرا از ریشهٔ مخزن:
 #   docker build -f admin-ui/Dockerfile .
 
-FROM node:20-alpine AS builder
+FROM node:20-bookworm-slim AS builder
 
 WORKDIR /repo
 

@@ -1,3 +1,6 @@
+const path = require('path')
+const webpack = require('webpack')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -10,6 +13,17 @@ const nextConfig = {
   },
   typescript: {
     ignoreBuildErrors: true,
+  },
+  webpack(config) {
+    if (process.env.NEXT_PUBLIC_EMBED_ADMIN_WIZARD === '0') {
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(
+          /contracts[\\/]wizard[\\/]WizardEmbed\.tsx$/,
+          path.join(__dirname, 'app/contracts/wizard/WizardStub.tsx')
+        )
+      )
+    }
+    return config
   },
   async rewrites() {
     const base =
