@@ -43,10 +43,10 @@ test('فلو ۱: ورود به سیستم و مشاهده داشبورد', async
 
   // sidebar باید نمایش داده شود (دو لوگوی هم‌نام در هدر موبایل + سایدبار — یکی را مشخص می‌کنیم)
   await expect(page.locator('#app-sidebar').getByText('اَملاین').first()).toBeVisible({ timeout: 20000 });
-  await expect(page.getByRole('link', { name: /داشبورد/i })).toBeVisible();
-  await expect(page.getByRole('link', { name: /قراردادها/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /داشبورد/i }).first()).toBeVisible();
+  await expect(page.getByRole('link', { name: /قراردادها/i }).first()).toBeVisible();
   await expect(page.getByRole('link', { name: /CRM/i }).first()).toBeVisible();
-  await expect(page.getByRole('link', { name: /کاربران/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /کاربران/i }).first()).toBeVisible();
 });
 
 // ================================================================
@@ -179,7 +179,7 @@ test('فلو ۵: صفحه قراردادها و navigation', async ({ page }) =>
 test('فلو ۶: صفحه کاربران', async ({ page }) => {
   await devLogin(page);
 
-  await page.getByRole('link', { name: /کاربران/i }).click();
+  await page.getByRole('link', { name: /کاربران/i }).first().click();
   await expect(page).toHaveURL(`${BASE}/users`);
   await page.waitForTimeout(2000);
   await screenshot(page, '14-users-page');

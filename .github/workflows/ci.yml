@@ -163,7 +163,7 @@ jobs:
           npm install @rollup/rollup-linux-x64-gnu@4.60.1 -w amline-admin-ui
           cd admin-ui
           npx playwright install chromium --with-deps
-          npm run test:e2e -- tests/e2e.spec.ts
+          npm run test:e2e
 
   # ==================== Build Docker Images ====================
   build-backend:
