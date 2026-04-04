@@ -25,6 +25,7 @@ from app.api.v1 import (
     media_routes,
     meta_routes,
     misc_routes,
+    messaging_bots_routes,
     notifications_routes,
     payment_routes,
     registry_routes,
@@ -39,6 +40,7 @@ platform_router.include_router(auth_routes.router)
 platform_router.include_router(contracts_routes.router)
 platform_router.include_router(dispute_routes.router)
 platform_router.include_router(misc_routes.router)
+platform_router.include_router(messaging_bots_routes.router)
 platform_router.include_router(admin_routes.router)
 platform_router.include_router(crm_routes.router)
 platform_router.include_router(crm_v1_routes.router)

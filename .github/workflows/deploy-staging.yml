@@ -1,0 +1,145 @@
+# دیپلوی استیجینگ: پنل ادمین (Vite) + سایت مارکتینگ (Next static export)
+# بک‌اند استیجینگ: https://amline-backend-staging.darkube.app (ر. API_DOCS.md)
+#
+# GitHub → Settings → Secrets and variables:
+#   Variable: STAGING_DEPLOY_HOST (الزامی برای SCP)
+#   Variables (اختیاری): STAGING_API_URL, STAGING_ADMIN_REMOTE_DIR, STAGING_SITE_REMOTE_DIR
+#     STAGING_MARKETING_URL, STAGING_APP_URL, STAGING_CONTACT_EMAIL
+#   Secret: STAGING_DEPLOY_SSH_KEY یا DEPLOY_SSH_KEY
+
+name: Deploy staging (admin-ui + site)
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_site:
+        description: 'فقط ادمین (بدون سایت)'
+        type: boolean
+        default: false
+  push:
+    branches: [staging]
+
+concurrency:
+  group: deploy-staging-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (admin-ui)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: admin-ui/package-lock.json
+
+      - name: Compute staging API URL
+        id: conf
+        run: |
+          API="${{ vars.STAGING_API_URL }}"
+          if [ -z "$API" ]; then API="https://amline-backend-staging.darkube.app"; fi
+          echo "api_url=$API" >> "$GITHUB_OUTPUT"
+
+      - name: Install & build admin-ui
+        working-directory: admin-ui
+        env:
+          VITE_API_URL: ${{ steps.conf.outputs.api_url }}
+          VITE_USE_MSW: 'false'
+          VITE_ENABLE_DEV_BYPASS: 'false'
+          VITE_USE_CRM_API: 'true'
+        run: |
+          npm ci
+          npm run build
+
+      - name: Setup Node.js (site)
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip_site != true }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install & build site
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip_site != true }}
+        working-directory: site
+        env:
+          NEXT_PUBLIC_AMLINE_APP_URL: ${{ vars.STAGING_APP_URL != '' && vars.STAGING_APP_URL || 'https://app.amline.ir' }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.STAGING_MARKETING_URL != '' && vars.STAGING_MARKETING_URL || 'https://amline.ir' }}
+          NEXT_PUBLIC_CONTACT_EMAIL: ${{ vars.STAGING_CONTACT_EMAIL != '' && vars.STAGING_CONTACT_EMAIL || 'info@amline.ir' }}
+        run: |
+          npm ci
+          npm run build
+
+      - name: Pack artifacts
+        run: |
+          tar -czf /tmp/admin-ui-staging.tar.gz -C admin-ui/dist .
+          if [ -d site/out ]; then tar -czf /tmp/site-staging.tar.gz -C site/out .; fi
+
+      - name: Upload build artifacts (no STAGING_DEPLOY_HOST)
+        if: ${{ vars.STAGING_DEPLOY_HOST == '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-static-${{ github.sha }}
+          path: |
+            /tmp/admin-ui-staging.tar.gz
+            /tmp/site-staging.tar.gz
+          if-no-files-found: warn
+
+      - name: Setup SSH
+        if: ${{ vars.STAGING_DEPLOY_HOST != '' }}
+        env:
+          STAGING_KEY: ${{ secrets.STAGING_DEPLOY_SSH_KEY }}
+          FALLBACK_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          KEY_CONTENT="${STAGING_KEY:-}"
+          if [ -z "$KEY_CONTENT" ]; then KEY_CONTENT="${FALLBACK_KEY:-}"; fi
+          if [ -z "$KEY_CONTENT" ]; then
+            echo "Set secret STAGING_DEPLOY_SSH_KEY or DEPLOY_SSH_KEY"
+            exit 1
+          fi
+          printf '%s\n' "$KEY_CONTENT" > ~/.ssh/staging_key
+          chmod 600 ~/.ssh/staging_key
+          ssh-keyscan -H "${{ vars.STAGING_DEPLOY_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Deploy over SSH
+        if: ${{ vars.STAGING_DEPLOY_HOST != '' }}
+        env:
+          HOST: ${{ vars.STAGING_DEPLOY_HOST }}
+        run: |
+          ADMIN_REMOTE="${{ vars.STAGING_ADMIN_REMOTE_DIR }}"
+          [ -z "$ADMIN_REMOTE" ] && ADMIN_REMOTE="/opt/amline/staging/admin-ui"
+          SITE_REMOTE="${{ vars.STAGING_SITE_REMOTE_DIR }}"
+          [ -z "$SITE_REMOTE" ] && SITE_REMOTE="/opt/amline/staging/site"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.skip_site }}" = "true" ]; then
+            SKIP_SITE="true"
+          else
+            SKIP_SITE="false"
+          fi
+          scp -i ~/.ssh/staging_key -o StrictHostKeyChecking=no /tmp/admin-ui-staging.tar.gz "root@${HOST}:/tmp/"
+          if [ "$SKIP_SITE" != "true" ] && [ -f /tmp/site-staging.tar.gz ]; then
+            scp -i ~/.ssh/staging_key -o StrictHostKeyChecking=no /tmp/site-staging.tar.gz "root@${HOST}:/tmp/"
+          fi
+          ssh -i ~/.ssh/staging_key -o StrictHostKeyChecking=no "root@${HOST}" \
+            bash -s -- "$ADMIN_REMOTE" "$SITE_REMOTE" "$SKIP_SITE" << 'EOS'
+          set -euo pipefail
+          ADMIN_REMOTE="$1"
+          SITE_REMOTE="$2"
+          SKIP_SITE="$3"
+          mkdir -p "${ADMIN_REMOTE}"
+          tar -xzf /tmp/admin-ui-staging.tar.gz -C "${ADMIN_REMOTE}"
+          rm -f /tmp/admin-ui-staging.tar.gz
+          if [ "$SKIP_SITE" != "true" ] && [ -f /tmp/site-staging.tar.gz ]; then
+            mkdir -p "${SITE_REMOTE}"
+            tar -xzf /tmp/site-staging.tar.gz -C "${SITE_REMOTE}"
+            rm -f /tmp/site-staging.tar.gz
+          fi
+          echo "OK: admin -> ${ADMIN_REMOTE}"
+          echo "OK: site -> ${SITE_REMOTE} (skip=${SKIP_SITE})"
+          EOS

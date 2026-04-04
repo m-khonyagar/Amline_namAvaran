@@ -3,6 +3,7 @@
  * Base URL empty in dev: Vite proxies paths to VITE_DEV_PROXY_TARGET.
  */
 import axios from 'axios'
+import { CookieNames, getCookie } from './cookies'
 import { mapAxiosLikeError } from './errorMapper'
 
 function resolveBaseUrl(): string {
@@ -35,6 +36,16 @@ apiClient.interceptors.request.use((config) => {
   const devUid = import.meta.env.VITE_DEV_USER_ID
   if (import.meta.env.DEV && devUid) {
     config.headers['X-User-Id'] = String(devUid)
+  } else {
+    try {
+      const rawUser = getCookie(CookieNames.USER)
+      if (rawUser) {
+        const user = JSON.parse(decodeURIComponent(rawUser)) as { id?: string }
+        if (user?.id) config.headers['X-User-Id'] = user.id
+      }
+    } catch {
+      /* ignore */
+    }
   }
   try {
     const agencyId = localStorage.getItem('amline_x_agency_id')

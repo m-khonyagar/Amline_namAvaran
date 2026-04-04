@@ -15,6 +15,16 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Vite: متغیرها فقط در زمان build (برای staging مقدار بدهید)
+ARG VITE_API_URL=
+ARG VITE_USE_MSW=false
+ARG VITE_ENABLE_DEV_BYPASS=false
+ARG VITE_USE_CRM_API=true
+ENV VITE_API_URL=$VITE_API_URL \
+    VITE_USE_MSW=$VITE_USE_MSW \
+    VITE_ENABLE_DEV_BYPASS=$VITE_ENABLE_DEV_BYPASS \
+    VITE_USE_CRM_API=$VITE_USE_CRM_API
+
 # Build the application
 RUN npm run build
 
