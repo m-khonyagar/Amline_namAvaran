@@ -3,8 +3,9 @@
  * در dev با baseURL خالی، Vite به `VITE_DEV_PROXY_TARGET` برای `/api/v1` و `/financials` پروکسی می‌کند.
  */
 import axios from 'axios'
+import { notifySessionExpired } from '../auth/authSession'
 import { AMLINE_API_V1_PREFIX } from './apiPaths'
-import { CookieNames, getCookie, removeCookie } from './cookies'
+import { CookieNames, getCookie } from './cookies'
 import { mapAxiosLikeError } from './errorMapper'
 
 /** درخواست‌هایی که 401 آن‌ها به معنای «پاک کردن نشست» نیست (رمز/OTP اشتباه و غیره). */
@@ -73,17 +74,8 @@ apiClient.interceptors.response.use(
   (err) => {
     const status = axios.isAxiosError(err) ? err.response?.status : undefined
     const cfg = err.config
-    if (
-      status === 401 &&
-      cfg &&
-      !isCredentialSubmissionRequest(cfg) &&
-      typeof window !== 'undefined' &&
-      !window.location.pathname.endsWith('/login')
-    ) {
-      removeCookie(CookieNames.ACCESS_TOKEN)
-      removeCookie(CookieNames.REFRESH_TOKEN)
-      removeCookie(CookieNames.USER)
-      window.location.assign(`${window.location.origin}/login`)
+    if (status === 401 && cfg && !isCredentialSubmissionRequest(cfg)) {
+      notifySessionExpired()
     }
     return Promise.reject(mapAxiosLikeError(err))
   }
