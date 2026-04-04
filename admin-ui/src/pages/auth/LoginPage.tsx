@@ -74,7 +74,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-[var(--amline-bg)] lg:flex-row">
+    <div className="relative flex min-h-[100dvh] flex-col bg-[var(--amline-bg)] safe-pb lg:min-h-screen lg:flex-row">
       <div
         className="pointer-events-none absolute inset-0 bg-[var(--amline-bg-mesh)] opacity-90"
         aria-hidden
@@ -106,12 +106,12 @@ export default function LoginPage() {
         </ul>
       </section>
 
-      <div className="relative flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6 lg:py-10">
-        <div className="absolute left-4 top-4 z-10 sm:left-6 sm:top-6 lg:left-8 lg:top-8">
+      <div className="relative flex flex-1 flex-col items-center justify-center px-4 py-8 sm:px-6 sm:py-12 lg:py-10">
+        <div className="absolute end-4 top-[max(1rem,env(safe-area-inset-top,0px))] z-10 sm:end-6 lg:end-8">
           <ThemeToggle />
         </div>
 
-        <div className="relative w-full max-w-md">
+        <div className="relative w-full max-w-md pb-[env(safe-area-inset-bottom,0px)]">
           <div className="mb-6 text-center lg:hidden">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-amline-lg bg-gradient-to-br from-[var(--amline-primary)] to-[var(--amline-accent)] text-lg font-extrabold text-white shadow-[var(--amline-shadow-md)]">
               ا

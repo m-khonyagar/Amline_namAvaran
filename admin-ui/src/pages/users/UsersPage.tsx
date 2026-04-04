@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { apiClient } from '../../lib/api'
+import { apiV1 } from '../../lib/apiPaths'
 
 interface UserListItem {
   id: string
@@ -52,7 +53,7 @@ export default function UsersPage() {
       const params: Record<string, string | number> = { page, limit: 20 }
       if (debouncedSearch) params.search = debouncedSearch
       if (roleFilter) params.role = roleFilter
-      const res = await apiClient.get<UsersListResponse>('/admin/users', { params })
+      const res = await apiClient.get<UsersListResponse>(apiV1('admin/users'), { params })
       return res.data
     },
   })

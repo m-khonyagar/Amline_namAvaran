@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { apiClient } from '../../lib/api'
+import { apiV1 } from '../../lib/apiPaths'
 import { useAuth } from '../../hooks/useAuth'
 
 export interface AdminRole {
@@ -19,14 +20,14 @@ export default function RolesPage() {
   const { data: roles = [], isLoading } = useQuery({
     queryKey: ['admin-roles'],
     queryFn: async () => {
-      const res = await apiClient.get<AdminRole[]>('/admin/roles')
+      const res = await apiClient.get<AdminRole[]>(apiV1('admin/roles'))
       return res.data
     },
   })
 
   const patchMutation = useMutation({
     mutationFn: async ({ id, permissions }: { id: string; permissions: string[] }) => {
-      const res = await apiClient.patch<AdminRole>(`/admin/roles/${id}`, { permissions })
+      const res = await apiClient.patch<AdminRole>(apiV1(`admin/roles/${id}`), { permissions })
       return res.data
     },
     onSuccess: () => {

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { apiV1 } from '@/lib/apiPaths';
 import { apiClient } from '../api/contractApi';
 
 interface RevokeContractButtonProps {
@@ -15,7 +16,7 @@ export function RevokeContractButton({ contractId, onRevoked }: RevokeContractBu
     setIsLoading(true);
     setError(null);
     try {
-      await apiClient.post(`/contracts/${contractId}/revoke`);
+      await apiClient.post(apiV1(`contracts/${contractId}/revoke`));
       setShowDialog(false);
       onRevoked();
     } catch {

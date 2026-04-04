@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ADMIN_NAV_SECTIONS } from '../config/adminNav';
 import { useAuth } from '../hooks/useAuth';
+import { cn } from '../lib/cn';
 
 type Props = {
   open: boolean;
@@ -29,7 +30,13 @@ export function AdminCommandMenu({ open, onOpenChange }: Props) {
       label="پرش سریع در پنل مدیریت"
       dir="rtl"
       overlayClassName="fixed inset-0 z-[100] bg-slate-900/45 backdrop-blur-[2px]"
-      contentClassName="fixed left-1/2 top-[12%] z-[101] w-[min(32rem,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-[var(--amline-radius-lg)] border border-[var(--amline-border)] bg-[var(--amline-surface)] shadow-[var(--amline-shadow-lg)] dark:border-slate-700 dark:bg-slate-900"
+      contentClassName={cn(
+        'fixed z-[101] flex max-h-[min(85dvh,calc(100vh-2rem))] flex-col overflow-hidden rounded-[var(--amline-radius-lg)] border border-[var(--amline-border)] bg-[var(--amline-surface)] shadow-[var(--amline-shadow-lg)] dark:border-slate-700 dark:bg-slate-900',
+        /* موبایل: تقریباً تمام ارتفاع، حاشیهٔ امن */
+        'inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom,0px))] top-[calc(0.75rem+env(safe-area-inset-top,0px)+3.5rem)] w-auto max-w-none translate-x-0 sm:inset-x-auto sm:bottom-auto',
+        /* تبلت به بالا: مودال مرکزی */
+        'sm:left-1/2 sm:top-[10%] sm:max-h-[min(70dvh,24rem)] sm:w-[min(32rem,calc(100vw-2rem))] sm:-translate-x-1/2'
+      )}
     >
       <div className="flex items-center gap-2 border-b border-[var(--amline-border)] px-3 dark:border-slate-700">
         <Search className="h-4 w-4 shrink-0 text-[var(--amline-fg-subtle)]" strokeWidth={2} aria-hidden />
@@ -39,7 +46,7 @@ export function AdminCommandMenu({ open, onOpenChange }: Props) {
           className="flex h-12 w-full bg-transparent py-3 text-sm text-[var(--amline-fg)] outline-none placeholder:text-[var(--amline-fg-subtle)]"
         />
       </div>
-      <Command.List className="max-h-[min(52vh,22rem)] overflow-y-auto p-2">
+      <Command.List className="max-h-[calc(100dvh-13rem)] overflow-y-auto overscroll-contain p-2 sm:max-h-[min(52vh,22rem)]">
         <Command.Empty className="py-8 text-center text-sm text-[var(--amline-fg-muted)]">
           نتیجه‌ای یافت نشد.
         </Command.Empty>

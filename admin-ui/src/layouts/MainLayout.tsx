@@ -60,7 +60,8 @@ export default function MainLayout() {
   return (
     <div dir="rtl" className="flex min-h-screen text-[var(--amline-fg)] transition-colors">
       <AdminCommandMenu open={commandOpen} onOpenChange={setCommandOpen} />
-      <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b border-[var(--amline-border)] bg-[var(--amline-surface)]/90 px-4 shadow-[var(--amline-shadow-sm)] backdrop-blur-lg dark:border-slate-700 dark:bg-slate-900/90 lg:hidden">
+      <header className="safe-pt fixed inset-x-0 top-0 z-40 flex min-h-14 flex-col border-b border-[var(--amline-border)] bg-[var(--amline-surface)]/90 shadow-[var(--amline-shadow-sm)] backdrop-blur-lg dark:border-slate-700 dark:bg-slate-900/90 lg:hidden">
+        <div className="flex h-14 shrink-0 items-center justify-between pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]">
         <button
           type="button"
           className="flex h-11 w-11 items-center justify-center rounded-amline-md border border-[var(--amline-border)] text-[var(--amline-fg)] transition-colors hover:bg-[var(--amline-surface-muted)] dark:border-slate-600"
@@ -84,6 +85,7 @@ export default function MainLayout() {
           <NotificationsBell />
           <ThemeToggle />
         </div>
+        </div>
       </header>
 
       <button
@@ -99,7 +101,7 @@ export default function MainLayout() {
       <aside
         id="app-sidebar"
         className={cn(
-          'fixed inset-y-0 right-0 z-50 flex w-[min(20.5rem,90vw)] flex-col border-l border-[var(--amline-border)] bg-[var(--amline-surface)]/95 shadow-[var(--amline-shadow-lg)] backdrop-blur-xl transition-transform duration-300 ease-out dark:border-slate-700 dark:bg-slate-900/95 lg:static lg:z-0 lg:w-64 lg:max-w-none lg:translate-x-0 lg:shadow-none',
+          'fixed inset-y-0 right-0 z-50 flex w-[min(20.5rem,calc(100vw-env(safe-area-inset-left,0px)-0.5rem))] max-w-[100vw] flex-col border-l border-[var(--amline-border)] bg-[var(--amline-surface)]/95 shadow-[var(--amline-shadow-lg)] backdrop-blur-xl transition-transform duration-300 ease-out dark:border-slate-700 dark:bg-slate-900/95 lg:static lg:z-0 lg:w-64 lg:max-w-none lg:translate-x-0 lg:shadow-none',
           mobileNavOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
         )}
       >
@@ -148,7 +150,7 @@ export default function MainLayout() {
                         onClick={() => setMobileNavOpen(false)}
                         className={({ isActive }) =>
                           cn(
-                            'flex items-center gap-3 rounded-amline-md px-3 py-2.5 text-sm transition-all duration-200',
+                            'flex min-h-[44px] items-center gap-3 rounded-amline-md px-3 py-2.5 text-sm transition-all duration-200 active:bg-[var(--amline-surface-muted)]',
                             isActive
                               ? 'bg-[var(--amline-primary-muted)] font-semibold text-[var(--amline-primary)] shadow-[var(--amline-shadow-sm)] ring-1 ring-[var(--amline-primary)]/15 dark:bg-blue-950/50 dark:ring-blue-500/20'
                               : 'text-[var(--amline-fg-muted)] hover:bg-[var(--amline-surface-muted)] hover:text-[var(--amline-fg)] dark:hover:bg-slate-800/80'
@@ -166,7 +168,7 @@ export default function MainLayout() {
           ))}
         </nav>
 
-        <div className="border-t border-[var(--amline-border)] p-4 dark:border-slate-700">
+        <div className="safe-pb border-t border-[var(--amline-border)] p-4 dark:border-slate-700">
           <div className="mb-3 flex items-center gap-3 rounded-amline-md bg-[var(--amline-surface-muted)]/60 p-2 dark:bg-slate-800/50">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--amline-primary-muted)] to-[var(--amline-accent-muted)] text-sm font-bold text-[var(--amline-primary)] ring-2 ring-[var(--amline-surface)] dark:from-blue-900/60 dark:to-teal-900/40 dark:text-blue-200">
               {user?.full_name?.[0] ?? user?.mobile?.[0] ?? 'U'}
@@ -189,8 +191,8 @@ export default function MainLayout() {
         </div>
       </aside>
 
-      <main className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-14 lg:pt-0">
-        <div className="container-amline animate-fadeIn flex-1 py-4 sm:py-6 lg:py-8">
+      <main className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-[calc(3.5rem+env(safe-area-inset-top,0px))] safe-pb lg:pt-0 lg:pb-0">
+        <div className="container-amline animate-fadeIn flex-1 py-3 sm:py-6 lg:py-8">
           <Outlet />
         </div>
       </main>

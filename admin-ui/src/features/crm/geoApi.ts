@@ -1,4 +1,5 @@
 import { apiClient } from '@/lib/api'
+import { apiV1 } from '@/lib/apiPaths'
 
 export interface ProvinceDto {
   id: string
@@ -15,14 +16,14 @@ export interface CityDto {
 }
 
 export async function fetchProvinces(): Promise<ProvinceDto[]> {
-  const { data } = await apiClient.get<ProvinceDto[]>('/api/v1/geo/provinces')
+  const { data } = await apiClient.get<ProvinceDto[]>(apiV1('geo/provinces'))
   return Array.isArray(data) ? data : []
 }
 
 export async function fetchCities(provinceId: string): Promise<CityDto[]> {
   if (!provinceId) return []
   const { data } = await apiClient.get<CityDto[]>(
-    `/api/v1/geo/provinces/${encodeURIComponent(provinceId)}/cities`
+    apiV1(`geo/provinces/${encodeURIComponent(provinceId)}/cities`)
   )
   return Array.isArray(data) ? data : []
 }

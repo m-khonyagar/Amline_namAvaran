@@ -27,56 +27,16 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3002,
       host: true,
+      // فرانت فقط canonical را صدا می‌زند (`/api/v1/...` via `apiV1()`). مسیرهای قدیمی ریشه حذف شدند.
       proxy: {
-        '/contracts': {
-          target: proxyTarget,
-          changeOrigin: true,
-          secure: false,
-          bypass: bypassHtmlRequest,
-        },
-        '/admin': {
-          target: proxyTarget,
-          changeOrigin: true,
-          secure: false,
-          bypass: bypassHtmlRequest,
-        },
-        '/users': {
-          target: proxyTarget,
-          changeOrigin: true,
-          secure: false,
-          bypass: bypassHtmlRequest,
-        },
-        '/files': {
-          target: proxyTarget,
-          changeOrigin: true,
-          secure: false,
-          bypass: bypassHtmlRequest,
-        },
-        '/financials': {
-          target: proxyTarget,
-          changeOrigin: true,
-          secure: false,
-          bypass: bypassHtmlRequest,
-        },
-        '/provinces': {
-          target: proxyTarget,
-          changeOrigin: true,
-          secure: false,
-          bypass: bypassHtmlRequest,
-        },
-        '/auth': {
-          target: proxyTarget,
-          changeOrigin: true,
-          secure: false,
-          bypass: bypassHtmlRequest,
-        },
         '/api/v1': {
           target: proxyTarget,
           changeOrigin: true,
           secure: false,
           bypass: bypassHtmlRequest,
         },
-        '/listings': {
+        // هدایت تمام‌صفحه به درگاه (مثلاً CommissionStep)
+        '/financials': {
           target: proxyTarget,
           changeOrigin: true,
           secure: false,

@@ -29,7 +29,7 @@ export function ThemeToggle() {
             aria-label={label}
             onClick={() => setPreference(value)}
             className={cn(
-              'flex h-9 w-9 items-center justify-center rounded-[calc(var(--amline-radius-md)-2px)] transition-all duration-200',
+              'flex h-10 w-10 min-h-[40px] min-w-[40px] items-center justify-center rounded-[calc(var(--amline-radius-md)-2px)] transition-all duration-200 sm:h-9 sm:w-9 sm:min-h-0 sm:min-w-0',
               active
                 ? 'bg-[var(--amline-surface)] text-[var(--amline-primary)] shadow-sm dark:bg-slate-700 dark:text-blue-300'
                 : 'text-[var(--amline-fg-muted)] hover:text-[var(--amline-fg)]'

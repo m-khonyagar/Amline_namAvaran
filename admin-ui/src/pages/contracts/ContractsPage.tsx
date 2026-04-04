@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { toast } from 'sonner'
 import { apiClient } from '../../lib/api'
+import { apiV1 } from '../../lib/apiPaths'
 import type { ContractStatus, ContractType } from '../../features/contract-wizard/types/wizard'
 
 interface ContractListItem {
@@ -73,14 +74,14 @@ export default function ContractsPage() {
       const params: Record<string, string | number> = { page, limit: 20 }
       if (statusFilter) params.status = statusFilter
       if (typeFilter) params.type = typeFilter
-      const res = await apiClient.get<ContractsListResponse>('/contracts/list', { params })
+      const res = await apiClient.get<ContractsListResponse>(apiV1('contracts/list'), { params })
       return res.data
     },
   })
 
   const approveMutation = useMutation({
     mutationFn: (id: string) =>
-      apiClient.post(`/admin/contracts/${id}/approve`),
+      apiClient.post(apiV1(`admin/contracts/${id}/approve`)),
     onSuccess: () => {
       toast.success('قرارداد تأیید شد')
       queryClient.invalidateQueries({ queryKey: ['contracts'] })
@@ -90,7 +91,7 @@ export default function ContractsPage() {
 
   const rejectMutation = useMutation({
     mutationFn: (id: string) =>
-      apiClient.post(`/admin/contracts/${id}/reject`),
+      apiClient.post(apiV1(`admin/contracts/${id}/reject`)),
     onSuccess: () => {
       toast.success('قرارداد رد شد')
       queryClient.invalidateQueries({ queryKey: ['contracts'] })

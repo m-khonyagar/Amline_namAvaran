@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { apiClient } from '@/lib/api'
+import { apiV1 } from '@/lib/apiPaths'
 import { posthog } from '@/lib/posthog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 import { Button } from '@/ui/button'
@@ -42,7 +43,7 @@ export default function AdsPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['listings-v1'],
     queryFn: async () => {
-      const res = await apiClient.get<ListingsResponse>('/api/v1/listings', {
+      const res = await apiClient.get<ListingsResponse>(apiV1('listings'), {
         params: { skip: 0, limit: 200 },
       })
       return res.data
@@ -52,7 +53,7 @@ export default function AdsPage() {
   const searchQuery = useQuery({
     queryKey: ['search-listings', q],
     queryFn: async () => {
-      const res = await apiClient.get<SearchListingsResponse>('/api/v1/search/listings', {
+      const res = await apiClient.get<SearchListingsResponse>(apiV1('search/listings'), {
         params: { q: q || undefined, limit: 50, skip: 0 },
       })
       return res.data
