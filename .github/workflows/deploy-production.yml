@@ -1,6 +1,7 @@
-# دیپلوی production — فقط دستی؛ تا اتصال واقعی (SSH/k8s) این workflow جایگزین job نمایشی قبلی در ci.yml است.
+# دیپلوی production — فقط دستی. برای اتصال واقعی، مراحل نمونهٔ زیر را فعال کنید.
 #
-# GitHub → Environments → production: محدودیت تأیید و secrets را اینجا تنظیم کنید.
+# GitHub → Environments → production (reviewers + secrets)
+# Secrets پیشنهادی: PRODUCTION_SSH_KEY، PRODUCTION_HOST، PRODUCTION_USER
 
 name: Deploy production (manual)
 
@@ -21,9 +22,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Placeholder — پیکربندی نشده
+      - name: راهنما
         run: |
-          echo "Production deploy is not wired yet."
-          echo "Use .github/workflows/deploy-staging.yml for staging, or add kubectl/ssh steps here."
+          echo "Staging: از workflow «Deploy staging» استفاده کنید."
           if [ -n "${{ inputs.notes }}" ]; then echo "Notes: ${{ inputs.notes }}"; fi
-          echo "::notice title=Deploy::Edit .github/workflows/deploy-production.yml to run real deploy commands."
+          echo "::notice::برای SSH می‌توانید appleboy/ssh-action یا rsync با کلید از secrets اضافه کنید."
+
+      # نمونه (غیرفعال) — `if: false` را بردارید و secrets را در GitHub تنظیم کنید:
+      # - name: Deploy over SSH
+      #   if: false
+      #   uses: appleboy/ssh-action@v1.0.3
+      #   with:
+      #     host: ${{ secrets.PRODUCTION_HOST }}
+      #     username: ${{ secrets.PRODUCTION_USER }}
+      #     key: ${{ secrets.PRODUCTION_SSH_KEY }}
+      #     script: |
+      #       cd /var/www/amline && git pull && docker compose up -d --build

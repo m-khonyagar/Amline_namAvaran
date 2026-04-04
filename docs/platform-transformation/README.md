@@ -10,6 +10,17 @@
 | [VERSIONING.md](./VERSIONING.md) | نسخه‌دهی تصاویر و قرارداد release |
 | [artifacts/](./artifacts/) | نمونهٔ `turbo.json` و `package.json` ریشه تا PR مهاجرت مونوریپو |
 
+## اسناد تکمیلی (ریپو)
+
+| سند | موضوع |
+|-----|--------|
+| [../adr/0001-service-boundaries.md](../adr/0001-service-boundaries.md) | مرز سرویس‌ها |
+| [../event-driven.md](../event-driven.md) | رویدادمحور |
+| [../search-service.md](../search-service.md) | جستجو |
+| [../wallet-settlement.md](../wallet-settlement.md) | کیف پول / تسویه |
+| [../../services/notification-service/README.md](../../services/notification-service/README.md) | نوتیفیکیشن |
+| [../../apps/mobile/README.md](../../apps/mobile/README.md) | موبایل |
+
 ## استک محلی Observability
 
 پوشهٔ ریشه: [`../../infra/observability/README.md`](../../infra/observability/README.md)

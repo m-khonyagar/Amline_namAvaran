@@ -135,6 +135,31 @@ jobs:
           PW_USE_BUNDLED_CHROMIUM: '1'
         run: npm run test:e2e
 
+  # ==================== admin-ui E2E (Playwright + MSW) ====================
+  admin-ui-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install monorepo & run admin-ui E2E
+        working-directory: admin-ui
+        env:
+          CI: true
+        run: |
+          cd ..
+          npm ci
+          cd admin-ui
+          npx playwright install chromium --with-deps
+          npm run test:e2e
+
   # ==================== Build Docker Images ====================
   build-backend:
     runs-on: ubuntu-latest

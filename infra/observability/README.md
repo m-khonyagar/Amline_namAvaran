@@ -22,6 +22,10 @@ docker compose up -d
 
 Prometheus به `host.docker.internal:8000` متصل می‌شود تا `/metrics` روی **میزبان** را بخواند (Linux: `host-gateway` در compose تنظیم شده است).
 
+## Redis (محدودیت نرخ بک‌اند)
+
+برای ذخیرهٔ محدودیت نرخ بین چند replica بک‌اند، `REDIS_URL=redis://host:6379/0` بگذارید. استک محلی: [`../redis/docker-compose.yml`](../redis/docker-compose.yml).
+
 ## OpenTelemetry (اختیاری)
 
 ```bash

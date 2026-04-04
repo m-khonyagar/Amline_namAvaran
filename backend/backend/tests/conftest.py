@@ -10,6 +10,8 @@ from datetime import datetime, timezone
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 os.environ.setdefault("AMLINE_OTP_DEBUG", "1")
 os.environ.setdefault("AMLINE_RBAC_ENFORCE", "0")
+os.environ.setdefault("AMLINE_RATE_LIMIT_ENABLED", "0")
+os.environ.setdefault("REDIS_URL", "")
 
 import pytest
 from sqlalchemy import text

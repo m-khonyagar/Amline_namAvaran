@@ -2,14 +2,27 @@ import { NextResponse } from 'next/server'
 import path from 'path'
 import fs from 'fs'
 
-const DEFAULT_PATH = path.resolve(process.cwd(), '..', 'docs', 'gsc_data', 'gsc_full_export.json')
-const GSC_DATA_PATH = process.env.GSC_DATA_PATH || DEFAULT_PATH
+const FALLBACK_PATHS = [
+  process.env.GSC_DATA_PATH,
+  path.resolve(process.cwd(), 'data', 'gsc', 'gsc_full_export.json'),
+  path.resolve(process.cwd(), '..', 'docs', 'gsc_data', 'gsc_full_export.json'),
+].filter(Boolean) as string[]
 
 export async function GET() {
   try {
-    const filePath = path.isAbsolute(GSC_DATA_PATH) ? GSC_DATA_PATH : path.resolve(process.cwd(), GSC_DATA_PATH)
-    if (!fs.existsSync(filePath)) {
-      return NextResponse.json({ error: 'GSC data not found. Run gsc_export_all.py first.' }, { status: 404 })
+    let filePath: string | null = null
+    for (const p of FALLBACK_PATHS) {
+      const abs = path.isAbsolute(p) ? p : path.resolve(process.cwd(), p)
+      if (fs.existsSync(abs)) {
+        filePath = abs
+        break
+      }
+    }
+    if (!filePath) {
+      return NextResponse.json(
+        { error: 'GSC data not found. Place gsc_full_export.json in data/gsc/ or set GSC_DATA_PATH.' },
+        { status: 404 }
+      )
     }
     const raw = fs.readFileSync(filePath, 'utf-8')
     const data = JSON.parse(raw)
