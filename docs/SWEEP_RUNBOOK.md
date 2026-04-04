@@ -41,6 +41,8 @@ Issues **#9–#19** follow this pattern (SSOT v2.0 backlog).
 
 ## Verify it works (smoke test)
 
+<!-- Sweep smoke-test anchor (e.g. issue #22): a healthy self-hosted app opens a PR that edits this runbook; if the stack is down, check `C:\sweep\.env` has real keys (no `REPLACE_ME_*`) and `docker ps` shows container `webhook`. -->
+
 1. After merge to `main`, open a small issue:  
    **`Sweep: chore — add a one-line comment in docs/SWEEP_RUNBOOK.md pointing to this runbook section`**  
    (or any trivial doc-only task).
