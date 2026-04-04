@@ -7,6 +7,7 @@ from fastapi import APIRouter, BackgroundTasks, Request
 from app.core.n8n_outbound import n8n_dispatch
 from app.integrations.temporal_workflows import schedule_contract_workflow
 from app.schemas.v1.contract_flow import (
+    ContractExternalRefsPatchBody,
     ContractStartBody,
     LandlordSetBody,
     PartyPatchBody,
@@ -79,6 +80,13 @@ def commission_invoice(contract_id: str) -> dict:
 @router.post("/contracts/{contract_id}/revoke")
 def contracts_revoke(contract_id: str) -> dict:
     return _flow.revoke(contract_id)
+
+
+@router.patch("/contracts/{contract_id}/external-refs")
+def contracts_patch_external_refs(
+    contract_id: str, body: ContractExternalRefsPatchBody
+) -> dict:
+    return _flow.patch_external_refs(contract_id, body)
 
 
 @router.post("/contracts/{contract_id}/party/landlord", status_code=201)
