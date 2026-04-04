@@ -6,6 +6,7 @@
   "description": "Admin UI for Amline Platform - اَملاین",
   "scripts": {
     "dev": "vite",
+    "dev:local": "vite --port 3005 --strictPort",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
@@ -22,6 +23,8 @@
     "framer-motion": "^11.2.12",
     "jalali-react-datepicker": "^1.2.1",
     "lucide-react": "^0.408.0",
+    "maplibre-gl": "^5.22.0",
+    "posthog-js": "^1.364.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.52.1",
@@ -46,14 +49,14 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.8",
+    "fast-check": "^3.23.2",
+    "jsdom": "^24.1.3",
     "msw": "^2.12.14",
     "postcss": "^8.4.39",
     "tailwindcss": "^3.4.6",
     "typescript": "^5.5.3",
     "vite": "^5.3.4",
-    "vitest": "^2.1.9",
-    "fast-check": "^3.23.2",
-    "jsdom": "^24.1.3"
+    "vitest": "^2.1.9"
   },
   "msw": {
     "workerDirectory": [
