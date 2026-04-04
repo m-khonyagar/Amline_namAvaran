@@ -64,16 +64,7 @@ export function useAuth() {
       setCookie(CookieNames.USER, JSON.stringify(user), 1)
       setAuthState({ user, isAuthenticated: true, isLoading: false })
     } catch {
-      // fallback: اگر backend session/httpOnly هنوز کامل نبود، user cache را موقتاً بپذیر
-      if (userData) {
-        try {
-          const user = JSON.parse(userData) as User
-          if (user.id && user.mobile && user.role && user.permissions) {
-            setAuthState({ user, isAuthenticated: true, isLoading: false })
-            return
-          }
-        } catch { /* continue */ }
-      }
+      // منبع حقیقت سرور است؛ کوکی USER بدون پاسخ معتبر /auth/me باعث «ورود شبح» و سردرگمی پشتیبانی می‌شود.
       removeCookie(CookieNames.ACCESS_TOKEN)
       removeCookie(CookieNames.REFRESH_TOKEN)
       removeCookie(CookieNames.USER)
