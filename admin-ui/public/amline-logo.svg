@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+  <title>AmLine</title>
+  <!-- Logomark: 3BA + EH, + 'DE'3  1F¯G'Ì (1F/ -->
+  <path fill="#D32F2F" d="M6 10h20L16 3 6 10z"/>
+  <path fill="#D32F2F" d="M8 6h3v2H8V6z"/>
+  <path fill="#00B2B2" d="M8 12c2.5 2 5.5 3.2 8 3.2S21.5 14 24 12v3c-2.8 2.2-6.2 3.5-8 3.5-1.8 0-5.2-1.3-8-3.5v-3z"/>
+  <path fill="#D32F2F" d="M14.5 24h3L16 27l-1.5-3z"/>
+</svg>
