@@ -6,6 +6,7 @@ from app.api.v1 import (
     admin_routes,
     auth_routes,
     contracts_routes,
+    dispute_routes,
     crm_routes,
     crm_v1_routes,
     geo_routes,
@@ -36,6 +37,7 @@ platform_router = APIRouter()
 platform_router.include_router(health_routes.router)
 platform_router.include_router(auth_routes.router)
 platform_router.include_router(contracts_routes.router)
+platform_router.include_router(dispute_routes.router)
 platform_router.include_router(misc_routes.router)
 platform_router.include_router(admin_routes.router)
 platform_router.include_router(crm_routes.router)
