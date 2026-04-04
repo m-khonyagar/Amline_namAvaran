@@ -6,9 +6,11 @@ const baseURL = `http://${devServerHost}:${devServerPort}`;
 
 export default defineConfig({
   testDir: './tests',
-  timeout: 60_000,
+  timeout: 90_000,
   retries: process.env.CI ? 1 : 0,
   forbidOnly: !!process.env.CI,
+  // یک سرور Vite dev را چند worker همزمان خفه می‌کند → goto در beforeEach تایم‌اوت
+  workers: 2,
   use: {
     baseURL,
     headless: true,
@@ -16,6 +18,8 @@ export default defineConfig({
     video: 'off',
     actionTimeout: 15_000,
     navigationTimeout: 30_000,
+    // بالای breakpoint lg تا سایدبار دسکتاپ (lg:static / lg:translate-x-0) پایدار باشد
+    viewport: { width: 1440, height: 900 },
   },
   webServer: {
     command: `npm run dev -- --host ${devServerHost} --port ${devServerPort}`,
