@@ -15,6 +15,7 @@ build/
 # Cache
 .cache/
 .eslintcache
+.turbo/
 
 # Python
 __pycache__/

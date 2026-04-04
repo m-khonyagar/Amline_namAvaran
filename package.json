@@ -1,0 +1,18 @@
+{
+  "name": "@amline/monorepo",
+  "private": true,
+  "packageManager": "npm@10.9.2",
+  "workspaces": [
+    "admin-ui",
+    "site",
+    "packages/amline-ui-core"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "lint": "turbo run lint --continue",
+    "test": "turbo run test --continue"
+  },
+  "devDependencies": {
+    "turbo": "^2.4.4"
+  }
+}

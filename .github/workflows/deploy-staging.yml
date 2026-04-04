@@ -31,12 +31,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js (admin-ui)
+      - name: Setup Node.js (monorepo root)
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: admin-ui/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Compute staging API URL
         id: conf
@@ -45,35 +45,22 @@ jobs:
           if [ -z "$API" ]; then API="https://amline-backend-staging.darkube.app"; fi
           echo "api_url=$API" >> "$GITHUB_OUTPUT"
 
-      - name: Install & build admin-ui
-        working-directory: admin-ui
+      - name: Install & build (Turbo — root workspace)
         env:
           VITE_API_URL: ${{ steps.conf.outputs.api_url }}
           VITE_USE_MSW: 'false'
           VITE_ENABLE_DEV_BYPASS: 'false'
           VITE_USE_CRM_API: 'true'
-        run: |
-          npm ci
-          npm run build
-
-      - name: Setup Node.js (site)
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip_site != true }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: site/package-lock.json
-
-      - name: Install & build site
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip_site != true }}
-        working-directory: site
-        env:
           NEXT_PUBLIC_AMLINE_APP_URL: ${{ vars.STAGING_APP_URL != '' && vars.STAGING_APP_URL || 'https://app.amline.ir' }}
           NEXT_PUBLIC_SITE_URL: ${{ vars.STAGING_MARKETING_URL != '' && vars.STAGING_MARKETING_URL || 'https://amline.ir' }}
           NEXT_PUBLIC_CONTACT_EMAIL: ${{ vars.STAGING_CONTACT_EMAIL != '' && vars.STAGING_CONTACT_EMAIL || 'info@amline.ir' }}
         run: |
           npm ci
-          npm run build
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.skip_site }}" = "true" ]; then
+            npx turbo run build --filter=amline-admin-ui
+          else
+            npm run build
+          fi
 
       - name: Pack artifacts
         run: |
