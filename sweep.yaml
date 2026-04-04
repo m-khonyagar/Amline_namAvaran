@@ -1,0 +1,62 @@
+# Sweep AI — Amline_namAvaran
+# Keep `sweep.yaml` and `.sweep.yaml` identical. The Sweep GitHub App reads `sweep.yaml` at repo root.
+
+gha_enabled: true
+branch: main
+draft: false
+
+description: >
+  Amline_namAvaran is a multi-app property contract platform. Production backend SSOT is
+  `backend/backend` (FastAPI, PostgreSQL, `/api/v1/*`). Frontends: `amline-ui` (Next.js App Router),
+  `site` (Next.js static export), `admin-ui` (Vite/React). Optional dev fallback: `dev-mock-api`.
+  Infrastructure: Docker Compose with Postgres, Redis, MinIO; integrations per docs.
+  Authoritative product truth: `docs/AMLINE_MASTER_SPEC.md` (master) and deep domain reference
+  `docs/AMLINE_REFERENCE_V2_2.md`. API integration SSOT: `docs/FRONTEND_API_INTEGRATION.md`.
+  When changing contracts, payments, signatures, or CRM flows, align with those documents and
+  preserve domain boundaries. Prefer clean architecture, strong validation, and idempotent APIs.
+
+# product_spec_rules (human label; Sweep consumes the same content via `rules:` below)
+# — Amline Product Master Specification alignment (contract types, flows S1–S5, P1–P4, T1, domains)
+rules:
+  - "Follow architecture and domain boundaries in docs/AMLINE_MASTER_SPEC.md and docs/AMLINE_REFERENCE_V2_2.md as SSOT; if Target vs as-built differs, document which layer the change follows."
+  - "Implement and maintain a unified contract model: Contract, Party (natural/legal), type-specific Terms, and Commission where applicable. Support contract kinds RENT, SALE, EXCHANGE, CONSTRUCTION, PRE_SALE, LEASE_TO_OWN as defined in product docs."
+  - "Respect signature flows S1–S5, payment flows P1–P4, and combined flow T1; keep lifecycle states, business rules, validation, and data integrity consistent across backend and UI."
+  - "Respect service boundaries: Auth, Listing, CRM, Visit, Contract, Payment, Billing, ML Pricing, Temporal workflows, Matrix messaging, Audit + Ledger. Do not collapse unrelated domains into one module."
+  - "Backend changes go to `backend/backend` (FastAPI) with Alembic migrations when schema changes; keep ErrorResponse and `/api/v1` patterns. Avoid breaking legacy mounts unless explicitly requested."
+  - "Frontend: align User Panel (`amline-ui`), Admin Panel (`admin-ui`), and marketing `site` with documented UX/API; use existing proxy and client error-handling patterns from docs/FRONTEND_API_INTEGRATION.md."
+  - "Multi-file edits are expected for features that touch API + UI + tests; search across services before finishing. Prefer modular DDD-style layout inside `backend/backend` where the codebase already organizes domains."
+  - "Use Python type hints on new/changed Python code; use strict TypeScript types on new/changed TS/TSX. No debug prints in production paths."
+  - "Add or update tests when changing business logic (pytest under backend, Jest/Playwright per app conventions). Keep commits logically scoped with clear messages."
+  - "Security: do not introduce secrets into code; use env vars. Preserve RBAC, audit, and payment idempotency patterns described in project docs."
+
+blocked_dirs:
+  - node_modules/
+  - .next/
+  - dist/
+  - build/
+  - coverage/
+  - .venv/
+  - venv/
+
+# Widen text/code context for YAML configs, SQL migrations, and JSON inventories (paths still subject to Sweep file limits)
+include_exts:
+  - ".py"
+  - ".md"
+  - ".txt"
+  - ".ts"
+  - ".tsx"
+  - ".js"
+  - ".jsx"
+  - ".mjs"
+  - ".cs"
+  - ".csharp"
+  - ".yaml"
+  - ".yml"
+  - ".json"
+  - ".sql"
+
+docs:
+  master_spec: docs/AMLINE_MASTER_SPEC.md
+  domain_reference: docs/AMLINE_REFERENCE_V2_2.md
+  frontend_api: docs/FRONTEND_API_INTEGRATION.md
+  architecture_contract: docs/ARCHITECTURE_CONTRACT_PLATFORM_PRODUCTION.md

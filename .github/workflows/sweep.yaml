@@ -1,0 +1,66 @@
+# Validates Sweep configuration on activity; Sweep itself runs via the Sweep GitHub App + sweep.yaml.
+# Optional: set repository secret SWEEP_API_KEY for future Mother-Builder / API hooks (placeholder).
+
+name: Sweep AI
+
+on:
+  issues:
+    types: [opened, edited, labeled, unlabeled]
+  issue_comment:
+    types: [created]
+  pull_request:
+    types: [opened, reopened, synchronize]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+
+concurrency:
+  group: sweep-ai-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-sweep-config:
+    runs-on: ubuntu-latest
+    env:
+      SWEEP_API_KEY: ${{ secrets.SWEEP_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate sweep.yaml and .sweep.yaml syntax
+        run: |
+          python3 <<'PY'
+          import pathlib
+          import sys
+
+          try:
+              import yaml  # type: ignore
+          except ImportError:
+              import subprocess
+
+              subprocess.check_call(
+                  [sys.executable, "-m", "pip", "install", "--quiet", "pyyaml"],
+                  stdout=subprocess.DEVNULL,
+              )
+              import yaml  # type: ignore
+
+          root = pathlib.Path(".")
+          for name in ("sweep.yaml", ".sweep.yaml"):
+              path = root / name
+              if not path.is_file():
+                  print(f"ERROR: missing {name}", file=sys.stderr)
+                  sys.exit(1)
+              yaml.safe_load(path.read_text(encoding="utf-8"))
+              print(f"OK: {name}")
+          PY
+
+      - name: Optional secret placeholder (never print value)
+        run: |
+          if [ -n "${SWEEP_API_KEY:-}" ]; then
+            echo "SWEEP_API_KEY secret is configured (value not shown)."
+          else
+            echo "SWEEP_API_KEY not set — optional unless you wire a custom Sweep/Mother-Builder API caller."
+          fi

@@ -104,6 +104,32 @@ site (3001)          amline-ui (3000)       admin-ui (3002)
 
 ---
 
+### 🚀 Sweep AI Autonomous Development Layer
+
+این ریپو برای توسعهٔ کمکی با **[Sweep AI](https://github.com/apps/sweep-ai)** پیکربندی شده است: فایل‌های `sweep.yaml` (الزامی برای GitHub App) و `.sweep.yaml` (کپی هم‌تراز برای ابزارهایی که فایل نقطه‌دار انتظار دارند) قوانین و زمینهٔ پروژه را به Sweep می‌دهند؛ workflow گیت‌هاب `.github/workflows/sweep.yaml` فقط **اعتبارسنجی نحوی** این فایل‌ها را روی رویدادهای issue، کامنت issue، pull request و `workflow_dispatch` اجرا می‌کند — **موتور اصلی Sweep از طریق نصب GitHub App** روی همین مخزن فعال می‌شود.
+
+**شروع کار با Sweep**
+
+1. در GitHub، [Sweep AI](https://github.com/apps/sweep-ai) را روی سازمان/حساب نصب کنید و به ریپوی `Amline_namAvaran` دسترسی بدهید.
+2. یک **Issue** بسازید که عنوان آن با `Sweep:` شروع شود، یا روی issue موجود **لیبل `Sweep`** بگذارید (طبق مستندات Sweep).
+3. در توضیح، مسیر فایل‌ها، رفتار مورد انتظار، و ارجاع به اسناد محصول را بنویسید.
+
+**Mother-Builder v1 (ارکستراسیون)**
+
+Mother-Builder v1 می‌تواند به‌عنوان لایهٔ بالادستی issueها، برچسب‌ها، یا اتوماسیون داخلی شما عمل کند و همان Issueهای استاندارد Sweep را تولید یا تقویت کند. در صورت اتصال به API اختصاصی، می‌توانید در GitHub برای ریپو یک Secret به نام **`SWEEP_API_KEY`** (مقدار placeholder تا زمان یکپارچه‌سازی واقعی) تعریف کنید؛ workflow فعلی فقط وجود/عدم وجود secret را گزارش می‌کند و مقدار را چاپ نمی‌کند.
+
+**نمونهٔ درخواست‌های مرتبط با قرارداد**
+
+- `Sweep: مدل Party (حقیقی/حقوقی) را با AMLINE_MASTER_SPEC برای قرارداد اجاره هم‌تراز کن`
+- `Sweep: جریان امضا S3 را در admin-ui و backend/backend با خطای یکدست ErrorResponse پیاده کن`
+- `Sweep: endpoint پرداخت P2 را idempotent نگه دار و تست pytest اضافه کن`
+
+**هم‌ترازی معماری و محصول**
+
+منبع حقیقت اجرایی: `docs/AMLINE_MASTER_SPEC.md` و مرجع عمیق دامنه `docs/AMLINE_REFERENCE_V2_2.md`. Sweep باید انواع قرارداد، جریان‌های امضا/پرداخت، و مرز سرویس‌ها را مطابق این اسناد و کد موجود در `backend/backend` و اپ‌های فرانت حفظ کند.
+
+---
+
 ## ماژول‌های admin-ui
 
 | مسیر | مجوز | توضیح |
