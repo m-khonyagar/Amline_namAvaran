@@ -1,4 +1,5 @@
 import { apiClient } from '@/lib/api'
+import { apiV1 } from '@/lib/apiPaths'
 import type { Lead, LeadActivity, LeadStatus } from './types'
 
 /** Backend CRM v1 shapes (subset) */
@@ -39,7 +40,7 @@ interface CrmActivityApi {
   created_at: string
 }
 
-const CRM_BASE = '/api/v1/crm'
+const CRM_BASE = apiV1('crm')
 
 function normalizeNeedType(raw: string): Lead['need_type'] {
   const u = raw.toUpperCase()
@@ -48,6 +49,8 @@ function normalizeNeedType(raw: string): Lead['need_type'] {
 }
 
 function normalizeLeadStatus(raw: string): LeadStatus {
+  const u = raw.toUpperCase()
+  if (u === 'QUALIFIED' || u === 'NEGOTIATION' || u === 'PROPOSAL') return 'NEGOTIATING'
   const allowed: LeadStatus[] = [
     'NEW',
     'CONTACTED',
@@ -55,7 +58,7 @@ function normalizeLeadStatus(raw: string): LeadStatus {
     'CONTRACTED',
     'LOST',
   ]
-  return (allowed.includes(raw as LeadStatus) ? raw : 'NEW') as LeadStatus
+  return (allowed.includes(u as LeadStatus) ? u : 'NEW') as LeadStatus
 }
 
 function mapLead(row: CrmLeadApi): Lead {

@@ -30,6 +30,10 @@ class PaymentIntent(Base):
         String(36), primary_key=True, default=lambda: str(uuid.uuid4())
     )
     user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    contract_id: Mapped[str | None] = mapped_column(
+        String(64), nullable=True, index=True
+    )
+    party_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     amount_cents: Mapped[int] = mapped_column(BigInteger, nullable=False)
     currency: Mapped[str] = mapped_column(String(8), nullable=False, default="IRR")
     idempotency_key: Mapped[str] = mapped_column(String(128), nullable=False)
@@ -61,4 +65,7 @@ class PaymentIntent(Base):
         nullable=False,
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
+    )
+    paid_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
     )

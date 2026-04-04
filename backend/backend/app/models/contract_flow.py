@@ -10,7 +10,7 @@ import enum
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from sqlalchemy import JSON, DateTime, ForeignKey, String, Text
+from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.sqlite import JSON as SQLITE_JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -21,8 +21,23 @@ JsonBlob = JSON().with_variant(SQLITE_JSON(), "sqlite")
 
 
 class ContractFlowPartyRole(str, enum.Enum):
+    """نقش طرف — SSOT v2 + سازگاری با New Flow رهن/اجاره."""
+
     LANDLORD = "LANDLORD"
     TENANT = "TENANT"
+    SELLER = "SELLER"
+    BUYER = "BUYER"
+    EXCHANGER_FIRST = "EXCHANGER_FIRST"
+    EXCHANGER_SECOND = "EXCHANGER_SECOND"
+    EXCHANGER_A = "EXCHANGER_A"
+    EXCHANGER_B = "EXCHANGER_B"
+    EXCHANGER_PRIMARY = "EXCHANGER_PRIMARY"
+    EXCHANGER_COUNTER = "EXCHANGER_COUNTER"
+    LAND_OWNER = "LAND_OWNER"
+    CONTRACTOR = "CONTRACTOR"
+    DEVELOPER = "DEVELOPER"
+    LESSOR = "LESSOR"
+    LESSEE = "LESSEE"
 
 
 class ContractFlowPersonType(str, enum.Enum):
@@ -46,6 +61,15 @@ class ContractFlowRecord(Base):
     contract_type: Mapped[str] = mapped_column(String(64), nullable=False)
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="DRAFT")
     current_step: Mapped[str] = mapped_column(String(64), nullable=False)
+    # زیرحالت و SLA (معماری پروداکشن قرارداد) — اختیاری تا هم‌ترازی با state machine هدف
+    substate: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    sla_deadlines_json: Mapped[Optional[dict[str, Any]]] = mapped_column(
+        JsonBlob, nullable=True
+    )
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    terms_json: Mapped[Optional[dict[str, Any]]] = mapped_column(
+        JsonBlob, nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

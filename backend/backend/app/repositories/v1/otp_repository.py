@@ -7,7 +7,12 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Literal, Optional
 
-Purpose = Literal["contract_sign", "witness"]
+Purpose = Literal[
+    "contract_sign",
+    "witness",
+    "admin_assisted_sign",
+    "commission_pay_delegate",
+]
 
 
 def _utcnow() -> datetime:

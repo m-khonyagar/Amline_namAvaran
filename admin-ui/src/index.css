@@ -4,32 +4,35 @@
 
 /* Design tokens — املاین (فارسی / RTL / Light & Dark) */
 :root {
-  --amline-primary: #1d6feb;
-  --amline-primary-hover: #155cc9;
-  --amline-primary-muted: rgba(29, 111, 235, 0.12);
+  --amline-primary: #2563eb;
+  --amline-primary-hover: #1d4ed8;
+  --amline-primary-muted: rgba(37, 99, 235, 0.1);
   --amline-accent: #0d9488;
   --amline-accent-muted: rgba(13, 148, 136, 0.12);
 
-  --amline-bg: #f4f6f9;
+  --amline-bg: #f1f5f9;
+  --amline-bg-mesh: radial-gradient(1200px 600px at 100% -10%, rgba(37, 99, 235, 0.07), transparent 55%),
+    radial-gradient(900px 500px at -5% 100%, rgba(13, 148, 136, 0.06), transparent 50%);
   --amline-fg: #0f172a;
   --amline-fg-muted: #475569;
   --amline-fg-subtle: #94a3b8;
 
   --amline-surface: #ffffff;
   --amline-surface-elevated: #ffffff;
-  --amline-surface-muted: #f1f5f9;
+  --amline-surface-muted: #f8fafc;
 
   --amline-border: #e2e8f0;
   --amline-border-strong: #cbd5e1;
 
-  --amline-ring: #1d6feb;
+  --amline-ring: #2563eb;
   --amline-radius-sm: 0.375rem;
   --amline-radius-md: 0.625rem;
   --amline-radius-lg: 0.875rem;
   --amline-radius-xl: 1.125rem;
-  --amline-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
-  --amline-shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
-  --amline-shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.1);
+  --amline-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.04);
+  --amline-shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 10px 24px -6px rgba(15, 23, 42, 0.08);
+  --amline-shadow-lg: 0 12px 32px -8px rgba(15, 23, 42, 0.1), 0 4px 16px rgba(15, 23, 42, 0.06);
+  --amline-shadow-glow: 0 0 0 1px rgba(37, 99, 235, 0.12), 0 8px 32px rgba(37, 99, 235, 0.15);
 
   /* سازگاری با کلاس‌های قبلی */
   --primary: var(--amline-primary);
@@ -49,7 +52,9 @@
 }
 
 .dark {
-  --amline-bg: #0b1120;
+  --amline-bg: #0c1222;
+  --amline-bg-mesh: radial-gradient(1000px 480px at 100% 0%, rgba(59, 130, 246, 0.12), transparent 50%),
+    radial-gradient(800px 400px at 0% 100%, rgba(13, 148, 136, 0.08), transparent 45%);
   --amline-fg: #f1f5f9;
   --amline-fg-muted: #94a3b8;
   --amline-fg-subtle: #64748b;
@@ -61,13 +66,14 @@
   --amline-border: #334155;
   --amline-border-strong: #475569;
 
-  --amline-primary: #3b82f6;
-  --amline-primary-hover: #2563eb;
-  --amline-primary-muted: rgba(59, 130, 246, 0.15);
+  --amline-primary: #60a5fa;
+  --amline-primary-hover: #3b82f6;
+  --amline-primary-muted: rgba(96, 165, 250, 0.14);
 
-  --amline-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
-  --amline-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
-  --amline-shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.45);
+  --amline-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --amline-shadow-md: 0 8px 28px rgba(0, 0, 0, 0.45);
+  --amline-shadow-lg: 0 24px 56px rgba(0, 0, 0, 0.55);
+  --amline-shadow-glow: 0 0 0 1px rgba(96, 165, 250, 0.2), 0 12px 40px rgba(37, 99, 235, 0.2);
 }
 
 * {
@@ -86,11 +92,14 @@ body {
   overflow-x: hidden;
   font-family: 'Vazirmatn', 'Vazir', 'Tahoma', system-ui, sans-serif;
   background-color: var(--amline-bg);
+  background-image: var(--amline-bg-mesh);
+  background-attachment: fixed;
   color: var(--amline-fg);
   font-size: 16px;
   line-height: 1.65;
   letter-spacing: 0.01em;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 [dir='rtl'] {
@@ -99,7 +108,7 @@ body {
 
 /* تایپوگرافی فارسی */
 .amline-display {
-  @apply text-2xl font-bold tracking-tight text-[var(--amline-fg)] md:text-3xl;
+  @apply text-xl font-extrabold tracking-tight text-[var(--amline-fg)] sm:text-2xl md:text-3xl;
 }
 .amline-title {
   @apply text-lg font-semibold text-[var(--amline-fg)] md:text-xl;
@@ -109,6 +118,46 @@ body {
 }
 .amline-caption {
   @apply text-xs text-[var(--amline-fg-subtle)];
+}
+.amline-page-eyebrow {
+  @apply text-xs font-medium uppercase tracking-wider text-[var(--amline-fg-subtle)];
+}
+.amline-stat-card {
+  @apply relative overflow-hidden rounded-[var(--amline-radius-lg)] border border-[var(--amline-border)] bg-[var(--amline-surface)] p-4 shadow-[var(--amline-shadow-sm)] sm:p-5;
+  @apply transition-all duration-200 hover:border-[var(--amline-border-strong)] hover:shadow-[var(--amline-shadow-md)];
+}
+.dark .amline-stat-card {
+  @apply border-slate-700/80 bg-slate-900/40 backdrop-blur-sm;
+}
+.amline-quick-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border-radius: var(--amline-radius-lg);
+  border: 1px dashed var(--amline-border);
+  padding: 1.5rem;
+  box-shadow: var(--amline-shadow-sm);
+  background-color: color-mix(in srgb, var(--amline-surface) 80%, transparent);
+  transition:
+    transform 200ms ease,
+    border-color 200ms ease,
+    background-color 200ms ease,
+    box-shadow 200ms ease;
+}
+.amline-quick-tile:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--amline-primary) 40%, transparent);
+  background-color: var(--amline-primary-muted);
+  box-shadow: var(--amline-shadow-md);
+}
+.dark .amline-quick-tile {
+  border-color: rgb(71 85 105);
+  background-color: rgb(15 23 42 / 0.3);
+}
+.dark .amline-quick-tile:hover {
+  background-color: rgb(23 37 84 / 0.3);
 }
 
 /* اسکرول‌بار */
@@ -163,8 +212,45 @@ body {
 }
 
 @layer utilities {
+  /* نوچ و home indicator — iOS / اندروید مدرن */
+  .safe-pt {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .safe-pb {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .safe-px {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+
   .container-amline {
-    @apply mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-8;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    max-width: 1400px;
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  }
+
+  @media (min-width: 640px) {
+    .container-amline {
+      padding-left: max(1.5rem, env(safe-area-inset-left, 0px));
+      padding-right: max(1.5rem, env(safe-area-inset-right, 0px));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container-amline {
+      padding-left: max(2rem, env(safe-area-inset-left, 0px));
+      padding-right: max(2rem, env(safe-area-inset-right, 0px));
+    }
+  }
+
+  @media (min-width: 1536px) {
+    .container-amline {
+      max-width: min(100%, 1600px);
+    }
   }
   .btn {
     @apply inline-flex min-h-11 items-center justify-center rounded-[var(--amline-radius-md)] px-4 text-sm font-medium transition-colors;
@@ -191,6 +277,7 @@ body {
   }
   .card {
     @apply rounded-[var(--amline-radius-lg)] border border-[var(--amline-border)] bg-[var(--amline-surface)] shadow-[var(--amline-shadow-sm)];
+    @apply transition-shadow duration-200;
   }
   .card-header {
     @apply flex flex-col space-y-1 border-b border-[var(--amline-border)] p-5;

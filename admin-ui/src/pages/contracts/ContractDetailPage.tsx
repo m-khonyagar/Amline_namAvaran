@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { apiClient } from '../../lib/api'
+import { apiV1 } from '../../lib/apiPaths'
 import type { ContractResponse } from '../../features/contract-wizard/types/api'
 import type { ContractStatus } from '../../features/contract-wizard/types/wizard'
 import { AddendumForm } from '../../features/contract-wizard/components/AddendumForm'
@@ -60,14 +61,14 @@ export default function ContractDetailPage() {
   const { data: contract, isLoading, isError } = useQuery<ContractResponse>({
     queryKey: ['contract', id],
     queryFn: async () => {
-      const res = await apiClient.get<ContractResponse>(`/contracts/${id}`)
+      const res = await apiClient.get<ContractResponse>(apiV1(`contracts/${id}`))
       return res.data
     },
     enabled: !!id,
   })
 
   const approveMutation = useMutation({
-    mutationFn: () => apiClient.post(`/admin/contracts/${id}/approve`),
+    mutationFn: () => apiClient.post(apiV1(`admin/contracts/${id}/approve`)),
     onSuccess: () => {
       toast.success('قرارداد تأیید شد')
       queryClient.invalidateQueries({ queryKey: ['contract', id] })
@@ -77,7 +78,7 @@ export default function ContractDetailPage() {
   })
 
   const rejectMutation = useMutation({
-    mutationFn: () => apiClient.post(`/admin/contracts/${id}/reject`),
+    mutationFn: () => apiClient.post(apiV1(`admin/contracts/${id}/reject`)),
     onSuccess: () => {
       toast.success('قرارداد رد شد')
       queryClient.invalidateQueries({ queryKey: ['contract', id] })
@@ -87,7 +88,7 @@ export default function ContractDetailPage() {
   })
 
   const revokeMutation = useMutation({
-    mutationFn: () => apiClient.post(`/admin/contracts/${id}/revoke`),
+    mutationFn: () => apiClient.post(apiV1(`admin/contracts/${id}/revoke`)),
     onSuccess: () => {
       toast.success('قرارداد فسخ شد')
       queryClient.invalidateQueries({ queryKey: ['contract', id] })

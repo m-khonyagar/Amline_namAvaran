@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api'
+import { apiV1 } from '@/lib/apiPaths'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
@@ -20,7 +21,7 @@ export default function WalletsPage() {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['wallet-balance', userId],
     queryFn: async () => {
-      const res = await apiClient.get<BalanceResponse>(`/api/v1/wallets/${encodeURIComponent(userId)}/balance`)
+      const res = await apiClient.get<BalanceResponse>(apiV1(`wallets/${encodeURIComponent(userId)}/balance`))
       return res.data
     },
     enabled: Boolean(userId),
