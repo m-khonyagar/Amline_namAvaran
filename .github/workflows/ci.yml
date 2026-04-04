@@ -12,7 +12,6 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   # ==================== Backend Tests ====================
@@ -77,6 +76,7 @@ jobs:
       - name: Install, lint & build (Turbo)
         run: |
           npm ci
+          npm install @rollup/rollup-linux-x64-gnu@4.60.1 -w amline-admin-ui
           npm run lint
           npm run build
 
@@ -156,6 +156,7 @@ jobs:
         run: |
           cd ..
           npm ci
+          npm install @rollup/rollup-linux-x64-gnu@4.60.1 -w amline-admin-ui
           cd admin-ui
           npx playwright install chromium --with-deps
           npm run test:e2e
@@ -170,6 +171,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Lowercase GHCR image path
+        run: echo "IMAGE_REPO=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -178,7 +182,7 @@ jobs:
         with:
           context: ./backend/backend
           push: false
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/backend:${{ github.sha }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/backend:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -191,6 +195,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Lowercase GHCR image path
+        run: echo "IMAGE_REPO=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -199,7 +206,7 @@ jobs:
         with:
           context: ./pdf-generator
           push: false
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/pdf-generator:${{ github.sha }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/pdf-generator:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -213,13 +220,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Lowercase GHCR image path
+        run: echo "IMAGE_REPO=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Build Admin UI image (monorepo context)
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./admin-ui/Dockerfile
           push: false
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/admin-ui:${{ github.sha }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/admin-ui:${{ github.sha }}
 
   build-amline-ui:
     runs-on: ubuntu-latest
@@ -228,6 +238,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Lowercase GHCR image path
+        run: echo "IMAGE_REPO=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -245,7 +258,7 @@ jobs:
         with:
           context: ./amline-ui
           push: false
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/amline-ui:${{ github.sha }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/amline-ui:${{ github.sha }}
 
   build-site:
     runs-on: ubuntu-latest
@@ -257,13 +270,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Lowercase GHCR image path
+        run: echo "IMAGE_REPO=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Build Site image (monorepo context)
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./site/Dockerfile
           push: false
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/site:${{ github.sha }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/site:${{ github.sha }}
 
   build-seo-dashboard:
     runs-on: ubuntu-latest

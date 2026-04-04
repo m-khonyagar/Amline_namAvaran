@@ -10,7 +10,10 @@ from temporalio.client import Client
 from temporalio.worker import Worker
 
 from app.temporal.activities import contract_lifecycle_milestone, log_platform_signal
-from app.temporal.workflow_defs import AmlineSignalWorkflow, ContractLifecycleJourneyWorkflow
+from app.temporal.workflow_defs import (
+    AmlineSignalWorkflow,
+    ContractLifecycleJourneyWorkflow,
+)
 
 log = logging.getLogger(__name__)
 

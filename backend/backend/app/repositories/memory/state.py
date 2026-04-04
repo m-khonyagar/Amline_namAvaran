@@ -287,7 +287,9 @@ class MemoryStore:
             items.append(merged)
             if len(items) >= limit:
                 break
-        unread_count = sum(1 for n in self.notifications_store if str(n["id"]) not in read_set)
+        unread_count = sum(
+            1 for n in self.notifications_store if str(n["id"]) not in read_set
+        )
         return items, len(self.notifications_store), unread_count
 
     def mark_notification_read(self, user_id: str, nid: str) -> bool:
@@ -305,7 +307,9 @@ class MemoryStore:
     def operations_pulse(self, user_id: str) -> Dict[str, Any]:
         """خلاصهٔ لحظه‌ای برای داشبورد عملیات / محصول (mock)."""
         read_set = self.notification_reads.setdefault(user_id, set())
-        unread = sum(1 for n in self.notifications_store if str(n["id"]) not in read_set)
+        unread = sum(
+            1 for n in self.notifications_store if str(n["id"]) not in read_set
+        )
 
         crm_by_status: Dict[str, int] = {}
         terminal = {"LOST", "CONTRACTED"}

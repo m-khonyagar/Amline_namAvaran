@@ -19,6 +19,7 @@ app = FastAPI(title="Amline API", version="1.0.0", docs_url="/docs", redoc_url="
 async def _security_startup() -> None:
     log_security_warnings()
 
+
 _cors = os.getenv("AMLINE_CORS_ORIGINS", "").strip()
 _allow_origins = (
     [x.strip() for x in _cors.split(",") if x.strip()]

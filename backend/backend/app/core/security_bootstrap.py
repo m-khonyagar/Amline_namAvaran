@@ -18,6 +18,4 @@ def log_security_warnings() -> None:
             "configure signing keys before exposing this instance."
         )
     if os.getenv("AMLINE_AUTH_USE_MOCK", "").lower() in ("1", "true", "yes"):
-        log.warning(
-            "AMLINE_AUTH_USE_MOCK is enabled — disable in production."
-        )
+        log.warning("AMLINE_AUTH_USE_MOCK is enabled — disable in production.")

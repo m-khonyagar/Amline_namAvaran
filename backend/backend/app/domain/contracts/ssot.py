@@ -35,7 +35,9 @@ _TYPE_TO_KIND: dict[str, str] = {
 
 def normalize_ssot_kind(contract_type: Optional[str]) -> str:
     raw = (contract_type or "PROPERTY_RENT").strip().upper()
-    return _TYPE_TO_KIND.get(raw, raw if raw in {k.value for k in ContractKind} else ContractKind.RENT.value)
+    return _TYPE_TO_KIND.get(
+        raw, raw if raw in {k.value for k in ContractKind} else ContractKind.RENT.value
+    )
 
 
 # --- Lifecycle (§3.1) ---
@@ -70,7 +72,10 @@ def lifecycle_status_to_product_v2(
     """Storage/SSOT → برچسب v2 برای API و فرانت."""
     s = (storage_status or "").strip().upper()
     sub = (substate or "").strip().lower() if substate else ""
-    if s in (ContractLifecycleStatus.REVOKED.value, ContractLifecycleStatus.CANCELLED.value):
+    if s in (
+        ContractLifecycleStatus.REVOKED.value,
+        ContractLifecycleStatus.CANCELLED.value,
+    ):
         return ContractProductStatusV2.TERMINATED.value
     if s == ContractLifecycleStatus.COMPLETED.value:
         return ContractProductStatusV2.FINALIZED.value

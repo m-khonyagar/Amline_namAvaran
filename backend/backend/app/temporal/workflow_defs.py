@@ -7,7 +7,10 @@ from datetime import timedelta
 from temporalio import workflow
 
 with workflow.unsafe.imports_passed_through():
-    from app.temporal.activities import contract_lifecycle_milestone, log_platform_signal
+    from app.temporal.activities import (
+        contract_lifecycle_milestone,
+        log_platform_signal,
+    )
 
 
 @workflow.defn
@@ -42,4 +45,8 @@ class ContractLifecycleJourneyWorkflow:
                 {**base, "milestone": name},
                 start_to_close_timeout=timedelta(seconds=30),
             )
-        return {"ok": True, "contract_id": cid, "workflow": "ContractLifecycleJourneyWorkflow"}
+        return {
+            "ok": True,
+            "contract_id": cid,
+            "workflow": "ContractLifecycleJourneyWorkflow",
+        }
