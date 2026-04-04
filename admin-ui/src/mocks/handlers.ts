@@ -1,6 +1,11 @@
 // @ts-nocheck — MSW resolver generics clash with shared dual-route handlers; runtime behavior is validated via dev MSW.
 import { http, HttpResponse } from 'msw';
 import type { HttpHandler } from 'msw';
+import {
+  seedRichMswDemoIfNeeded,
+  type MswDirectoryUser,
+  type MswListingSeed,
+} from './mswSeedRichDemo';
 
 /** هر هندلر را هم برای مسیر قدیمی star-slash و هم برای canonical با پیشوند api/v1 ثبت می‌کند. */
 const MSW_V1 = '/api/v1';
@@ -126,35 +131,6 @@ const mswNotifications: Array<{
 const crmMockLeads: Record<string, unknown>[] = [];
 const crmMockActivities: Record<string, Record<string, unknown>[]> = {};
 
-function seedCrmMockLeadsIfEmpty() {
-  if (crmMockLeads.length > 0) return;
-  const now = new Date().toISOString();
-  const row = (overrides: Record<string, unknown>) => ({
-    source: 'WEB',
-    full_name: 'سرنخ',
-    mobile: '09120000000',
-    need_type: 'RENT',
-    notes: '',
-    assigned_to: null,
-    contract_id: null,
-    listing_id: null,
-    requirement_id: null,
-    province_id: null,
-    city_id: null,
-    province_name_fa: null,
-    city_name_fa: null,
-    sla_due_at: null,
-    created_at: now,
-    updated_at: now,
-    ...overrides,
-  });
-  crmMockLeads.push(
-    row({ id: 'crm-seed-1', full_name: 'علی احمدی', status: 'NEW' }),
-    row({ id: 'crm-seed-2', full_name: 'مریم کریمی', status: 'CONTACTED' }),
-    row({ id: 'crm-seed-3', full_name: 'رضا محمدی', status: 'QUALIFIED' })
-  );
-}
-
 function crmOpenLeadCount(): number {
   seedCrmMockLeadsIfEmpty();
   return crmMockLeads.filter((l) => {
@@ -197,10 +173,11 @@ interface MockContract {
   status: string;
   step: string;
   parties: Record<string, unknown[]>;
+  created_at?: string;
+  user_id?: string;
 }
 
 const contracts = new Map<string, MockContract>();
-let idCounter = 1;
 
 interface MswLegalReviewRow {
   id: string;
@@ -212,6 +189,101 @@ interface MswLegalReviewRow {
   decided_at: string | null;
 }
 const mswLegalReviews: MswLegalReviewRow[] = [];
+
+/** کاربران دایرکتوری، آگهی‌های نمونه؛ seed با قراردادها و CRM در ensureMswRichDemo */
+const mswDirectoryUsers: MswDirectoryUser[] = [];
+const mswListingRows: MswListingSeed[] = [];
+const idCounterRef = { current: 1 };
+
+const mswPaymentIntents: Array<{
+  id: string;
+  user_id: string;
+  amount_cents: number;
+  currency: string;
+  idempotency_key: string;
+  status: 'PENDING' | 'COMPLETED' | 'FAILED';
+  psp_reference?: string | null;
+  psp_provider?: string | null;
+  psp_checkout_token?: string | null;
+  last_verify_error?: string | null;
+  verify_attempt_count: number;
+  callback_payload?: string | null;
+  created_at: string;
+  updated_at: string;
+}> = [];
+
+function seedPaymentIntentsDemo() {
+  if (mswPaymentIntents.length > 0 || mswDirectoryUsers.length === 0) return;
+  const t = new Date().toISOString();
+  const t2 = new Date(Date.now() - 86400000).toISOString();
+  mswPaymentIntents.push(
+    {
+      id: 'pi-demo-1',
+      user_id: 'user-002',
+      amount_cents: 150_000_000,
+      currency: 'IRR',
+      idempotency_key: 'idem-mock-1',
+      status: 'PENDING',
+      psp_reference: null,
+      psp_provider: 'zibal',
+      psp_checkout_token: null,
+      last_verify_error: null,
+      verify_attempt_count: 0,
+      callback_payload: null,
+      created_at: t,
+      updated_at: t,
+    },
+    {
+      id: 'pi-demo-2',
+      user_id: 'realtor-003',
+      amount_cents: 80_000_000,
+      currency: 'IRR',
+      idempotency_key: 'idem-mock-2',
+      status: 'COMPLETED',
+      psp_reference: 'PSP-REF-9921',
+      psp_provider: 'mellat',
+      psp_checkout_token: null,
+      last_verify_error: null,
+      verify_attempt_count: 1,
+      callback_payload: '{"ok":true}',
+      created_at: t2,
+      updated_at: t2,
+    },
+    {
+      id: 'pi-demo-3',
+      user_id: 'user-004',
+      amount_cents: 10_000_000,
+      currency: 'IRR',
+      idempotency_key: 'idem-mock-3',
+      status: 'FAILED',
+      psp_reference: null,
+      psp_provider: 'zibal',
+      psp_checkout_token: null,
+      last_verify_error: 'عدم تأیید بانک',
+      verify_attempt_count: 3,
+      callback_payload: null,
+      created_at: t2,
+      updated_at: t,
+    }
+  );
+}
+
+function ensureMswRichDemo() {
+  seedRichMswDemoIfNeeded({
+    directoryUsers: mswDirectoryUsers,
+    contracts,
+    idCounterRef,
+    crmLeads: crmMockLeads,
+    notifications: mswNotifications,
+    legalReviews: mswLegalReviews,
+    listingRows: mswListingRows,
+  });
+  seedPaymentIntentsDemo();
+}
+
+function seedCrmMockLeadsIfEmpty() {
+  ensureMswRichDemo();
+}
 
 type MswAddendumRow = {
   id: string;
@@ -293,15 +365,22 @@ function adminEnterpriseHandlers() {
       const items = mswSessions.slice(skip, skip + limit);
       return HttpResponse.json({ total: mswSessions.length, items, skip, limit });
     }),
-    ...dualGet('*/admin/metrics/summary', () =>
-      HttpResponse.json({
+    ...dualGet('*/admin/metrics/summary', () => {
+      ensureMswRichDemo();
+      const today = new Date().toISOString().slice(0, 10);
+      let contractsToday = 0;
+      for (const c of contracts.values()) {
+        const d = (c.created_at ?? '').slice(0, 10);
+        if (d === today) contractsToday += 1;
+      }
+      return HttpResponse.json({
         contracts_total: contracts.size,
-        users_total: 1,
+        users_total: mswDirectoryUsers.length,
         active_leads: crmOpenLeadCount(),
-        contracts_today: 0,
+        contracts_today: contractsToday,
         audit_events_total: mswAuditLogs.length,
-      })
-    ),
+      });
+    }),
     ...dualGet('*/admin/metrics/operations', () => {
       const unread = mswNotifications.filter((x) => !mswNotificationReads.has(x.id)).length;
       const cutoff = Date.now() - 24 * 60 * 60 * 1000;
@@ -434,7 +513,7 @@ function crmLeadHandlers() {
 }
 
 function nextId(): string {
-  return `contract-${String(idCounter++).padStart(3, '0')}`;
+  return `contract-${String(idCounterRef.current++).padStart(3, '0')}`;
 }
 
 function contractJson(c: MockContract) {
@@ -447,7 +526,7 @@ function contractJson(c: MockContract) {
     is_owner: true,
     key: 'mock-key',
     password: null,
-    created_at: new Date().toISOString(),
+    created_at: c.created_at ?? new Date().toISOString(),
   };
 }
 
@@ -494,13 +573,26 @@ function setStep(c: MockContract, step: string) {
 }
 
 function handleContractList({ request }: { request: Request }) {
+  ensureMswRichDemo();
   const u = new URL(request.url);
   const page = Math.max(1, parseInt(u.searchParams.get('page') ?? '1', 10) || 1);
   const limit = Math.min(100, Math.max(1, parseInt(u.searchParams.get('limit') ?? '20', 10) || 20));
-  const all = Array.from(contracts.values()).map(contractJson);
+  const status = u.searchParams.get('status') ?? '';
+  const type = u.searchParams.get('type') ?? '';
+  const userId = u.searchParams.get('user_id') ?? '';
+  let rows = Array.from(contracts.values()).map(contractJson);
+  if (status) rows = rows.filter((x) => x.status === status);
+  if (type) rows = rows.filter((x) => x.type === type);
+  if (userId) {
+    rows = rows.filter((x) => {
+      const raw = contracts.get(x.id);
+      return raw?.user_id === userId;
+    });
+  }
+  rows.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
   const start = (page - 1) * limit;
-  const items = all.slice(start, start + limit);
-  return HttpResponse.json({ items, total: all.length, page, limit });
+  const items = rows.slice(start, start + limit);
+  return HttpResponse.json({ items, total: rows.length, page, limit });
 }
 
 export const handlers = [
@@ -542,6 +634,8 @@ export const handlers = [
       status: 'DRAFT',
       step: 'LANDLORD_INFORMATION',
       parties: {},
+      created_at: new Date().toISOString(),
+      user_id: mockUser.id,
     };
     contracts.set(id, c);
     return HttpResponse.json(contractJson(c), { status: 201 });
@@ -795,22 +889,167 @@ export const handlers = [
 
   ...dualPost('*/files/upload', () => HttpResponse.json({ id: 'file-001', url: null }, { status: 201 })),
 
-  ...dualGet('*/admin/users', () =>
-    HttpResponse.json({
-      total_count: 1,
-      start_index: 0,
-      end_index: 1,
-      data: [mockUser],
-    })
-  ),
+  ...dualGet('*/admin/users', ({ request }) => {
+    ensureMswRichDemo();
+    const u = new URL(request.url);
+    const page = Math.max(1, parseInt(u.searchParams.get('page') ?? '1', 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(u.searchParams.get('limit') ?? '20', 10) || 20));
+    const search = (u.searchParams.get('search') ?? '').trim().toLowerCase();
+    const role = u.searchParams.get('role') ?? '';
+    let rows = [...mswDirectoryUsers];
+    if (search) {
+      rows = rows.filter(
+        (r) =>
+          r.mobile.replace(/\D/g, '').includes(search.replace(/\D/g, '')) ||
+          (r.full_name && r.full_name.toLowerCase().includes(search))
+      );
+    }
+    if (role) rows = rows.filter((r) => r.role === role);
+    const total = rows.length;
+    const start = (page - 1) * limit;
+    const slice = rows.slice(start, start + limit);
+    const items = slice.map((r) => ({
+      id: r.id,
+      mobile: r.mobile,
+      full_name: r.full_name,
+      role: r.role,
+      created_at: r.created_at,
+      last_login: r.last_login,
+      is_active: r.is_active,
+    }));
+    return HttpResponse.json({ items, total, page, limit });
+  }),
 
-  ...dualGet('*/admin/users/:id', () => HttpResponse.json(mockUser)),
+  ...dualGet('*/admin/users/:id', ({ params }) => {
+    ensureMswRichDemo();
+    const row = mswDirectoryUsers.find((x) => x.id === params.id);
+    if (!row) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
+    return HttpResponse.json({
+      id: row.id,
+      mobile: row.mobile,
+      full_name: row.full_name,
+      national_id: row.national_id ?? undefined,
+      email: row.email ?? undefined,
+      role: row.role,
+      wallet_balance: row.wallet_balance ?? 0,
+      created_at: row.created_at,
+      profile: {},
+    });
+  }),
 
   // ---- CRM in-memory (وقتی VITE_USE_CRM_API=true + MSW) ----
   ...crmLeadHandlers(),
 
   http.get('*/provinces/cities', () => HttpResponse.json([])),
   http.get('*/provinces', () => HttpResponse.json([])),
+
+  ...dualGet('*/listings', ({ request }) => {
+    ensureMswRichDemo();
+    const u = new URL(request.url);
+    const skip = Math.max(0, parseInt(u.searchParams.get('skip') ?? '0', 10) || 0);
+    const limit = Math.min(500, Math.max(1, parseInt(u.searchParams.get('limit') ?? '200', 10) || 200));
+    const items = mswListingRows.slice(skip, skip + limit);
+    return HttpResponse.json({ items, total: mswListingRows.length });
+  }),
+
+  ...dualGet('*/search/listings', ({ request }) => {
+    ensureMswRichDemo();
+    const u = new URL(request.url);
+    const q = (u.searchParams.get('q') ?? '').trim().toLowerCase();
+    const limit = Math.min(100, Math.max(1, parseInt(u.searchParams.get('limit') ?? '50', 10) || 50));
+    let items = [...mswListingRows];
+    if (q) {
+      items = items.filter(
+        (x) =>
+          x.title.toLowerCase().includes(q) ||
+          x.location_summary.toLowerCase().includes(q) ||
+          x.deal_type.toLowerCase().includes(q)
+      );
+    }
+    const total = items.length;
+    items = items.slice(0, limit);
+    return HttpResponse.json({ items, total, facets: {} });
+  }),
+
+  ...dualGet('*/wallets/:userId/balance', ({ params }) => {
+    ensureMswRichDemo();
+    const uid = params.userId as string;
+    const row = mswDirectoryUsers.find((x) => x.id === uid);
+    const cents = row?.wallet_balance ?? 0;
+    return HttpResponse.json({ user_id: uid, balance_cents: cents, currency: 'IRR' });
+  }),
+
+  ...dualGet('*/payments/intents', ({ request }) => {
+    ensureMswRichDemo();
+    const u = new URL(request.url);
+    const status = u.searchParams.get('status') ?? '';
+    const userId = u.searchParams.get('user_id') ?? '';
+    let items = [...mswPaymentIntents];
+    if (status) items = items.filter((x) => x.status === status);
+    if (userId) items = items.filter((x) => x.user_id === userId);
+    return HttpResponse.json({ items, total: items.length });
+  }),
+
+  ...dualGet('*/payments/intents/:id', ({ params }) => {
+    ensureMswRichDemo();
+    const row = mswPaymentIntents.find((x) => x.id === params.id);
+    if (!row) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
+    return HttpResponse.json(row);
+  }),
+
+  ...dualPost('*/payments/intents/:id/verify-retry', ({ params }) => {
+    ensureMswRichDemo();
+    const row = mswPaymentIntents.find((x) => x.id === params.id);
+    if (!row) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
+    row.verify_attempt_count += 1;
+    row.status = 'COMPLETED';
+    row.updated_at = new Date().toISOString();
+    row.last_verify_error = null;
+    row.psp_reference = row.psp_reference ?? `RETRY-${Date.now()}`;
+    return HttpResponse.json(row);
+  }),
+
+  ...dualGet('*/billing/plans', () =>
+    HttpResponse.json([
+      {
+        id: 'plan-basic',
+        code: 'BASIC',
+        name_fa: 'پایه',
+        price_cents: 0,
+        cycle: 'monthly',
+      },
+      {
+        id: 'plan-pro',
+        code: 'PRO',
+        name_fa: 'حرفه‌ای',
+        price_cents: 99_000_000,
+        cycle: 'monthly',
+      },
+    ])
+  ),
+
+  ...dualGet('*/billing/me', () =>
+    HttpResponse.json({
+      id: 'sub-demo-1',
+      user_id: mockUser.id,
+      plan_id: 'plan-pro',
+      status: 'ACTIVE',
+      current_period_end: new Date(Date.now() + 20 * 86400000).toISOString(),
+    })
+  ),
+
+  ...dualGet('*/billing/invoice/latest', () =>
+    HttpResponse.json({
+      subscription_id: 'sub-demo-1',
+      status: 'OPEN',
+      lines: [
+        { description: 'اشتراک اَملاین — طرح حرفه‌ای', amount_cents: 99_000_000 },
+        { description: 'مالیات بر ارزش افزوده', amount_cents: 9_900_000 },
+      ],
+      total_cents: 108_900_000,
+      period_end: new Date(Date.now() + 20 * 86400000).toISOString(),
+    })
+  ),
 
   http.get('*/financials/wallets', () =>
     HttpResponse.json({
