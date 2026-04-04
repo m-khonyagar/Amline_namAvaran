@@ -24,6 +24,10 @@ interface ImportMetaEnv {
    * در production بدون اثر (isWizardPreviewMode همیشه false).
    */
   readonly VITE_WIZARD_PREVIEW_MODE: string
+  /** آدرس پایهٔ site (لندینگ) در dev — پیش‌فرض در هاب تست: http://localhost:3005 */
+  readonly VITE_LOCAL_LANDING_URL: string
+  /** آدرس پایهٔ amline-ui (پنل کاربر) در dev — پیش‌فرض: http://localhost:3006 */
+  readonly VITE_LOCAL_USER_APP_URL: string
   readonly VITE_PUBLIC_POSTHOG_KEY: string
   readonly VITE_PUBLIC_POSTHOG_HOST: string
   /** `true` فقط در staging — ضبط جلسه PostHog */
