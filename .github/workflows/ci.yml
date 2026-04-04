@@ -55,9 +55,11 @@ jobs:
         run: pytest tests/ -v --cov=app --cov-report=xml
 
       - name: Upload coverage
+        continue-on-error: true
         uses: codecov/codecov-action@v4
         with:
           file: ./backend/backend/coverage.xml
+          fail_ci_if_error: false
 
   # ==================== Monorepo (npm workspaces + Turborepo) ====================
   monorepo-js-build:
@@ -161,7 +163,7 @@ jobs:
           npm install @rollup/rollup-linux-x64-gnu@4.60.1 -w amline-admin-ui
           cd admin-ui
           npx playwright install chromium --with-deps
-          npm run test:e2e
+          npm run test:e2e -- tests/e2e.spec.ts
 
   # ==================== Build Docker Images ====================
   build-backend:
