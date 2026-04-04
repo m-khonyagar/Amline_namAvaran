@@ -76,10 +76,11 @@ test('CRM: افزودن Lead جدید', async ({ page }) => {
 test('Contract Wizard: صفحه شروع نمایش داده می‌شود', async ({ page }) => {
   await devLogin(page);
   await page.goto(`${BASE}/contracts/wizard`);
-  await expect(page.getByText('رهن و اجاره')).toBeVisible({ timeout: 15000 });
-  await expect(page.getByText('خرید و فروش')).toBeVisible();
-  await expect(page.getByText('برای خودم')).toBeVisible();
-  await expect(page.getByText('برای دیگران')).toBeVisible();
+  const rentBtn = page.getByRole('button', { name: 'رهن و اجاره', exact: true });
+  await expect(rentBtn).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole('button', { name: 'خرید و فروش', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'برای خودم', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'برای دیگران', exact: true })).toBeVisible();
 });
 
 // ================================================================
@@ -88,9 +89,11 @@ test('Contract Wizard: صفحه شروع نمایش داده می‌شود', asy
 test('Contract Wizard: انتخاب رهن و اجاره', async ({ page }) => {
   await devLogin(page);
   await page.goto(`${BASE}/contracts/wizard`);
-  await expect(page.getByText('رهن و اجاره')).toBeVisible({ timeout: 15000 });
-  await page.getByText('رهن و اجاره').click();
-  await page.getByText('برای دیگران').click();
+  await expect(page.getByRole('button', { name: 'رهن و اجاره', exact: true })).toBeVisible({
+    timeout: 15000,
+  });
+  await page.getByRole('button', { name: 'رهن و اجاره', exact: true }).click();
+  await page.getByRole('button', { name: 'برای دیگران', exact: true }).click();
   const startBtn = page.getByRole('button', { name: 'شروع قرارداد', exact: true });
   await expect(startBtn).toBeVisible({ timeout: 5000 });
 });

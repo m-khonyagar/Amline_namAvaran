@@ -5,7 +5,6 @@ export async function logAudit(
   metadata?: Record<string, unknown>
 ): Promise<void> {
   if (import.meta.env.DEV) {
-    // eslint-disable-next-line no-console
     console.debug('[audit]', action, entity, metadata)
   }
 }

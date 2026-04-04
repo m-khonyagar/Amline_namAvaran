@@ -12,7 +12,7 @@ export async function loadLeads(): Promise<Lead[]> {
 }
 
 export async function loadLead(id: string): Promise<Lead | null> {
-  if (useRemote()) return remote.remoteGetLead(id)
+  if (isCrmRemoteApiEnabled()) return remote.remoteGetLead(id)
   return local.getLeads().find((l) => l.id === id) ?? null
 }
 

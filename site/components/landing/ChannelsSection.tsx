@@ -43,9 +43,9 @@ export function ChannelsSection() {
               ble.ir/amlinebime
             </a>
             — نسخهٔ بلند و سئو‌شده در{' '}
-            <a href="/blog/" className="text-cyan-400 underline-offset-2 hover:underline">
+            <Link href="/blog/" className="text-cyan-400 underline-offset-2 hover:underline">
               بلاگ سایت
-            </a>
+            </Link>
             .
           </p>
         </div>

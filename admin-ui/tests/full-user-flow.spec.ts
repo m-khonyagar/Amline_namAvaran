@@ -95,15 +95,17 @@ test('فلو ۳: Contract Wizard — شروع قرارداد رهن و اجار�
   // رفتن به wizard از sidebar
   await page.getByRole('link', { name: /قرارداد جدید/i }).click();
   await expect(page).toHaveURL(`${BASE}/contracts/wizard`);
-  await expect(page.getByText('رهن و اجاره')).toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole('button', { name: 'رهن و اجاره', exact: true })).toBeVisible({
+    timeout: 10000,
+  });
   await screenshot(page, '07-wizard-start');
 
   // انتخاب رهن و اجاره
-  await page.getByText('رهن و اجاره').click();
+  await page.getByRole('button', { name: 'رهن و اجاره', exact: true }).click();
   await screenshot(page, '08-wizard-rent-selected');
 
   // انتخاب حالت کاتب
-  await page.getByText('برای دیگران').click();
+  await page.getByRole('button', { name: 'برای دیگران', exact: true }).click();
   await screenshot(page, '09-wizard-scribe-mode');
 
   // بررسی دکمه شروع

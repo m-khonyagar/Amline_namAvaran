@@ -14,6 +14,8 @@ COPY amline-ui/ /app/amline-ui/
 COPY packages/amline-ui-core /app/packages/amline-ui-core
 WORKDIR /app/amline-ui
 ENV NEXT_TELEMETRY_DISABLED=1
+# Docker image: stub wizard (no admin-ui bundle); local dev uses NEXT_PUBLIC_EMBED_ADMIN_WIZARD=1
+ENV NEXT_PUBLIC_EMBED_ADMIN_WIZARD=0
 RUN npm run build
 
 FROM node:20-alpine AS runner
