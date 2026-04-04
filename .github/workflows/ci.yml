@@ -62,6 +62,8 @@ jobs:
   # ==================== Monorepo (npm workspaces + Turborepo) ====================
   monorepo-js-build:
     runs-on: ubuntu-latest
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -242,21 +244,11 @@ jobs:
       - name: Lowercase GHCR image path
         run: echo "IMAGE_REPO=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: amline-ui/package-lock.json
-
-      - name: Install dependencies
-        working-directory: amline-ui
-        run: npm ci
-
       - name: Build Amline UI
         uses: docker/build-push-action@v5
         with:
-          context: ./amline-ui
+          context: .
+          file: ./amline-ui/Dockerfile
           push: false
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/amline-ui:${{ github.sha }}
 

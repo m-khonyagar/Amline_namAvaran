@@ -2,12 +2,12 @@ import type { Lead, LeadActivity, LeadStatus } from './types'
 import * as local from './crmStorage'
 import * as remote from './crmApi'
 
-function useRemote(): boolean {
+function isCrmRemoteApiEnabled(): boolean {
   return import.meta.env.VITE_USE_CRM_API === 'true'
 }
 
 export async function loadLeads(): Promise<Lead[]> {
-  if (useRemote()) return remote.remoteListLeads()
+  if (isCrmRemoteApiEnabled()) return remote.remoteListLeads()
   return local.getLeads()
 }
 
@@ -20,7 +20,7 @@ export async function saveLeadStatus(
   id: string,
   status: LeadStatus
 ): Promise<Lead | null> {
-  if (useRemote()) {
+  if (isCrmRemoteApiEnabled()) {
     return remote.remotePatchLead(id, { status })
   }
   return local.updateLeadStatus(id, status)
@@ -42,7 +42,7 @@ export async function createLeadRecord(data: {
     status: 'NEW' as const,
     contract_id: null,
   }
-  if (useRemote()) {
+  if (isCrmRemoteApiEnabled()) {
     return remote.remoteCreateLead(base)
   }
   return Promise.resolve(local.createLead(base))
@@ -52,21 +52,21 @@ export async function updateLeadRecord(
   id: string,
   updates: Partial<Omit<Lead, 'id' | 'created_at'>>
 ): Promise<Lead | null> {
-  if (useRemote()) {
+  if (isCrmRemoteApiEnabled()) {
     return remote.remotePatchLead(id, updates)
   }
   return local.updateLead(id, updates)
 }
 
 export async function loadActivities(leadId: string): Promise<LeadActivity[]> {
-  if (useRemote()) return remote.remoteListActivities(leadId)
+  if (isCrmRemoteApiEnabled()) return remote.remoteListActivities(leadId)
   return local.getActivities(leadId)
 }
 
 export async function addLeadActivityRecord(
   data: Omit<LeadActivity, 'id' | 'created_at'>
 ): Promise<LeadActivity> {
-  if (useRemote()) {
+  if (isCrmRemoteApiEnabled()) {
     return remote.remoteAddActivity(data.lead_id, data)
   }
   return Promise.resolve(local.addActivity(data))

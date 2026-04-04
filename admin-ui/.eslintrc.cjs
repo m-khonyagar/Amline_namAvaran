@@ -28,4 +28,12 @@ module.exports = {
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/no-empty-object-type": "off",
   },
+  overrides: [
+    {
+      files: ["src/mocks/handlers.ts"],
+      rules: {
+        "@typescript-eslint/ban-ts-comment": "off",
+      },
+    },
+  ],
 };
