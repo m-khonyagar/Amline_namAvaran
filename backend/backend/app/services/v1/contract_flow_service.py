@@ -11,14 +11,36 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from app.core.errors import AmlineError
+from app.domain.contracts.ssot import (
+    ContractLifecycleStatus,
+    assert_transition_ok,
+    merge_external_refs,
+    normalize_ssot_kind,
+)
 from app.repositories.memory.state import get_store
 from app.schemas.v1.contract_flow import (
+    ContractExternalRefsPatchBody,
     ContractStartBody,
     LandlordSetBody,
     PartyPatchBody,
     SectionPatchBody,
     TenantSetBody,
 )
+
+
+def _default_party_row(
+    party_id: str, party_type: str, ssot_role: str, c_json: dict[str, Any]
+) -> dict[str, Any]:
+    return {
+        "id": party_id,
+        "contract": c_json,
+        "party_type": party_type,
+        "ssot_role": ssot_role,
+        "person_type": "NATURAL_PERSON",
+        "signature_status": None,
+        "signature_method": None,
+        "agent_user_id": None,
+    }
 
 
 class FlowStep:
@@ -82,14 +104,24 @@ class ContractFlowService:
         ctype = body.contract_type or "PROPERTY_RENT"
         cid = s.next_contract_id()
         now = _now_iso()
+        eref = None
+        if getattr(body, "external_refs", None) is not None:
+            eref = body.external_refs.model_dump(exclude_none=False)
+        refs = merge_external_refs(None, eref)
         c: Dict[str, Any] = {
             "id": cid,
             "type": ctype,
-            "status": "DRAFT",
+            "ssot_kind": normalize_ssot_kind(ctype),
+            "status": ContractLifecycleStatus.DRAFT.value,
             "step": FlowStep.LANDLORD_INFORMATION,
             "parties": {},
             "created_at": now,
             "flow_version": "0.1.3",
+            "external_refs": refs,
+            "created_by": getattr(body, "created_by", None),
+            "witnesses": [],
+            "amendments": [],
+            "payments": {},
         }
         s.contracts[cid] = c
         return s.contract_json(c)
@@ -127,7 +159,9 @@ class ContractFlowService:
     def revoke(self, contract_id: str) -> Dict[str, Any]:
         s = get_store()
         c = s.get_contract(contract_id)
-        c["status"] = "REVOKED"
+        cur = c.get("status", ContractLifecycleStatus.DRAFT.value)
+        assert_transition_ok(cur, ContractLifecycleStatus.REVOKED.value)
+        c["status"] = ContractLifecycleStatus.REVOKED.value
         return {"ok": True}
 
     def create_landlord_party(self, contract_id: str) -> Dict[str, Any]:
@@ -135,15 +169,14 @@ class ContractFlowService:
         c = s.get_contract(contract_id)
         _require_step(c, FlowStep.LANDLORD_INFORMATION)
         party_id = f"party-landlord-{int(datetime.now().timestamp() * 1000)}"
-        row = {
-            "id": party_id,
-            "contract": s.contract_json(c),
-            "party_type": "LANDLORD",
-            "person_type": "NATURAL_PERSON",
-        }
+        row = _default_party_row(
+            party_id, "LANDLORD", "LANDLORD", s.contract_json(c)
+        )
         landlords = c.setdefault("parties", {}).setdefault("landlords", [])
         landlords.append(row)
-        return row
+        out_row = {k: v for k, v in row.items() if k != "contract"}
+        out_row["contract"] = s.contract_json(c)
+        return out_row
 
     def patch_party(
         self, contract_id: str, party_id: str, body: PartyPatchBody
@@ -152,8 +185,10 @@ class ContractFlowService:
         c = s.get_contract(contract_id)
         patch = body.model_dump(exclude_none=True)
         found: Dict[str, Any] | None = None
-        for bucket in ("landlords", "tenants"):
-            for row in c.get("parties", {}).get(bucket) or []:
+        for _bucket, lst in (c.get("parties") or {}).items():
+            if not isinstance(lst, list):
+                continue
+            for row in lst:
                 if str(row.get("id")) == str(party_id):
                     found = row
                     break
@@ -166,23 +201,37 @@ class ContractFlowService:
                     "natural_person_detail",
                     "legal_person_detail",
                     "mobile",
+                    "signature_status",
+                    "signature_method",
+                    "agent_user_id",
                 ):
                     found[k] = v
         pt = found.get("party_type", "LANDLORD") if found else "LANDLORD"
         ptype = (
             found.get("person_type", "NATURAL_PERSON") if found else "NATURAL_PERSON"
         )
-        return {
+        out: Dict[str, Any] = {
             "id": party_id,
             "contract": s.contract_json(c),
             "party_type": pt,
             "person_type": ptype,
         }
+        if found:
+            for k in ("signature_status", "signature_method", "agent_user_id", "ssot_role"):
+                if k in found:
+                    out[k] = found[k]
+        return out
 
     def landlord_set(self, contract_id: str, body: LandlordSetBody) -> Dict[str, Any]:
         s = get_store()
         c = s.get_contract(contract_id)
         _require_step(c, FlowStep.LANDLORD_INFORMATION)
+        cur = c.get("status", ContractLifecycleStatus.DRAFT.value)
+        if cur == ContractLifecycleStatus.DRAFT.value:
+            assert_transition_ok(
+                cur, ContractLifecycleStatus.IN_PROGRESS.value
+            )
+            c["status"] = ContractLifecycleStatus.IN_PROGRESS.value
         nxt = body.next_step or FlowStep.TENANT_INFORMATION
         c["step"] = nxt
         return {"next_step": nxt}
@@ -192,15 +241,14 @@ class ContractFlowService:
         c = s.get_contract(contract_id)
         _require_step(c, FlowStep.TENANT_INFORMATION)
         party_id = f"party-tenant-{int(datetime.now().timestamp() * 1000)}"
-        row = {
-            "id": party_id,
-            "contract": s.contract_json(c),
-            "party_type": "TENANT",
-            "person_type": "NATURAL_PERSON",
-        }
+        row = _default_party_row(
+            party_id, "TENANT", "TENANT", s.contract_json(c)
+        )
         tenants = c.setdefault("parties", {}).setdefault("tenants", [])
         tenants.append(row)
-        return row
+        out_row = {k: v for k, v in row.items() if k != "contract"}
+        out_row["contract"] = s.contract_json(c)
+        return out_row
 
     def tenant_set(self, contract_id: str, body: TenantSetBody) -> Dict[str, Any]:
         s = get_store()
@@ -213,10 +261,12 @@ class ContractFlowService:
     def delete_party(self, contract_id: str, party_id: str) -> Dict[str, Any]:
         s = get_store()
         c = s.get_contract(contract_id)
-        parties = c.get("parties") or {}
-        for bucket in ("landlords", "tenants"):
-            lst = parties.get(bucket) or []
-            parties[bucket] = [p for p in lst if str(p.get("id")) != str(party_id)]
+        parties = dict(c.get("parties") or {})
+        for bucket, lst in list(parties.items()):
+            if isinstance(lst, list):
+                parties[bucket] = [
+                    p for p in lst if str(p.get("id")) != str(party_id)
+                ]
         c["parties"] = parties
         return {"ok": True}
 
@@ -271,6 +321,15 @@ class ContractFlowService:
         s = get_store()
         c = s.get_contract(contract_id)
         _require_step(c, FlowStep.SIGNING)
+        cur = c.get("status", ContractLifecycleStatus.DRAFT.value)
+        if cur in (
+            ContractLifecycleStatus.DRAFT.value,
+            ContractLifecycleStatus.IN_PROGRESS.value,
+        ):
+            assert_transition_ok(
+                cur, ContractLifecycleStatus.PENDING_SIGNATURES.value
+            )
+            c["status"] = ContractLifecycleStatus.PENDING_SIGNATURES.value
         nxt = body.next_step or FlowStep.WITNESS
         c["step"] = nxt
         rec = {
@@ -290,6 +349,17 @@ class ContractFlowService:
         nxt = body.next_step or FlowStep.WITNESS
         c["step"] = nxt
         return {"next_step": nxt}
+
+    def patch_external_refs(
+        self, contract_id: str, body: ContractExternalRefsPatchBody
+    ) -> Dict[str, Any]:
+        s = get_store()
+        c = s.get_contract(contract_id)
+        patch = body.model_dump(exclude_unset=True)
+        c["external_refs"] = merge_external_refs(
+            c.get("external_refs"), patch
+        )
+        return s.contract_json(c)
 
 
 _svc: Optional[ContractFlowService] = None

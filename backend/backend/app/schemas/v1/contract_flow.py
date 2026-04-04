@@ -7,11 +7,25 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class ExternalRefsFields(BaseModel):
+    """Nullable integration IDs (SSOT §3.1)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    khodnevis_id: Optional[str] = None
+    katib_id: Optional[str] = None
+    tracking_code: Optional[str] = None
+
+
 class ContractStartBody(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     contract_type: Optional[str] = "PROPERTY_RENT"
     party_type: Optional[str] = None
+    external_refs: Optional[ExternalRefsFields] = None
+    created_by: Optional[str] = Field(
+        default=None, description="Scribe / staff user id (SSOT §3.1)"
+    )
 
 
 class NextStepResponse(BaseModel):
@@ -48,6 +62,17 @@ class PartyPatchBody(BaseModel):
     natural_person_detail: Optional[Dict[str, Any]] = None
     legal_person_detail: Optional[Dict[str, Any]] = None
     mobile: Optional[str] = None
+    signature_status: Optional[str] = None
+    signature_method: Optional[str] = None
+    agent_user_id: Optional[str] = None
+
+
+class ContractExternalRefsPatchBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    khodnevis_id: Optional[str] = None
+    katib_id: Optional[str] = None
+    tracking_code: Optional[str] = None
 
 
 class ContractSummaryJson(BaseModel):
@@ -55,6 +80,7 @@ class ContractSummaryJson(BaseModel):
 
     id: str
     type: str
+    ssot_kind: Optional[str] = None
     status: str
     step: str
     parties: Dict[str, Any] = Field(default_factory=dict)
