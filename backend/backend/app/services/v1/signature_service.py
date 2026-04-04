@@ -1,7 +1,15 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from enum import Enum
 from typing import Any, Optional
+
+
+class SignatureMethod(str, Enum):
+    SELF_OTP = "SELF_OTP"
+    AGENT_OTP = "AGENT_OTP"
+    ADMIN_OTP = "ADMIN_OTP"
+    AUTO = "AUTO"
 
 from app.repositories.memory.state import get_store
 from app.services.v1.otp_service import get_otp_service, mask_phone, normalize_mobile_ir
@@ -119,6 +127,8 @@ class SignatureService:
         challenge_id: Optional[str],
         client_ip: Optional[str],
         user_agent: Optional[str],
+        signature_method: SignatureMethod = SignatureMethod.SELF_OTP,
+        agent_user_id: Optional[str] = None,
     ) -> dict[str, Any]:
         store = get_store()
         c = store.get_contract(contract_id)
@@ -141,11 +151,12 @@ class SignatureService:
             row["signed"] = True
             row["signed_at"] = _now_iso()
             row["signature_audit"] = {
-                "method": "OTP",
+                "method": signature_method.value,
                 "timestamp": _now_iso(),
                 "ip": client_ip,
                 "user_agent": user_agent,
                 "salt": salt,
+                "agent_user_id": agent_user_id,
             }
         elif pid:
             parties = c.setdefault("parties", {})
@@ -155,11 +166,12 @@ class SignatureService:
                         p["signed"] = True
                         p["signed_at"] = _now_iso()
                         p["signature_audit"] = {
-                            "method": "OTP",
+                            "method": signature_method.value,
                             "timestamp": _now_iso(),
                             "ip": client_ip,
                             "user_agent": user_agent,
                             "salt": salt,
+                            "agent_user_id": agent_user_id,
                         }
                         row = p
                         break
@@ -171,13 +183,45 @@ class SignatureService:
             phone_masked=mask_phone(phone_norm),
             ip=client_ip,
             user_agent=user_agent,
-            extra={"challenge_id": rec.id, "salt": salt},
+            extra={
+                "challenge_id": rec.id,
+                "salt": salt,
+                "signature_method": signature_method.value,
+                "agent_user_id": agent_user_id,
+            },
         )
 
         if c.get("step") == "SIGNING" and c.get("status") == "DRAFT":
             c["status"] = "SIGNING"
 
         return {"ok": True}
+
+    def sign_as_agent(
+        self,
+        contract_id: str,
+        *,
+        party_id: str | int,
+        otp_code: str,
+        agent_user_id: str,
+        mobile: str,
+        salt: Optional[str] = None,
+        challenge_id: Optional[str] = None,
+        client_ip: Optional[str] = None,
+        user_agent: Optional[str] = None,
+    ) -> dict[str, Any]:
+        """امضا توسط کاتب/نماینده با همان مسیر verify OTP؛ ممیزی با agent_user_id."""
+        return self.verify_contract_sign(
+            contract_id,
+            otp=otp_code,
+            mobile=mobile,
+            party_id=party_id,
+            salt=salt,
+            challenge_id=challenge_id,
+            client_ip=client_ip,
+            user_agent=user_agent,
+            signature_method=SignatureMethod.AGENT_OTP,
+            agent_user_id=agent_user_id,
+        )
 
     def request_witness(
         self,
