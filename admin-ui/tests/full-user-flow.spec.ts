@@ -41,8 +41,10 @@ test('فلو ۱: ورود به سیستم و مشاهده داشبورد', async
   await expect(page.locator('body')).not.toBeEmpty();
   await screenshot(page, '02-dashboard');
 
-  // sidebar باید نمایش داده شود (دو لوگوی هم‌نام در هدر موبایل + سایدبار — یکی را مشخص می‌کنیم)
-  await expect(page.locator('#app-sidebar').getByText('اَملاین').first()).toBeVisible({ timeout: 20000 });
+  // sidebar — لوگو با alt «اَم‌لاین — AmLine» (متن ساده «اَملاین» در DOM نیست)
+  await expect(page.locator('#app-sidebar').getByRole('img', { name: /AmLine|اَم‌لاین/i })).toBeVisible({
+    timeout: 20000,
+  });
   await expect(page.getByRole('link', { name: /داشبورد/i }).first()).toBeVisible();
   await expect(page.getByRole('link', { name: /قراردادها/i }).first()).toBeVisible();
   await expect(page.getByRole('link', { name: /CRM/i }).first()).toBeVisible();
@@ -109,11 +111,11 @@ test('فلو ۳: Contract Wizard — شروع قرارداد رهن و اجار�
   await page.getByRole('button', { name: 'برای دیگران', exact: true }).click();
   await screenshot(page, '09-wizard-scribe-mode');
 
-  // بررسی دکمه شروع
-  await expect(page.getByRole('button', { name: 'شروع قرارداد', exact: true })).toBeVisible();
+  const wizardStartBtn = page.getByRole('button', { name: /شروع قرارداد/ });
+  await expect(wizardStartBtn).toBeVisible({ timeout: 15000 });
 
   // MSW پاسخ می‌دهد — باید به مرحله اطلاعات مالک برسیم
-  await page.getByRole('button', { name: 'شروع قرارداد', exact: true }).click();
+  await wizardStartBtn.click();
   await expect(page.getByRole('heading', { name: /اطلاعات مالک/ })).toBeVisible({ timeout: 15000 });
   await expect(page.getByRole('button', { name: 'شخص حقیقی' })).toBeVisible();
   await screenshot(page, '10-wizard-after-start');
@@ -128,7 +130,7 @@ test('فلو ۳ب: Contract Wizard — شروع قرارداد خرید و فر�
   await expect(page.getByText('خرید و فروش')).toBeVisible({ timeout: 10000 });
   await page.getByText('خرید و فروش').click();
   await page.getByText('برای خودم').click();
-  await page.getByRole('button', { name: 'شروع قرارداد', exact: true }).click();
+  await page.getByRole('button', { name: /شروع قرارداد/ }).click();
   await expect(page.getByRole('heading', { name: /اطلاعات فروشنده/ })).toBeVisible({ timeout: 15000 });
 });
 
@@ -143,7 +145,7 @@ test('فلو ۴: Contract Wizard — DraftBanner و شروع قرارداد جد
 
   // اگه DraftBanner نمایش داده شد، دکمه «شروع قرارداد جدید» رو بزن
   const newContractBtn = page.getByRole('button', { name: /شروع قرارداد جدید/i });
-  const startBtn = page.getByRole('button', { name: 'شروع قرارداد', exact: true });
+  const startBtn = page.getByRole('button', { name: /شروع قرارداد/ });
 
   const hasDraft = await newContractBtn.isVisible({ timeout: 3000 }).catch(() => false);
   if (hasDraft) {

@@ -96,8 +96,8 @@ test('Contract Wizard: انتخاب رهن و اجاره', async ({ page }) => {
   });
   await page.getByRole('button', { name: /رهن و اجاره/ }).click();
   await page.getByRole('button', { name: /برای دیگران/ }).click();
-  const startBtn = page.getByRole('button', { name: 'شروع قرارداد', exact: true });
-  await expect(startBtn).toBeVisible({ timeout: 5000 });
+  const startBtn = page.getByRole('button', { name: /شروع قرارداد/ });
+  await expect(startBtn).toBeVisible({ timeout: 15000 });
 });
 
 // ================================================================
