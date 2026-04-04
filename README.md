@@ -159,7 +159,7 @@ cd amline-ui && npx playwright test
 
 ## Sweep AI (توسعهٔ خودکار)
 
-پیکربندی روی **`main`**: `sweep.yaml` + `.sweep.yaml`؛ Issue با عنوان **`Sweep: ...`** و برچسب **`sweep`**. راهنمای نصب App و تست دود: [`docs/SWEEP_RUNBOOK.md`](docs/SWEEP_RUNBOOK.md) — قالب Issue: **Sweep SSOT task**.
+پیکربندی روی **`main`**: `sweep.yaml` + `.sweep.yaml`؛ Issue با عنوان **`Sweep: ...`** و برچسب **`sweep`**. لینک قدیمی **`github.com/apps/sweep-ai`** دیگر ۴۰۴ است؛ برای بات GitHub باید **Sweep خودمیزبان** طبق [`docs/SWEEP_RUNBOOK.md`](docs/SWEEP_RUNBOOK.md) — قالب Issue: **Sweep SSOT task**.
 
 ---
 
