@@ -3,7 +3,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { apiClient } from '../../lib/api'
-import type { ContractStatus, ContractType } from '../../features/contract-wizard/types/wizard'
+import {
+  CONTRACT_TYPE_LABELS,
+  type ContractStatus,
+  type ContractType,
+} from '../../features/contract-wizard/types/wizard'
 
 interface ContractListItem {
   id: string
@@ -39,10 +43,7 @@ const STATUS_LABELS: Record<string, string> = {
   PDF_GENERATING_FAILED: 'خطا در تولید PDF',
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  PROPERTY_RENT: 'رهن و اجاره',
-  BUYING_AND_SELLING: 'خرید و فروش',
-}
+const TYPE_LABELS: Record<string, string> = { ...CONTRACT_TYPE_LABELS }
 
 export default function ContractsPage() {
   const navigate = useNavigate()

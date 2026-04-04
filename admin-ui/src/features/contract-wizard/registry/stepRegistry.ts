@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 import type { ContractType, PRContractStep, StepMeta, StepProps } from '../types/wizard';
+import { usesRentingContractFlow } from '../types/wizard';
 import { LandlordStep } from '../components/steps/LandlordStep';
 import { TenantStep } from '../components/steps/TenantStep';
 import { PlaceInfoStep } from '../components/steps/PlaceInfoStep';
@@ -57,7 +58,7 @@ const SALE_REGISTRY: Record<PRContractStep, StepMeta> = {
 };
 
 export function getStepRegistry(contractType: ContractType): Record<PRContractStep, StepMeta> {
-  return contractType === 'PROPERTY_RENT' ? RENT_REGISTRY : SALE_REGISTRY;
+  return usesRentingContractFlow(contractType) ? RENT_REGISTRY : SALE_REGISTRY;
 }
 
 export function getProgress(currentStep: PRContractStep): number {

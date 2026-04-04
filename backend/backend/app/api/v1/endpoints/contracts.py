@@ -20,6 +20,7 @@ from app.schemas.v1.signatures import (
     WitnessRequestBody,
     WitnessVerifyBody,
 )
+from app.domain.contracts.ssot import contract_catalog
 from app.services.v1.contract_flow_service import get_contract_flow_service
 from app.services.v1.signature_service import get_signature_service
 
@@ -59,6 +60,12 @@ def contracts_start(body: ContractStartBody, background_tasks: BackgroundTasks) 
 @router.get("/contracts/list")
 def contracts_list() -> list:
     return _flow.list_contracts()
+
+
+@router.get("/contracts/ssot/catalog")
+def contracts_ssot_catalog() -> dict:
+    """Canonical SSOT contract kinds, flow labels (S1–S5, P1–P4, T1), and aliases."""
+    return contract_catalog()
 
 
 @router.get("/contracts/{contract_id}")

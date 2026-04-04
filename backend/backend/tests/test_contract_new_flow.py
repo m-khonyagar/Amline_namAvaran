@@ -27,7 +27,7 @@ def test_get_contract_includes_next_step_and_flow_version(client: TestClient) ->
     cid = client.post("/api/v1/contracts/start", json={"party_type": "LANDLORD"}).json()["id"]
     body = client.get(f"/api/v1/contracts/{cid}").json()
     assert body["next_step"] == body["step"]
-    assert body["flow_version"] == "0.1.3"
+    assert body["flow_version"] == "0.1.4"
 
 
 def test_home_info_stores_payload(client: TestClient) -> None:

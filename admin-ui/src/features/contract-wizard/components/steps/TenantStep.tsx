@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { contractApi } from '../../api/contractApi';
 import type { AddContractPartyResponse } from '../../types/api';
 import type { StepProps } from '../../types/wizard';
+import { usesRentingContractFlow } from '../../types/wizard';
 import { StepErrorBanner } from '../StepErrorBanner';
 import { NaturalPersonForm } from './NaturalPersonForm';
 import { LegalPersonForm } from './LegalPersonForm';
@@ -18,7 +19,7 @@ export function TenantStep({ contractId, contractType, onComplete, isScribeMode 
   const { error, details, hint, setFromError, clear } = useMappedStepError();
   const [personKind, setPersonKind] = useState<PersonKind>('NATURAL');
 
-  const partyLabel = contractType === 'PROPERTY_RENT' ? 'مستاجر' : 'خریدار';
+  const partyLabel = usesRentingContractFlow(contractType) ? 'مستاجر' : 'خریدار';
 
   async function handleAddNatural(data: NaturalPersonFormData) {
     setIsLoading(true);

@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { contractApi } from '../../api/contractApi';
 import type { StepProps } from '../../types/wizard';
+import { usesRentingContractFlow } from '../../types/wizard';
 import { OtpForm } from '../OtpForm';
 import { StepErrorBanner } from '../StepErrorBanner';
 import { ensureMappedError } from '../../../../lib/errorMapper';
@@ -84,8 +85,8 @@ export function WitnessStep({ contractId, contractType, onComplete }: StepProps)
     });
   }
 
-  const landlordLabel = contractType === 'PROPERTY_RENT' ? 'مالک' : 'فروشنده';
-  const tenantLabel = contractType === 'PROPERTY_RENT' ? 'مستاجر' : 'خریدار';
+  const landlordLabel = usesRentingContractFlow(contractType) ? 'مالک' : 'فروشنده';
+  const tenantLabel = usesRentingContractFlow(contractType) ? 'مستاجر' : 'خریدار';
 
   return (
     <div dir="rtl" className="space-y-4">

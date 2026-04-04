@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { contractApi } from '../../api/contractApi';
 import type { ContractType, PRContractStep } from '../../types/wizard';
+import { usesRentingContractFlow } from '../../types/wizard';
 import { StepErrorBanner } from '../StepErrorBanner';
 import { useMappedStepError } from '../../hooks/useMappedStepError';
 import type { PartyType } from '../../types/api';
@@ -56,11 +57,18 @@ export function StartStep({ onStart }: StartStepProps) {
       {/* انتخاب نوع قرارداد */}
       <div>
         <p className="text-sm font-medium text-gray-700 mb-3">نوع قرارداد</p>
-        <div className="grid grid-cols-2 gap-3">
-          {([
-            { value: 'PROPERTY_RENT', label: 'رهن و اجاره', icon: '🏠' },
-            { value: 'BUYING_AND_SELLING', label: 'خرید و فروش', icon: '🤝' },
-          ] as const).map((opt) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[22rem] overflow-y-auto pr-1">
+          {(
+            [
+              { value: 'PROPERTY_RENT' as const, label: 'رهن و اجاره', icon: '🏠' },
+              { value: 'LEASE_TO_OWN' as const, label: 'اجاره به شرط تملیک', icon: '📜' },
+              { value: 'BUYING_AND_SELLING' as const, label: 'خرید و فروش', icon: '🤝' },
+              { value: 'SALE' as const, label: 'فروش (SSOT)', icon: '💰' },
+              { value: 'EXCHANGE' as const, label: 'معاوضه', icon: '🔁' },
+              { value: 'CONSTRUCTION' as const, label: 'مشارکت در ساخت', icon: '🏗️' },
+              { value: 'PRE_SALE' as const, label: 'پیش‌فروش', icon: '📋' },
+            ] satisfies { value: ContractType; label: string; icon: string }[]
+          ).map((opt) => (
             <button
               key={opt.value}
               type="button"
@@ -84,8 +92,14 @@ export function StartStep({ onStart }: StartStepProps) {
         <p className="text-sm font-medium text-gray-700 mb-3">نقش شما در شروع قرارداد</p>
         <div className="grid grid-cols-2 gap-3">
           {([
-            { value: 'LANDLORD' as const, label: contractType === 'PROPERTY_RENT' ? 'مالک' : 'فروشنده' },
-            { value: 'TENANT' as const, label: contractType === 'PROPERTY_RENT' ? 'مستاجر' : 'خریدار' },
+            {
+              value: 'LANDLORD' as const,
+              label: usesRentingContractFlow(contractType) ? 'مالک' : 'فروشنده',
+            },
+            {
+              value: 'TENANT' as const,
+              label: usesRentingContractFlow(contractType) ? 'مستاجر' : 'خریدار',
+            },
           ]).map((opt) => (
             <button
               key={opt.value}

@@ -11,6 +11,12 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from app.core.errors import AmlineError
+from app.domain.contracts.ssot import (
+    ContractKind,
+    default_ssot_meta,
+    normalize_contract_kind,
+    uses_renting_stage,
+)
 from app.repositories.memory.state import get_store
 from app.schemas.v1.contract_flow import (
     ContractStartBody,
@@ -59,9 +65,14 @@ def _require_step(c: Dict[str, Any], *allowed: str) -> None:
 
 
 def _default_next_after_mortgage(c: Dict[str, Any]) -> str:
-    if c.get("type") == "BUYING_AND_SELLING":
-        return FlowStep.SIGNING
-    return FlowStep.RENTING
+    kind = ContractKind(str(c.get("ssot_kind", ContractKind.RENT.value)))
+    if uses_renting_stage(kind):
+        return FlowStep.RENTING
+    return FlowStep.SIGNING
+
+
+def _contract_kind(c: Dict[str, Any]) -> ContractKind:
+    return ContractKind(str(c.get("ssot_kind", ContractKind.RENT.value)))
 
 
 class ContractFlowService:
@@ -80,8 +91,10 @@ class ContractFlowService:
             )
         s = get_store()
         ctype = body.contract_type or "PROPERTY_RENT"
+        kind = normalize_contract_kind(ctype)
         cid = s.next_contract_id()
         now = _now_iso()
+        meta = default_ssot_meta(kind)
         c: Dict[str, Any] = {
             "id": cid,
             "type": ctype,
@@ -89,7 +102,8 @@ class ContractFlowService:
             "step": FlowStep.LANDLORD_INFORMATION,
             "parties": {},
             "created_at": now,
-            "flow_version": "0.1.3",
+            "flow_version": "0.1.4",
+            **meta,
         }
         s.contracts[cid] = c
         return s.contract_json(c)
@@ -122,6 +136,7 @@ class ContractFlowService:
             "landlord_share": 2_500_000,
             "tenant_share": 2_500_000,
             "invoice_id": f"inv-{c['id']}",
+            "ssot_kind": c.get("ssot_kind"),
         }
 
     def revoke(self, contract_id: str) -> Dict[str, Any]:
@@ -253,12 +268,12 @@ class ContractFlowService:
     def set_renting(self, contract_id: str, body: SectionPatchBody) -> Dict[str, Any]:
         s = get_store()
         c = s.get_contract(contract_id)
-        if c.get("type") == "BUYING_AND_SELLING":
+        if not uses_renting_stage(_contract_kind(c)):
             raise AmlineError(
                 "FLOW_INVALID_OPERATION",
-                "برای قرارداد خرید و فروش مرحلهٔ رهن اجاره اعمال نمی‌شود.",
+                "برای این نوع قرارداد مرحلهٔ رهن و اجاره اعمال نمی‌شود.",
                 status_code=422,
-                details={"contract_type": c.get("type")},
+                details={"contract_type": c.get("type"), "ssot_kind": c.get("ssot_kind")},
             )
         _require_step(c, FlowStep.RENTING)
         if body.payload is not None:
@@ -280,6 +295,13 @@ class ContractFlowService:
         }
         if body.payload:
             rec["payload"] = body.payload
+        if body.ssot_signature_stage:
+            rec["ssot_signature_stage"] = body.ssot_signature_stage
+            sf = c.setdefault("signature_flow", {})
+            sf["current"] = body.ssot_signature_stage
+            done = sf.setdefault("completed", [])
+            if body.ssot_signature_stage not in done:
+                done.append(body.ssot_signature_stage)
         c.setdefault("signings", []).append(rec)
         return {"next_step": nxt}
 

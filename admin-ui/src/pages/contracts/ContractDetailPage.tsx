@@ -4,7 +4,10 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { apiClient } from '../../lib/api'
 import type { ContractResponse } from '../../features/contract-wizard/types/api'
-import type { ContractStatus } from '../../features/contract-wizard/types/wizard'
+import {
+  CONTRACT_TYPE_LABELS,
+  type ContractStatus,
+} from '../../features/contract-wizard/types/wizard'
 import { AddendumForm } from '../../features/contract-wizard/components/AddendumForm'
 import { AddendumList } from '../../features/contract-wizard/components/AddendumList'
 
@@ -27,10 +30,7 @@ const STATUS_LABELS: Record<string, string> = {
   PDF_GENERATING_FAILED: 'خطا در تولید PDF',
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  PROPERTY_RENT: 'رهن و اجاره',
-  BUYING_AND_SELLING: 'خرید و فروش',
-}
+const TYPE_LABELS: Record<string, string> = { ...CONTRACT_TYPE_LABELS }
 
 const PARTY_TYPE_LABELS: Record<string, string> = {
   LANDLORD: 'موجر',

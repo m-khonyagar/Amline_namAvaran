@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -18,6 +18,9 @@ class NextStepResponse(BaseModel):
     next_step: str
 
 
+SignatureStage = Literal["S1", "S2", "S3", "S4", "S5"]
+
+
 class SectionPatchBody(BaseModel):
     """بدنهٔ مشترک برای home-info / dating / mortgage / renting."""
 
@@ -26,6 +29,10 @@ class SectionPatchBody(BaseModel):
     next_step: Optional[str] = None
     payload: Optional[Dict[str, Any]] = Field(
         default=None, description="دادهٔ بخش مطابق DTO سوگر"
+    )
+    ssot_signature_stage: Optional[SignatureStage] = Field(
+        default=None,
+        description="مرحلهٔ جریان امضای SSOT (S1–S5) هنگام ثبت sign/set",
     )
 
 

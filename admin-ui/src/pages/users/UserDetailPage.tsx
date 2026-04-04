@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { apiClient } from '../../lib/api'
+import { CONTRACT_TYPE_LABELS } from '../../features/contract-wizard/types/wizard'
 
 interface UserDetail {
   id: string
@@ -38,9 +39,7 @@ const STATUS_LABELS: Record<string, string> = {
   REVOKED: 'فسخ شده', PENDING_ADMIN_APPROVAL: 'در انتظار تأیید',
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  PROPERTY_RENT: 'رهن و اجاره', BUYING_AND_SELLING: 'خرید و فروش',
-}
+const TYPE_LABELS: Record<string, string> = { ...CONTRACT_TYPE_LABELS }
 
 const mockActivities = [
   { id: '1', type: 'LOGIN', description: 'ورود به سیستم', created_at: new Date(Date.now() - 86400000).toISOString() },

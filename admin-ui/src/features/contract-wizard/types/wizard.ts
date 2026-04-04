@@ -2,7 +2,30 @@
 // Contract Wizard — Core Types
 // ============================================================
 
-export type ContractType = 'PROPERTY_RENT' | 'BUYING_AND_SELLING';
+/** API contract_type strings; backend normalizes to SSOT kinds (RENT, SALE, …). */
+export type ContractType =
+  | 'PROPERTY_RENT'
+  | 'BUYING_AND_SELLING'
+  | 'SALE'
+  | 'EXCHANGE'
+  | 'CONSTRUCTION'
+  | 'PRE_SALE'
+  | 'LEASE_TO_OWN';
+
+export const CONTRACT_TYPE_LABELS: Record<ContractType, string> = {
+  PROPERTY_RENT: 'رهن و اجاره',
+  BUYING_AND_SELLING: 'خرید و فروش',
+  SALE: 'فروش (SSOT)',
+  EXCHANGE: 'معاوضه',
+  CONSTRUCTION: 'مشارکت در ساخت',
+  PRE_SALE: 'پیش‌فروش',
+  LEASE_TO_OWN: 'اجاره به شرط تملیک',
+};
+
+/** Matches backend ``uses_renting_stage`` (RENT + LEASE_TO_OWN). */
+export function usesRentingContractFlow(ct: ContractType): boolean {
+  return ct === 'PROPERTY_RENT' || ct === 'LEASE_TO_OWN';
+}
 
 export type ContractRole = 'PARTY' | 'WITNESS' | 'SCRIBE';
 

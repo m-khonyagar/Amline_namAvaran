@@ -19,6 +19,10 @@ const MSW_FULL_PERMS = [
   'notifications:read',
 ];
 
+function mockContractUsesRentingStage(contractType: string): boolean {
+  return contractType === 'PROPERTY_RENT' || contractType === 'LEASE_TO_OWN';
+}
+
 const mockUser = {
   id: 'mock-001',
   mobile: '09120000000',
@@ -446,7 +450,8 @@ export const handlers = [
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     const body = (await request.json().catch(() => ({}))) as { next_step?: string };
-    const next = body.next_step ?? (c.type === 'BUYING_AND_SELLING' ? 'SIGNING' : 'RENTING');
+    const next =
+      body.next_step ?? (mockContractUsesRentingStage(c.type) ? 'RENTING' : 'SIGNING');
     const resolved = next;
     setStep(c, resolved);
     return HttpResponse.json({ next_step: resolved }, { status: 201 });

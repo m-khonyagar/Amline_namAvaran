@@ -17,6 +17,11 @@ interface ContractRow {
 const TYPE_LABEL: Record<string, string> = {
   PROPERTY_RENT: 'رهن و اجاره',
   BUYING_AND_SELLING: 'خرید و فروش',
+  SALE: 'فروش (SSOT)',
+  EXCHANGE: 'معاوضه',
+  CONSTRUCTION: 'مشارکت در ساخت',
+  PRE_SALE: 'پیش‌فروش',
+  LEASE_TO_OWN: 'اجاره به شرط تملیک',
 }
 
 export default function ContractsListPage() {

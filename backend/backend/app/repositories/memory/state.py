@@ -176,13 +176,32 @@ class MemoryStore:
         self.id_counter += 1
         return cid
 
+    @staticmethod
+    def _parties_for_api(parties: Dict[str, Any]) -> Dict[str, Any]:
+        """Strip nested ``contract`` blobs from party rows to avoid JSON cycles."""
+        if not parties:
+            return {}
+        out: Dict[str, Any] = {}
+        for bucket, lst in parties.items():
+            if not isinstance(lst, list):
+                out[bucket] = lst
+                continue
+            cleaned: List[Dict[str, Any]] = []
+            for row in lst:
+                if isinstance(row, dict):
+                    cleaned.append({k: v for k, v in row.items() if k != "contract"})
+                else:
+                    cleaned.append(row)  # type: ignore[arg-type]
+            out[bucket] = cleaned
+        return out
+
     def contract_json(self, c: Dict[str, Any]) -> Dict[str, Any]:
         out: Dict[str, Any] = {
             "id": c["id"],
             "type": c["type"],
             "status": c["status"],
             "step": c["step"],
-            "parties": c.get("parties", {}),
+            "parties": self._parties_for_api(c.get("parties") or {}),
             "is_owner": True,
             "key": "mock-key",
             "password": None,
@@ -197,6 +216,13 @@ class MemoryStore:
             "signings",
             "signature_events",
             "witness",
+            "ssot_kind",
+            "ssot_version",
+            "signature_flow",
+            "payment_flow",
+            "combined_flow_t1",
+            "terms",
+            "commission",
         ):
             if k in c:
                 out[k] = c[k]

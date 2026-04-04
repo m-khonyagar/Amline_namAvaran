@@ -1,10 +1,6 @@
-  import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { localDraftStorage, type DraftEntry } from '../storage/draftStorage';
-
-const contractTypeLabel: Record<string, string> = {
-  PROPERTY_RENT: 'رهن و اجاره',
-  BUYING_AND_SELLING: 'خرید و فروش',
-};
+import { CONTRACT_TYPE_LABELS } from '../types/wizard';
 
 const stepLabel: Record<string, string> = {
   DRAFT: 'شروع',
@@ -78,7 +74,7 @@ export function DraftBanner({ onContinue, onStartNew }: DraftBannerProps) {
           >
             <div className="space-y-0.5">
               <p className="text-sm font-medium text-gray-800">
-                {contractTypeLabel[draft.contractType] ?? draft.contractType}
+                {CONTRACT_TYPE_LABELS[draft.contractType] ?? draft.contractType}
               </p>
               <p className="text-xs text-gray-500">
                 مرحله: {stepLabel[draft.currentStep] ?? draft.currentStep}
