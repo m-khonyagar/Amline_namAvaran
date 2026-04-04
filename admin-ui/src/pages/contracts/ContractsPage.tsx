@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useAuth } from '../../hooks/useAuth'
 import { toast } from 'sonner'
 import { apiClient } from '../../lib/api'
+import { apiV1 } from '../../lib/apiPaths'
 import type { ContractStatus, ContractType } from '../../features/contract-wizard/types/wizard'
 
 interface ContractListItem {
@@ -46,10 +48,25 @@ const TYPE_LABELS: Record<string, string> = {
 
 export default function ContractsPage() {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const queryClient = useQueryClient()
+  const { hasPermission } = useAuth()
   const [statusFilter, setStatusFilter] = useState('')
-  const [typeFilter, setTypeFilter] = useState('')
+  const typeFilter = searchParams.get('type') ?? ''
   const [page, setPage] = useState(1)
+
+  function setTypeFilter(next: string) {
+    setSearchParams(
+      (prev) => {
+        const p = new URLSearchParams(prev)
+        if (next) p.set('type', next)
+        else p.delete('type')
+        return p
+      },
+      { replace: true }
+    )
+    setPage(1)
+  }
 
   const { data, isLoading, isError } = useQuery<ContractsListResponse>({
     queryKey: ['contracts', statusFilter, typeFilter, page],
@@ -57,14 +74,14 @@ export default function ContractsPage() {
       const params: Record<string, string | number> = { page, limit: 20 }
       if (statusFilter) params.status = statusFilter
       if (typeFilter) params.type = typeFilter
-      const res = await apiClient.get<ContractsListResponse>('/contracts/list', { params })
+      const res = await apiClient.get<ContractsListResponse>(apiV1('contracts/list'), { params })
       return res.data
     },
   })
 
   const approveMutation = useMutation({
     mutationFn: (id: string) =>
-      apiClient.post(`/admin/contracts/${id}/approve`),
+      apiClient.post(apiV1(`admin/contracts/${id}/approve`)),
     onSuccess: () => {
       toast.success('قرارداد تأیید شد')
       queryClient.invalidateQueries({ queryKey: ['contracts'] })
@@ -74,7 +91,7 @@ export default function ContractsPage() {
 
   const rejectMutation = useMutation({
     mutationFn: (id: string) =>
-      apiClient.post(`/admin/contracts/${id}/reject`),
+      apiClient.post(apiV1(`admin/contracts/${id}/reject`)),
     onSuccess: () => {
       toast.success('قرارداد رد شد')
       queryClient.invalidateQueries({ queryKey: ['contracts'] })
@@ -90,12 +107,15 @@ export default function ContractsPage() {
     <div dir="rtl" className="p-6">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">قراردادها</h1>
-        <button
-          onClick={() => navigate('/contracts/wizard')}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          + قرارداد جدید
-        </button>
+        {hasPermission('contracts:write') ? (
+          <button
+            type="button"
+            onClick={() => navigate('/contracts/wizard')}
+            className="rounded-lg bg-[var(--amline-primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--amline-primary-hover)]"
+          >
+            + قرارداد جدید
+          </button>
+        ) : null}
       </div>
 
       {/* Filters */}

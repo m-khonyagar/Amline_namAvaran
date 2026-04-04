@@ -94,8 +94,8 @@ scripts/           inventory فرانت، بار k6، ML baseline
 
 | سرویس                             | حالت توسعهٔ متداول (README / مستندات)                   | Docker Compose (ریشه)                               |
 | --------------------------------- | ------------------------------------------------------- | --------------------------------------------------- |
-| بک‌اند FastAPI                    | `**8080`** روی میزبان (پیشنهاد README برای اتصال فرانت) | `**8080` → `8000**` داخل کانتینر (`amline-backend`) |
-| اجرای مستقیم `uvicorn` روی میزبان | اغلب `**8000**` یا هر پورتی که صریح بدهی                | —                                                   |
+| بک‌اند FastAPI                    | `**8080`** روی میزبان (پیشنهاد README برای اتصال فرانت) | `**8080` → `8000`** داخل کانتینر (`amline-backend`) |
+| اجرای مستقیم `uvicorn` روی میزبان | اغلب `**8000`** یا هر پورتی که صریح بدهی                | —                                                   |
 | admin-ui                          | **3002**                                                | **3002 → 80** (nginx داخل image)                    |
 | amline-ui                         | **3000**                                                | **3000 → 80**                                       |
 | site                              | **3001**                                                | **3001 → 80**                                       |
@@ -136,18 +136,11 @@ scripts/           inventory فرانت، بار k6، ML baseline
 2. یا `docker compose` یا سرویس‌های جدا + `uvicorn` + `npm run dev`
 3. تغییر روی **feature branch** از روی `main`
 4. هر تغییری که مسیر یا متد یک فراخوانی HTTP در فرانت‌ها (`admin-ui/` یا `amline-ui/`) را تغییر می‌دهد، **اجرای این کامند الزامی است**:
-
-   ```bash
+  ```bash
    # از ریشه ریپو (همان جایی که فایل docker-compose.yml قرار دارد)
    python ./scripts/inventory_frontend_http_calls.py
-   ```
-
+  ```
    سپس فایل تولید شده را به commit خود اضافه کن:
-
-   ```bash
-   git add docs/generated/frontend-http-inventory.json
-   ```
-
    اگر این مرحله فراموش شود، CI در مرحله `frontend-http-inventory` با خطا مواجه خواهد شد.
 
 ### ۵.۳ CI/CD (GitHub Actions) — فهرست workflowهای ریشه
@@ -171,7 +164,7 @@ scripts/           inventory فرانت، بار k6، ML baseline
 | بک‌اند        | از `backend/backend`: `pytest tests/ -v` (نمونهٔ اخیر: **۵۹** تست collect شده) |
 | ادمین         | `npm test`، `npm run build`، `npx playwright test` در `admin-ui`               |
 | amline-ui E2E | `npm run test:e2e` در `amline-ui`؛ جزئیات env در `FRONTEND_API_INTEGRATION`    |
-| Drift فرانت   | `python ./scripts/inventory_frontend_http_calls.py --check` (از ریشه ریپو)      |
+| Drift فرانت   | `python ./scripts/inventory_frontend_http_calls.py --check` (از ریشه ریپو)     |
 
 
 ### ۵.۵ امنیت و عملیات
@@ -268,7 +261,7 @@ cd backend/backend && pytest tests/ -v
 **قبل از اولین ویرایش کد:**
 
 1. **§۰** (سلسله‌مراتب) و `**FRONTEND_API_INTEGRATION.md`** را برای هر تغییر فرانت/API بخوان.
-2. `**REPO_SPEC_ALIGNMENT.md**` — ببین آیا کار تو در چک‌باکس‌های باز گیر می‌کند.
+2. `**REPO_SPEC_ALIGNMENT.md`** — ببین آیا کار تو در چک‌باکس‌های باز گیر می‌کند.
 3. **تغییر کوچک، diff متمرکز**؛ بدون refactor عریض مگر صریحاً خواسته شود.
 
 **خط قرمزها (بدون تأیید انسان):**
@@ -311,21 +304,21 @@ cd backend/backend && pytest tests/ -v
 ## ۱۳. نقشهٔ اسناد (گسترش‌یافته)
 
 
-| سند                                                                                | کاربرد                               |
-| ---------------------------------------------------------------------------------- | ------------------------------------ |
-| `[AMLINE_MASTER_SPEC.md](./AMLINE_MASTER_SPEC.md)`                                 | مرجع اجرایی نسخه‌دار                 |
+| سند                                                                                              | کاربرد                                             |
+| ------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
+| `[AMLINE_MASTER_SPEC.md](./AMLINE_MASTER_SPEC.md)`                                               | مرجع اجرایی نسخه‌دار                               |
 | `[ARCHITECTURE_CONTRACT_PLATFORM_PRODUCTION.md](./ARCHITECTURE_CONTRACT_PLATFORM_PRODUCTION.md)` | قرارداد پروداکشن: شکست، dispute، تسویه، audit، SLA |
-| `[REPO_SPEC_ALIGNMENT.md](./REPO_SPEC_ALIGNMENT.md)`                               | Spec ↔ کد                            |
-| `[FRONTEND_API_INTEGRATION.md](./FRONTEND_API_INTEGRATION.md)`                     | SSOT فرانت و API                     |
-| `[INTEGRATIONS.md](./INTEGRATIONS.md)`                                             | env سرویس‌های لبه                    |
-| `[GIT_AND_BACKEND_POLICY.md](./GIT_AND_BACKEND_POLICY.md)`                         | Git + نکته `backend/backend`         |
-| `[HTTPONLY_AUTH.md](./HTTPONLY_AUTH.md)`                                           | کوکی و امنیت session                 |
-| `[MATRIX_SETUP.md](./MATRIX_SETUP.md)`، `[METABASE_SETUP.md](./METABASE_SETUP.md)` | راه‌اندازی                           |
-| `[WORKSPACE_OPERATIONS.md](./WORKSPACE_OPERATIONS.md)`                             | عملیات workspace                     |
-| `[contract-wizard/requirements.md](./contract-wizard/requirements.md)`             | ویزارد قرارداد                       |
-| `[integrations/contract-flow/README.md](../integrations/contract-flow/README.md)`  | فهرست endpoint قرارداد mock/New Flow |
-| `[MONOREPO_NOTE.md](./MONOREPO_NOTE.md)`                                           | آیندهٔ workspaces                    |
-| `[KIRO_HANDOFF_NOTE.md](./KIRO_HANDOFF_NOTE.md)`                                   | handoff عامل Cursor                  |
+| `[REPO_SPEC_ALIGNMENT.md](./REPO_SPEC_ALIGNMENT.md)`                                             | Spec ↔ کد                                          |
+| `[FRONTEND_API_INTEGRATION.md](./FRONTEND_API_INTEGRATION.md)`                                   | SSOT فرانت و API                                   |
+| `[INTEGRATIONS.md](./INTEGRATIONS.md)`                                                           | env سرویس‌های لبه                                  |
+| `[GIT_AND_BACKEND_POLICY.md](./GIT_AND_BACKEND_POLICY.md)`                                       | Git + نکته `backend/backend`                       |
+| `[HTTPONLY_AUTH.md](./HTTPONLY_AUTH.md)`                                                         | کوکی و امنیت session                               |
+| `[MATRIX_SETUP.md](./MATRIX_SETUP.md)`، `[METABASE_SETUP.md](./METABASE_SETUP.md)`               | راه‌اندازی                                         |
+| `[WORKSPACE_OPERATIONS.md](./WORKSPACE_OPERATIONS.md)`                                           | عملیات workspace                                   |
+| `[contract-wizard/requirements.md](./contract-wizard/requirements.md)`                           | ویزارد قرارداد                                     |
+| `[integrations/contract-flow/README.md](../integrations/contract-flow/README.md)`                | فهرست endpoint قرارداد mock/New Flow               |
+| `[MONOREPO_NOTE.md](./MONOREPO_NOTE.md)`                                                         | آیندهٔ workspaces                                  |
+| `[KIRO_HANDOFF_NOTE.md](./KIRO_HANDOFF_NOTE.md)`                                                 | handoff عامل Cursor                                |
 
 
 ---

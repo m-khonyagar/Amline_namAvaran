@@ -4,7 +4,8 @@
 **Master اجرایی (SSOT هم‌تراز با کد + هدف):** [`docs/AMLINE_MASTER_SPEC.md`](./AMLINE_MASTER_SPEC.md) (v5.0)  
 **سند مرجع عمیق (Target دامنه/Blu/عملیات):** [`docs/AMLINE_REFERENCE_V2_2.md`](./AMLINE_REFERENCE_V2_2.md) (v2.7)  
 **قرارداد خطا (OpenAPI):** [`docs/openapi/amline-v1-errors.openapi.yaml`](./openapi/amline-v1-errors.openapi.yaml)  
-**معماری تکمیل‌شدهٔ قرارداد پروداکشن (Target):** [`ARCHITECTURE_CONTRACT_PLATFORM_PRODUCTION.md`](./ARCHITECTURE_CONTRACT_PLATFORM_PRODUCTION.md) — ماشین حالت، dispute، settlement، audit، SLA، رشد، versioning.
+**معماری تکمیل‌شدهٔ قرارداد پروداکشن (Target):** [`ARCHITECTURE_CONTRACT_PLATFORM_PRODUCTION.md`](./ARCHITECTURE_CONTRACT_PLATFORM_PRODUCTION.md) — ماشین حالت، dispute، settlement، audit، SLA، رشد، versioning.  
+**محصول قرارداد چندگانه (شش نوع، امضا/پرداخت، Strangler):** [`Amline_Complete_Master_Spec_v2.md`](./Amline_Complete_Master_Spec_v2.md) + [`CONTRACT_DATA_MODELS.md`](./CONTRACT_DATA_MODELS.md) + [`STATUS_MAPPING_v2.md`](./STATUS_MAPPING_v2.md).
 
 این فایل **تک‌منبع** برای تیم است تا بداند کد فعلی کجاست و هدف سند کجاست.
 

@@ -14,7 +14,23 @@ from app.models.contract_flow import (
     Signing,
     Witness,
 )
+from app.models.contract_commission import (
+    CommissionPaidBy,
+    CommissionPaymentMethod,
+    CommissionRecordStatus,
+    ContractCommission,
+    ContractCommissionType,
+)
 from app.models.crm import CrmActivity, CrmActivityType, CrmLead, CrmLeadSource
+from app.models.dispute import (
+    Dispute,
+    DisputeCategory,
+    DisputeEvidence,
+    DisputeEvidenceType,
+    DisputeResolutionType,
+    DisputeStatus,
+    LedgerHold,
+)
 from app.models.geo import City, Province
 from app.models.growth import (
     AnalyticsEvent,
@@ -107,4 +123,16 @@ __all__ = [
     "UserSubscription",
     "UserGamification",
     "ClientErrorReport",
+    "Dispute",
+    "DisputeCategory",
+    "DisputeStatus",
+    "DisputeResolutionType",
+    "DisputeEvidence",
+    "DisputeEvidenceType",
+    "LedgerHold",
+    "ContractCommission",
+    "ContractCommissionType",
+    "CommissionPaidBy",
+    "CommissionRecordStatus",
+    "CommissionPaymentMethod",
 ]

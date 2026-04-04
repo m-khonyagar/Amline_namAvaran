@@ -4,9 +4,17 @@
 @tailwind utilities;
 
 :root {
-  --brand: #1d4ed8;
-  --brand-light: #3b82f6;
+  --brand: #2563eb;
+  --brand-mid: #0891b2;
 }
 
-html { scroll-behavior: smooth; }
-body { font-family: 'Vazirmatn', sans-serif; }
+html {
+  scroll-behavior: smooth;
+}
+body {
+  font-family: 'Vazirmatn', system-ui, sans-serif;
+}
+::selection {
+  background: rgba(34, 211, 238, 0.35);
+  color: #fff;
+}

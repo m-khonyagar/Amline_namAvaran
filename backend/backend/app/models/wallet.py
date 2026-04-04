@@ -67,6 +67,12 @@ class WalletLedgerEntry(Base):
     )
     reference_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     idempotency_key: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    reversal_of_entry_id: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey("wallet_ledger_entries.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
     memo: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

@@ -17,3 +17,14 @@ def log_platform_signal(payload: dict) -> str:
         payload.get("entity_id"),
     )
     return "logged"
+
+
+@activity.defn
+def contract_lifecycle_milestone(payload: dict) -> str:
+    """نقاط قرارداد v2: پیش‌نویس → امضا → نهایی‌سازی (لاگ عملیاتی)."""
+    log.info(
+        "contract_lifecycle milestone=%s contract_id=%s",
+        payload.get("milestone"),
+        payload.get("contract_id"),
+    )
+    return "milestone_logged"

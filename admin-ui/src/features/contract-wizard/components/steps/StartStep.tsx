@@ -53,13 +53,17 @@ export function StartStep({ onStart }: StartStepProps) {
 
       <StepErrorBanner message={error} details={details} hint={hint} onDismiss={() => clear()} />
 
-      {/* انتخاب نوع قرارداد */}
+      {/* انتخاب نوع قرارداد — Master Spec v2 */}
       <div>
         <p className="text-sm font-medium text-gray-700 mb-3">نوع قرارداد</p>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {([
-            { value: 'PROPERTY_RENT', label: 'رهن و اجاره', icon: '🏠' },
-            { value: 'BUYING_AND_SELLING', label: 'خرید و فروش', icon: '🤝' },
+            { value: 'PROPERTY_RENT' as const, label: 'رهن و اجاره', icon: '🏠' },
+            { value: 'BUYING_AND_SELLING' as const, label: 'خرید و فروش', icon: '🤝' },
+            { value: 'EXCHANGE' as const, label: 'معاوضه', icon: '🔁' },
+            { value: 'CONSTRUCTION' as const, label: 'مشارکت در ساخت', icon: '🏗️' },
+            { value: 'PRE_SALE' as const, label: 'پیش‌فروش', icon: '🏢' },
+            { value: 'LEASE_TO_OWN' as const, label: 'اجاره به شرط تملیک', icon: '📜' },
           ] as const).map((opt) => (
             <button
               key={opt.value}
@@ -73,10 +77,13 @@ export function StartStep({ onStart }: StartStepProps) {
               ].join(' ')}
             >
               <span className="text-2xl">{opt.icon}</span>
-              <span className="text-sm font-medium">{opt.label}</span>
+              <span className="text-sm font-medium text-center leading-snug">{opt.label}</span>
             </button>
           ))}
         </div>
+        <p className="mt-2 text-xs text-gray-500">
+          انواع جدید در ویزارد فعلاً از مسیر خرید/فروش عبور می‌کنند؛ شرایط اختصاصی را در API با PATCH /terms ثبت کنید.
+        </p>
       </div>
 
       {/* نقش شروع‌کننده قرارداد */}
@@ -84,8 +91,24 @@ export function StartStep({ onStart }: StartStepProps) {
         <p className="text-sm font-medium text-gray-700 mb-3">نقش شما در شروع قرارداد</p>
         <div className="grid grid-cols-2 gap-3">
           {([
-            { value: 'LANDLORD' as const, label: contractType === 'PROPERTY_RENT' ? 'مالک' : 'فروشنده' },
-            { value: 'TENANT' as const, label: contractType === 'PROPERTY_RENT' ? 'مستاجر' : 'خریدار' },
+            {
+              value: 'LANDLORD' as const,
+              label:
+                contractType === 'PROPERTY_RENT'
+                  ? 'موجر / مالک'
+                  : contractType === 'BUYING_AND_SELLING'
+                    ? 'فروشنده'
+                    : 'طرف اول',
+            },
+            {
+              value: 'TENANT' as const,
+              label:
+                contractType === 'PROPERTY_RENT'
+                  ? 'مستأجر'
+                  : contractType === 'BUYING_AND_SELLING'
+                    ? 'خریدار'
+                    : 'طرف دوم',
+            },
           ]).map((opt) => (
             <button
               key={opt.value}

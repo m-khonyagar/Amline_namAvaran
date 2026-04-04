@@ -20,6 +20,39 @@ class SignVerifyBody(BaseModel):
     salt: str = ""
     party_id: Optional[str] = None
     challenge_id: Optional[str] = None
+    signature_method: Optional[str] = Field(
+        default=None,
+        description="SELF_OTP | AGENT_OTP | ADMIN_OTP | AUTO",
+    )
+    agent_user_id: Optional[str] = None
+
+
+class AgentSignVerifyBody(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    otp: str
+    mobile: str
+    party_id: str
+    agent_user_id: str
+    salt: str = ""
+    challenge_id: Optional[str] = None
+
+
+class AdminAssistSignRequestBody(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    party_id: str
+
+
+class AdminAssistSignVerifyBody(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    party_id: str
+    otp: str
+    mobile: str
+    agent_user_id: str
+    salt: str = ""
+    challenge_id: Optional[str] = None
 
 
 class LegacySendSignBody(BaseModel):

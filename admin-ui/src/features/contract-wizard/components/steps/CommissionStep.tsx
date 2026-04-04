@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { apiV1 } from '@/lib/apiPaths';
 import { apiClient } from '../../api/contractApi';
 import type { StepProps } from '../../types/wizard';
 import { StepErrorBanner } from '../StepErrorBanner';
@@ -26,7 +27,7 @@ export function CommissionStep({ contractId }: StepProps) {
   useEffect(() => {
     setIsLoading(true);
     apiClient
-      .get<CommissionInvoice>(`/contracts/${contractId}/commission/invoice`)
+      .get<CommissionInvoice>(apiV1(`contracts/${contractId}/commission/invoice`))
       .then((res) => setInvoice(res.data))
       .catch((err: unknown) => {
         const m = ensureMappedError(err);

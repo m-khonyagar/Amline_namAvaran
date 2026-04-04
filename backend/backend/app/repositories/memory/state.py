@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional, Set
 
 from app.core.errors import AmlineError
+from app.domain.contracts.ssot import lifecycle_status_to_product_v2
 
 FULL_ADMIN_PERMS = [
+    "legal:read",
+    "legal:write",
     "contracts:read",
     "contracts:write",
     "users:read",
@@ -24,6 +27,8 @@ FULL_ADMIN_PERMS = [
     "roles:write",
     "reports:read",
     "notifications:read",
+    "crm:read",
+    "crm:write",
 ]
 
 
@@ -65,6 +70,7 @@ class MemoryStore:
     crm_leads: List[Dict[str, Any]] = field(default_factory=list)
     crm_activities: Dict[str, List[Dict[str, Any]]] = field(default_factory=dict)
     crm_seq: int = 4
+    notification_reads: Dict[str, Set[str]] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         self.roles = [
@@ -114,11 +120,20 @@ class MemoryStore:
         self.notifications_store = [
             {
                 "id": "n1",
+                "type": "contract",
                 "title": "قرارداد جدید ثبت شد",
                 "body": "یک قرارداد در صف بررسی است.",
                 "read": False,
                 "created_at": _now_iso(),
-            }
+            },
+            {
+                "id": "n2",
+                "type": "legal",
+                "title": "پرونده در صف حقوقی",
+                "body": "یک مورد برای بررسی حقوقی در انتظار است.",
+                "read": False,
+                "created_at": _now_iso(),
+            },
         ]
         self.crm_leads = [
             {
@@ -231,6 +246,16 @@ class MemoryStore:
             if k in c:
                 out[k] = c[k]
         out["next_step"] = c.get("step")
+        out["lifecycle_v2"] = lifecycle_status_to_product_v2(
+            str(c.get("status", "")),
+            substate=c.get("substate"),
+        )
+        if "terms" in c:
+            out["terms"] = c["terms"]
+        if "commissions" in c:
+            out["commissions"] = c["commissions"]
+        if c.get("substate") is not None:
+            out["substate"] = c["substate"]
         return out
 
     def get_contract(self, cid: str) -> Dict[str, Any]:
@@ -243,6 +268,106 @@ class MemoryStore:
                 details={"contract_id": cid},
             )
         return c
+
+    def list_notifications_for_user(
+        self,
+        user_id: str,
+        *,
+        unread_only: bool = False,
+        limit: int = 50,
+    ) -> tuple[List[Dict[str, Any]], int, int]:
+        read_set = self.notification_reads.setdefault(user_id, set())
+        ordered = list(reversed(self.notifications_store))
+        items: List[Dict[str, Any]] = []
+        for n in ordered:
+            nid = str(n["id"])
+            merged = {**n, "read": nid in read_set}
+            if unread_only and merged["read"]:
+                continue
+            items.append(merged)
+            if len(items) >= limit:
+                break
+        unread_count = sum(1 for n in self.notifications_store if str(n["id"]) not in read_set)
+        return items, len(self.notifications_store), unread_count
+
+    def mark_notification_read(self, user_id: str, nid: str) -> bool:
+        ids = {str(n["id"]) for n in self.notifications_store}
+        if nid not in ids:
+            return False
+        self.notification_reads.setdefault(user_id, set()).add(nid)
+        return True
+
+    def mark_all_notifications_read(self, user_id: str) -> None:
+        rs = self.notification_reads.setdefault(user_id, set())
+        for n in self.notifications_store:
+            rs.add(str(n["id"]))
+
+    def operations_pulse(self, user_id: str) -> Dict[str, Any]:
+        """خلاصهٔ لحظه‌ای برای داشبورد عملیات / محصول (mock)."""
+        read_set = self.notification_reads.setdefault(user_id, set())
+        unread = sum(1 for n in self.notifications_store if str(n["id"]) not in read_set)
+
+        crm_by_status: Dict[str, int] = {}
+        terminal = {"LOST", "CONTRACTED"}
+        open_leads = 0
+        for lead in self.crm_leads:
+            st = str(lead.get("status") or "UNKNOWN")
+            crm_by_status[st] = crm_by_status.get(st, 0) + 1
+            if st not in terminal:
+                open_leads += 1
+
+        legalish = 0
+        for c in self.contracts.values():
+            st = str(c.get("status", "")).upper()
+            sub = str(c.get("substate") or "").upper()
+            if "LEGAL" in sub or st in (
+                "LEGAL_REVIEW",
+                "PENDING_LEGAL",
+                "AWAITING_LEGAL",
+            ):
+                legalish += 1
+
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+        audit_24h = 0
+        for ev in self.audit_logs:
+            raw = str(ev.get("created_at") or "")
+            try:
+                ts = raw.replace("Z", "+00:00")
+                dt = datetime.fromisoformat(ts)
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                if dt >= cutoff:
+                    audit_24h += 1
+            except (ValueError, TypeError):
+                continue
+
+        return {
+            "unread_notifications": unread,
+            "open_crm_leads": open_leads,
+            "crm_by_status": crm_by_status,
+            "contracts_flagged_legal": legalish,
+            "audit_events_last_24h": audit_24h,
+        }
+
+    def append_notification(
+        self,
+        *,
+        title: str,
+        body: str = "",
+        notif_type: str = "system",
+    ) -> Dict[str, Any]:
+        nid = f"n-{self.id_counter}"
+        self.id_counter += 1
+        row = {
+            "id": nid,
+            "type": notif_type,
+            "title": title,
+            "body": body,
+            "read": False,
+            "created_at": _now_iso(),
+        }
+        self.notifications_store.append(row)
+        return row
 
 
 _store: Optional[MemoryStore] = None

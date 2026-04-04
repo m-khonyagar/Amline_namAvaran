@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api'
+import { apiV1 } from '@/lib/apiPaths'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
@@ -35,7 +36,7 @@ export default function BillingPage() {
   const plansQ = useQuery({
     queryKey: ['billing-plans'],
     queryFn: async () => {
-      const res = await apiClient.get<Plan[]>('/api/v1/billing/plans')
+      const res = await apiClient.get<Plan[]>(apiV1('billing/plans'))
       return res.data
     },
     enabled: hasPermission('listings:read'),
@@ -44,7 +45,7 @@ export default function BillingPage() {
   const subQ = useQuery({
     queryKey: ['billing-me'],
     queryFn: async () => {
-      const res = await apiClient.get<Subscription | null>('/api/v1/billing/me')
+      const res = await apiClient.get<Subscription | null>(apiV1('billing/me'))
       return res.data
     },
     enabled: hasPermission('wallets:read'),
@@ -53,7 +54,7 @@ export default function BillingPage() {
   const invQ = useQuery({
     queryKey: ['billing-invoice'],
     queryFn: async () => {
-      const res = await apiClient.get<Invoice | null>('/api/v1/billing/invoice/latest')
+      const res = await apiClient.get<Invoice | null>(apiV1('billing/invoice/latest'))
       return res.data
     },
     enabled: hasPermission('wallets:read') && Boolean(subQ.data),
@@ -61,7 +62,7 @@ export default function BillingPage() {
 
   const subscribe = useMutation({
     mutationFn: async (planCode: string) => {
-      await apiClient.post('/api/v1/billing/subscribe', { plan_code: planCode })
+      await apiClient.post(apiV1('billing/subscribe'), { plan_code: planCode })
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['billing-me'] })

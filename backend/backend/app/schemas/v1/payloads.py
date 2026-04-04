@@ -67,3 +67,9 @@ class CrmActivityBody(BaseModel):
     type: str
     note: Optional[str] = ""
     user_id: Optional[str] = None
+
+
+class AdminNotificationCreateBody(BaseModel):
+    title: str
+    body: Optional[str] = ""
+    type: Optional[str] = "system"

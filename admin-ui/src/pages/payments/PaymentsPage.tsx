@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { apiClient } from '@/lib/api'
+import { apiV1 } from '@/lib/apiPaths'
 import { Button } from '@/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
@@ -42,7 +43,7 @@ export default function PaymentsPage() {
       const params = new URLSearchParams()
       if (statusFilter) params.set('status', statusFilter)
       if (userFilter.trim()) params.set('user_id', userFilter.trim())
-      const res = await apiClient.get<ListResponse>(`/api/v1/payments/intents?${params.toString()}`)
+      const res = await apiClient.get<ListResponse>(`${apiV1('payments/intents')}?${params.toString()}`)
       return res.data
     },
   })
@@ -50,7 +51,7 @@ export default function PaymentsPage() {
   const detailQuery = useQuery({
     queryKey: ['payment-intent', selectedId],
     queryFn: async () => {
-      const res = await apiClient.get<PaymentIntentDetail>(`/api/v1/payments/intents/${selectedId}`)
+      const res = await apiClient.get<PaymentIntentDetail>(apiV1(`payments/intents/${selectedId}`))
       return res.data
     },
     enabled: Boolean(selectedId),
@@ -58,7 +59,7 @@ export default function PaymentsPage() {
 
   const retryMut = useMutation({
     mutationFn: async (id: string) => {
-      const res = await apiClient.post<PaymentIntentDetail>(`/api/v1/payments/intents/${id}/verify-retry`)
+      const res = await apiClient.post<PaymentIntentDetail>(apiV1(`payments/intents/${id}/verify-retry`))
       return res.data
     },
     onSuccess: () => {
