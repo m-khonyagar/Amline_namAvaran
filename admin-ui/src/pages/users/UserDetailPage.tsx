@@ -95,7 +95,9 @@ export default function UserDetailPage() {
   if (isError || !user) {
     return (
       <div dir="rtl" className="p-6">
-        <div className="rounded-lg bg-red-50 p-4 text-red-700">خطا در دریافت اطلاعات کاربر</div>
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">
+          خطا در دریافت اطلاعات کاربر
+        </div>
       </div>
     )
   }
@@ -103,69 +105,74 @@ export default function UserDetailPage() {
   const contracts = contractsData?.items ?? []
 
   return (
-    <div dir="rtl" className="p-6">
+    <div dir="rtl" className="p-6 text-[var(--amline-fg)]">
       <div className="mb-6 flex items-center gap-4">
-        <button onClick={() => navigate('/users')} className="text-sm text-gray-500 hover:text-gray-700">
+        <button
+          onClick={() => navigate('/users')}
+          className="text-sm text-[var(--amline-fg-muted)] hover:text-[var(--amline-fg)]"
+        >
           ← بازگشت
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">{user.full_name ?? user.mobile}</h1>
+        <h1 className="text-2xl font-bold text-[var(--amline-fg)]">{user.full_name ?? user.mobile}</h1>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold text-gray-800">اطلاعات پروفایل</h2>
+          <div className="rounded-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] p-6 shadow-sm dark:border-slate-600">
+            <h2 className="mb-4 text-lg font-semibold text-[var(--amline-fg)]">اطلاعات پروفایل</h2>
             <dl className="grid grid-cols-2 gap-4">
               <div>
-                <dt className="text-sm text-gray-500">نام کامل</dt>
-                <dd className="mt-1 font-medium">{user.full_name ?? '—'}</dd>
+                <dt className="text-sm text-[var(--amline-fg-muted)]">نام کامل</dt>
+                <dd className="mt-1 font-medium text-[var(--amline-fg)]">{user.full_name ?? '—'}</dd>
               </div>
               <div>
-                <dt className="text-sm text-gray-500">موبایل</dt>
-                <dd className="mt-1 font-mono">{user.mobile}</dd>
+                <dt className="text-sm text-[var(--amline-fg-muted)]">موبایل</dt>
+                <dd className="mt-1 font-mono text-[var(--amline-fg)]">{user.mobile}</dd>
               </div>
               <div>
-                <dt className="text-sm text-gray-500">نقش</dt>
+                <dt className="text-sm text-[var(--amline-fg-muted)]">نقش</dt>
                 <dd className="mt-1">
-                  <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                  <span className="rounded-full bg-[var(--amline-primary-muted)] px-2 py-0.5 text-xs font-medium text-[var(--amline-primary)] dark:text-blue-300">
                     {ROLE_LABELS[user.role] ?? user.role}
                   </span>
                 </dd>
               </div>
               <div>
-                <dt className="text-sm text-gray-500">تاریخ عضویت</dt>
-                <dd className="mt-1 text-sm">{new Date(user.created_at).toLocaleDateString('fa-IR')}</dd>
+                <dt className="text-sm text-[var(--amline-fg-muted)]">تاریخ عضویت</dt>
+                <dd className="mt-1 text-sm text-[var(--amline-fg)]">
+                  {new Date(user.created_at).toLocaleDateString('fa-IR')}
+                </dd>
               </div>
               {user.email && (
                 <div>
-                  <dt className="text-sm text-gray-500">ایمیل</dt>
-                  <dd className="mt-1 text-sm">{user.email}</dd>
+                  <dt className="text-sm text-[var(--amline-fg-muted)]">ایمیل</dt>
+                  <dd className="mt-1 text-sm text-[var(--amline-fg)]">{user.email}</dd>
                 </div>
               )}
               {user.national_id && (
                 <div>
-                  <dt className="text-sm text-gray-500">کد ملی</dt>
-                  <dd className="mt-1 font-mono text-sm">{user.national_id}</dd>
+                  <dt className="text-sm text-[var(--amline-fg-muted)]">کد ملی</dt>
+                  <dd className="mt-1 font-mono text-sm text-[var(--amline-fg)]">{user.national_id}</dd>
                 </div>
               )}
             </dl>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm text-center">
-              <div className="text-3xl font-bold text-blue-600">{contracts.length}</div>
-              <div className="mt-1 text-sm text-gray-500">تعداد قراردادها</div>
+            <div className="rounded-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] p-4 text-center shadow-sm dark:border-slate-600">
+              <div className="text-3xl font-bold text-[var(--amline-primary)]">{contracts.length}</div>
+              <div className="mt-1 text-sm text-[var(--amline-fg-muted)]">تعداد قراردادها</div>
             </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm text-center">
-              <div className="text-2xl font-bold text-green-600">
+            <div className="rounded-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] p-4 text-center shadow-sm dark:border-slate-600">
+              <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                 {user.wallet_balance != null ? user.wallet_balance.toLocaleString('fa-IR') : '—'}
               </div>
-              <div className="mt-1 text-sm text-gray-500">موجودی کیف پول (ریال)</div>
+              <div className="mt-1 text-sm text-[var(--amline-fg-muted)]">موجودی کیف پول (ریال)</div>
             </div>
           </div>
 
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold text-gray-800">نمودار فعالیت</h2>
+          <div className="rounded-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] p-6 shadow-sm dark:border-slate-600">
+            <h2 className="mb-4 text-lg font-semibold text-[var(--amline-fg)]">نمودار فعالیت</h2>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={activityChartData}>
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} />
@@ -177,26 +184,35 @@ export default function UserDetailPage() {
           </div>
 
           {contracts.length > 0 && (
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-semibold text-gray-800">قراردادها</h2>
+            <div className="rounded-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] p-6 shadow-sm dark:border-slate-600">
+              <h2 className="mb-4 text-lg font-semibold text-[var(--amline-fg)]">قراردادها</h2>
               <div className="space-y-2">
                 {contracts.map((c) => (
-                  <div key={c.id} className="flex items-center justify-between rounded-lg bg-gray-50 p-3">
+                  <div
+                    key={c.id}
+                    className="flex items-center justify-between rounded-lg bg-[var(--amline-surface-muted)] p-3 dark:bg-slate-800/60"
+                  >
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium">{TYPE_LABELS[c.type] ?? c.type}</span>
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                        c.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-                      }`}>
+                      <span className="text-sm font-medium text-[var(--amline-fg)]">
+                        {TYPE_LABELS[c.type] ?? c.type}
+                      </span>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                          c.status === 'ACTIVE'
+                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-200'
+                            : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
+                        }`}
+                      >
                         {STATUS_LABELS[c.status] ?? c.status}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-[var(--amline-fg-subtle)]">
                         {new Date(c.created_at).toLocaleDateString('fa-IR')}
                       </span>
                       <button
                         onClick={() => navigate(`/contracts/${c.id}`)}
-                        className="text-xs text-blue-600 hover:underline"
+                        className="text-xs text-[var(--amline-primary)] hover:underline dark:text-blue-400"
                       >
                         مشاهده
                       </button>
@@ -209,22 +225,22 @@ export default function UserDetailPage() {
         </div>
 
         <div>
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold text-gray-800">تایم‌لاین فعالیت</h2>
+          <div className="rounded-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] p-6 shadow-sm dark:border-slate-600">
+            <h2 className="mb-4 text-lg font-semibold text-[var(--amline-fg)]">تایم‌لاین فعالیت</h2>
             <div className="space-y-4">
               {mockActivities.map((activity, idx) => (
                 <div key={activity.id} className="flex gap-3">
                   <div className="flex flex-col items-center">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-sm">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--amline-primary-muted)] text-sm dark:bg-blue-950/50">
                       {ACTIVITY_ICONS[activity.type] ?? '📌'}
                     </div>
                     {idx < mockActivities.length - 1 && (
-                      <div className="mt-1 h-8 w-px bg-gray-200" />
+                      <div className="mt-1 h-8 w-px bg-[var(--amline-border)] dark:bg-slate-600" />
                     )}
                   </div>
                   <div className="pb-2">
-                    <p className="text-sm font-medium text-gray-800">{activity.description}</p>
-                    <p className="mt-0.5 text-xs text-gray-400">
+                    <p className="text-sm font-medium text-[var(--amline-fg)]">{activity.description}</p>
+                    <p className="mt-0.5 text-xs text-[var(--amline-fg-subtle)]">
                       {new Date(activity.created_at).toLocaleDateString('fa-IR')}
                     </p>
                   </div>

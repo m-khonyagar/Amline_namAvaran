@@ -7,6 +7,11 @@ export function isWizardPreviewMode(): boolean {
   return import.meta.env.VITE_WIZARD_PREVIEW_MODE === 'true';
 }
 
+/** در پنل ادمین: رد کردن مراحل و پیمایش آزاد نوار همیشه فعال است (نیازی به env نیست). */
+export function isAdminContractWizardFlexible(platform: 'admin' | 'user'): boolean {
+  return platform === 'admin';
+}
+
 export function isPreviewBootstrapContractId(contractId: string): boolean {
   return contractId.startsWith('local-preview__');
 }

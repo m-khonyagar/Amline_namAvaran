@@ -1,19 +1,28 @@
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { datingSchema, type DatingFormData } from '../../schemas/contractSchemas';
 import { contractApi } from '../../api/contractApi';
 import type { StepProps } from '../../types/wizard';
 import { StepErrorBanner } from '../StepErrorBanner';
 import { useMappedStepError } from '../../hooks/useMappedStepError';
+import { JalaliDateInput } from '../JalaliDateInput';
+import { todayJalaliString } from '../../../../lib/jalaliDate';
 
 export function DatingStep({ contractId, onComplete }: StepProps) {
   const { error: serverError, details, hint, setFromError, clear } = useMappedStepError();
 
   const {
-    register,
+    control,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<DatingFormData>({ resolver: zodResolver(datingSchema) });
+  } = useForm<DatingFormData>({
+    resolver: zodResolver(datingSchema),
+    defaultValues: {
+      start_date: todayJalaliString(),
+      end_date: todayJalaliString(),
+      delivery_date: todayJalaliString(),
+    },
+  });
 
   async function onSubmit(data: DatingFormData) {
     clear();
@@ -32,48 +41,57 @@ export function DatingStep({ contractId, onComplete }: StepProps) {
   }
 
   return (
-    <div dir="rtl" className="space-y-4">
-      <h2 className="text-lg font-bold text-gray-800">تاریخ‌های قرارداد</h2>
+    <div dir="rtl" className="space-y-6">
+      <h2 className="text-lg font-bold text-[var(--amline-fg)]">تاریخ‌های قرارداد (شمسی)</h2>
+      <p className="text-sm text-[var(--amline-fg-muted)]">
+        سال و ماه و روز را از لیست انتخاب کنید یا در کادر متنی به‌صورت دستی وارد کنید. ارقام فارسی هم پذیرفته
+        می‌شود.
+      </p>
       <StepErrorBanner message={serverError} details={details} hint={hint} onDismiss={() => clear()} />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">تاریخ شروع *</label>
-          <input
-            {...register('start_date')}
-            type="text"
-            placeholder="1403/01/01"
-            className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary ${errors.start_date ? 'border-red-500' : 'border-gray-300'}`}
-          />
-          {errors.start_date && <p className="mt-1 text-xs text-red-600">{errors.start_date.message}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">تاریخ پایان *</label>
-          <input
-            {...register('end_date')}
-            type="text"
-            placeholder="1404/01/01"
-            className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary ${errors.end_date ? 'border-red-500' : 'border-gray-300'}`}
-          />
-          {errors.end_date && <p className="mt-1 text-xs text-red-600">{errors.end_date.message}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">تاریخ تحویل *</label>
-          <input
-            {...register('delivery_date')}
-            type="text"
-            placeholder="1403/01/15"
-            className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary ${errors.delivery_date ? 'border-red-500' : 'border-gray-300'}`}
-          />
-          {errors.delivery_date && <p className="mt-1 text-xs text-red-600">{errors.delivery_date.message}</p>}
-        </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
+        <Controller
+          name="start_date"
+          control={control}
+          render={({ field }) => (
+            <JalaliDateInput
+              label="تاریخ شروع"
+              value={field.value}
+              onChange={field.onChange}
+              error={errors.start_date?.message}
+              hint="اول قرارداد یا تحویل اولیه را در نظر بگیرید."
+            />
+          )}
+        />
+        <Controller
+          name="end_date"
+          control={control}
+          render={({ field }) => (
+            <JalaliDateInput
+              label="تاریخ پایان"
+              value={field.value}
+              onChange={field.onChange}
+              error={errors.end_date?.message}
+            />
+          )}
+        />
+        <Controller
+          name="delivery_date"
+          control={control}
+          render={({ field }) => (
+            <JalaliDateInput
+              label="تاریخ تحویل ملک"
+              value={field.value}
+              onChange={field.onChange}
+              error={errors.delivery_date?.message}
+            />
+          )}
+        />
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-primary text-white rounded-lg py-2.5 font-medium disabled:opacity-50"
+          className="w-full rounded-[var(--amline-radius-lg)] bg-[var(--amline-accent)] py-3 font-semibold text-white shadow-md transition hover:opacity-95 disabled:opacity-50 dark:shadow-black/30"
         >
           {isSubmitting ? 'در حال ثبت...' : 'ثبت تاریخ‌ها و ادامه'}
         </button>

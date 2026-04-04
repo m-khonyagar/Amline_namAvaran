@@ -13,14 +13,20 @@ import type { DraftEntry } from './storage/draftStorage';
 import { signingPartiesStorage } from './storage/signingPartiesStorage';
 import { useContractStatusPolling } from './hooks/useContractStatusPolling';
 import type { ContractStatus, PRContractStep } from './types/wizard';
-import { isPreviewBootstrapContractId, isWizardPreviewMode } from './wizardPreviewMode';
+import {
+  isAdminContractWizardFlexible,
+  isPreviewBootstrapContractId,
+  isWizardPreviewMode,
+} from './wizardPreviewMode';
+import { AdminWizardStepToolbar } from './components/AdminWizardStepToolbar';
 
 interface WizardInnerProps {
   platform: 'admin' | 'user';
   wizardPreviewMode: boolean;
+  flexibleWizardNav: boolean;
 }
 
-function WizardInner({ platform, wizardPreviewMode }: WizardInnerProps) {
+function WizardInner({ platform, wizardPreviewMode, flexibleWizardNav }: WizardInnerProps) {
   const { state, dispatch } = useWizard();
 
   // Polling وضعیت قرارداد
@@ -42,6 +48,7 @@ function WizardInner({ platform, wizardPreviewMode }: WizardInnerProps) {
   // هشدار هنگام ترک صفحه
   useEffect(() => {
     if (!state.contractId || state.currentStep === 'FINISH') return;
+    if (platform === 'admin') return;
     if (wizardPreviewMode && state.contractId && isPreviewBootstrapContractId(state.contractId)) return;
     const handler = (e: BeforeUnloadEvent) => {
       e.preventDefault();
@@ -49,7 +56,7 @@ function WizardInner({ platform, wizardPreviewMode }: WizardInnerProps) {
     };
     window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
-  }, [state.contractId, state.currentStep, wizardPreviewMode]);
+  }, [state.contractId, state.currentStep, wizardPreviewMode, platform]);
 
   function handleStepComplete(nextStep: PRContractStep) {
     dispatch({ type: 'APPLY_NEXT_STEP', payload: { nextStep } });
@@ -63,13 +70,13 @@ function WizardInner({ platform, wizardPreviewMode }: WizardInnerProps) {
     const currentIndex = STEP_ORDER.indexOf(state.currentStep);
     const targetIndex = STEP_ORDER.indexOf(nextStep);
     const isBackNavigation = targetIndex >= 0 && currentIndex >= 0 && targetIndex < currentIndex;
-    if (isBackNavigation && !wizardPreviewMode) {
+    if (isBackNavigation && !flexibleWizardNav) {
       const ok = window.confirm(
         'آیا مطمئن هستید می‌خواهید به مرحله قبل برگردید؟ تغییرات ثبت‌نشده این مرحله از بین می‌رود.'
       );
       if (!ok) return;
     }
-    if (nextStep === 'DRAFT' && wizardPreviewMode) {
+    if (nextStep === 'DRAFT' && flexibleWizardNav) {
       localDraftStorage.clearAll();
       if (state.contractId) signingPartiesStorage.clear(state.contractId);
       dispatch({ type: 'PREVIEW_JUMP_TO_STEP', payload: { nextStep } });
@@ -83,7 +90,7 @@ function WizardInner({ platform, wizardPreviewMode }: WizardInnerProps) {
         isScribeMode: state.isScribeMode,
       });
     }
-    if (wizardPreviewMode) {
+    if (flexibleWizardNav) {
       dispatch({ type: 'PREVIEW_JUMP_TO_STEP', payload: { nextStep } });
     } else {
       dispatch({ type: 'APPLY_NEXT_STEP', payload: { nextStep } });
@@ -165,11 +172,30 @@ function WizardInner({ platform, wizardPreviewMode }: WizardInnerProps) {
       dir="rtl"
       className="mx-auto w-full max-w-3xl space-y-6 rounded-[var(--amline-radius-xl)] border border-[var(--amline-border)] bg-gradient-to-b from-[var(--amline-surface)] to-[var(--amline-surface-muted)]/30 p-4 shadow-amline sm:p-6 lg:p-8 dark:border-slate-700 dark:from-[var(--amline-surface-elevated)] dark:to-slate-950/50"
     >
-      {wizardPreviewMode && (
-        <div className="flex items-center gap-2 rounded-[var(--amline-radius-lg)] border border-sky-200/70 bg-sky-50/90 px-4 py-2.5 text-sm text-sky-950 dark:border-sky-500/25 dark:bg-sky-950/35 dark:text-sky-100">
-          <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-sky-500" aria-hidden />
+      {flexibleWizardNav && (
+        <div
+          className={
+            wizardPreviewMode
+              ? 'flex items-center gap-2 rounded-[var(--amline-radius-lg)] border border-sky-200/70 bg-sky-50/90 px-4 py-2.5 text-sm text-sky-950 dark:border-sky-500/25 dark:bg-sky-950/35 dark:text-sky-100'
+              : 'flex items-center gap-2 rounded-[var(--amline-radius-lg)] border border-teal-200/80 bg-teal-50/90 px-4 py-2.5 text-sm text-teal-950 dark:border-teal-700/40 dark:bg-teal-950/30 dark:text-teal-100'
+          }
+        >
+          <span
+            className={`inline-flex h-2 w-2 rounded-full ${wizardPreviewMode ? 'animate-pulse bg-sky-500' : 'bg-teal-500'}`}
+            aria-hidden
+          />
           <span>
-            <span className="font-semibold">پیش‌نمایش:</span> پیمایش آزاد بین مراحل فعال است؛ داده‌ها ممکن است با سرور هم‌خوان نباشند.
+            {wizardPreviewMode ? (
+              <>
+                <span className="font-semibold">پیش‌نمایش dev:</span> پیمایش آزاد و دکمهٔ شروع بدون POST؛ داده با API ممکن است
+                هم‌خوان نباشد.
+              </>
+            ) : (
+              <>
+                <span className="font-semibold">پنل ادمین:</span> می‌توانید از نوار مراحل یا دکمهٔ «رد کردن این مرحله» بدون
+                تکمیل فرم جابه‌جا شوید؛ برای ثبت واقعی هر بخش همان دکمهٔ اصلی مرحله را بزنید.
+              </>
+            )}
           </span>
         </div>
       )}
@@ -180,7 +206,7 @@ function WizardInner({ platform, wizardPreviewMode }: WizardInnerProps) {
           completedSteps={state.completedSteps}
           contractType={state.contractType}
           editableSteps={state.editableSteps}
-          freeStepNavigation={wizardPreviewMode}
+          freeStepNavigation={flexibleWizardNav}
           onStepClick={handleStepNavigation}
         />
       </div>
@@ -199,8 +225,8 @@ function WizardInner({ platform, wizardPreviewMode }: WizardInnerProps) {
           بازگشت به مرحله قبل
         </button>
         <span className="text-xs text-[var(--amline-fg-subtle)] sm:text-end">
-          {wizardPreviewMode
-            ? 'در حالت پیش‌نمایش می‌توانید هر مرحله را از نوار بالا باز کنید.'
+          {flexibleWizardNav
+            ? 'نوار بالا تمام مراحل را باز می‌کند؛ در ادمین نیازی به تکمیل فرم برای جابه‌جایی نیست.'
             : 'برای ویرایش مراحل تکمیل‌شده از نوار مراحل استفاده کنید.'}
         </span>
       </div>
@@ -222,14 +248,23 @@ function WizardInner({ platform, wizardPreviewMode }: WizardInnerProps) {
 
       {/* رندر مرحله فعال */}
       {StepComponent ? (
-        <StepComponent
-          contractId={state.contractId}
-          contractType={state.contractType}
-          platform={platform}
-          isScribeMode={state.isScribeMode}
-          signingParties={signingPartiesStorage.load(state.contractId)}
-          onComplete={handleStepComplete}
-        />
+        <>
+          {platform === 'admin' && state.currentStep !== 'FINISH' ? (
+            <AdminWizardStepToolbar
+              contractType={state.contractType}
+              currentStep={state.currentStep}
+              onJumpNext={(next) => handleStepNavigation(next)}
+            />
+          ) : null}
+          <StepComponent
+            contractId={state.contractId}
+            contractType={state.contractType}
+            platform={platform}
+            isScribeMode={state.isScribeMode}
+            signingParties={signingPartiesStorage.load(state.contractId)}
+            onComplete={handleStepComplete}
+          />
+        </>
       ) : (
         <div className="py-10 text-center text-sm text-[var(--amline-fg-muted)]">
           این مرحله در حال توسعه است...
@@ -257,10 +292,15 @@ interface ContractWizardPageProps {
 
 export function ContractWizardPage({ platform = 'user' }: ContractWizardPageProps) {
   const wizardPreviewMode = platform === 'admin' && isWizardPreviewMode();
+  const flexibleWizardNav = isAdminContractWizardFlexible(platform) || wizardPreviewMode;
   return (
     <WizardProvider platform={platform}>
       <WizardErrorBoundary>
-        <WizardInner platform={platform} wizardPreviewMode={wizardPreviewMode} />
+        <WizardInner
+          platform={platform}
+          wizardPreviewMode={wizardPreviewMode}
+          flexibleWizardNav={flexibleWizardNav}
+        />
       </WizardErrorBoundary>
     </WizardProvider>
   );

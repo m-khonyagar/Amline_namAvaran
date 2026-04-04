@@ -22,7 +22,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^3.6.0",
     "framer-motion": "^11.2.12",
-    "jalali-react-datepicker": "^1.2.1",
+    "jalaali-js": "^1.2.8",
     "lucide-react": "^0.408.0",
     "maplibre-gl": "^5.22.0",
     "posthog-js": "^1.364.7",
