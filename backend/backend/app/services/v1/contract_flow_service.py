@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import os
+import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
@@ -14,13 +15,19 @@ from app.core.errors import AmlineError
 from app.domain.contracts.ssot import (
     ContractLifecycleStatus,
     assert_transition_ok,
+    lifecycle_status_to_product_v2,
     merge_external_refs,
     normalize_ssot_kind,
 )
 from app.repositories.memory.state import get_store
+from app.services.v1.otp_service import get_otp_service
 from app.schemas.v1.contract_flow import (
+    CommissionCreateBody,
+    CommissionDelegateRequestBody,
+    CommissionDelegateVerifyBody,
     ContractExternalRefsPatchBody,
     ContractStartBody,
+    ContractTermsPatchBody,
     LandlordSetBody,
     PartyPatchBody,
     SectionPatchBody,
@@ -65,6 +72,33 @@ def _strict_flow() -> bool:
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _party_mobile_from_contract(c: Dict[str, Any], party_id: str) -> str:
+    parties = c.get("parties") or {}
+    for lst in parties.values():
+        if not isinstance(lst, list):
+            continue
+        for row in lst:
+            if str(row.get("id")) != str(party_id):
+                continue
+            m = row.get("mobile")
+            if m:
+                return str(m)
+            npd = row.get("natural_person_detail") or {}
+            if isinstance(npd, dict) and npd.get("mobile"):
+                return str(npd["mobile"])
+            lpd = row.get("legal_person_detail") or {}
+            if isinstance(lpd, dict):
+                signers = lpd.get("signers") or []
+                if signers and isinstance(signers[0], dict) and signers[0].get("mobile"):
+                    return str(signers[0]["mobile"])
+    raise AmlineError(
+        "RESOURCE_NOT_FOUND",
+        "طرف قرارداد یا شماره موبایل یافت نشد.",
+        status_code=404,
+        details={"entity": "party", "party_id": party_id},
+    )
 
 
 def _require_step(c: Dict[str, Any], *allowed: str) -> None:
@@ -122,6 +156,9 @@ class ContractFlowService:
             "witnesses": [],
             "amendments": [],
             "payments": {},
+            "terms": {},
+            "commissions": [],
+            "substate": None,
         }
         s.contracts[cid] = c
         return s.contract_json(c)
@@ -140,6 +177,10 @@ class ContractFlowService:
         step = c["step"]
         return {
             "status": c["status"],
+            "lifecycle_v2": lifecycle_status_to_product_v2(
+                str(c.get("status", "")),
+                substate=c.get("substate"),
+            ),
             "step": step,
             "contract_id": c["id"],
             "type": c["type"],
@@ -360,6 +401,108 @@ class ContractFlowService:
             c.get("external_refs"), patch
         )
         return s.contract_json(c)
+
+    def patch_terms(self, contract_id: str, body: ContractTermsPatchBody) -> Dict[str, Any]:
+        s = get_store()
+        c = s.get_contract(contract_id)
+        c["terms"] = dict(body.terms or {})
+        return s.contract_json(c)
+
+    def add_commission(
+        self, contract_id: str, body: CommissionCreateBody
+    ) -> Dict[str, Any]:
+        s = get_store()
+        c = s.get_contract(contract_id)
+        row = {
+            "id": str(uuid.uuid4()),
+            "contract_id": contract_id,
+            "commission_type": body.commission_type,
+            "paid_by": body.paid_by,
+            "amount": body.amount,
+            "status": body.status,
+            "payment_method": body.payment_method,
+            "created_at": _now_iso(),
+        }
+        c.setdefault("commissions", []).append(row)
+        return row
+
+    def list_commissions(self, contract_id: str) -> Dict[str, Any]:
+        s = get_store()
+        c = s.get_contract(contract_id)
+        return {"items": list(c.get("commissions") or [])}
+
+    def request_commission_delegate_pay(
+        self,
+        contract_id: str,
+        commission_id: str,
+        body: CommissionDelegateRequestBody,
+        *,
+        client_ip: Optional[str],
+        user_agent: Optional[str],
+    ) -> Dict[str, Any]:
+        s = get_store()
+        c = s.get_contract(contract_id)
+        phone = _party_mobile_from_contract(c, body.party_id)
+        return get_otp_service().create_and_send(
+            phone=phone,
+            contract_id=contract_id,
+            party_id=body.party_id,
+            purpose="commission_pay_delegate",
+            request_ip=client_ip,
+            request_user_agent=user_agent,
+            salt=f"commission:{commission_id}",
+        )
+
+    def verify_commission_delegate_pay(
+        self,
+        contract_id: str,
+        commission_id: str,
+        body: CommissionDelegateVerifyBody,
+        *,
+        client_ip: Optional[str],
+        user_agent: Optional[str],
+    ) -> Dict[str, Any]:
+        s = get_store()
+        c = s.get_contract(contract_id)
+        get_otp_service().verify(
+            contract_id=contract_id,
+            phone=body.mobile,
+            purpose="commission_pay_delegate",
+            otp=body.otp,
+            challenge_id=body.challenge_id,
+            verify_ip=client_ip,
+            verify_user_agent=user_agent,
+        )
+        party_ids: set[str] = set()
+        for lst in (c.get("parties") or {}).values():
+            if not isinstance(lst, list):
+                continue
+            for p in lst:
+                if isinstance(p, dict) and p.get("id") is not None:
+                    party_ids.add(str(p["id"]))
+        if str(body.party_id) not in party_ids:
+            raise AmlineError(
+                "VALIDATION_FAILED",
+                "party_id با قرارداد مطابقت ندارد.",
+                status_code=422,
+            )
+        found = False
+        for row in c.get("commissions") or []:
+            if isinstance(row, dict) and str(row.get("id")) == str(commission_id):
+                row["status"] = "PAID"
+                row["payment_method"] = "AGENT"
+                row["paid_at"] = _now_iso()
+                row["paid_for_party_id"] = body.party_id
+                found = True
+                break
+        if not found:
+            raise AmlineError(
+                "RESOURCE_NOT_FOUND",
+                "ردیف کمیسیون یافت نشد.",
+                status_code=404,
+                details={"entity": "commission"},
+            )
+        return {"ok": True, "commission_id": commission_id}
 
 
 _svc: Optional[ContractFlowService] = None

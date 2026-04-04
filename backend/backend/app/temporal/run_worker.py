@@ -9,8 +9,8 @@ import os
 from temporalio.client import Client
 from temporalio.worker import Worker
 
-from app.temporal.activities import log_platform_signal
-from app.temporal.workflow_defs import AmlineSignalWorkflow
+from app.temporal.activities import contract_lifecycle_milestone, log_platform_signal
+from app.temporal.workflow_defs import AmlineSignalWorkflow, ContractLifecycleJourneyWorkflow
 
 log = logging.getLogger(__name__)
 
@@ -23,8 +23,8 @@ async def _main() -> None:
     worker = Worker(
         client,
         task_queue=queue,
-        workflows=[AmlineSignalWorkflow],
-        activities=[log_platform_signal],
+        workflows=[AmlineSignalWorkflow, ContractLifecycleJourneyWorkflow],
+        activities=[log_platform_signal, contract_lifecycle_milestone],
     )
     await worker.run()
 

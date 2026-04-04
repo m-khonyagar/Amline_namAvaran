@@ -5,6 +5,7 @@
 **ریپوی مرجع کد:** [Amline_namAvaran](https://github.com/m-khonyagar/Amline_namAvaran)  
 **یکپارچگی فرانت (SSOT):** [`FRONTEND_API_INTEGRATION.md`](./FRONTEND_API_INTEGRATION.md) و فهرست ماشین‌خوان مسیرها `docs/generated/frontend-http-inventory.json`.  
 **معماری پروداکشن قراردادمحور (هدف: شکست، اختلاف، تسویه، ممیزی حقوقی، SLA، نسخه‌گذاری):** [`ARCHITECTURE_CONTRACT_PLATFORM_PRODUCTION.md`](./ARCHITECTURE_CONTRACT_PLATFORM_PRODUCTION.md).  
+**سند محصول واحد قراردادهای چندگانه (v2.0 — شش نوع قرارداد، فلو امضا/پرداخت، Strangler):** [`Amline_Complete_Master_Spec_v2.md`](./Amline_Complete_Master_Spec_v2.md) — پیوست‌های اجرایی: [`CONTRACT_DATA_MODELS.md`](./CONTRACT_DATA_MODELS.md)، [`CONTRACT_SERVICE_API_SPEC.md`](./CONTRACT_SERVICE_API_SPEC.md)، [`SIGNATURE_PAYMENT_SCENARIOS.md`](./SIGNATURE_PAYMENT_SCENARIOS.md)، [`STATUS_MAPPING_v2.md`](./STATUS_MAPPING_v2.md)؛ فلوهای نوع‌محور: [`SALE_CONTRACT_FLOW.md`](./SALE_CONTRACT_FLOW.md)، [`EXCHANGE_CONTRACT_FLOW.md`](./EXCHANGE_CONTRACT_FLOW.md)، [`LEASE_TO_OWN_FLOW.md`](./LEASE_TO_OWN_FLOW.md)، [`CONSTRUCTION_CONTRACT_FLOW.md`](./CONSTRUCTION_CONTRACT_FLOW.md)، [`PRE_SALE_CONTRACT_FLOW.md`](./PRE_SALE_CONTRACT_FLOW.md).  
 **تحلیل as-built بر اساس:** snapshot معادل `main` (مسیر نمونه workspace: `dev-mock-api/main.py`, `admin-ui`, `amline-ui`, `backend/backend`)
 
 ---

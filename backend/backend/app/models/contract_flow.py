@@ -21,8 +21,23 @@ JsonBlob = JSON().with_variant(SQLITE_JSON(), "sqlite")
 
 
 class ContractFlowPartyRole(str, enum.Enum):
+    """نقش طرف — SSOT v2 + سازگاری با New Flow رهن/اجاره."""
+
     LANDLORD = "LANDLORD"
     TENANT = "TENANT"
+    SELLER = "SELLER"
+    BUYER = "BUYER"
+    EXCHANGER_FIRST = "EXCHANGER_FIRST"
+    EXCHANGER_SECOND = "EXCHANGER_SECOND"
+    EXCHANGER_A = "EXCHANGER_A"
+    EXCHANGER_B = "EXCHANGER_B"
+    EXCHANGER_PRIMARY = "EXCHANGER_PRIMARY"
+    EXCHANGER_COUNTER = "EXCHANGER_COUNTER"
+    LAND_OWNER = "LAND_OWNER"
+    CONTRACTOR = "CONTRACTOR"
+    DEVELOPER = "DEVELOPER"
+    LESSOR = "LESSOR"
+    LESSEE = "LESSEE"
 
 
 class ContractFlowPersonType(str, enum.Enum):
@@ -52,6 +67,9 @@ class ContractFlowRecord(Base):
         JsonBlob, nullable=True
     )
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    terms_json: Mapped[Optional[dict[str, Any]]] = mapped_column(
+        JsonBlob, nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

@@ -61,3 +61,10 @@ server {
 
 - CORS staging: [`BACKEND_STAGING_CORS.md`](./BACKEND_STAGING_CORS.md)
 - یکپارچگی فرانت: [`FRONTEND_API_INTEGRATION.md`](./FRONTEND_API_INTEGRATION.md)
+- نقشهٔ مهاجرت قرارداد چندگانه (v2): [`Amline_Complete_Master_Spec_v2.md`](./Amline_Complete_Master_Spec_v2.md) §۶ — **feature flag** برای درصد ترافیک و fallback ۵۰۰ به legacy در همان Gateway پیاده شود (مثلاً با `error_page` / middleware Traefik `errors`).
+
+## Rollout قرارداد v2 (خلاصه اجرایی)
+
+1. استقرار Gateway روی `app.` / `admin.` قبل از فعال‌سازی رفتار جدید.
+2. مسیرهای `/api/v1/contracts/*` را نسخه‌سنجی کنید؛ با `lifecycle_v2` فرانت می‌تواند UI را تدریجی عوض کند.
+3. Temporal: با `AMLINE_TEMPORAL_HOST`، workflow `ContractLifecycleJourneyWorkflow` روی worker ثبت شده است؛ worker را بعد از deploy بک‌اند به‌روز کنید.

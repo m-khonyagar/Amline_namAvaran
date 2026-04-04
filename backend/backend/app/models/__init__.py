@@ -14,6 +14,13 @@ from app.models.contract_flow import (
     Signing,
     Witness,
 )
+from app.models.contract_commission import (
+    CommissionPaidBy,
+    CommissionPaymentMethod,
+    CommissionRecordStatus,
+    ContractCommission,
+    ContractCommissionType,
+)
 from app.models.crm import CrmActivity, CrmActivityType, CrmLead, CrmLeadSource
 from app.models.dispute import (
     Dispute,
@@ -123,4 +130,9 @@ __all__ = [
     "DisputeEvidence",
     "DisputeEvidenceType",
     "LedgerHold",
+    "ContractCommission",
+    "ContractCommissionType",
+    "CommissionPaidBy",
+    "CommissionRecordStatus",
+    "CommissionPaymentMethod",
 ]

@@ -8,13 +8,13 @@
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 30,
+      "line": 31,
       "path": "/admin/activity",
       "surface": "legacy_mount"
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 29,
+      "line": 30,
       "path": "/admin/audit",
       "surface": "legacy_mount"
     },
@@ -74,7 +74,7 @@
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 42,
+      "line": 43,
       "path": "/admin/notifications",
       "surface": "legacy_mount"
     },
@@ -92,7 +92,7 @@
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 28,
+      "line": 29,
       "path": "/admin/roles",
       "surface": "legacy_mount"
     },
@@ -128,7 +128,7 @@
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 21,
+      "line": 22,
       "path": "/ads",
       "surface": "other_slash"
     },
@@ -229,6 +229,18 @@
       "surface": "canonical_v1"
     },
     {
+      "file": "admin-ui/src/pages/contracts/LegalReviewQueuePage.tsx",
+      "line": 23,
+      "path": "/api/v1/legal/reviews",
+      "surface": "canonical_v1"
+    },
+    {
+      "file": "admin-ui/src/pages/contracts/LegalReviewQueuePage.tsx",
+      "line": 32,
+      "path": "/api/v1/legal/reviews/${id}/decide",
+      "surface": "canonical_v1"
+    },
+    {
       "file": "admin-ui/src/pages/ads/AdsPage.tsx",
       "line": 45,
       "path": "/api/v1/listings",
@@ -278,7 +290,7 @@
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 25,
+      "line": 26,
       "path": "/billing",
       "surface": "other_slash"
     },
@@ -296,7 +308,7 @@
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 178,
+      "line": 179,
       "path": "/contracts",
       "surface": "legacy_mount"
     },
@@ -499,9 +511,21 @@
       "surface": "legacy_mount"
     },
     {
+      "file": "admin-ui/src/pages/contracts/LegalReviewQueuePage.tsx",
+      "line": 84,
+      "path": "/contracts/${row.contract_id}",
+      "surface": "legacy_mount"
+    },
+    {
       "file": "amline-ui/next.config.js",
       "line": 22,
       "path": "/contracts/:path*",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/layouts/MainLayout.tsx",
+      "line": 20,
+      "path": "/contracts/legal-queue",
       "surface": "legacy_mount"
     },
     {
@@ -547,6 +571,12 @@
       "surface": "legacy_mount"
     },
     {
+      "file": "admin-ui/src/pages/contracts/LegalReviewQueuePage.tsx",
+      "line": 45,
+      "path": "/contracts/wizard",
+      "surface": "legacy_mount"
+    },
+    {
       "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
       "line": 82,
       "path": "/contracts/wizard",
@@ -572,7 +602,7 @@
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 20,
+      "line": 21,
       "path": "/crm",
       "surface": "other_slash"
     },
@@ -602,13 +632,13 @@
     },
     {
       "file": "admin-ui/src/App.tsx",
-      "line": 81,
+      "line": 82,
       "path": "/dashboard",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/App.tsx",
-      "line": 184,
+      "line": 190,
       "path": "/dashboard",
       "surface": "other_slash"
     },
@@ -620,7 +650,7 @@
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 178,
+      "line": 179,
       "path": "/dashboard",
       "surface": "other_slash"
     },
@@ -662,7 +692,7 @@
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 27,
+      "line": 28,
       "path": "/integrations",
       "surface": "other_slash"
     },
@@ -674,19 +704,19 @@
     },
     {
       "file": "admin-ui/src/App.tsx",
-      "line": 41,
+      "line": 42,
       "path": "/login",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/App.tsx",
-      "line": 71,
+      "line": 72,
       "path": "/login",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 108,
+      "line": 109,
       "path": "/login",
       "surface": "other_slash"
     },
@@ -740,7 +770,7 @@
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 24,
+      "line": 25,
       "path": "/payments",
       "surface": "other_slash"
     },
@@ -752,13 +782,13 @@
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 26,
+      "line": 27,
       "path": "/settings",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 22,
+      "line": 23,
       "path": "/users",
       "surface": "other_slash"
     },
@@ -782,7 +812,7 @@
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 23,
+      "line": 24,
       "path": "/wallets",
       "surface": "other_slash"
     },
@@ -793,7 +823,7 @@
       "surface": "other_slash"
     }
   ],
-  "entry_count": 132,
+  "entry_count": 137,
   "generator": "scripts/inventory_frontend_http_calls.py",
   "repo_root_hint": "Amline_namAvaran",
   "scan_roots": [
@@ -802,6 +832,6 @@
     "site/app",
     "packages/amline-ui-core/src"
   ],
-  "sha256_prefix": "529dd27b856f8c37",
+  "sha256_prefix": "445216c4edb5554f",
   "version": 1
 }
