@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { EXPLICIT_FULL_DEV_PERMISSIONS, isDevBypassEnv } from '../../lib/permissions';
@@ -176,6 +176,17 @@ export default function LoginPage() {
               <p className="text-center text-xs text-[var(--amline-fg-subtle)]">
                 © ۱۴۰۳ اَملاین — تمامی حقوق محفوظ است
               </p>
+
+              {import.meta.env.DEV && (
+                <p className="text-center text-xs">
+                  <Link
+                    to="/dev/test-hub"
+                    className="font-medium text-[var(--amline-primary)] underline-offset-2 hover:underline"
+                  >
+                    فهرست همهٔ مسیرها برای تست (بدون ورود)
+                  </Link>
+                </p>
+              )}
 
               {isDevBypassEnabled && (
                 <div className="border-t border-dashed border-[var(--amline-border)] pt-4 dark:border-slate-600">

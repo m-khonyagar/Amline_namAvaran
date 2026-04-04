@@ -10,7 +10,7 @@ const groups = [...new Set(LOCAL_TEST_HUB_ROUTES.map((r) => r.group))]
 
 export default function LocalTestHubPage() {
   const viewAll =
-    import.meta.env.DEV && import.meta.env.VITE_DEV_VIEW_ALL_PAGES === 'true'
+    import.meta.env.DEV && import.meta.env.VITE_DEV_VIEW_ALL_PAGES !== 'false'
 
   return (
     <div dir="rtl" className="mx-auto max-w-4xl space-y-8">
@@ -23,24 +23,26 @@ export default function LocalTestHubPage() {
             <h1 className="amline-title text-[var(--amline-fg)]">تست لوکال — همهٔ مسیرها</h1>
             <p className="amline-caption mt-1">
               فقط در حالت توسعه (Vite <code className="rounded bg-[var(--amline-surface-muted)] px-1">DEV</code>) در دسترس است.
+              اگر مرورگر «اتصال رد شد» داد، از پوشهٔ <code className="rounded bg-[var(--amline-surface-muted)] px-1 font-mono text-[10px]">admin-ui</code> سرور را اجرا کنید:{' '}
+              <code className="rounded bg-[var(--amline-surface-muted)] px-1 font-mono text-[10px]">npm run dev</code>
+              — پورت پیش‌فرض <span className="font-mono">3002</span> است.
             </p>
           </div>
         </div>
         <div className="rounded-amline-md border border-amber-200/80 bg-amber-50/90 p-4 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
-          <p className="font-medium">دسترسی به صفحات محافظت‌شده با RBAC</p>
+          <p className="font-medium">باز کردن مسیرهای پنل بعد از ورود</p>
           <ul className="mt-2 list-inside list-disc space-y-1 text-[var(--amline-fg-muted)] dark:text-amber-200/90">
             <li>
-              با <strong>MSW</strong> یا کاربر mock که همهٔ permissionها را دارد وارد شوید؛ یا
+              در حالت <strong>dev</strong> به‌صورت پیش‌فرض گارد مجوز برای همهٔ صفحات باز است (نیازی به env نیست).
             </li>
             <li>
-              در <code className="rounded bg-black/5 px-1 dark:bg-white/10">admin-ui/.env.local</code> مقدار{' '}
-              <code className="rounded bg-black/5 px-1 dark:bg-white/10">VITE_DEV_VIEW_ALL_PAGES=true</code> بگذارید و سرور dev را
-              دوباره اجرا کنید — در این حالت <strong>فقط در dev</strong> همهٔ صفحات بدون خطای دسترسی باز می‌شوند.
+              برای تست واقعی RBAC در dev، در <code className="rounded bg-black/5 px-1 dark:bg-white/10">.env.local</code> مقدار{' '}
+              <code className="rounded bg-black/5 px-1 dark:bg-white/10">VITE_DEV_VIEW_ALL_PAGES=false</code> بگذارید.
             </li>
           </ul>
           <p className="mt-2 text-xs">
-            وضعیت فعلی دور زدن گارد:{' '}
-            <strong>{viewAll ? 'فعال' : 'غیرفعال'}</strong>
+            وضعیت فعلی دور زدن گارد در dev:{' '}
+            <strong>{viewAll ? 'فعال (پیش‌فرض)' : 'غیرفعال'}</strong>
           </p>
         </div>
         <p className="amline-body text-[var(--amline-fg-muted)]">

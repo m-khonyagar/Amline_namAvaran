@@ -14,6 +14,13 @@ export type LocalTestHubEntry = {
 export const LOCAL_TEST_HUB_SAMPLE_USER_ID = 'mock-001'
 
 export const LOCAL_TEST_HUB_ROUTES: LocalTestHubEntry[] = [
+  {
+    group: 'توسعه',
+    path: '/dev/test-hub',
+    label: 'هاب تست — فهرست همین صفحه',
+    permission: '—',
+    hint: 'در حالت dev بدون ورود هم باز می‌شود',
+  },
   { group: 'ورود', path: '/login', label: 'صفحه ورود (OTP)', hint: 'خارج از قالب اصلی؛ در حالت وارد شده به داشبورد redirect می‌شوید' },
   {
     group: 'پیش‌نمایش کاربر',

@@ -75,6 +75,20 @@ function AppRoutes() {
 
         {import.meta.env.DEV ? (
           <Route
+            path="/dev/test-hub"
+            element={
+              <div
+                dir="rtl"
+                className="min-h-screen bg-[var(--amline-bg)] px-4 py-8 text-[var(--amline-fg)] sm:px-8"
+              >
+                <LocalTestHubPage />
+              </div>
+            }
+          />
+        ) : null}
+
+        {import.meta.env.DEV ? (
+          <Route
             path="/dev/preview/user-wizard"
             element={
               <ProtectedRoute>
@@ -230,9 +244,6 @@ function AppRoutes() {
             } />
           </Route>
 
-          {import.meta.env.DEV ? (
-            <Route path="dev/test-hub" element={<LocalTestHubPage />} />
-          ) : null}
         </Route>
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

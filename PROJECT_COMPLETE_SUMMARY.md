@@ -1,8 +1,10 @@
-# 📋 خلاصه جامع پروژه Agent Windsurf Amline
+# 📋 خلاصه جامع پروژه‌ها (املاین / Agent / SEO)
 
-**تاریخ**: ۱۲ مارس ۲۰۲۶  
-**مخزن**: `agent-windsurf-amline` (GitHub)  
-**مسیر محلی**: `e:\CTO`
+**آخرین به‌روزرسانی این سند**: ۵ آوریل ۲۰۲۶ (میلادی)
+
+**مخزن اصلی فعلی (مونوریپو املاین)**: [`Amline_namAvaran`](https://github.com/m-khonyagar/Amline_namAvaran) — مسیر محلی رایج: `E:\Amline_namAvaran`
+
+**سند تاریخی (CTO / agent-windsurf-amline)**: مسیر قدیمی `e:\CTO` در بخش‌های پایین‌تر برای بافت تاریخی حفظ شده است.
 
 ---
 
@@ -270,6 +272,53 @@ cd Agent/Agent/winfsurf-20/taskflow/TaskFlowDesktop && npm run dev
 # GSC Export
 python scripts/gsc_export_all.py
 ```
+
+---
+
+## 🔟 ۱۰. مخزن `Amline_namAvaran` — وضعیت و اقدامات (آوریل ۲۰۲۶)
+
+### ۱۰.۱ نمای کلی
+
+| مورد | مقدار |
+|------|--------|
+| **Remote** | `https://github.com/m-khonyagar/Amline_namAvaran.git` |
+| **شاخه‌های فعال** | `main`, `staging` (همگام با main پس از تغییرات اخیر) |
+| **ساختار** | مونوریپو npm workspaces: `admin-ui`, `site`, `packages/amline-ui-core`؛ بک‌اند در `backend/backend` |
+
+### ۱۰.۲ admin-ui (پنل مدیریت — Vite + React)
+
+| مورد | جزئیات |
+|------|--------|
+| **پورت dev** | `3002` (`vite.config.ts` — `server.port`) |
+| **اجرای محلی** | `cd admin-ui && npm run dev` — سپس مثلاً `http://127.0.0.1:3002/login` |
+| **تست E2E** | `cd admin-ui && npm run test:e2e` (Playwright؛ سرور dev به‌صورت خودکار بالا می‌آید) |
+
+### ۱۰.۳ اقدامات انجام‌شده (جمع‌بندی فنی)
+
+1. **Playwright / CI (`admin-ui-e2e`)**
+   - سلکتور دکمهٔ ویزارد با برچسب واقعی **`شروع قرارداد (ثبت در سرور)`** (ثابت `WIZARD_SUBMIT_SERVER_LABEL` در `admin-ui/tests/e2e-helpers.ts`)؛ جلوگیری از تداخل با «شروع قرارداد جدید» (DraftBanner).
+   - helperهای **`gotoAmline`** (`domcontentloaded`) و **`ensureSidebarOpen`** برای پایداری ناوبری.
+   - **`viewport: 1440×900`**, **`workers: 2`**, **`timeout: 90s`** در `playwright.config.ts` برای کاهش فشار روی یک سرور Vite و نمایش پایدار سایدبار دسکتاپ.
+   - **`real-auth-smoke`**: فقط با **`REAL_AUTH_E2E=1`** اجرا می‌شود (با MSW/ورود آزمایشی سازگار نیست).
+   - اصلاح فلوهای **`e2e.spec.ts`** و **`full-user-flow.spec.ts`** (دکمهٔ «برای دیگران»، سایدبار، ویزارد).
+
+2. **هاب تست مسیرها (`/dev/test-hub`)**
+   - در حالت **DEV** مسیر **`/dev/test-hub`** در ریشهٔ `App.tsx` (بدون `MainLayout` / بدون نیاز به ورود) برای نمایش فهرست لینک‌ها از `localTestHubRoutes.ts`.
+   - در صفحهٔ ورود، لینک dev: **«فهرست همهٔ مسیرها برای تست (بدون ورود)»**.
+   - **`PermissionGuard`**: در dev به‌صورت پیش‌فرض همهٔ صفحات را باز می‌کند؛ با **`VITE_DEV_VIEW_ALL_PAGES=false`** در `.env.local` می‌توان RBAC واقعی را در dev آزمود.
+
+3. **Git / کیفیت**
+   - کامیت‌های نمونهٔ اخیر روی `main`: اصلاح E2E، هاب تست، گارد dev.
+   - حذف gitlink شکستهٔ **`Agent/Amline test`** از ایندکس (قبلاً در تاریخچهٔ مخزن).
+
+### ۱۰.۴ CI مرتبط
+
+- **`.github/workflows/ci.yml`**: جاب **`admin-ui-e2e`** — نصب مونوریپو، Playwright Chromium، `npm run test:e2e` از پوشهٔ `admin-ui`.
+
+### ۱۰.۵ نکات عملی برای توسعه‌دهنده
+
+- اگر مرورگر **«connection refused»** روی پورت ۳۰۰۲ داد، ابتدا **`npm run dev`** در `admin-ui` را اجرا کنید.
+- برای فهرست URLها در dev: **`/dev/test-hub`**.
 
 ---
 
