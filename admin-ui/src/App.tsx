@@ -21,6 +21,7 @@ import BillingPage from './pages/billing/BillingPage'
 import CRMPage from './pages/crm/CRMPage'
 import LeadDetailPage from './pages/crm/LeadDetailPage'
 import NotificationsPage from './pages/notifications/NotificationsPage'
+import LocalTestHubPage from './pages/dev/LocalTestHubPage'
 import { useAuth } from './hooks/useAuth'
 import { PermissionGuard } from './components/auth/PermissionGuard'
 import { ContractWizardPage } from './features/contract-wizard/ContractWizardPage'
@@ -200,6 +201,10 @@ function AppRoutes() {
               </PermissionGuard>
             } />
           </Route>
+
+          {import.meta.env.DEV ? (
+            <Route path="dev/test-hub" element={<LocalTestHubPage />} />
+          ) : null}
         </Route>
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

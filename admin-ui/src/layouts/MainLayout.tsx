@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { LogOut, Menu, Search, X } from 'lucide-react';
-import { ADMIN_NAV_SECTIONS } from '../config/adminNav';
+import { getAdminNavSectionsResolved } from '../config/adminNav';
 import { AdminCommandMenu } from '../components/AdminCommandMenu';
 import { useAuth } from '../hooks/useAuth';
 import { NotificationsBell } from '../components/NotificationsBell';
@@ -47,7 +47,7 @@ export default function MainLayout() {
     return () => document.removeEventListener('keydown', onKey);
   }, []);
 
-  const sections = ADMIN_NAV_SECTIONS.map((section) => ({
+  const sections = getAdminNavSectionsResolved().map((section) => ({
     ...section,
     items: section.items.filter((item) => !item.permission || hasPermission(item.permission)),
   })).filter((s) => s.items.length > 0);

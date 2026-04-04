@@ -14,6 +14,11 @@ interface ImportMetaEnv {
   readonly VITE_USE_CRM_API: string
   /** فعال/غیرفعال کردن ورود آزمایشی فقط در DEV */
   readonly VITE_ENABLE_DEV_BYPASS: string
+  /**
+   * فقط در DEV: اگر `true` باشد PermissionGuard همهٔ صفحات را بدون چک RBAC نشان می‌دهد (تست UI لوکال).
+   * در بیلد production حذف می‌شود (import.meta.env.DEV همیشه false).
+   */
+  readonly VITE_DEV_VIEW_ALL_PAGES: string
   readonly VITE_PUBLIC_POSTHOG_KEY: string
   readonly VITE_PUBLIC_POSTHOG_HOST: string
   /** `true` فقط در staging — ضبط جلسه PostHog */
