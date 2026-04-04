@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api'
+import { apiV1 } from '@/lib/apiPaths'
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 
 type HealthSummary = Record<string, Record<string, unknown>>
@@ -8,7 +9,7 @@ export default function IntegrationsPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['integrations-health'],
     queryFn: async () => {
-      const res = await apiClient.get<HealthSummary>('/api/v1/integrations/health/summary')
+      const res = await apiClient.get<HealthSummary>(apiV1('integrations/health/summary'))
       return res.data
     },
   })

@@ -1,6 +1,6 @@
 /**
- * Shared Axios client — proxies to real FastAPI (legacy + /api/v1).
- * Base URL empty in dev: Vite proxies paths to VITE_DEV_PROXY_TARGET.
+ * Shared Axios client — تمام مسیرهای ادمین باید با `apiV1()` از `apiPaths.ts` ساخته شوند (`/api/v1/...`).
+ * در dev با baseURL خالی، Vite به `VITE_DEV_PROXY_TARGET` برای `/api/v1` و `/financials` پروکسی می‌کند.
  */
 import axios from 'axios'
 import { CookieNames, getCookie } from './cookies'

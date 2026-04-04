@@ -21,7 +21,7 @@ export function NotificationsBell() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="relative flex h-10 w-10 items-center justify-center rounded-amline-md border border-[var(--amline-border)] text-[var(--amline-fg-muted)] transition-colors hover:bg-[var(--amline-surface-muted)] hover:text-[var(--amline-primary)] dark:border-slate-600"
+        className="relative flex h-11 min-h-[44px] w-11 min-w-[44px] items-center justify-center rounded-amline-md border border-[var(--amline-border)] text-[var(--amline-fg-muted)] transition-colors hover:bg-[var(--amline-surface-muted)] hover:text-[var(--amline-primary)] active:scale-[0.98] dark:border-slate-600"
         aria-expanded={open}
         aria-label="اعلان‌ها"
       >
@@ -39,11 +39,21 @@ export function NotificationsBell() {
         <>
           <button
             type="button"
-            className="fixed inset-0 z-40 cursor-default"
+            className="fixed inset-0 z-40 cursor-default bg-slate-900/20 sm:bg-transparent"
             aria-label="بستن اعلان‌ها"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute left-0 top-full z-50 mt-2 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-amline-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] shadow-[var(--amline-shadow-lg)] dark:border-slate-700">
+          <div
+            className={cn(
+              'z-50 overflow-hidden rounded-amline-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] shadow-[var(--amline-shadow-lg)] dark:border-slate-700',
+              /* موبایل: زیر هدر، تمام‌عرض با حاشیهٔ امن */
+              'fixed left-3 right-3 top-[calc(3.5rem+env(safe-area-inset-top,0px)+0.5rem)] max-h-[min(70vh,28rem)] w-auto max-w-none sm:left-auto sm:right-auto',
+              /* دسکتاپ / تبلت: زیر دکمه */
+              'sm:absolute sm:mt-2 sm:max-h-72 sm:w-[min(22rem,calc(100vw-2rem))] sm:max-w-[22rem]',
+              /* RTL: لبهٔ منطقی «شروع» با دکمه هم‌تراز */
+              'sm:end-0 sm:top-full'
+            )}
+          >
             <div className="flex items-center justify-between border-b border-[var(--amline-border)] bg-[var(--amline-surface-muted)]/50 px-4 py-3 dark:border-slate-700">
               <div>
                 <p className="text-sm font-semibold text-[var(--amline-fg)]">اعلان‌ها</p>
@@ -51,7 +61,7 @@ export function NotificationsBell() {
               </div>
               <Link
                 to="/notifications"
-                className="text-xs font-semibold text-[var(--amline-primary)] hover:underline"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center text-xs font-semibold text-[var(--amline-primary)] hover:underline sm:min-h-0 sm:min-w-0 sm:px-1"
                 onClick={() => setOpen(false)}
               >
                 همه
@@ -61,13 +71,13 @@ export function NotificationsBell() {
               {items.length === 0 ? (
                 <p className="px-3 py-8 text-center text-sm text-[var(--amline-fg-muted)]">اعلانی نیست</p>
               ) : (
-                <ul className="max-h-72 space-y-1 overflow-y-auto">
+                <ul className="max-h-[min(50vh,18rem)] space-y-1 overflow-y-auto overscroll-contain sm:max-h-60">
                   {items.slice(0, 8).map((n) => (
                     <li key={n.id}>
                       <button
                         type="button"
                         className={cn(
-                          'w-full rounded-amline-md px-3 py-2.5 text-right text-sm transition-colors',
+                          'min-h-[48px] w-full rounded-amline-md px-3 py-3 text-right text-sm transition-colors active:bg-black/5 dark:active:bg-white/10',
                           n.read
                             ? 'text-[var(--amline-fg-muted)]'
                             : 'bg-[var(--amline-primary-muted)] font-medium text-[var(--amline-fg)]'

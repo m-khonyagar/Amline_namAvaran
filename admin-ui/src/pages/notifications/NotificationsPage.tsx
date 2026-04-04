@@ -56,24 +56,24 @@ export default function NotificationsPage() {
   const items = data?.items ?? [];
 
   return (
-    <div dir="rtl" className="container-amline max-w-3xl py-6">
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div dir="rtl" className="container-amline max-w-3xl py-4 sm:py-6">
+      <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <span className="flex h-12 w-12 items-center justify-center rounded-amline-lg bg-[var(--amline-primary-muted)] text-[var(--amline-primary)]">
             <Bell className="h-6 w-6" strokeWidth={2} />
           </span>
           <div>
-            <h1 className="amline-display text-2xl">مرکز اعلان‌ها</h1>
+            <h1 className="amline-display">مرکز اعلان‌ها</h1>
             <p className="amline-caption mt-1">
               به‌روزرسانی خودکار هر ۴۵ ثانیه — مبتنی بر TanStack Query (متن‌باز)
             </p>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           {items.some((i) => !i.read) ? (
             <button
               type="button"
-              className="btn btn-outline text-sm"
+              className="btn btn-outline w-full min-h-11 text-sm sm:w-auto"
               onClick={() => markAll.mutate()}
               disabled={markAll.isPending}
             >
@@ -81,7 +81,7 @@ export default function NotificationsPage() {
               خواندن همه
             </button>
           ) : null}
-          <button type="button" className="btn btn-ghost text-sm" onClick={() => refetch()}>
+          <button type="button" className="btn btn-ghost w-full min-h-11 text-sm sm:w-auto" onClick={() => refetch()}>
             تازه‌سازی
           </button>
         </div>
@@ -148,14 +148,16 @@ export default function NotificationsPage() {
                 {!n.read ? (
                   <button
                     type="button"
-                    className="shrink-0 text-xs font-semibold text-[var(--amline-primary)] hover:underline"
+                    className="min-h-[44px] shrink-0 px-2 text-xs font-semibold text-[var(--amline-primary)] hover:underline sm:min-h-0"
                     onClick={() => markOne.mutate(n.id)}
                     disabled={markOne.isPending}
                   >
                     خواندم
                   </button>
                 ) : (
-                  <span className="shrink-0 text-xs text-[var(--amline-fg-subtle)]">خوانده‌شده</span>
+                  <span className="flex min-h-[44px] shrink-0 items-center text-xs text-[var(--amline-fg-subtle)] sm:min-h-0">
+                    خوانده‌شده
+                  </span>
                 )}
               </div>
             </li>

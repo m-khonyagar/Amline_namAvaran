@@ -25,6 +25,7 @@ import {
 } from 'recharts';
 import { useAuth } from '../../hooks/useAuth';
 import { apiClient } from '../../lib/api';
+import { apiV1 } from '../../lib/apiPaths';
 import { loadLeads } from '../../features/crm/crmService';
 import { cn } from '../../lib/cn';
 
@@ -57,6 +58,7 @@ const CRM_STATUS_FA: Record<string, string> = {
   NEW: 'جدید',
   CONTACTED: 'تماس گرفته',
   QUALIFIED: 'واجد شرایط',
+  NEGOTIATING: 'مذاکره',
   NEGOTIATION: 'مذاکره',
   PROPOSAL: 'پیشنهاد',
   LOST: 'از دست‌رفته',
@@ -126,7 +128,7 @@ function OpsCard({
   return (
     <Link
       to={to}
-      className="group relative flex flex-col rounded-[var(--amline-radius-lg)] border border-[var(--amline-border)] bg-[var(--amline-surface)] p-4 shadow-[var(--amline-shadow-sm)] transition-all hover:border-[var(--amline-primary)]/25 hover:shadow-[var(--amline-shadow-md)] dark:border-slate-700 dark:bg-slate-900/40"
+      className="group relative flex min-h-[120px] flex-col rounded-[var(--amline-radius-lg)] border border-[var(--amline-border)] bg-[var(--amline-surface)] p-4 shadow-[var(--amline-shadow-sm)] transition-all hover:border-[var(--amline-primary)]/25 hover:shadow-[var(--amline-shadow-md)] active:scale-[0.99] dark:border-slate-700 dark:bg-slate-900/40 sm:min-h-0"
     >
       <div className="mb-2 flex items-center justify-between gap-2">
         <span className="flex h-9 w-9 items-center justify-center rounded-amline-md bg-[var(--amline-primary-muted)] text-[var(--amline-primary)] dark:bg-blue-950/50">
@@ -148,7 +150,7 @@ export default function DashboardPage() {
   const { data: metrics, isError: metricsError } = useQuery({
     queryKey: ['admin-metrics-summary'],
     queryFn: async () => {
-      const res = await apiClient.get<MetricsSummary>('/admin/metrics/summary');
+      const res = await apiClient.get<MetricsSummary>(apiV1('admin/metrics/summary'));
       return res.data;
     },
   });
@@ -156,7 +158,7 @@ export default function DashboardPage() {
   const { data: pulse, isError: pulseError } = useQuery({
     queryKey: ['admin-metrics-operations'],
     queryFn: async () => {
-      const res = await apiClient.get<OperationsPulse>('/admin/metrics/operations');
+      const res = await apiClient.get<OperationsPulse>(apiV1('admin/metrics/operations'));
       return res.data;
     },
   });
@@ -164,7 +166,7 @@ export default function DashboardPage() {
   const { data: recentAudit, isError: auditError } = useQuery({
     queryKey: ['admin-audit-recent-dashboard'],
     queryFn: async () => {
-      const res = await apiClient.get<{ items: AuditItem[] }>('/admin/audit', {
+      const res = await apiClient.get<{ items: AuditItem[] }>(apiV1('admin/audit'), {
         params: { skip: 0, limit: 6 },
       });
       return res.data.items;
@@ -250,7 +252,7 @@ export default function DashboardPage() {
             <h2 id="pulse-heading" className="amline-title">
               تپش عملیات
             </h2>
-            <p className="max-w-md text-sm text-[var(--amline-fg-muted)]">
+            <p className="max-w-md text-sm text-[var(--amline-fg-muted)] max-sm:text-xs">
               اولویت‌های امروز تیم: اعلان‌ها، سرنخ‌ها، قراردادهای پرچم‌خورده حقوقی، و فعالیت ممیزی ۲۴ ساعت اخیر.
             </p>
           </div>
@@ -309,13 +311,14 @@ export default function DashboardPage() {
               <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
             </Link>
           </div>
-          <div className="rounded-[var(--amline-radius-lg)] border border-[var(--amline-border)] bg-[var(--amline-surface)] p-4 shadow-[var(--amline-shadow-sm)] dark:border-slate-700 dark:bg-slate-900/40">
-            <div className="h-64 w-full" dir="ltr">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={funnelData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <div className="rounded-[var(--amline-radius-lg)] border border-[var(--amline-border)] bg-[var(--amline-surface)] p-2 shadow-[var(--amline-shadow-sm)] dark:border-slate-700 dark:bg-slate-900/40 sm:p-4">
+            <div className="overflow-x-auto overscroll-x-contain" dir="ltr">
+              <div className="h-56 w-full min-w-[280px] sm:h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={funnelData} margin={{ top: 8, right: 8, left: 4, bottom: 4 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-[var(--amline-border)] opacity-40" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11 }} className="fill-[var(--amline-fg-muted)]" />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} className="fill-[var(--amline-fg-muted)]" />
+                  <XAxis dataKey="name" tick={{ fontSize: 10 }} interval={0} height={40} className="fill-[var(--amline-fg-muted)]" />
+                  <YAxis allowDecimals={false} width={32} tick={{ fontSize: 10 }} className="fill-[var(--amline-fg-muted)]" />
                   <Tooltip
                     contentStyle={{
                       borderRadius: 'var(--amline-radius-md)',
@@ -326,6 +329,7 @@ export default function DashboardPage() {
                   <Bar dataKey="count" fill="var(--amline-primary)" radius={[6, 6, 0, 0]} name="تعداد" />
                 </BarChart>
               </ResponsiveContainer>
+              </div>
             </div>
           </div>
         </section>
@@ -344,8 +348,8 @@ export default function DashboardPage() {
               مشاهده همه
             </Link>
           </div>
-          <div className="overflow-x-auto rounded-[var(--amline-radius-lg)] border border-[var(--amline-border)] bg-[var(--amline-surface)] shadow-[var(--amline-shadow-sm)] dark:border-slate-700 dark:bg-slate-900/40">
-            <table className="min-w-full text-right text-sm">
+          <div className="overflow-x-auto overscroll-x-contain rounded-[var(--amline-radius-lg)] border border-[var(--amline-border)] bg-[var(--amline-surface)] shadow-[var(--amline-shadow-sm)] dark:border-slate-700 dark:bg-slate-900/40">
+            <table className="min-w-[520px] w-full text-right text-sm sm:min-w-full">
               <thead className="border-b border-[var(--amline-border)] bg-[var(--amline-surface-muted)]/50 dark:border-slate-700 dark:bg-slate-800/50">
                 <tr>
                   <th className="px-4 py-3 font-medium text-[var(--amline-fg-muted)]">زمان</th>

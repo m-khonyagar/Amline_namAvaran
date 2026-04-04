@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { apiClient } from '../../lib/api';
+import { apiV1 } from '../../lib/apiPaths';
 
 type LegalStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
@@ -20,7 +21,7 @@ export default function LegalReviewQueuePage() {
     queryKey: ['legal-reviews'],
     queryFn: async () => {
       const res = await apiClient.get<{ items: LegalReviewItem[]; total: number }>(
-        '/api/v1/legal/reviews',
+        apiV1('legal/reviews'),
         { params: { limit: 100 } }
       );
       return res.data;
@@ -29,7 +30,7 @@ export default function LegalReviewQueuePage() {
 
   const decide = useMutation({
     mutationFn: async ({ id, approve }: { id: string; approve: boolean }) => {
-      await apiClient.post(`/api/v1/legal/reviews/${id}/decide`, {
+      await apiClient.post(apiV1(`legal/reviews/${id}/decide`), {
         approve,
         comment: approve ? 'تأیید از صف ادمین' : 'رد از صف ادمین',
       });

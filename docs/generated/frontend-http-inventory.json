@@ -7,57 +7,27 @@
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 31,
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 159,
       "path": "/admin/activity",
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 30,
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 152,
       "path": "/admin/audit",
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/pages/admin/AuditLogPage.tsx",
-      "line": 29,
+      "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
+      "line": 292,
       "path": "/admin/audit",
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/pages/contracts/ContractDetailPage.tsx",
-      "line": 70,
-      "path": "/admin/contracts/${id}/approve",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/pages/contracts/ContractsPage.tsx",
-      "line": 67,
-      "path": "/admin/contracts/${id}/approve",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/pages/contracts/ContractDetailPage.tsx",
-      "line": 80,
-      "path": "/admin/contracts/${id}/reject",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/pages/contracts/ContractsPage.tsx",
-      "line": 77,
-      "path": "/admin/contracts/${id}/reject",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/pages/contracts/ContractDetailPage.tsx",
-      "line": 90,
-      "path": "/admin/contracts/${id}/revoke",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/hooks/useAuth.ts",
-      "line": 95,
-      "path": "/admin/login",
+      "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
+      "line": 345,
+      "path": "/admin/audit",
       "surface": "legacy_mount"
     },
     {
@@ -67,69 +37,33 @@
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
-      "line": 22,
-      "path": "/admin/metrics/summary",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 43,
-      "path": "/admin/notifications",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/hooks/useAuth.ts",
-      "line": 117,
-      "path": "/admin/otp/send",
-      "surface": "legacy_mount"
-    },
-    {
       "file": "amline-ui/lib/auth.ts",
       "line": 43,
       "path": "/admin/otp/send",
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 29,
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 145,
       "path": "/admin/roles",
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/pages/admin/RolesPage.tsx",
-      "line": 22,
-      "path": "/admin/roles",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/pages/admin/RolesPage.tsx",
-      "line": 29,
-      "path": "/admin/roles/${id}",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/pages/admin/ActivityReportPage.tsx",
-      "line": 32,
-      "path": "/admin/staff/activity",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/pages/users/UsersPage.tsx",
-      "line": 55,
-      "path": "/admin/users",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/pages/users/UserDetailPage.tsx",
-      "line": 69,
-      "path": "/admin/users/${id}",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 22,
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 88,
       "path": "/ads",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/components/SiteNav.tsx",
+      "line": 14,
+      "path": "/agencies",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/components/landing/LandingHome.tsx",
+      "line": 108,
+      "path": "/agencies",
       "surface": "other_slash"
     },
     {
@@ -145,15 +79,39 @@
       "surface": "legacy_api_prefix"
     },
     {
-      "file": "amline-ui/next.config.js",
-      "line": 20,
-      "path": "/api/v1/:path*",
+      "file": "admin-ui/src/lib/api.ts",
+      "line": 3,
+      "path": "/api/v1",
       "surface": "canonical_v1"
     },
     {
-      "file": "admin-ui/src/pages/billing/BillingPage.tsx",
-      "line": 56,
-      "path": "/api/v1/billing/invoice/latest",
+      "file": "admin-ui/src/lib/apiPaths.ts",
+      "line": 5,
+      "path": "/api/v1",
+      "surface": "canonical_v1"
+    },
+    {
+      "file": "admin-ui/src/mocks/handlers.ts",
+      "line": 6,
+      "path": "/api/v1",
+      "surface": "canonical_v1"
+    },
+    {
+      "file": "admin-ui/src/lib/api.ts",
+      "line": 2,
+      "path": "/api/v1/...",
+      "surface": "canonical_v1"
+    },
+    {
+      "file": "admin-ui/src/lib/apiPaths.ts",
+      "line": 2,
+      "path": "/api/v1/...",
+      "surface": "canonical_v1"
+    },
+    {
+      "file": "amline-ui/next.config.js",
+      "line": 20,
+      "path": "/api/v1/:path*",
       "surface": "canonical_v1"
     },
     {
@@ -169,12 +127,6 @@
       "surface": "canonical_v1"
     },
     {
-      "file": "admin-ui/src/pages/billing/BillingPage.tsx",
-      "line": 47,
-      "path": "/api/v1/billing/me",
-      "surface": "canonical_v1"
-    },
-    {
       "file": "amline-ui/app/billing/page.tsx",
       "line": 26,
       "path": "/api/v1/billing/me",
@@ -187,21 +139,9 @@
       "surface": "canonical_v1"
     },
     {
-      "file": "admin-ui/src/pages/billing/BillingPage.tsx",
-      "line": 38,
-      "path": "/api/v1/billing/plans",
-      "surface": "canonical_v1"
-    },
-    {
       "file": "amline-ui/app/billing/page.tsx",
       "line": 24,
       "path": "/api/v1/billing/plans",
-      "surface": "canonical_v1"
-    },
-    {
-      "file": "admin-ui/src/pages/billing/BillingPage.tsx",
-      "line": 64,
-      "path": "/api/v1/billing/subscribe",
       "surface": "canonical_v1"
     },
     {
@@ -211,63 +151,9 @@
       "surface": "canonical_v1"
     },
     {
-      "file": "admin-ui/src/features/crm/crmApi.ts",
-      "line": 42,
-      "path": "/api/v1/crm",
-      "surface": "canonical_v1"
-    },
-    {
-      "file": "admin-ui/src/features/crm/geoApi.ts",
-      "line": 18,
-      "path": "/api/v1/geo/provinces",
-      "surface": "canonical_v1"
-    },
-    {
-      "file": "admin-ui/src/pages/integrations/IntegrationsPage.tsx",
-      "line": 11,
-      "path": "/api/v1/integrations/health/summary",
-      "surface": "canonical_v1"
-    },
-    {
-      "file": "admin-ui/src/pages/contracts/LegalReviewQueuePage.tsx",
-      "line": 23,
-      "path": "/api/v1/legal/reviews",
-      "surface": "canonical_v1"
-    },
-    {
-      "file": "admin-ui/src/pages/contracts/LegalReviewQueuePage.tsx",
-      "line": 32,
-      "path": "/api/v1/legal/reviews/${id}/decide",
-      "surface": "canonical_v1"
-    },
-    {
-      "file": "admin-ui/src/pages/ads/AdsPage.tsx",
-      "line": 45,
-      "path": "/api/v1/listings",
-      "surface": "canonical_v1"
-    },
-    {
-      "file": "admin-ui/src/pages/settings/SettingsPage.tsx",
-      "line": 224,
-      "path": "/api/v1/meta/context",
-      "surface": "canonical_v1"
-    },
-    {
-      "file": "admin-ui/src/pages/payments/PaymentsPage.tsx",
-      "line": 61,
-      "path": "/api/v1/payments/intents/${id}/verify-retry",
-      "surface": "canonical_v1"
-    },
-    {
-      "file": "admin-ui/src/pages/payments/PaymentsPage.tsx",
-      "line": 53,
-      "path": "/api/v1/payments/intents/${selectedId}",
-      "surface": "canonical_v1"
-    },
-    {
-      "file": "admin-ui/src/pages/ads/AdsPage.tsx",
-      "line": 55,
-      "path": "/api/v1/search/listings",
+      "file": "admin-ui/src/mocks/handlers.ts",
+      "line": 125,
+      "path": "/api/v1/crm/*",
       "surface": "canonical_v1"
     },
     {
@@ -277,20 +163,8 @@
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/hooks/useAuth.ts",
-      "line": 63,
-      "path": "/auth/me",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/hooks/useAuth.ts",
-      "line": 103,
-      "path": "/auth/me",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 26,
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 113,
       "path": "/billing",
       "surface": "other_slash"
     },
@@ -301,20 +175,74 @@
       "surface": "other_slash"
     },
     {
-      "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 18,
+      "file": "site/app/blog/[slug]/page.tsx",
+      "line": 101,
+      "path": "/blog",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/app/blog/[slug]/page.tsx",
+      "line": 186,
+      "path": "/blog",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/components/SiteFooter.tsx",
+      "line": 24,
+      "path": "/blog",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/components/SiteNav.tsx",
+      "line": 13,
+      "path": "/blog",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/components/landing/ChannelsSection.tsx",
+      "line": 46,
+      "path": "/blog",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/components/landing/LandingHome.tsx",
+      "line": 114,
+      "path": "/blog",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/app/blog/page.tsx",
+      "line": 87,
+      "path": "/blog/${post.slug}",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/app/blog/page.tsx",
+      "line": 100,
+      "path": "/blog/${post.slug}",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 49,
       "path": "/contracts",
       "surface": "legacy_mount"
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 179,
+      "line": 149,
       "path": "/contracts",
       "surface": "legacy_mount"
     },
     {
       "file": "admin-ui/src/pages/contracts/ContractDetailPage.tsx",
-      "line": 121,
+      "line": 122,
+      "path": "/contracts",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/pages/contracts/PRContractsPage.tsx",
+      "line": 79,
       "path": "/contracts",
       "surface": "legacy_mount"
     },
@@ -350,13 +278,13 @@
     },
     {
       "file": "admin-ui/src/pages/contracts/ContractsPage.tsx",
-      "line": 178,
+      "line": 198,
       "path": "/contracts/${c.id}",
       "surface": "legacy_mount"
     },
     {
       "file": "admin-ui/src/pages/users/UserDetailPage.tsx",
-      "line": 197,
+      "line": 198,
       "path": "/contracts/${c.id}",
       "surface": "legacy_mount"
     },
@@ -367,152 +295,14 @@
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/features/contract-wizard/components/AddendumForm.tsx",
-      "line": 31,
-      "path": "/contracts/${contractId}/addendum",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/components/AddendumList.tsx",
-      "line": 43,
-      "path": "/contracts/${contractId}/addendum",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/components/AddendumForm.tsx",
-      "line": 44,
-      "path": "/contracts/${contractId}/addendum/sign/initiate",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/components/steps/CommissionStep.tsx",
-      "line": 29,
-      "path": "/contracts/${contractId}/commission/invoice",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/components/RevokeContractButton.tsx",
-      "line": 18,
-      "path": "/contracts/${contractId}/revoke",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/pages/contracts/ContractDetailPage.tsx",
-      "line": 63,
-      "path": "/contracts/${id}",
-      "surface": "legacy_mount"
-    },
-    {
       "file": "amline-ui/app/contracts/[id]/page.tsx",
       "line": 41,
       "path": "/contracts/${id}",
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 75,
-      "path": "/contracts/${id}/add-witness",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 57,
-      "path": "/contracts/${id}/dating",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 54,
-      "path": "/contracts/${id}/home-info",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 60,
-      "path": "/contracts/${id}/mortgage",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 48,
-      "path": "/contracts/${id}/party/${partyId}",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 51,
-      "path": "/contracts/${id}/party/${partyId}",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 36,
-      "path": "/contracts/${id}/party/landlord",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 39,
-      "path": "/contracts/${id}/party/landlord/set",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 42,
-      "path": "/contracts/${id}/party/tenant",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 45,
-      "path": "/contracts/${id}/party/tenant/set",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 63,
-      "path": "/contracts/${id}/renting",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 66,
-      "path": "/contracts/${id}/sign",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 72,
-      "path": "/contracts/${id}/sign/set",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 69,
-      "path": "/contracts/${id}/sign/verify",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 84,
-      "path": "/contracts/${id}/status",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 78,
-      "path": "/contracts/${id}/witness/send-otp",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 81,
-      "path": "/contracts/${id}/witness/verify",
-      "surface": "legacy_mount"
-    },
-    {
       "file": "admin-ui/src/pages/contracts/LegalReviewQueuePage.tsx",
-      "line": 84,
+      "line": 85,
       "path": "/contracts/${row.contract_id}",
       "surface": "legacy_mount"
     },
@@ -523,27 +313,21 @@
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 20,
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 69,
       "path": "/contracts/legal-queue",
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 87,
-      "path": "/contracts/list",
+      "file": "admin-ui/src/pages/contracts/PRContractsPage.tsx",
+      "line": 61,
+      "path": "/contracts/legal-queue",
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/pages/contracts/ContractsPage.tsx",
-      "line": 60,
-      "path": "/contracts/list",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/pages/users/UserDetailPage.tsx",
-      "line": 78,
-      "path": "/contracts/list",
+      "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
+      "line": 283,
+      "path": "/contracts/legal-queue",
       "surface": "legacy_mount"
     },
     {
@@ -553,32 +337,38 @@
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 33,
-      "path": "/contracts/start",
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 56,
+      "path": "/contracts/pr-contracts",
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 19,
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 62,
       "path": "/contracts/wizard",
       "surface": "legacy_mount"
     },
     {
       "file": "admin-ui/src/pages/contracts/ContractsPage.tsx",
-      "line": 94,
+      "line": 113,
       "path": "/contracts/wizard",
       "surface": "legacy_mount"
     },
     {
       "file": "admin-ui/src/pages/contracts/LegalReviewQueuePage.tsx",
-      "line": 45,
+      "line": 46,
+      "path": "/contracts/wizard",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/pages/contracts/PRContractsPage.tsx",
+      "line": 22,
       "path": "/contracts/wizard",
       "surface": "legacy_mount"
     },
     {
       "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
-      "line": 82,
+      "line": 387,
       "path": "/contracts/wizard",
       "surface": "legacy_mount"
     },
@@ -601,8 +391,8 @@
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 21,
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 81,
       "path": "/crm",
       "surface": "other_slash"
     },
@@ -614,7 +404,19 @@
     },
     {
       "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
-      "line": 90,
+      "line": 274,
+      "path": "/crm",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
+      "line": 307,
+      "path": "/crm",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
+      "line": 401,
       "path": "/crm",
       "surface": "other_slash"
     },
@@ -632,37 +434,43 @@
     },
     {
       "file": "admin-ui/src/App.tsx",
-      "line": 82,
+      "line": 83,
       "path": "/dashboard",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/App.tsx",
-      "line": 190,
+      "line": 205,
+      "path": "/dashboard",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/components/auth/AccessDenied.tsx",
+      "line": 20,
+      "path": "/dashboard",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 38,
       "path": "/dashboard",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 17,
-      "path": "/dashboard",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 179,
+      "line": 149,
       "path": "/dashboard",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/pages/auth/LoginPage.tsx",
-      "line": 44,
+      "line": 35,
       "path": "/dashboard",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/pages/auth/LoginPage.tsx",
-      "line": 79,
+      "line": 70,
       "path": "/dashboard",
       "surface": "other_slash"
     },
@@ -673,9 +481,9 @@
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/features/contract-wizard/api/contractApi.ts",
-      "line": 96,
-      "path": "/files/upload",
+      "file": "admin-ui/src/lib/api.ts",
+      "line": 3,
+      "path": "/financials",
       "surface": "legacy_mount"
     },
     {
@@ -686,13 +494,13 @@
     },
     {
       "file": "admin-ui/src/features/contract-wizard/components/steps/CommissionStep.tsx",
-      "line": 41,
+      "line": 42,
       "path": "/financials/bank/gateway",
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 28,
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 138,
       "path": "/integrations",
       "surface": "other_slash"
     },
@@ -704,25 +512,25 @@
     },
     {
       "file": "admin-ui/src/App.tsx",
-      "line": 42,
+      "line": 43,
       "path": "/login",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/App.tsx",
-      "line": 72,
+      "line": 73,
       "path": "/login",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 109,
+      "line": 57,
       "path": "/login",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/pages/settings/SettingsPage.tsx",
-      "line": 305,
+      "line": 306,
       "path": "/login",
       "surface": "other_slash"
     },
@@ -769,69 +577,106 @@
       "surface": "other_slash"
     },
     {
-      "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 25,
+      "file": "site/components/SiteFooter.tsx",
+      "line": 54,
+      "path": "/miniapp",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/components/SiteNav.tsx",
+      "line": 16,
+      "path": "/miniapp",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/components/landing/ChannelsSection.tsx",
+      "line": 89,
+      "path": "/miniapp",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/components/NotificationsBell.tsx",
+      "line": 63,
+      "path": "/notifications",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 120,
+      "path": "/notifications",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
+      "line": 265,
+      "path": "/notifications",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 107,
       "path": "/payments",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/pages/ads/AdsPage.tsx",
-      "line": 240,
+      "line": 241,
       "path": "/search/listings",
       "surface": "other_slash"
     },
     {
-      "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 27,
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 132,
       "path": "/settings",
       "surface": "other_slash"
     },
     {
-      "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 23,
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 95,
       "path": "/users",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
-      "line": 98,
+      "line": 410,
       "path": "/users",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/pages/users/UserDetailPage.tsx",
-      "line": 107,
+      "line": 108,
       "path": "/users",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/pages/users/UsersPage.tsx",
-      "line": 141,
+      "line": 142,
       "path": "/users/${u.id}",
       "surface": "other_slash"
     },
     {
-      "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 24,
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 101,
       "path": "/wallets",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/pages/payments/PaymentsPage.tsx",
-      "line": 77,
+      "line": 78,
       "path": "/wallets",
       "surface": "other_slash"
     }
   ],
-  "entry_count": 137,
+  "entry_count": 111,
   "generator": "scripts/inventory_frontend_http_calls.py",
   "repo_root_hint": "Amline_namAvaran",
   "scan_roots": [
     "amline-ui",
     "admin-ui/src",
     "site/app",
+    "site/components",
     "packages/amline-ui-core/src"
   ],
-  "sha256_prefix": "445216c4edb5554f",
+  "sha256_prefix": "260a777fa215823f",
   "version": 1
 }

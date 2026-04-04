@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { apiClient } from '../../lib/api'
+import { apiV1 } from '../../lib/apiPaths'
 
 interface UserDetail {
   id: string
@@ -66,7 +67,7 @@ export default function UserDetailPage() {
   const { data: user, isLoading, isError } = useQuery<UserDetail>({
     queryKey: ['user', id],
     queryFn: async () => {
-      const res = await apiClient.get<UserDetail>(`/admin/users/${id}`)
+      const res = await apiClient.get<UserDetail>(apiV1(`admin/users/${id}`))
       return res.data
     },
     enabled: !!id,
@@ -75,7 +76,7 @@ export default function UserDetailPage() {
   const { data: contractsData } = useQuery<ContractsListResponse>({
     queryKey: ['user-contracts', id],
     queryFn: async () => {
-      const res = await apiClient.get<ContractsListResponse>('/contracts/list', {
+      const res = await apiClient.get<ContractsListResponse>(apiV1('contracts/list'), {
         params: { user_id: id, limit: 10 },
       })
       return res.data

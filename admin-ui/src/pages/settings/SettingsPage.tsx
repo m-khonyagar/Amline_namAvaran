@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../../hooks/useAuth'
 import { cn } from '../../lib/cn'
 import { apiClient } from '../../lib/api'
+import { apiV1 } from '../../lib/apiPaths'
 
 type Tab = 'profile' | 'security' | 'notifications' | 'system'
 
@@ -221,7 +222,7 @@ function SystemTab() {
   const metaQ = useQuery({
     queryKey: ['meta-context'],
     queryFn: async () => {
-      const res = await apiClient.get<MetaContext>('/api/v1/meta/context')
+      const res = await apiClient.get<MetaContext>(apiV1('meta/context'))
       return res.data
     },
     enabled: hasPermission('listings:read'),

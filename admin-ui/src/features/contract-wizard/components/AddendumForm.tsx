@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { apiV1 } from '@/lib/apiPaths';
 import { apiClient } from '../api/contractApi';
 import { StepErrorBanner } from './StepErrorBanner';
 import { useMappedStepError } from '../hooks/useMappedStepError';
@@ -28,7 +29,7 @@ export function AddendumForm({ contractId, onSuccess, onCancel }: AddendumFormPr
   async function onSubmit(data: AddendumFormData) {
     clear();
     try {
-      await apiClient.post(`/contracts/${contractId}/addendum`, {
+      await apiClient.post(apiV1(`contracts/${contractId}/addendum`), {
         subject: data.subject,
         content: data.content,
       });
@@ -41,7 +42,7 @@ export function AddendumForm({ contractId, onSuccess, onCancel }: AddendumFormPr
   async function handleInitiateSign() {
     clear();
     try {
-      await apiClient.post(`/contracts/${contractId}/addendum/sign/initiate`);
+      await apiClient.post(apiV1(`contracts/${contractId}/addendum/sign/initiate`));
       onSuccess();
     } catch (err: unknown) {
       setFromError(err);

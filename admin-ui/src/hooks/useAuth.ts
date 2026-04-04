@@ -4,6 +4,7 @@
  */
 import { useState, useEffect, useCallback } from 'react'
 import { apiClient } from '../lib/api'
+import { apiV1 } from '../lib/apiPaths'
 import { ensureMappedError } from '../lib/errorMapper'
 import { CookieNames, getCookie, removeCookie, setCookie } from '../lib/cookies'
 import { EXPLICIT_FULL_DEV_PERMISSIONS, isDevBypassEnv, permissionMatches } from '../lib/permissions'
@@ -58,7 +59,7 @@ export function useAuth() {
     }
 
     try {
-      const response = await apiClient.get<User>('/auth/me')
+      const response = await apiClient.get<User>(apiV1('auth/me'))
       const user = response.data
       setCookie(CookieNames.USER, JSON.stringify(user), 1)
       setAuthState({ user, isAuthenticated: true, isLoading: false })
@@ -90,7 +91,7 @@ export function useAuth() {
         access_token?: string
         refresh_token?: string
         user?: User
-      }>('/admin/login', { mobile, otp })
+      }>(apiV1('admin/login'), { mobile, otp })
 
       const { access_token, refresh_token } = response.data
 
@@ -98,7 +99,7 @@ export function useAuth() {
       if (refresh_token) setCookie(CookieNames.REFRESH_TOKEN, refresh_token, 30)
 
       // برای حالت session/httpOnly، user را از /auth/me می‌گیریم.
-      const me = await apiClient.get<User>('/auth/me')
+      const me = await apiClient.get<User>(apiV1('auth/me'))
       const user = me.data
       setCookie(CookieNames.USER, JSON.stringify(user), 1)
       setAuthState({ user, isAuthenticated: true, isLoading: false })
@@ -112,7 +113,7 @@ export function useAuth() {
 
   const sendOtp = async (mobile: string) => {
     try {
-      await apiClient.post('/admin/otp/send', { mobile })
+      await apiClient.post(apiV1('admin/otp/send'), { mobile })
       return { success: true }
     } catch (error: unknown) {
       const m = ensureMappedError(error)

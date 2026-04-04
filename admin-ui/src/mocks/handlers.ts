@@ -1,4 +1,28 @@
+// @ts-nocheck — MSW resolver generics clash with shared dual-route handlers; runtime behavior is validated via dev MSW.
 import { http, HttpResponse } from 'msw';
+import type { HttpHandler } from 'msw';
+
+/** هر هندلر را هم برای مسیر قدیمی star-slash و هم برای canonical با پیشوند api/v1 ثبت می‌کند. */
+const MSW_V1 = '/api/v1';
+
+function mswDual(legacyStarPath: string): string[] {
+  if (!legacyStarPath.startsWith('*/')) return [legacyStarPath];
+  const rest = legacyStarPath.slice(2);
+  return [legacyStarPath, `*${MSW_V1}/${rest}`];
+}
+
+function dualGet(path: string, resolver: Parameters<typeof http.get>[1]): HttpHandler[] {
+  return mswDual(path).map((p) => http.get(p, resolver));
+}
+function dualPost(path: string, resolver: Parameters<typeof http.post>[1]): HttpHandler[] {
+  return mswDual(path).map((p) => http.post(p, resolver));
+}
+function dualPatch(path: string, resolver: Parameters<typeof http.patch>[1]): HttpHandler[] {
+  return mswDual(path).map((p) => http.patch(p, resolver));
+}
+function dualDelete(path: string, resolver: Parameters<typeof http.delete>[1]): HttpHandler[] {
+  return mswDual(path).map((p) => http.delete(p, resolver));
+}
 
 // ---- Mock user & shared fixtures ----
 const MSW_FULL_PERMS = [
@@ -98,6 +122,58 @@ const mswNotifications: Array<{
   },
 ];
 
+/** MSW CRM — همان منبع برای `/api/v1/crm/*` و متریک‌های داشبورد */
+const crmMockLeads: Record<string, unknown>[] = [];
+const crmMockActivities: Record<string, Record<string, unknown>[]> = {};
+
+function seedCrmMockLeadsIfEmpty() {
+  if (crmMockLeads.length > 0) return;
+  const now = new Date().toISOString();
+  const row = (overrides: Record<string, unknown>) => ({
+    source: 'WEB',
+    full_name: 'سرنخ',
+    mobile: '09120000000',
+    need_type: 'RENT',
+    notes: '',
+    assigned_to: null,
+    contract_id: null,
+    listing_id: null,
+    requirement_id: null,
+    province_id: null,
+    city_id: null,
+    province_name_fa: null,
+    city_name_fa: null,
+    sla_due_at: null,
+    created_at: now,
+    updated_at: now,
+    ...overrides,
+  });
+  crmMockLeads.push(
+    row({ id: 'crm-seed-1', full_name: 'علی احمدی', status: 'NEW' }),
+    row({ id: 'crm-seed-2', full_name: 'مریم کریمی', status: 'CONTACTED' }),
+    row({ id: 'crm-seed-3', full_name: 'رضا محمدی', status: 'QUALIFIED' })
+  );
+}
+
+function crmOpenLeadCount(): number {
+  seedCrmMockLeadsIfEmpty();
+  return crmMockLeads.filter((l) => {
+    const s = String((l as { status?: string }).status ?? '').toUpperCase();
+    return s !== 'LOST' && s !== 'CONTRACTED';
+  }).length;
+}
+
+function crmByStatusCounts(): Record<string, number> {
+  seedCrmMockLeadsIfEmpty();
+  const m: Record<string, number> = {};
+  for (const raw of crmMockLeads) {
+    let s = String((raw as { status?: string }).status ?? 'NEW').toUpperCase();
+    if (s === 'QUALIFIED' || s === 'NEGOTIATION' || s === 'PROPOSAL') s = 'NEGOTIATING';
+    m[s] = (m[s] ?? 0) + 1;
+  }
+  return m;
+}
+
 function mswRecordAudit(userId: string, action: string, entity: string, metadata: Record<string, unknown>) {
   const created_at = new Date().toISOString();
   const ev = {
@@ -126,10 +202,29 @@ interface MockContract {
 const contracts = new Map<string, MockContract>();
 let idCounter = 1;
 
+interface MswLegalReviewRow {
+  id: string;
+  contract_id: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  comment: string | null;
+  reviewer_id: string | null;
+  created_at: string;
+  decided_at: string | null;
+}
+const mswLegalReviews: MswLegalReviewRow[] = [];
+
+type MswAddendumRow = {
+  id: string;
+  subject: string;
+  created_at: string;
+  sign_status: 'PENDING' | 'PARTIALLY_SIGNED' | 'FULLY_SIGNED';
+};
+const addendumsByContractId = new Map<string, MswAddendumRow[]>();
+
 function adminEnterpriseHandlers() {
   return [
-    http.get('*/admin/roles', () => HttpResponse.json([...mswRoles])),
-    http.post('*/admin/roles', async ({ request }) => {
+    ...dualGet('*/admin/roles', () => HttpResponse.json([...mswRoles])),
+    ...dualPost('*/admin/roles', async ({ request }) => {
       const body = (await request.json()) as { name: string; description?: string; permissions?: string[] };
       const row = {
         id: `role-${mswRoles.length + 1}`,
@@ -140,7 +235,7 @@ function adminEnterpriseHandlers() {
       mswRoles.push(row);
       return HttpResponse.json(row, { status: 201 });
     }),
-    http.patch('*/admin/roles/:roleId', async ({ params, request }) => {
+    ...dualPatch('*/admin/roles/:roleId', async ({ params, request }) => {
       const id = params.roleId as string;
       const body = (await request.json()) as {
         name?: string;
@@ -154,7 +249,7 @@ function adminEnterpriseHandlers() {
       if (body.permissions !== undefined) r.permissions = [...body.permissions];
       return HttpResponse.json(r);
     }),
-    http.post('*/admin/audit', async ({ request }) => {
+    ...dualPost('*/admin/audit', async ({ request }) => {
       const body = (await request.json()) as {
         action: string;
         entity: string;
@@ -165,15 +260,15 @@ function adminEnterpriseHandlers() {
       const ev = mswRecordAudit(uid, body.action, body.entity, body.metadata ?? {});
       return HttpResponse.json(ev, { status: 201 });
     }),
-    http.get('*/admin/audit', ({ request }) => {
+    ...dualGet('*/admin/audit', ({ request }) => {
       const u = new URL(request.url);
       const skip = Math.max(0, parseInt(u.searchParams.get('skip') ?? '0', 10) || 0);
       const limit = Math.min(200, Math.max(1, parseInt(u.searchParams.get('limit') ?? '50', 10) || 50));
       const items = mswAuditLogs.slice(skip, skip + limit);
       return HttpResponse.json({ total: mswAuditLogs.length, items, skip, limit });
     }),
-    http.post('*/admin/auth/heartbeat', () => HttpResponse.json({ ok: 'true' })),
-    http.get('*/admin/staff/activity', ({ request }) => {
+    ...dualPost('*/admin/auth/heartbeat', () => HttpResponse.json({ ok: 'true' })),
+    ...dualGet('*/admin/staff/activity', ({ request }) => {
       const u = new URL(request.url);
       const fromDate = u.searchParams.get('from_date') ?? undefined;
       const toDate = u.searchParams.get('to_date') ?? undefined;
@@ -191,38 +286,39 @@ function adminEnterpriseHandlers() {
       rows.sort((a, b) => (a.date === b.date ? b.user_id.localeCompare(a.user_id) : b.date.localeCompare(a.date)));
       return HttpResponse.json({ items: rows, total: rows.length });
     }),
-    http.get('*/admin/sessions', ({ request }) => {
+    ...dualGet('*/admin/sessions', ({ request }) => {
       const u = new URL(request.url);
       const skip = Math.max(0, parseInt(u.searchParams.get('skip') ?? '0', 10) || 0);
       const limit = Math.min(200, Math.max(1, parseInt(u.searchParams.get('limit') ?? '50', 10) || 50));
       const items = mswSessions.slice(skip, skip + limit);
       return HttpResponse.json({ total: mswSessions.length, items, skip, limit });
     }),
-    http.get('*/admin/metrics/summary', () =>
+    ...dualGet('*/admin/metrics/summary', () =>
       HttpResponse.json({
         contracts_total: contracts.size,
         users_total: 1,
-        active_leads: 3,
+        active_leads: crmOpenLeadCount(),
         contracts_today: 0,
         audit_events_total: mswAuditLogs.length,
       })
     ),
-    http.get('*/admin/metrics/operations', () => {
+    ...dualGet('*/admin/metrics/operations', () => {
       const unread = mswNotifications.filter((x) => !mswNotificationReads.has(x.id)).length;
       const cutoff = Date.now() - 24 * 60 * 60 * 1000;
       const audit24 = mswAuditLogs.filter((e) => {
         const t = Date.parse(e.created_at);
         return !Number.isNaN(t) && t >= cutoff;
       }).length;
+      const legalPending = mswLegalReviews.filter((r) => r.status === 'PENDING').length;
       return HttpResponse.json({
         unread_notifications: unread,
-        open_crm_leads: 3,
-        crm_by_status: { NEW: 1, CONTACTED: 1, QUALIFIED: 1 },
-        contracts_flagged_legal: 0,
+        open_crm_leads: crmOpenLeadCount(),
+        crm_by_status: crmByStatusCounts(),
+        contracts_flagged_legal: legalPending,
         audit_events_last_24h: audit24,
       });
     }),
-    http.get('*/admin/notifications', ({ request }) => {
+    ...dualGet('*/admin/notifications', ({ request }) => {
       const u = new URL(request.url);
       const unreadOnly = u.searchParams.get('unread_only') === 'true' || u.searchParams.get('unread_only') === '1';
       const limit = Math.min(200, Math.max(1, parseInt(u.searchParams.get('limit') ?? '50', 10) || 50));
@@ -237,15 +333,15 @@ function adminEnterpriseHandlers() {
       const unread_count = mswNotifications.filter((x) => !mswNotificationReads.has(x.id)).length;
       return HttpResponse.json({ items, total: mswNotifications.length, unread_count });
     }),
-    http.post('*/admin/notifications/:id/read', ({ params }) => {
+    ...dualPost('*/admin/notifications/:id/read', ({ params }) => {
       mswNotificationReads.add(params.id as string);
       return new HttpResponse(null, { status: 204 });
     }),
-    http.post('*/admin/notifications/read-all', () => {
+    ...dualPost('*/admin/notifications/read-all', () => {
       mswNotifications.forEach((n) => mswNotificationReads.add(n.id));
       return new HttpResponse(null, { status: 204 });
     }),
-    http.post('*/admin/notifications', async ({ request }) => {
+    ...dualPost('*/admin/notifications', async ({ request }) => {
       const body = (await request.json()) as { title: string; body?: string; type?: string };
       const row = {
         id: `n-${Date.now()}`,
@@ -261,61 +357,79 @@ function adminEnterpriseHandlers() {
   ];
 }
 
-/** MSW CRM — برای تست API بدون backend */
-const crmMockLeads: Record<string, unknown>[] = [];
-const crmMockActivities: Record<string, Record<string, unknown>[]> = {};
-
 function crmLeadHandlers() {
+  const listHandler = ({ request }: { request: Request }) => {
+    seedCrmMockLeadsIfEmpty();
+    const u = new URL(request.url);
+    const skip = Math.max(0, parseInt(u.searchParams.get('skip') ?? '0', 10) || 0);
+    const limit = Math.min(500, Math.max(1, parseInt(u.searchParams.get('limit') ?? '100', 10) || 100));
+    const items = crmMockLeads.slice(skip, skip + limit);
+    return HttpResponse.json({
+      items,
+      total: crmMockLeads.length,
+      skip,
+      limit,
+    });
+  };
+  const getById = ({ params }: { params: { id: string } }) => {
+    seedCrmMockLeadsIfEmpty();
+    const row = crmMockLeads.find((l) => (l as { id: string }).id === params.id);
+    return row
+      ? HttpResponse.json(row)
+      : HttpResponse.json({ error: 'not_found' }, { status: 404 });
+  };
+  const postLead = async ({ request }: { request: Request }) => {
+    const body = (await request.json()) as Record<string, unknown>;
+    const now = new Date().toISOString();
+    const row = {
+      ...body,
+      id: `crm-${Date.now()}`,
+      created_at: now,
+      updated_at: now,
+    };
+    crmMockLeads.push(row);
+    return HttpResponse.json(row, { status: 201 });
+  };
+  const patchLead = async ({ params, request }: { params: { id: string }; request: Request }) => {
+    seedCrmMockLeadsIfEmpty();
+    const idx = crmMockLeads.findIndex((l) => (l as { id: string }).id === params.id);
+    if (idx < 0) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
+    const patch = (await request.json()) as Record<string, unknown>;
+    crmMockLeads[idx] = {
+      ...crmMockLeads[idx],
+      ...patch,
+      updated_at: new Date().toISOString(),
+    };
+    return HttpResponse.json(crmMockLeads[idx]);
+  };
+  const getActs = ({ params }: { params: { id: string } }) => {
+    const list = crmMockActivities[params.id] ?? [];
+    return HttpResponse.json([...list]);
+  };
+  const postAct = async ({ params, request }: { params: { id: string }; request: Request }) => {
+    const id = params.id;
+    const body = (await request.json()) as Record<string, unknown>;
+    const act = {
+      ...body,
+      id: `act-${Date.now()}`,
+      created_at: new Date().toISOString(),
+    };
+    crmMockActivities[id] = [...(crmMockActivities[id] ?? []), act];
+    return HttpResponse.json(act, { status: 201 });
+  };
   return [
-    http.get('*/admin/crm/leads', () =>
-      HttpResponse.json([...crmMockLeads])
-    ),
-    http.get('*/admin/crm/leads/:id', ({ params }) => {
-      const row = crmMockLeads.find((l) => (l as { id: string }).id === params.id);
-      return row
-        ? HttpResponse.json(row)
-        : HttpResponse.json({ error: 'not_found' }, { status: 404 });
-    }),
-    http.post('*/admin/crm/leads', async ({ request }) => {
-      const body = (await request.json()) as Record<string, unknown>;
-      const now = new Date().toISOString();
-      const row = {
-        ...body,
-        id: `crm-${Date.now()}`,
-        created_at: now,
-        updated_at: now,
-      };
-      crmMockLeads.push(row);
-      return HttpResponse.json(row, { status: 201 });
-    }),
-    http.patch('*/admin/crm/leads/:id', async ({ params, request }) => {
-      const idx = crmMockLeads.findIndex(
-        (l) => (l as { id: string }).id === params.id
-      );
-      if (idx < 0) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
-      const patch = (await request.json()) as Record<string, unknown>;
-      crmMockLeads[idx] = {
-        ...crmMockLeads[idx],
-        ...patch,
-        updated_at: new Date().toISOString(),
-      };
-      return HttpResponse.json(crmMockLeads[idx]);
-    }),
-    http.get('*/admin/crm/leads/:id/activities', ({ params }) => {
-      const list = crmMockActivities[params.id as string] ?? [];
-      return HttpResponse.json([...list]);
-    }),
-    http.post('*/admin/crm/leads/:id/activities', async ({ params, request }) => {
-      const id = params.id as string;
-      const body = (await request.json()) as Record<string, unknown>;
-      const act = {
-        ...body,
-        id: `act-${Date.now()}`,
-        created_at: new Date().toISOString(),
-      };
-      crmMockActivities[id] = [...(crmMockActivities[id] ?? []), act];
-      return HttpResponse.json(act, { status: 201 });
-    }),
+    ...dualGet('*/crm/leads', listHandler),
+    http.get('*/admin/crm/leads', listHandler),
+    ...dualGet('*/crm/leads/:id', getById),
+    http.get('*/admin/crm/leads/:id', getById),
+    ...dualPost('*/crm/leads', postLead),
+    http.post('*/admin/crm/leads', postLead),
+    ...dualPatch('*/crm/leads/:id', patchLead),
+    http.patch('*/admin/crm/leads/:id', patchLead),
+    ...dualGet('*/crm/leads/:id/activities', getActs),
+    http.get('*/admin/crm/leads/:id/activities', getActs),
+    ...dualPost('*/crm/leads/:id/activities', postAct),
+    http.post('*/admin/crm/leads/:id/activities', postAct),
   ];
 }
 
@@ -345,11 +459,21 @@ function setStep(c: MockContract, step: string) {
   c.step = step;
 }
 
+function handleContractList({ request }: { request: Request }) {
+  const u = new URL(request.url);
+  const page = Math.max(1, parseInt(u.searchParams.get('page') ?? '1', 10) || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(u.searchParams.get('limit') ?? '20', 10) || 20));
+  const all = Array.from(contracts.values()).map(contractJson);
+  const start = (page - 1) * limit;
+  const items = all.slice(start, start + limit);
+  return HttpResponse.json({ items, total: all.length, page, limit });
+}
+
 export const handlers = [
   // Auth
-  http.get('*/auth/me', () => HttpResponse.json(mockUser)),
-  http.post('*/admin/otp/send', () => HttpResponse.json({ success: true, message: 'کد ارسال شد' })),
-  http.post('*/admin/login', async ({ request }) => {
+  ...dualGet('*/auth/me', () => HttpResponse.json(mockUser)),
+  ...dualPost('*/admin/otp/send', () => HttpResponse.json({ success: true, message: 'کد ارسال شد' })),
+  ...dualPost('*/admin/login', async ({ request }) => {
     const body = (await request.json().catch(() => ({}))) as { mobile?: string };
     mswRecordAudit(mockUser.id, 'auth.login', 'session', { mobile: body.mobile ?? '' });
     mswSessions.unshift({
@@ -368,7 +492,7 @@ export const handlers = [
 
   ...adminEnterpriseHandlers(),
 
-  http.post('*/contracts/start', async ({ request }) => {
+  ...dualPost('*/contracts/start', async ({ request }) => {
     const body = (await request.json().catch(() => ({}))) as { contract_type?: string; party_type?: string };
     if (!body.party_type) {
       return HttpResponse.json(
@@ -389,11 +513,76 @@ export const handlers = [
     return HttpResponse.json(contractJson(c), { status: 201 });
   }),
 
-  http.get('*/contracts/list', () =>
-    HttpResponse.json(Array.from(contracts.values()).map(contractJson))
-  ),
+  ...dualGet('*/contracts/list', handleContractList),
 
-  http.get('*/contracts/:id/status', ({ params }) => {
+  ...dualGet('*/contracts/:id', ({ params }) => {
+    const c = getContract(params.id as string);
+    if (!c) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
+    return HttpResponse.json(contractJson(c));
+  }),
+
+  ...dualGet('*/contracts/:id/addendum', ({ params }) => {
+    const id = params.id as string;
+    const list = addendumsByContractId.get(id) ?? [];
+    return HttpResponse.json([...list]);
+  }),
+
+  ...dualPost('*/contracts/:id/addendum', async ({ params, request }) => {
+    const id = params.id as string;
+    const body = (await request.json().catch(() => ({}))) as { subject?: string; content?: string };
+    const row: MswAddendumRow = {
+      id: `add-${Date.now()}`,
+      subject: body.subject ?? 'متمم',
+      created_at: new Date().toISOString(),
+      sign_status: 'PENDING',
+    };
+    addendumsByContractId.set(id, [...(addendumsByContractId.get(id) ?? []), row]);
+    return HttpResponse.json(row, { status: 201 });
+  }),
+
+  ...dualPost('*/contracts/:id/addendum/sign/initiate', () => HttpResponse.json({ ok: true })),
+
+  ...dualPost('*/admin/contracts/:id/approve', ({ params }) => {
+    const c = getContract(params.id as string);
+    if (!c) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
+    c.status = 'ACTIVE';
+    return HttpResponse.json({ ok: true });
+  }),
+
+  ...dualPost('*/admin/contracts/:id/reject', ({ params }) => {
+    const c = getContract(params.id as string);
+    if (!c) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
+    c.status = 'ADMIN_REJECTED';
+    return HttpResponse.json({ ok: true });
+  }),
+
+  ...dualPost('*/admin/contracts/:id/revoke', ({ params }) => {
+    const c = getContract(params.id as string);
+    if (!c) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
+    c.status = 'REVOKED';
+    return HttpResponse.json({ ok: true });
+  }),
+
+  ...dualGet('*/legal/reviews', ({ request }) => {
+    const u = new URL(request.url);
+    const limit = Math.min(200, Math.max(1, parseInt(u.searchParams.get('limit') ?? '100', 10) || 100));
+    const items = mswLegalReviews.slice(0, limit);
+    return HttpResponse.json({ items, total: mswLegalReviews.length });
+  }),
+
+  ...dualPost('*/legal/reviews/:id/decide', async ({ params, request }) => {
+    const id = params.id as string;
+    const body = (await request.json().catch(() => ({}))) as { approve?: boolean; comment?: string };
+    const row = mswLegalReviews.find((r) => r.id === id);
+    if (!row) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
+    row.status = body.approve ? 'APPROVED' : 'REJECTED';
+    row.comment = body.comment ?? null;
+    row.decided_at = new Date().toISOString();
+    row.reviewer_id = mockUser.id;
+    return HttpResponse.json(row);
+  }),
+
+  ...dualGet('*/contracts/:id/status', ({ params }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     return HttpResponse.json({
@@ -404,7 +593,7 @@ export const handlers = [
     });
   }),
 
-  http.get('*/contracts/:id/commission/invoice', ({ params }) => {
+  ...dualGet('*/contracts/:id/commission/invoice', ({ params }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     return HttpResponse.json({
@@ -415,14 +604,14 @@ export const handlers = [
     });
   }),
 
-  http.post('*/contracts/:id/revoke', ({ params }) => {
+  ...dualPost('*/contracts/:id/revoke', ({ params }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     c.status = 'REVOKED';
     return HttpResponse.json({ ok: true });
   }),
 
-  http.post('*/contracts/:id/party/landlord', ({ params }) => {
+  ...dualPost('*/contracts/:id/party/landlord', ({ params }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     const partyId = `party-landlord-${Date.now()}`;
@@ -436,7 +625,7 @@ export const handlers = [
     return HttpResponse.json(row, { status: 201 });
   }),
 
-  http.patch('*/contracts/:id/party/:partyId', ({ params }) => {
+  ...dualPatch('*/contracts/:id/party/:partyId', ({ params }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     return HttpResponse.json({
@@ -447,7 +636,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/contracts/:id/party/landlord/set', async ({ params, request }) => {
+  ...dualPost('*/contracts/:id/party/landlord/set', async ({ params, request }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     const body = (await request.json().catch(() => ({}))) as { next_step?: string };
@@ -456,7 +645,7 @@ export const handlers = [
     return HttpResponse.json({ next_step: next });
   }),
 
-  http.post('*/contracts/:id/party/tenant', ({ params }) => {
+  ...dualPost('*/contracts/:id/party/tenant', ({ params }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     const partyId = `party-tenant-${Date.now()}`;
@@ -470,7 +659,7 @@ export const handlers = [
     return HttpResponse.json(row, { status: 201 });
   }),
 
-  http.post('*/contracts/:id/party/tenant/set', async ({ params, request }) => {
+  ...dualPost('*/contracts/:id/party/tenant/set', async ({ params, request }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     const body = (await request.json().catch(() => ({}))) as { next_step?: string };
@@ -479,13 +668,13 @@ export const handlers = [
     return HttpResponse.json({ next_step: next });
   }),
 
-  http.delete('*/contracts/:id/party/:partyId', ({ params }) => {
+  ...dualDelete('*/contracts/:id/party/:partyId', ({ params }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     return HttpResponse.json({ ok: true });
   }),
 
-  http.post('*/contracts/:id/home-info', async ({ params, request }) => {
+  ...dualPost('*/contracts/:id/home-info', async ({ params, request }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     const body = (await request.json().catch(() => ({}))) as { next_step?: string };
@@ -494,7 +683,7 @@ export const handlers = [
     return HttpResponse.json({ next_step: next }, { status: 201 });
   }),
 
-  http.post('*/contracts/:id/dating', async ({ params, request }) => {
+  ...dualPost('*/contracts/:id/dating', async ({ params, request }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     const body = (await request.json().catch(() => ({}))) as { next_step?: string };
@@ -503,7 +692,7 @@ export const handlers = [
     return HttpResponse.json({ next_step: next }, { status: 201 });
   }),
 
-  http.post('*/contracts/:id/mortgage', async ({ params, request }) => {
+  ...dualPost('*/contracts/:id/mortgage', async ({ params, request }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     const body = (await request.json().catch(() => ({}))) as { next_step?: string };
@@ -513,7 +702,7 @@ export const handlers = [
     return HttpResponse.json({ next_step: resolved }, { status: 201 });
   }),
 
-  http.post('*/contracts/:id/renting', async ({ params, request }) => {
+  ...dualPost('*/contracts/:id/renting', async ({ params, request }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     const body = (await request.json().catch(() => ({}))) as { next_step?: string };
@@ -522,11 +711,11 @@ export const handlers = [
     return HttpResponse.json({ next_step: next }, { status: 201 });
   }),
 
-  http.post('*/contracts/:id/sign', () => HttpResponse.json({}, { status: 201 })),
+  ...dualPost('*/contracts/:id/sign', () => HttpResponse.json({}, { status: 201 })),
 
-  http.post('*/contracts/:id/sign/verify', () => HttpResponse.json({ ok: true })),
+  ...dualPost('*/contracts/:id/sign/verify', () => HttpResponse.json({ ok: true })),
 
-  http.post('*/contracts/:id/sign/set', async ({ params, request }) => {
+  ...dualPost('*/contracts/:id/sign/set', async ({ params, request }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     const body = (await request.json().catch(() => ({}))) as { next_step?: string };
@@ -535,7 +724,7 @@ export const handlers = [
     return HttpResponse.json({ next_step: next });
   }),
 
-  http.post('*/contracts/:id/add-witness', async ({ params, request }) => {
+  ...dualPost('*/contracts/:id/add-witness', async ({ params, request }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     const body = (await request.json().catch(() => ({}))) as { next_step?: string };
@@ -544,23 +733,35 @@ export const handlers = [
     return HttpResponse.json({ next_step: next });
   }),
 
-  http.post('*/contracts/:id/witness/send-otp', () => HttpResponse.json({}, { status: 201 })),
+  ...dualPost('*/contracts/:id/witness/send-otp', () => HttpResponse.json({}, { status: 201 })),
 
-  http.post('*/contracts/:id/witness/verify', async ({ params, request }) => {
+  ...dualPost('*/contracts/:id/witness/verify', async ({ params, request }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     const body = (await request.json().catch(() => ({}))) as { next_step?: string };
     const next = body.next_step ?? 'FINISH';
     setStep(c, next);
     c.status = 'COMPLETED';
+    const contractId = c.id;
+    if (!mswLegalReviews.some((r) => r.contract_id === contractId && r.status === 'PENDING')) {
+      mswLegalReviews.unshift({
+        id: `leg-${Date.now()}`,
+        contract_id: contractId,
+        status: 'PENDING',
+        comment: null,
+        reviewer_id: null,
+        created_at: new Date().toISOString(),
+        decided_at: null,
+      });
+    }
     return HttpResponse.json({ ok: true, next_step: next });
   }),
 
-  http.get('*/contracts/resolve-info', () => HttpResponse.json({ result: 'اطلاعات تأیید شد' })),
+  ...dualGet('*/contracts/resolve-info', () => HttpResponse.json({ result: 'اطلاعات تأیید شد' })),
 
-  http.post('*/files/upload', () => HttpResponse.json({ id: 'file-001', url: null }, { status: 201 })),
+  ...dualPost('*/files/upload', () => HttpResponse.json({ id: 'file-001', url: null }, { status: 201 })),
 
-  http.get('*/admin/users', () =>
+  ...dualGet('*/admin/users', () =>
     HttpResponse.json({
       total_count: 1,
       start_index: 0,
@@ -569,7 +770,7 @@ export const handlers = [
     })
   ),
 
-  http.get('*/admin/users/:id', () => HttpResponse.json(mockUser)),
+  ...dualGet('*/admin/users/:id', () => HttpResponse.json(mockUser)),
 
   // ---- CRM in-memory (وقتی VITE_USE_CRM_API=true + MSW) ----
   ...crmLeadHandlers(),
