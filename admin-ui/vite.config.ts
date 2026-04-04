@@ -26,6 +26,7 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 3002,
+      host: true,
       proxy: {
         '/contracts': {
           target: proxyTarget,
