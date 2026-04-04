@@ -1,0 +1,29 @@
+# دیپلوی production — فقط دستی؛ تا اتصال واقعی (SSH/k8s) این workflow جایگزین job نمایشی قبلی در ci.yml است.
+#
+# GitHub → Environments → production: محدودیت تأیید و secrets را اینجا تنظیم کنید.
+
+name: Deploy production (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      notes:
+        description: 'یادداشت کوتاه برای لاگ دیپلوی (اختیاری)'
+        required: false
+        default: ''
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Placeholder — پیکربندی نشده
+        run: |
+          echo "Production deploy is not wired yet."
+          echo "Use .github/workflows/deploy-staging.yml for staging, or add kubectl/ssh steps here."
+          if [ -n "${{ inputs.notes }}" ]; then echo "Notes: ${{ inputs.notes }}"; fi
+          echo "::notice title=Deploy::Edit .github/workflows/deploy-production.yml to run real deploy commands."
