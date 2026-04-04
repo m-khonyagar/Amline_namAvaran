@@ -17,6 +17,7 @@ const NAV_CONFIG: NavConfig[] = [
   { to: '/dashboard', label: 'داشبورد', icon: '🏠' },
   { to: '/contracts', label: 'قراردادها', icon: '📄', permission: 'contracts:read' },
   { to: '/contracts/wizard', label: 'قرارداد جدید', icon: '✍️', permission: 'contracts:write' },
+  { to: '/contracts/legal-queue', label: 'صف حقوقی', icon: '⚖️', permission: 'legal:read' },
   { to: '/crm', label: 'CRM', icon: '📊' },
   { to: '/ads', label: 'آگهی‌ها', icon: '🏷️', permission: 'ads:read' },
   { to: '/users', label: 'کاربران', icon: '👥', permission: 'users:read' },

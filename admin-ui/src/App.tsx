@@ -9,6 +9,7 @@ import AdsPage from './pages/ads/AdsPage'
 import ContractsPage from './pages/contracts/ContractsPage'
 import ContractDetailPage from './pages/contracts/ContractDetailPage'
 import PRContractsPage from './pages/contracts/PRContractsPage'
+import LegalReviewQueuePage from './pages/contracts/LegalReviewQueuePage'
 import WalletsPage from './pages/wallets/WalletsPage'
 import PaymentsPage from './pages/payments/PaymentsPage'
 import SettingsPage from './pages/settings/SettingsPage'
@@ -106,6 +107,11 @@ function AppRoutes() {
             <Route index element={
               <PermissionGuard permission="contracts:read">
                 <ContractsPage />
+              </PermissionGuard>
+            } />
+            <Route path="legal-queue" element={
+              <PermissionGuard permission="legal:read">
+                <LegalReviewQueuePage />
               </PermissionGuard>
             } />
             <Route path=":id" element={

@@ -51,6 +51,38 @@ class ContractLifecycleStatus(str, Enum):
     CANCELLED = "CANCELLED"
 
 
+class ContractProductStatusV2(str, Enum):
+    """نمای محصول طبق Amline_Complete_Master_Spec_v2 §۳.۱ — نگاشت در STATUS_MAPPING_v2."""
+
+    DRAFT = "DRAFT"
+    AWAITING_SIGNATURES = "AWAITING_SIGNATURES"
+    SIGNED = "SIGNED"
+    REVIEWED_BY_EXPERT = "REVIEWED_BY_EXPERT"
+    FINALIZED = "FINALIZED"
+    TERMINATED = "TERMINATED"
+
+
+def lifecycle_status_to_product_v2(
+    storage_status: str,
+    *,
+    substate: Optional[str] = None,
+) -> str:
+    """Storage/SSOT → برچسب v2 برای API و فرانت."""
+    s = (storage_status or "").strip().upper()
+    sub = (substate or "").strip().lower() if substate else ""
+    if s in (ContractLifecycleStatus.REVOKED.value, ContractLifecycleStatus.CANCELLED.value):
+        return ContractProductStatusV2.TERMINATED.value
+    if s == ContractLifecycleStatus.COMPLETED.value:
+        return ContractProductStatusV2.FINALIZED.value
+    if s == ContractLifecycleStatus.EXECUTED.value:
+        if sub in ("legal_approved", "reviewed_by_expert", "expert_ok"):
+            return ContractProductStatusV2.REVIEWED_BY_EXPERT.value
+        return ContractProductStatusV2.SIGNED.value
+    if s == ContractLifecycleStatus.PENDING_SIGNATURES.value:
+        return ContractProductStatusV2.AWAITING_SIGNATURES.value
+    return ContractProductStatusV2.DRAFT.value
+
+
 _TERMINAL: FrozenSet[str] = frozenset(
     {
         ContractLifecycleStatus.COMPLETED.value,
@@ -123,7 +155,14 @@ _KIND_PARTY_ROLES: dict[str, FrozenSet[str]] = {
     ContractKind.RENT.value: frozenset({"LANDLORD", "TENANT"}),
     ContractKind.SALE.value: frozenset({"SELLER", "BUYER"}),
     ContractKind.EXCHANGE.value: frozenset(
-        {"EXCHANGER_A", "EXCHANGER_B", "EXCHANGER_PRIMARY", "EXCHANGER_COUNTER"}
+        {
+            "EXCHANGER_FIRST",
+            "EXCHANGER_SECOND",
+            "EXCHANGER_A",
+            "EXCHANGER_B",
+            "EXCHANGER_PRIMARY",
+            "EXCHANGER_COUNTER",
+        }
     ),
     ContractKind.CONSTRUCTION.value: frozenset({"LAND_OWNER", "CONTRACTOR"}),
     ContractKind.PRE_SALE.value: frozenset({"DEVELOPER", "BUYER"}),
@@ -141,6 +180,11 @@ _BUCKET_DEFAULT_ROLE: dict[str, str] = {
 
 def allowed_party_roles_for_kind(kind: str) -> FrozenSet[str]:
     return _KIND_PARTY_ROLES.get(kind, frozenset())
+
+
+def is_party_role_allowed_for_kind(kind: str, role: str) -> bool:
+    r = (role or "").strip().upper()
+    return r in allowed_party_roles_for_kind(kind)
 
 
 def default_ssot_role_for_bucket(bucket: str) -> Optional[str]:

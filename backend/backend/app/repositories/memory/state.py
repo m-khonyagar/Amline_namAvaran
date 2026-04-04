@@ -7,8 +7,11 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from app.core.errors import AmlineError
+from app.domain.contracts.ssot import lifecycle_status_to_product_v2
 
 FULL_ADMIN_PERMS = [
+    "legal:read",
+    "legal:write",
     "contracts:read",
     "contracts:write",
     "users:read",
@@ -231,6 +234,16 @@ class MemoryStore:
             if k in c:
                 out[k] = c[k]
         out["next_step"] = c.get("step")
+        out["lifecycle_v2"] = lifecycle_status_to_product_v2(
+            str(c.get("status", "")),
+            substate=c.get("substate"),
+        )
+        if "terms" in c:
+            out["terms"] = c["terms"]
+        if "commissions" in c:
+            out["commissions"] = c["commissions"]
+        if c.get("substate") is not None:
+            out["substate"] = c["substate"]
         return out
 
     def get_contract(self, cid: str) -> Dict[str, Any]:
