@@ -320,6 +320,12 @@ python scripts/gsc_export_all.py
 - اگر مرورگر **«connection refused»** روی پورت ۳۰۰۲ داد، ابتدا **`npm run dev`** در `admin-ui` را اجرا کنید.
 - برای فهرست URLها در dev: **`/dev/test-hub`**.
 
+### ۱۰.۶ چند اپ روی یک سرور (استقرار)
+
+- قرارداد مسیرها: **`/opt/apps/<app>/<env>/<role>/`** — اسکریپت مشترک SPA: **`/opt/apps/_shared/spa_static_server.py`** — ثبت پورت روی سرور: **`/opt/apps/_registry/ports.txt`**.
+- systemd: الگوی **`appsvc-<app>-<env>-<role>.service`** و هدف تجمیعی **`multi-app-static.target`**.
+- مستندات و چک‌لیست اپ جدید: **`infra/multi-app-server/`** — ثابت‌های پیش‌فرض در **`scripts/server_layout_constants.py`**.
+
 ---
 
 **این سند خلاصه جامع پروژه است. برای جزئیات هر بخش به مستندات اختصاصی مراجعه کنید.**

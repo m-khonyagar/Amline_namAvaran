@@ -8,8 +8,8 @@ Required environment variables (no secrets in repo):
   DEPLOY_PASSWORD   SSH password (use SSH keys in production)
 
 Optional:
-  ADMIN_REMOTE  default /opt/amline/staging/admin-ui
-  SITE_REMOTE   default /opt/amline/staging/site
+  ADMIN_REMOTE  default from server_layout_constants ( /opt/apps/amline/staging/admin-ui )
+  SITE_REMOTE   default marketing-site path ( /opt/apps/amline/staging/marketing-site )
   SKIP_SITE     set to "1" to deploy admin-ui only
 
 Run from monorepo root after `npm run build`.
@@ -24,14 +24,22 @@ from pathlib import Path
 
 import paramiko
 
+_script_dir = Path(__file__).resolve().parent
+if str(_script_dir) not in sys.path:
+    sys.path.insert(0, str(_script_dir))
+from server_layout_constants import (
+    PATH_AMLINE_STAGING_ADMIN_UI,
+    PATH_AMLINE_STAGING_MARKETING,
+)
+
 
 def main() -> None:
-    repo = Path(__file__).resolve().parent.parent
+    repo = _script_dir.parent
     host = os.environ.get("DEPLOY_HOST", "").strip()
     user = os.environ.get("DEPLOY_USER", "root").strip()
     password = os.environ.get("DEPLOY_PASSWORD", "")
-    admin_remote = os.environ.get("ADMIN_REMOTE", "/opt/amline/staging/admin-ui").strip()
-    site_remote = os.environ.get("SITE_REMOTE", "/opt/amline/staging/site").strip()
+    admin_remote = os.environ.get("ADMIN_REMOTE", PATH_AMLINE_STAGING_ADMIN_UI).strip()
+    site_remote = os.environ.get("SITE_REMOTE", PATH_AMLINE_STAGING_MARKETING).strip()
     skip_site = os.environ.get("SKIP_SITE", "").strip() in ("1", "true", "yes")
 
     if not host or not password:

@@ -4,6 +4,8 @@
 # GitHub → Settings → Secrets and variables:
 #   Variable: STAGING_DEPLOY_HOST (الزامی برای SCP)
 #   Variables (اختیاری): STAGING_API_URL, STAGING_ADMIN_REMOTE_DIR, STAGING_SITE_REMOTE_DIR
+#     پیش‌فرضها: /opt/apps/amline/staging/admin-ui و /opt/apps/amline/staging/marketing-site
+#     مستندات چند‌اپ: infra/multi-app-server/
 #     STAGING_MARKETING_URL, STAGING_APP_URL, STAGING_CONTACT_EMAIL
 #   Secret: STAGING_DEPLOY_SSH_KEY یا DEPLOY_SSH_KEY
 
@@ -100,9 +102,9 @@ jobs:
           HOST: ${{ vars.STAGING_DEPLOY_HOST }}
         run: |
           ADMIN_REMOTE="${{ vars.STAGING_ADMIN_REMOTE_DIR }}"
-          [ -z "$ADMIN_REMOTE" ] && ADMIN_REMOTE="/opt/amline/staging/admin-ui"
+          [ -z "$ADMIN_REMOTE" ] && ADMIN_REMOTE="/opt/apps/amline/staging/admin-ui"
           SITE_REMOTE="${{ vars.STAGING_SITE_REMOTE_DIR }}"
-          [ -z "$SITE_REMOTE" ] && SITE_REMOTE="/opt/amline/staging/site"
+          [ -z "$SITE_REMOTE" ] && SITE_REMOTE="/opt/apps/amline/staging/marketing-site"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.skip_site }}" = "true" ]; then
             SKIP_SITE="true"
           else

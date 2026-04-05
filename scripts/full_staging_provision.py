@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 """
-Full staging deploy: local build → SFTP static bundles → systemd + Python static SPA servers.
+Full staging deploy: local build → SFTP → /opt/apps/... → systemd (appsvc-*).
 
-بدون apt/nginx: برای سرورهایی که به مخازن اوبونتو دسترسی ندارند.
+چیدمان چند‌اپ: infra/multi-app-server/
 
-Env (required):
-  DEPLOY_HOST, DEPLOY_PASSWORD
-Optional:
-  DEPLOY_USER (default root)
-  SKIP_BUILD=1
-  STAGING_API_URL
+Env (required): DEPLOY_HOST, DEPLOY_PASSWORD
+Optional: DEPLOY_USER, SKIP_BUILD=1, STAGING_API_URL
 """
 from __future__ import annotations
 
@@ -23,13 +19,18 @@ from pathlib import Path
 
 import paramiko
 
-REPO = Path(__file__).resolve().parent.parent
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+import server_layout_constants as C
+
+REPO = _SCRIPT_DIR.parent
 ADMIN_DIST = REPO / "admin-ui" / "dist"
 SITE_OUT = REPO / "site" / "out"
-ADMIN_REMOTE = "/opt/amline/staging/admin-ui"
-SITE_REMOTE = "/opt/amline/staging/site"
 
-# سرور تک‌ریسمه: SPA fallback + چندنخی
+SITE_REMOTE = C.PATH_AMLINE_STAGING_MARKETING
+ADMIN_REMOTE = C.PATH_AMLINE_STAGING_ADMIN_UI
+
 SPA_STATIC_SERVER = r'''#!/usr/bin/env python3
 import os
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
@@ -56,62 +57,116 @@ if __name__ == "__main__":
     ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
 '''
 
-def remote_bootstrap_sh(site_remote: str, admin_remote: str) -> str:
-    # heredoc بدون کوتیشن تا $SITE_PORT داخل فایل unit به عدد تبدیل شود
+
+def remote_bootstrap_sh() -> str:
+    """Shell روی سرور: مهاجرت، README، registry، systemd جدید، خاموش کردن واحدهای قدیمی."""
+    m = C.PATH_AMLINE_STAGING_MARKETING
+    a = C.PATH_AMLINE_STAGING_ADMIN_UI
+    spa = C.PATH_SPA_STATIC_SERVER
+    um = C.UNIT_AMLINE_STAGING_MARKETING
+    ua = C.UNIT_AMLINE_STAGING_ADMIN_UI
+    tgt = C.SYSTEMD_TARGET_STATIC
+    leg_m = C.LEGACY_STAGING_SITE
+    leg_a = C.LEGACY_STAGING_ADMIN
+
+    legacy_disable = "\n".join(
+        f"systemctl disable --now {u} 2>/dev/null || true" for u in C.LEGACY_UNITS
+    )
+
     return f"""set -euo pipefail
-mkdir -p /opt/amline/staging
-install -m 0755 /tmp/spa_static_server.py /opt/amline/staging/spa_static_server.py
+mkdir -p "{C.PATH_SHARED_DIR}" "{C.PATH_REGISTRY_DIR}" "{m}" "{a}"
+install -m 0755 /tmp/spa_static_server.py "{spa}"
 rm -f /tmp/spa_static_server.py
+
+# مهاجرت یک‌باره از چیدمان قدیمی /opt/amline/staging (اگر هدف خالی باشد)
+migrate_if_empty() {{
+  local src="$1" dest="$2"
+  if [ -d "$src" ] && [ -n "$(ls -A "$src" 2>/dev/null)" ]; then
+    if [ ! -f "$dest/index.html" ] && [ -z "$(ls -A "$dest" 2>/dev/null)" ]; then
+      cp -a "$src"/. "$dest"/ || true
+    fi
+  fi
+}}
+migrate_if_empty "{leg_m}" "{m}"
+migrate_if_empty "{leg_a}" "{a}"
+
+{legacy_disable}
+rm -f /etc/systemd/system/amline-staging-site.service /etc/systemd/system/amline-staging-admin.service
+
+cat > /etc/systemd/system/{tgt} << 'TARGET'
+[Unit]
+Description=Target: static/SPA apps under /opt/apps (multi-app host)
+TARGET
+systemctl enable {tgt} 2>/dev/null || true
+
+cat > "{C.PATH_APPS_README}" << 'README'
+Multi-application root on this server: /opt/apps/
+  _shared/     Shared tools (e.g. spa_static_server.py)
+  _registry/   Port and ownership notes (ports.txt)
+  <app>/<env>/<role>/  Static or SPA build output
+
+Human docs: Amline_namAvaran repo -> infra/multi-app-server/
+README
 
 if ss -ltn | grep -q ':80 '; then SITE_PORT=3080; else SITE_PORT=80; fi
 if ss -ltn | grep -q ':8080 '; then ADMIN_PORT=3081; else ADMIN_PORT=8080; fi
 
-cat > /etc/systemd/system/amline-staging-site.service << UNIT
+cat > "{C.PATH_REGISTRY_PORTS_TXT}" << PORTSREG
+# Sync with Git repo: infra/multi-app-server/PORT-REGISTRY.md
+# fields: app<TAB>env<TAB>role<TAB>port<TAB>unit
+amline	staging	marketing-site	$SITE_PORT	{um}
+amline	staging	admin-ui	$ADMIN_PORT	{ua}
+# reserved legacy: port 3003 next-server — coordinate before reuse
+PORTSREG
+
+cat > /etc/systemd/system/{um} << UNIT
 [Unit]
-Description=Amline staging marketing site (Python static SPA)
+Description=appsvc: amline staging marketing-site (static SPA)
+PartOf={tgt}
 After=network.target
 
 [Service]
 Type=simple
-Environment=ROOT={site_remote}
+Environment=ROOT={m}
 Environment=PORT=$SITE_PORT
-ExecStart=/usr/bin/python3 /opt/amline/staging/spa_static_server.py
+ExecStart=/usr/bin/python3 {spa}
 Restart=always
 RestartSec=3
 
 [Install]
-WantedBy=multi-user.target
+WantedBy={tgt}
 UNIT
 
-cat > /etc/systemd/system/amline-staging-admin.service << UNIT
+cat > /etc/systemd/system/{ua} << UNIT
 [Unit]
-Description=Amline staging admin-ui (Python static SPA)
+Description=appsvc: amline staging admin-ui (static SPA)
+PartOf={tgt}
 After=network.target
 
 [Service]
 Type=simple
-Environment=ROOT={admin_remote}
+Environment=ROOT={a}
 Environment=PORT=$ADMIN_PORT
-ExecStart=/usr/bin/python3 /opt/amline/staging/spa_static_server.py
+ExecStart=/usr/bin/python3 {spa}
 Restart=always
 RestartSec=3
 
 [Install]
-WantedBy=multi-user.target
+WantedBy={tgt}
 UNIT
 
 systemctl daemon-reload
-systemctl enable amline-staging-site.service amline-staging-admin.service
-systemctl restart amline-staging-site.service amline-staging-admin.service
+systemctl enable {um} {ua}
+systemctl restart {um} {ua}
 
 if command -v ufw >/dev/null 2>&1 && ufw status 2>/dev/null | grep -q 'active'; then
-  ufw allow "$SITE_PORT/tcp" comment 'amline staging site' || true
-  ufw allow "$ADMIN_PORT/tcp" comment 'amline staging admin' || true
+  ufw allow "$SITE_PORT/tcp" comment 'appsvc amline marketing' || true
+  ufw allow "$ADMIN_PORT/tcp" comment 'appsvc amline admin-ui' || true
 fi
 
 sleep 1
-systemctl is-active amline-staging-site.service
-systemctl is-active amline-staging-admin.service
+systemctl is-active {um}
+systemctl is-active {ua}
 echo "SITE_PORT=$SITE_PORT"
 echo "ADMIN_PORT=$ADMIN_PORT"
 echo PYTHON_OK
@@ -168,8 +223,7 @@ def main() -> None:
         sys.exit(1)
 
     has_site = SITE_OUT.is_dir()
-
-    bootstrap = remote_bootstrap_sh(SITE_REMOTE, ADMIN_REMOTE)
+    bootstrap = remote_bootstrap_sh()
 
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
@@ -243,14 +297,14 @@ def main() -> None:
                 f"print('smoke_http',a,b)\""
             )
             _, stdout_sm, stderr_sm = client.exec_command(smoke)
-            out_smoke = stdout_sm.read().decode()
-            err_smoke = stderr_sm.read().decode()
-            print(out_smoke, flush=True)
-            if err_smoke:
-                print(err_smoke, file=sys.stderr, flush=True)
+            print(stdout_sm.read().decode(), flush=True)
+            err_sm = stderr_sm.read().decode()
+            if err_sm:
+                print(err_sm, file=sys.stderr, flush=True)
             if stdout_sm.channel.recv_exit_status() != 0:
                 print(
-                    "Smoke test failed. Check: journalctl -u amline-staging-site -u amline-staging-admin",
+                    "Smoke test failed. journalctl -u "
+                    f"{C.UNIT_AMLINE_STAGING_MARKETING} -u {C.UNIT_AMLINE_STAGING_ADMIN_UI}",
                     file=sys.stderr,
                 )
                 sys.exit(1)
@@ -258,16 +312,15 @@ def main() -> None:
             api = os.environ.get(
                 "STAGING_API_URL", "https://amline-backend-staging.darkube.app"
             )
-            note_ports = (
-                "If port 80 was busy, site uses 3080; if 8080 busy, admin uses 3081."
-            )
             print(
                 f"\nDone.\n"
-                f"  Marketing site: http://{host}:{site_port}/\n"
-                f"  Admin UI:       http://{host}:{admin_port}/\n"
-                f"  {note_ports}\n"
-                f"  API (baked in): {api}\n"
-                f"  systemd:        systemctl status amline-staging-site amline-staging-admin\n",
+                f"  Paths: {SITE_REMOTE} , {ADMIN_REMOTE}\n"
+                f"  Marketing: http://{host}:{site_port}/\n"
+                f"  Admin UI:  http://{host}:{admin_port}/\n"
+                f"  API build: {api}\n"
+                f"  systemd:   systemctl status {C.UNIT_AMLINE_STAGING_MARKETING} "
+                f"{C.UNIT_AMLINE_STAGING_ADMIN_UI}\n"
+                f"  Docs:      infra/multi-app-server/\n",
                 flush=True,
             )
         finally:
