@@ -15,6 +15,6 @@ test.describe('پنل کاربر — لیست قراردادها (mock API)', ()
     await page.getByRole('button', { name: 'جستجو' }).click();
     await expect(page.getByPlaceholder(/جستجو بر اساس عنوان/i)).toBeVisible();
 
-    await expect(page.getByRole('link', { name: 'قرارداد جدید' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'قرارداد جدید', exact: true })).toBeVisible();
   });
 });
