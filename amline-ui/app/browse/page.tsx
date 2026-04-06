@@ -2,22 +2,13 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
-import { BROWSE_MOCK, type BrowseItem } from '../../lib/browseMock'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ensureMappedError } from '../../lib/errorMapper'
+import { fetchMarketFeed, type MarketFeedItem, type NeedKindApi } from '../../lib/needsApi'
 import { CITY_OPTIONS } from '../../lib/needsConstants'
 import { hasAccessToken } from '../../lib/auth'
 
-type Tab = 'barter' | 'buy' | 'rent'
-
-function matchesFilters(item: BrowseItem, tab: Tab, city: string, q: string): boolean {
-  if (item.kind !== tab) return false
-  if (city && item.city !== city) return false
-  if (q) {
-    const s = `${item.title} ${item.excerpt} ${item.neighborhood}`.toLowerCase()
-    if (!s.includes(q.toLowerCase())) return false
-  }
-  return true
-}
+type Tab = NeedKindApi
 
 export default function BrowsePage() {
   const router = useRouter()
@@ -25,17 +16,38 @@ export default function BrowsePage() {
   const [filterOpen, setFilterOpen] = useState(false)
   const [cityFilter, setCityFilter] = useState('')
   const [query, setQuery] = useState('')
+  const [rows, setRows] = useState<MarketFeedItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const cityNames = useMemo(() => CITY_OPTIONS.map((c) => c.label), [])
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetchMarketFeed({
+        kind: tab,
+        city: cityFilter || undefined,
+        q: query.trim() || undefined,
+      })
+      setRows(res.items)
+    } catch (e) {
+      setError(ensureMappedError(e).message)
+      setRows([])
+    } finally {
+      setLoading(false)
+    }
+  }, [tab, cityFilter, query])
 
   useEffect(() => {
     if (!hasAccessToken()) router.replace('/login')
   }, [router])
 
-  const cityNames = useMemo(() => CITY_OPTIONS.map((c) => c.label), [])
-
-  const rows = useMemo(
-    () => BROWSE_MOCK.filter((item) => matchesFilters(item, tab, cityFilter, query)),
-    [tab, cityFilter, query]
-  )
+  useEffect(() => {
+    if (!hasAccessToken()) return
+    void load()
+  }, [load])
 
   if (!hasAccessToken()) {
     return (
@@ -94,6 +106,9 @@ export default function BrowsePage() {
               className="input mt-1"
             />
           </div>
+          <button type="button" onClick={() => void load()} className="btn btn-primary min-h-[44px] w-full font-medium">
+            اعمال فیلتر
+          </button>
         </div>
       ) : null}
 
@@ -120,29 +135,45 @@ export default function BrowsePage() {
         ))}
       </div>
 
-      <ul className="mt-6 space-y-3">
-        {rows.length === 0 ? (
-          <li className="rounded-amline border border-[var(--amline-border)] bg-[var(--amline-surface)] p-6 text-center text-sm text-[var(--amline-fg-muted)] dark:border-slate-700">
-            موردی با این فیلتر نیست. فیلتر را بازنشانی کنید یا بعداً دوباره مراجعه کنید.
-          </li>
-        ) : (
-          rows.map((item) => (
-            <li key={item.id}>
-              <article className="card border border-[var(--amline-border)] p-4 shadow-[var(--amline-shadow-sm)] dark:border-slate-700 dark:bg-[var(--amline-surface-elevated)]">
-                <h2 className="text-base font-semibold text-[var(--amline-fg)]">{item.title}</h2>
-                <p className="amline-caption mt-1 text-[var(--amline-fg-subtle)]">
-                  {item.city} — {item.neighborhood}
-                </p>
-                <p className="mt-2 text-sm text-[var(--amline-fg-muted)]">{item.excerpt}</p>
-                <p className="mt-3 text-sm font-medium text-[var(--amline-primary)]">{item.priceLabel}</p>
-                <div className="mt-4 flex gap-2 border-t border-[var(--amline-border)] pt-3 dark:border-slate-700">
-                  <span className="text-xs text-[var(--amline-fg-subtle)]">نیازمندی‌های مشابه و آگهی‌های مشابه پس از اتصال به بک‌اند اینجا نمایش داده می‌شود.</span>
-                </div>
-              </article>
+      {error ? (
+        <div
+          role="alert"
+          className="mt-4 rounded-amline border border-red-200 bg-red-50 p-4 text-sm text-red-900 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-50"
+        >
+          <p>{error}</p>
+          <button type="button" onClick={() => void load()} className="btn btn-outline mt-3 min-h-[44px] dark:border-slate-700">
+            تلاش دوباره
+          </button>
+        </div>
+      ) : null}
+
+      {loading ? (
+        <p className="amline-body mt-8 text-center text-[var(--amline-fg-muted)]">در حال بارگذاری…</p>
+      ) : (
+        <ul className="mt-6 space-y-3">
+          {rows.length === 0 ? (
+            <li className="rounded-amline border border-[var(--amline-border)] bg-[var(--amline-surface)] p-6 text-center text-sm text-[var(--amline-fg-muted)] dark:border-slate-700">
+              موردی با این فیلتر نیست.
             </li>
-          ))
-        )}
-      </ul>
+          ) : (
+            rows.map((item) => (
+              <li key={item.id}>
+                <article className="card border border-[var(--amline-border)] p-4 shadow-[var(--amline-shadow-sm)] dark:border-slate-700 dark:bg-[var(--amline-surface-elevated)]">
+                  <h2 className="text-base font-semibold text-[var(--amline-fg)]">{item.title}</h2>
+                  <p className="amline-caption mt-1 text-[var(--amline-fg-subtle)]">
+                    {item.city} — {item.neighborhood}
+                  </p>
+                  <p className="mt-2 text-sm text-[var(--amline-fg-muted)]">{item.excerpt}</p>
+                  <p className="mt-3 text-sm font-medium text-[var(--amline-primary)]">{item.price_label}</p>
+                  <p className="amline-caption mt-2 text-[var(--amline-fg-subtle)]">
+                    شناسه: <span className="font-mono">{item.id}</span>
+                  </p>
+                </article>
+              </li>
+            ))
+          )}
+        </ul>
+      )}
 
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-[var(--amline-border)] bg-[var(--amline-surface)]/95 backdrop-blur-sm dark:border-slate-700">
         <div

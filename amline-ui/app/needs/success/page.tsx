@@ -4,24 +4,33 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import { hasAccessToken } from '../../../lib/auth'
+import { getRequirement } from '../../../lib/needsApi'
 import { QUEUE_MESSAGE } from '../../../lib/needsConstants'
 
 function SuccessInner() {
   const search = useSearchParams()
   const kind = search.get('kind') ?? ''
+  const id = search.get('id') ?? ''
   const [msg, setMsg] = useState(QUEUE_MESSAGE)
+  const [titleHint, setTitleHint] = useState<string | null>(null)
 
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem('needs:lastSubmit')
-      if (raw) {
-        const j = JSON.parse(raw) as { queueMessage?: string }
-        if (j.queueMessage) setMsg(j.queueMessage)
+    if (!id) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const r = await getRequirement(id)
+        if (cancelled) return
+        if (r.queue_message) setMsg(r.queue_message)
+        if (r.publish_title) setTitleHint(r.publish_title)
+      } catch {
+        /* keep fallback QUEUE_MESSAGE */
       }
-    } catch {
-      /* ignore */
+    })()
+    return () => {
+      cancelled = true
     }
-  }, [])
+  }, [id])
 
   const kindLabel =
     kind === 'buy' ? 'خرید' : kind === 'rent' ? 'رهن و اجاره' : kind === 'barter' ? 'معاوضه' : 'نیازمندی'
@@ -34,6 +43,9 @@ function SuccessInner() {
       <h1 className="amline-display mt-6 text-[var(--amline-fg)]">در صف انتشار</h1>
       <p className="amline-body mt-3 max-w-sm text-[var(--amline-fg-muted)]">{msg}</p>
       <p className="amline-caption mt-2 text-[var(--amline-fg-subtle)]">نوع: {kindLabel}</p>
+      {titleHint ? (
+        <p className="amline-caption mt-1 max-w-sm text-[var(--amline-fg-muted)]">{titleHint}</p>
+      ) : null}
       <div className="mt-10 flex w-full max-w-xs flex-col gap-3">
         <Link href="/browse" className="btn btn-primary min-h-[48px] font-semibold">
           بازگشت به بازار

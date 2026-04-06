@@ -3,7 +3,9 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { CITY_OPTIONS, PROPERTY_TYPE_OPTIONS, QUEUE_MESSAGE } from '../../lib/needsConstants'
+import { ensureMappedError } from '../../lib/errorMapper'
+import { createRequirement } from '../../lib/needsApi'
+import { CITY_OPTIONS, PROPERTY_TYPE_OPTIONS } from '../../lib/needsConstants'
 
 export type BuyRentMode = 'buy' | 'rent'
 
@@ -31,6 +33,8 @@ export function BuyRentNeedForm({ mode }: { mode: BuyRentMode }) {
   const [publishTitle, setPublishTitle] = useState('')
   const [showErrors, setShowErrors] = useState(false)
   const [previewOpen, setPreviewOpen] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const city = CITY_OPTIONS.find((c) => c.id === cityId)
   const nhoods = city?.neighborhoods ?? []
@@ -62,7 +66,6 @@ export function BuyRentNeedForm({ mode }: { mode: BuyRentMode }) {
       amenities: { elevator, storage, parking },
       description: description.trim(),
       publishTitle: publishTitle.trim(),
-      queuedAt: new Date().toISOString(),
     }
   }
 
@@ -72,16 +75,34 @@ export function BuyRentNeedForm({ mode }: { mode: BuyRentMode }) {
     setPreviewOpen(true)
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     setShowErrors(true)
+    setSubmitError(null)
     if (!requiredOk) return
-    const payload = buildPayload()
+    const p = buildPayload()
+    setSubmitting(true)
     try {
-      sessionStorage.setItem('needs:lastSubmit', JSON.stringify({ ...payload, queueMessage: QUEUE_MESSAGE }))
-    } catch {
-      /* ignore */
+      const res = await createRequirement({
+        kind: p.mode,
+        publish_title: p.publishTitle,
+        city_label: p.cityLabel,
+        neighborhood_label: p.neighborhoodLabel,
+        property_type_id: p.propertyTypeId || undefined,
+        property_type_label: p.propertyTypeLabel || undefined,
+        min_area: p.minArea ?? undefined,
+        total_price: p.totalPrice ?? undefined,
+        build_year: p.buildYear ?? undefined,
+        renovated: p.renovated,
+        rooms: p.rooms ?? undefined,
+        amenities: p.amenities,
+        description: p.description || undefined,
+      })
+      router.push(`/needs/success?kind=${encodeURIComponent(mode)}&id=${encodeURIComponent(res.id)}`)
+    } catch (e) {
+      setSubmitError(ensureMappedError(e).message)
+    } finally {
+      setSubmitting(false)
     }
-    router.push(`/needs/success?kind=${mode}`)
   }
 
   const headline =
@@ -258,6 +279,11 @@ export function BuyRentNeedForm({ mode }: { mode: BuyRentMode }) {
             لطفاً فیلدهای اجباری را تکمیل کنید؛ تا آن زمان پیش‌نمایش و ثبت فعال نمی‌شود.
           </p>
         ) : null}
+        {submitError ? (
+          <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+            {submitError}
+          </p>
+        ) : null}
       </div>
 
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-[var(--amline-border)] bg-[var(--amline-surface)]/95 backdrop-blur-sm dark:border-slate-700 dark:bg-[var(--amline-bg)]/95">
@@ -268,7 +294,7 @@ export function BuyRentNeedForm({ mode }: { mode: BuyRentMode }) {
           <button
             type="button"
             onClick={handlePreview}
-            disabled={!requiredOk}
+            disabled={!requiredOk || submitting}
             title={
               requiredOk
                 ? 'نمایش خلاصه قبل از ثبت'
@@ -278,8 +304,13 @@ export function BuyRentNeedForm({ mode }: { mode: BuyRentMode }) {
           >
             پیش‌نمایش
           </button>
-          <button type="button" onClick={handleSubmit} className="btn btn-primary min-h-[48px] flex-1 font-semibold">
-            ثبت نیازمندی
+          <button
+            type="button"
+            onClick={() => void handleSubmit()}
+            disabled={submitting}
+            className="btn btn-primary min-h-[48px] flex-1 font-semibold disabled:opacity-50"
+          >
+            {submitting ? 'در حال ثبت…' : 'ثبت نیازمندی'}
           </button>
         </div>
       </div>

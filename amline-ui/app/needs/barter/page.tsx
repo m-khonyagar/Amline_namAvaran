@@ -3,7 +3,9 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState, useEffect } from 'react'
-import { CITY_OPTIONS, PROPERTY_TYPE_OPTIONS, QUEUE_MESSAGE } from '../../../lib/needsConstants'
+import { ensureMappedError } from '../../../lib/errorMapper'
+import { createRequirement } from '../../../lib/needsApi'
+import { CITY_OPTIONS, PROPERTY_TYPE_OPTIONS } from '../../../lib/needsConstants'
 import { hasAccessToken } from '../../../lib/auth'
 
 export default function NeedBarterPage() {
@@ -14,6 +16,8 @@ export default function NeedBarterPage() {
   const [description, setDescription] = useState('')
   const [publishTitle, setPublishTitle] = useState('')
   const [showErrors, setShowErrors] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!hasAccessToken()) router.replace('/login')
@@ -31,27 +35,26 @@ export default function NeedBarterPage() {
     return true
   }, [cityId, neighborhoodId, description, publishTitle])
 
-  function submit() {
+  async function submit() {
     setShowErrors(true)
+    setSubmitError(null)
     if (!requiredOk) return
+    setSubmitting(true)
     try {
-      sessionStorage.setItem(
-        'needs:lastSubmit',
-        JSON.stringify({
-          mode: 'barter',
-          cityLabel: city?.label,
-          neighborhoodLabel: nLabel,
-          propertyTypeLabel: ptLabel || null,
-          description: description.trim(),
-          publishTitle: publishTitle.trim(),
-          queueMessage: QUEUE_MESSAGE,
-          queuedAt: new Date().toISOString(),
-        })
-      )
-    } catch {
-      /* ignore */
+      const res = await createRequirement({
+        kind: 'barter',
+        publish_title: publishTitle.trim(),
+        city_label: city?.label ?? '',
+        neighborhood_label: nLabel,
+        property_type_label: ptLabel || undefined,
+        description: description.trim(),
+      })
+      router.push(`/needs/success?kind=barter&id=${encodeURIComponent(res.id)}`)
+    } catch (e) {
+      setSubmitError(ensureMappedError(e).message)
+    } finally {
+      setSubmitting(false)
     }
-    router.push('/needs/success?kind=barter')
   }
 
   if (!hasAccessToken()) {
@@ -169,6 +172,11 @@ export default function NeedBarterPage() {
             شهر، محله، توضیح کافی و عنوان انتشار الزامی است.
           </p>
         ) : null}
+        {submitError ? (
+          <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+            {submitError}
+          </p>
+        ) : null}
       </div>
 
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-[var(--amline-border)] bg-[var(--amline-surface)]/95 backdrop-blur-sm dark:border-slate-700">
@@ -176,8 +184,13 @@ export default function NeedBarterPage() {
           className="mx-auto max-w-lg px-4 pt-3"
           style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
         >
-          <button type="button" onClick={submit} className="btn btn-primary min-h-[48px] w-full font-semibold">
-            ثبت نیازمندی معاوضه
+          <button
+            type="button"
+            onClick={() => void submit()}
+            disabled={submitting}
+            className="btn btn-primary min-h-[48px] w-full font-semibold disabled:opacity-50"
+          >
+            {submitting ? 'در حال ثبت…' : 'ثبت نیازمندی معاوضه'}
           </button>
         </div>
       </div>

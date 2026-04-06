@@ -22,6 +22,7 @@ from app.api.routes import (
     payments,
     properties,
     referrals,
+    requirements_market,
     tenant_score,
     users,
     wallet,
@@ -68,6 +69,15 @@ api_router.include_router(admin_contracts.router, prefix="/admin", tags=["admin-
 # ── consultant routes ────────────────────────────────────────────
 # /consultant/auth/register, /consultant/auth/login, /consultant/me, ...
 api_router.include_router(consultant.router, prefix="/consultant", tags=["consultant"])
+
+# ── نیازمندی کاربر + بازار (Hamgit-style) ───────────────────────
+api_router.include_router(requirements_market.router, prefix="/requirements", tags=["requirements"])
+api_router.include_router(requirements_market.market_router, prefix="/market", tags=["market"])
+api_router.include_router(
+    requirements_market.admin_ads_router,
+    prefix="/admin",
+    tags=["admin-ads-hamgit"],
+)
 
 # ── /auth/me — consumed by both admin-ui and amline-ui ──────────
 @api_router.get("/auth/me", tags=["auth"])
