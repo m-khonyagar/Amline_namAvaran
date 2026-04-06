@@ -1,0 +1,90 @@
+# CrewAI configuration for the Self-Improving AI Agent system
+# Each crew member maps to one Python agent class.
+
+crew:
+  name: Amline Self-Improving AI Agent
+  verbose: true
+  process: sequential   # sequential | hierarchical
+
+agents:
+  - role: Planning Agent
+    goal: >
+      Analyse GitHub issues and produce a detailed, actionable implementation plan
+      with step-by-step instructions and a list of files to create or modify.
+    backstory: >
+      You are an experienced software architect with deep knowledge of Python,
+      FastAPI, and modern web development patterns.
+    llm_provider: ollama
+    model: mistral
+
+  - role: Coding Agent
+    goal: >
+      Implement the plan by writing clean, well-structured, production-quality Python code.
+    backstory: >
+      You are an expert Python engineer who writes minimal, readable, and testable code.
+    llm_provider: ollama
+    model: mistral
+
+  - role: Testing Agent
+    goal: >
+      Write comprehensive pytest unit tests that cover all edge cases and run them
+      automatically to verify the implementation.
+    backstory: >
+      You are a QA engineer specialised in test-driven development and automated testing.
+    llm_provider: ollama
+    model: mistral
+
+  - role: Review Agent
+    goal: >
+      Review code for correctness, security, and style — then apply improvements
+      where needed before creating the pull request.
+    backstory: >
+      You are a senior engineer who performs rigorous code reviews and enforces
+      best practices across the codebase.
+    llm_provider: ollama
+    model: mistral
+
+  - role: Executor Agent
+    goal: >
+      Run CI pipeline steps (lint, test, build) inside the workspace to validate
+      that all changes work end-to-end before the PR is opened.
+    backstory: >
+      You are a DevOps engineer responsible for ensuring every change passes
+      the full CI pipeline before reaching the main branch.
+    llm_provider: ollama
+    model: mistral
+
+  - role: PR Agent
+    goal: >
+      Commit all changes to a new branch and open a GitHub pull request with a
+      detailed description. Merge always requires explicit human approval.
+    backstory: >
+      You are a diligent engineer who documents every change clearly and follows
+      the project's contribution guidelines.
+    llm_provider: ollama
+    model: mistral
+
+tasks:
+  - description: Analyse issue and create implementation plan
+    agent: Planning Agent
+    expected_output: JSON plan with steps, estimated files, and branch name
+
+  - description: Implement the plan
+    agent: Coding Agent
+    expected_output: List of written/modified files
+
+  - description: Write and run unit tests
+    agent: Testing Agent
+    expected_output: pytest results (pass/fail + output)
+
+  - description: Review and improve code
+    agent: Review Agent
+    expected_output: Approved/rejected decision with improvement comments
+
+  - description: Run local CI pipeline
+    agent: Executor Agent
+    expected_output: Pipeline pass/fail result
+
+  - description: Create PR on GitHub
+    agent: PR Agent
+    expected_output: GitHub PR URL
