@@ -85,7 +85,7 @@ services:
       dockerfile: Dockerfile
     container_name: amline-backend
     environment:
-      - AMLINE_ENV=staging
+      - AMLINE_ENV=${APP_ENV:-staging}
       - AMLINE_DATABASE_URL=postgresql+psycopg://${POSTGRES_USER:-amline}:${POSTGRES_PASSWORD:-amline_secret}@postgres:5432/${POSTGRES_DB:-amline}
       - AMLINE_REDIS_URL=redis://:${REDIS_PASSWORD:-amline_redis_secret}@redis:6379/0
       - AMLINE_JWT_SECRET=${JWT_SECRET:-change-me-in-production}
@@ -97,6 +97,7 @@ services:
       - AMLINE_S3_SECRET_KEY=${MINIO_SECRET_KEY:-amline_minio_secret}
       - AMLINE_S3_BUCKET=amline-docs
       - AMLINE_BOOTSTRAP_ADMIN_MOBILE=${BOOTSTRAP_ADMIN_MOBILE:-09120000000}
+      - AMLINE_CORS_ORIGINS=${CORS_ORIGINS:-}
     ports:
       - "8080:8000"
     depends_on:
@@ -149,8 +150,10 @@ services:
       dockerfile: Dockerfile
     container_name: amline-admin-ui
     environment:
-      - VITE_API_BASE_URL=http://backend
-      - VITE_API_URL=http://backend
+      - VITE_API_BASE_URL=
+      - VITE_API_URL=
+      - VITE_USE_MSW=false
+      - VITE_ENABLE_DEV_BYPASS=false
     ports:
       - "3002:80"
     depends_on:
@@ -164,10 +167,10 @@ services:
       dockerfile: Dockerfile
     container_name: amline-ui
     environment:
-      - NEXT_PUBLIC_API_BASE_URL=http://backend
-      - NEXT_PUBLIC_API_URL=http://backend
+      - NEXT_PUBLIC_API_BASE_URL=http://backend:8000
+      - NEXT_PUBLIC_ENABLE_DEV_BYPASS=false
     ports:
-      - "3000:80"
+      - "3000:3000"
     depends_on:
       - backend
     networks:
@@ -179,9 +182,21 @@ services:
       dockerfile: Dockerfile
     container_name: amline-site
     environment:
-      - NEXT_PUBLIC_API_BASE_URL=http://backend
+      - NEXT_PUBLIC_API_BASE_URL=http://backend:8000
     ports:
       - "3001:80"
+    depends_on:
+      - backend
+    networks:
+      - amline-network
+
+  consultant-ui:
+    build:
+      context: ./consultant-ui
+      dockerfile: Dockerfile
+    container_name: amline-consultant-ui
+    ports:
+      - "3004:80"
     depends_on:
       - backend
     networks:
