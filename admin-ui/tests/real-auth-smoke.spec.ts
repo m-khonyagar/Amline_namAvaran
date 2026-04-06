@@ -18,12 +18,14 @@ test('smoke واقعی: ارسال OTP از فرم لاگین', async ({ page })
   await expect
     .poll(
       async () => {
-        const otpStep = await page.getByText(/کد ارسال شده به/).isVisible().catch(() => false);
+        // متن hint در UI: «کد ارسال‌شده به» با نیم‌فاصله (U+200C) بین «ارسال» و «شده»
+        const otpStep = await page.getByText(/کد ارسال[\u200c\s]*شده به/).isVisible().catch(() => false);
+        const otpField = await page.getByPlaceholder('••••••').isVisible().catch(() => false);
         const mobileAgain = await page
           .getByRole('button', { name: /^ارسال کد تأیید$/ })
           .isVisible()
           .catch(() => false);
-        return otpStep || mobileAgain;
+        return otpStep || otpField || mobileAgain;
       },
       { timeout: 30_000, intervals: [100, 250, 500] },
     )

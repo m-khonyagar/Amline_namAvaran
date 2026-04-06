@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
-import { loadLeads } from '../crmService'
-import type { Lead, LeadStatus } from '../types'
+import { loadLeads, loadStats } from '../crmService'
+import type { Lead, LeadStatus, CrmStats } from '../types'
 
 const STATUS_LABELS: Record<LeadStatus, string> = {
   NEW: 'جدید',
@@ -19,25 +19,31 @@ const STATUS_COLORS: Record<LeadStatus, string> = {
   LOST: '#ef4444',
 }
 
+function KpiSkeleton() {
+  return (
+    <div className="rounded-xl border border-gray-100 bg-gray-50 p-5 animate-pulse">
+      <div className="h-3 w-24 rounded bg-gray-200" />
+      <div className="mt-3 h-8 w-16 rounded bg-gray-200" />
+    </div>
+  )
+}
+
 export function CRMDashboard() {
   const [leads, setLeads] = useState<Lead[]>([])
+  const [stats, setStats] = useState<CrmStats | null>(null)
+  const [statsLoading, setStatsLoading] = useState(true)
 
   useEffect(() => {
     void loadLeads().then(setLeads)
   }, [])
 
-  const stats = useMemo(() => {
-    const now = new Date()
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-
-    const active = leads.filter((l) => l.status !== 'LOST' && l.status !== 'CONTRACTED').length
-    const contracted = leads.filter((l) => l.status === 'CONTRACTED').length
-    const total = leads.length
-    const conversionRate = total > 0 ? Math.round((contracted / total) * 100) : 0
-    const thisMonth = leads.filter((l) => new Date(l.created_at) >= startOfMonth).length
-
-    return { active, contracted, total, conversionRate, thisMonth }
-  }, [leads])
+  useEffect(() => {
+    setStatsLoading(true)
+    loadStats()
+      .then(setStats)
+      .catch(() => {/* toast already shown by service */})
+      .finally(() => setStatsLoading(false))
+  }, [])
 
   const chartData = useMemo(() => {
     const statuses: LeadStatus[] = ['NEW', 'CONTACTED', 'NEGOTIATING', 'CONTRACTED', 'LOST']
@@ -52,18 +58,28 @@ export function CRMDashboard() {
     <div dir="rtl" className="space-y-6">
       {/* KPI Cards */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="rounded-xl border border-blue-100 bg-blue-50 p-5">
-          <p className="text-sm text-blue-600">Lead های فعال</p>
-          <p className="mt-2 text-3xl font-bold text-blue-700">{stats.active}</p>
-        </div>
-        <div className="rounded-xl border border-green-100 bg-green-50 p-5">
-          <p className="text-sm text-green-600">نرخ تبدیل</p>
-          <p className="mt-2 text-3xl font-bold text-green-700">{stats.conversionRate}٪</p>
-        </div>
-        <div className="rounded-xl border border-purple-100 bg-purple-50 p-5">
-          <p className="text-sm text-purple-600">Lead این ماه</p>
-          <p className="mt-2 text-3xl font-bold text-purple-700">{stats.thisMonth}</p>
-        </div>
+        {statsLoading ? (
+          <>
+            <KpiSkeleton />
+            <KpiSkeleton />
+            <KpiSkeleton />
+          </>
+        ) : (
+          <>
+            <div className="rounded-xl border border-blue-100 bg-blue-50 p-5">
+              <p className="text-sm text-blue-600">Lead های فعال</p>
+              <p className="mt-2 text-3xl font-bold text-blue-700">{stats?.active_leads ?? 0}</p>
+            </div>
+            <div className="rounded-xl border border-green-100 bg-green-50 p-5">
+              <p className="text-sm text-green-600">نرخ تبدیل</p>
+              <p className="mt-2 text-3xl font-bold text-green-700">{stats?.conversion_rate ?? 0}٪</p>
+            </div>
+            <div className="rounded-xl border border-purple-100 bg-purple-50 p-5">
+              <p className="text-sm text-purple-600">Lead این ماه</p>
+              <p className="mt-2 text-3xl font-bold text-purple-700">{stats?.leads_this_month ?? 0}</p>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Bar Chart */}

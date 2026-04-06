@@ -66,6 +66,8 @@ npm run dev
 
 جزئیات پورت‌ها، تضاد 8080، و پروفایل MSW در مقابل proxy: **[docs/LOCAL_DEV.md](docs/LOCAL_DEV.md)**.
 
+نقشهٔ راه آماده‌سازی برای کاربر واقعی (backend، امنیت، CI، چک‌لیست پروداکشن): **[docs/PLATFORM_GO_LIVE_ROADMAP.md](docs/PLATFORM_GO_LIVE_ROADMAP.md)**.
+
 `admin-ui/.env.local` (پیش‌فرض آماده است):
 ```env
 VITE_USE_MSW=true          # MSW برای mock در مرورگر؛ برای proxy به mock/backend مقدار false

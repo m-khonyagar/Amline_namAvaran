@@ -6,7 +6,9 @@
   "description": "Admin UI for Amline Platform - اَملاین",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/assert-safe-production-env.mjs",
     "build": "tsc && vite build",
+    "verify": "npx tsc --noEmit && vitest run",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "test": "vitest run",

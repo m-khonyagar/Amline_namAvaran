@@ -40,4 +40,11 @@ export const APP_NAV_ITEMS: NavItemConfig[] = [
   { to: '/admin/roles', label: 'نقش‌ها', icon: '🔐', permission: 'roles:read' },
   { to: '/admin/audit', label: 'ممیزی', icon: '📋', permission: 'audit:read' },
   { to: '/admin/activity', label: 'گزارش فعالیت', icon: '📈', permission: 'reports:read' },
+  {
+    to: '/admin/hamgit-port',
+    label: 'ادغام Hamgit',
+    icon: '🔗',
+    permission: 'settings:read',
+    featureFlag: 'HAMGIT_PORT',
+  },
 ]

@@ -11,6 +11,47 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  # ==================== Admin UI (هر PR / push) ====================
+  admin-ui-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: admin-ui/package-lock.json
+
+      - name: Install admin-ui dependencies
+        working-directory: admin-ui
+        run: npm ci
+
+      - name: Typecheck & unit tests
+        working-directory: admin-ui
+        run: |
+          npx tsc --noEmit
+          npm test
+
+  dev-mock-api-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install & pytest smoke
+        working-directory: dev-mock-api
+        run: |
+          pip install -r requirements-dev.txt
+          python -m pytest tests/test_smoke.py -v
+
   # ==================== Backend Tests ====================
   backend-test:
     runs-on: ubuntu-latest
@@ -136,11 +177,13 @@ jobs:
 
       - name: Install dependencies
         working-directory: admin-ui
-        run: npm install
+        run: npm ci
 
-      - name: Run linter
+      - name: Typecheck & unit tests
         working-directory: admin-ui
-        run: npm run lint || true
+        run: |
+          npx tsc --noEmit
+          npm test
 
       - name: Build Admin UI
         uses: docker/build-push-action@v5

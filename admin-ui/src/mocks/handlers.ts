@@ -3,6 +3,8 @@ import type { ContractResponse, Party } from '../features/contract-wizard/types/
 import { userAdminHandlers } from './userAdminHandlers';
 import { consultantPlatformHandlers } from './consultantPlatformHandlers'; // self + admin review
 import { workspaceOrgHandlers } from './workspaceOrgHandlers';
+import { hamgitPortHandlers } from './hamgitPortHandlers';
+import { crmHandlers } from './crmHandlers';
 
 // ---- Mock user & shared fixtures ----
 const MSW_FULL_PERMS = [
@@ -342,63 +344,7 @@ function adminEnterpriseHandlers() {
   ];
 }
 
-/** MSW CRM — برای تست API بدون backend */
-const crmMockLeads: Record<string, unknown>[] = [];
-const crmMockActivities: Record<string, Record<string, unknown>[]> = {};
 
-function crmLeadHandlers() {
-  return [
-    http.get('*/admin/crm/leads', () =>
-      HttpResponse.json([...crmMockLeads])
-    ),
-    http.get('*/admin/crm/leads/:id', ({ params }) => {
-      const row = crmMockLeads.find((l) => (l as { id: string }).id === params.id);
-      return row
-        ? HttpResponse.json(row)
-        : HttpResponse.json({ error: 'not_found' }, { status: 404 });
-    }),
-    http.post('*/admin/crm/leads', async ({ request }) => {
-      const body = (await request.json()) as Record<string, unknown>;
-      const now = new Date().toISOString();
-      const row = {
-        ...body,
-        id: `crm-${Date.now()}`,
-        created_at: now,
-        updated_at: now,
-      };
-      crmMockLeads.push(row);
-      return HttpResponse.json(row, { status: 201 });
-    }),
-    http.patch('*/admin/crm/leads/:id', async ({ params, request }) => {
-      const idx = crmMockLeads.findIndex(
-        (l) => (l as { id: string }).id === params.id
-      );
-      if (idx < 0) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
-      const patch = (await request.json()) as Record<string, unknown>;
-      crmMockLeads[idx] = {
-        ...crmMockLeads[idx],
-        ...patch,
-        updated_at: new Date().toISOString(),
-      };
-      return HttpResponse.json(crmMockLeads[idx]);
-    }),
-    http.get('*/admin/crm/leads/:id/activities', ({ params }) => {
-      const list = crmMockActivities[params.id as string] ?? [];
-      return HttpResponse.json([...list]);
-    }),
-    http.post('*/admin/crm/leads/:id/activities', async ({ params, request }) => {
-      const id = params.id as string;
-      const body = (await request.json()) as Record<string, unknown>;
-      const act = {
-        ...body,
-        id: `act-${Date.now()}`,
-        created_at: new Date().toISOString(),
-      };
-      crmMockActivities[id] = [...(crmMockActivities[id] ?? []), act];
-      return HttpResponse.json(act, { status: 201 });
-    }),
-  ];
-}
 
 function nextId(): string {
   return `contract-${String(idCounter++).padStart(3, '0')}`;
@@ -732,8 +678,8 @@ export const handlers = [
 
   http.post('*/files/upload', () => HttpResponse.json({ id: '10001', url: null }, { status: 201 })),
 
-  // ---- CRM in-memory (وقتی VITE_USE_CRM_API=true + MSW) ----
-  ...crmLeadHandlers(),
+  // ---- CRM in-memory ----
+  ...crmHandlers,
 
   http.get('*/provinces/cities', () => HttpResponse.json([])),
   http.get('*/provinces', () => HttpResponse.json([])),
@@ -750,4 +696,6 @@ export const handlers = [
   ...consultantPlatformHandlers(),
 
   ...workspaceOrgHandlers(),
+
+  ...hamgitPortHandlers(),
 ];

@@ -371,19 +371,102 @@ def register_extended_routes(app: FastAPI) -> None:
     def admin_ads_list() -> Dict[str, Any]:
         return {"items": list(state.ads), "total": len(state.ads)}
 
-    @app.get("/admin/wallets")
-    def admin_wallets_list() -> Dict[str, Any]:
+    def _wallets_admin_payload() -> Dict[str, Any]:
         return {
             "items": [
                 {
+                    "id": "wallet-mock-1",
                     "user_id": "mock-001",
                     "mobile": "09120000000",
                     "balance": 500_000,
+                    "currency": "IRR",
                     "status": "ACTIVE",
                 }
             ],
             "total": 1,
         }
+
+    @app.get("/admin/wallets")
+    def admin_wallets_list() -> Dict[str, Any]:
+        return _wallets_admin_payload()
+
+    # --- Hamgit-compatible financials (admin-ui قدیمی: wallet.js) ---
+    @app.get("/admin/financials/wallets")
+    def admin_financials_wallets_list() -> Dict[str, Any]:
+        return _wallets_admin_payload()
+
+    @app.post("/admin/financials/wallets/manual-charge")
+    def admin_financials_wallet_manual_charge() -> Dict[str, Any]:
+        return {"ok": True}
+
+    @app.post("/admin/financials/wallets/bulk-manual-charge")
+    def admin_financials_wallet_bulk_manual_charge() -> Dict[str, Any]:
+        return {"ok": True}
+
+    # --- PR contracts (سطح لیست؛ جزئیات بعداً با backend واقعی) ---
+    @app.get("/admin/pr-contracts/list")
+    def pr_contracts_list(
+        page: int = 1,
+        limit: int = 20,
+    ) -> Dict[str, Any]:
+        rows = list(state.pr_contracts)
+        return {"items": rows, "total": len(rows), "page": page, "limit": limit}
+
+    @app.get("/admin/pr-contracts/{contract_id}")
+    def pr_contract_detail(contract_id: str) -> Dict[str, Any]:
+        for c in state.pr_contracts:
+            if c.get("id") == contract_id:
+                return c
+        raise HTTPException(status_code=404, detail="not_found")
+
+    # --- Hamgit-aligned stubs (لیست خالی تا UI و هاب بدون 404) ---
+    @app.get("/admin/settlements/users")
+    def hamgit_settlements_users() -> Dict[str, Any]:
+        return {"items": [], "total": 0}
+
+    @app.patch("/admin/settlements")
+    def hamgit_settlements_patch() -> Dict[str, Any]:
+        return {"ok": True}
+
+    @app.get("/admin/custom-invoices/users")
+    def hamgit_custom_invoices_users() -> Dict[str, Any]:
+        return {"items": [], "total": 0}
+
+    @app.post("/admin/custom_payment_link")
+    def hamgit_custom_payment_link() -> Dict[str, Any]:
+        return {"ok": True, "link": "https://example.com/pay/mock"}
+
+    @app.get("/admin/ads/properties")
+    def hamgit_ads_properties() -> Dict[str, Any]:
+        return {"items": [], "total": 0}
+
+    @app.get("/admin/ads/visit-requests")
+    def hamgit_ads_visit_requests() -> Dict[str, Any]:
+        return {"items": [], "total": 0}
+
+    @app.get("/admin/ads/wanted/properties")
+    def hamgit_wanted_properties() -> Dict[str, Any]:
+        return {"items": [], "total": 0}
+
+    @app.get("/admin/ads/swaps")
+    def hamgit_swaps() -> Dict[str, Any]:
+        return {"items": [], "total": 0}
+
+    @app.get("/admin/contracts/base-clauses")
+    def hamgit_base_clauses() -> Dict[str, Any]:
+        return {"items": [], "total": 0}
+
+    @app.get("/financials/promos")
+    def hamgit_promos_list() -> Dict[str, Any]:
+        return {"items": [], "total": 0}
+
+    @app.post("/financials/promos/generate")
+    def hamgit_promos_generate() -> Dict[str, Any]:
+        return {"ok": True, "code": "MOCK-PROMO", "discount_type": "PERCENTAGE"}
+
+    @app.post("/financials/promos/bulk-generate")
+    def hamgit_promos_bulk() -> Dict[str, Any]:
+        return {"ok": True, "count": 0}
 
     # --- Workspace ---
     def _ws_seed() -> None:

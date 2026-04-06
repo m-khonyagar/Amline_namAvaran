@@ -78,6 +78,9 @@ Google Dos/
 id_rsa*
 id_ed25519*
 
+# Master reference doc (contains credentials — local only)
+docs/AMLINE_MASTER_REFERENCE.md
+
 # SEO Dashboard secrets
 seo-dashboard/.env.local
 
@@ -87,6 +90,9 @@ amline-ui/test-results/
 
 # QA Playwright HTML report output
 qa-amline-tests/playwright-report/
+
+# Local extract from amline_repos_cloned.zip for diff only (never commit)
+.reference/
 
 # Scratch / temporary backend checkout (not part of monorepo source)
 _temp_backend/

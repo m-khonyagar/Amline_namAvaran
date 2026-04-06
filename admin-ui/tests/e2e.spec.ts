@@ -55,9 +55,10 @@ test('CRM: صفحه KanbanBoard نمایش داده می‌شود', async ({ pag
 test('CRM: افزودن Lead جدید', async ({ page }) => {
   await devLogin(page);
   await page.goto(`${BASE}/crm`);
-  await expect(page.getByRole('heading', { name: 'جدید' })).toBeVisible({ timeout: 15000 });
+  await page.getByRole('heading', { name: 'تابلوی Kanban' }).scrollIntoViewIfNeeded();
+  // ستون NEW همیشه دکمهٔ «+ افزودن Lead» دارد (پایدارتر از عنوان h3 در viewport)
+  await expect(page.getByRole('button', { name: /\+ افزودن Lead/i }).first()).toBeVisible({ timeout: 15000 });
 
-  // کلیک روی دکمه «+ افزودن Lead» در ستون NEW
   await page.getByRole('button', { name: /\+ افزودن Lead/i }).first().click();
 
   // modal باید باز بشه — فرم نمایش داده بشه

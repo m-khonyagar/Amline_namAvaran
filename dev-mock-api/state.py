@@ -32,3 +32,6 @@ staff_options: List[Dict[str, Any]] = [
     {"id": "mock-001", "name": "کاربر آزمایشی", "title": "مدیر"},
     {"id": "staff-2", "name": "کارشناس حقوقی", "title": "بررسی قرارداد"},
 ]
+
+# قراردادهای PR (هم‌نام با API قدیمی Hamgit؛ در mock خالی تا UI لیست را نشان دهد)
+pr_contracts: List[Dict[str, Any]] = []

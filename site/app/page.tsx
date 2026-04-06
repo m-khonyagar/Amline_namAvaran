@@ -1,4 +1,4 @@
-import Link from 'next/link'
+اimport Link from 'next/link'
 
 const FEATURES = [
   {
