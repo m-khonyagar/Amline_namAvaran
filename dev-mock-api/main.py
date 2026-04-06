@@ -1,16 +1,27 @@
 """Dev mock API for local frontend testing (no production use)."""
 from __future__ import annotations
 
+import os
 from datetime import date as date_cls
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, Header, HTTPException
+from commission_calc import commission_invoice_from_contract_dict
+from commission_discount import invoice_with_optional_discount
+from fastapi import FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, field_validator
 
 from wizard_step_machine import InvalidStepTransitionError, assert_valid_transition, mortgage_default_next
+
+
+def _stage_dump(s: BaseModel) -> Dict[str, Any]:
+    if hasattr(s, "model_dump"):
+        return s.model_dump()
+    return s.dict()
+
 
 app = FastAPI(title="Amline Dev Mock API", version="0.1.0")
 
@@ -181,6 +192,34 @@ def _require_commission_paid_for_signing_mock(c: Dict[str, Any]) -> None:
         raise HTTPException(status_code=400, detail="commission_required")
 
 
+def _merge_contract_parties(c: Dict[str, Any], updates: Dict[str, Any]) -> None:
+    p = dict(c.get("parties") or {})
+    if not isinstance(p, dict):
+        p = {}
+    p.update(updates)
+    c["parties"] = p
+
+
+def _commission_discount_codes_csv() -> str:
+    return os.environ.get("AMLINE_COMMISSION_DISCOUNT_CODES", "")
+
+
+def _commission_invoice_payload(c: Dict[str, Any], discount_code: Optional[str] = None) -> Dict[str, Any]:
+    base = commission_invoice_from_contract_dict(c)
+    try:
+        return invoice_with_optional_discount(
+            base,
+            _commission_discount_codes_csv(),
+            discount_code,
+            reject_invalid=bool(discount_code and discount_code.strip()),
+        )
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail={"code": "invalid_discount_code", "hint": "کد تخفیف معتبر نیست"},
+        )
+
+
 def _contract_json(c: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "id": c["id"],
@@ -311,13 +350,15 @@ def contracts_status(contract_id: str) -> Dict[str, Any]:
 
 
 @app.get("/contracts/{contract_id}/commission/invoice")
-def commission_invoice(contract_id: str) -> Dict[str, Any]:
+def commission_invoice(
+    contract_id: str,
+    discount_code: Optional[str] = Query(None),
+) -> Dict[str, Any]:
     c = _get(contract_id)
     paid = bool(c.get("commission_paid_at"))
+    inv = _commission_invoice_payload(c, discount_code=discount_code)
     return {
-        "total_amount": 5_000_000,
-        "landlord_share": 2_500_000,
-        "tenant_share": 2_500_000,
+        **inv,
         "invoice_id": f"inv-{c['id']}",
         "commission_paid": paid,
         "commission_paid_at": c.get("commission_paid_at"),
@@ -328,6 +369,7 @@ class CommissionPayBody(BaseModel):
     use_wallet_credit: bool = False
     use_all_wallet_credits: bool = False
     wallet_credits: Optional[int] = None
+    discount_code: Optional[str] = None
 
 
 @app.post("/contracts/{contract_id}/commission/pay")
@@ -340,6 +382,7 @@ def commission_pay(contract_id: str, body: CommissionPayBody) -> Dict[str, Any]:
             "used_wallet": False,
             "already_paid": True,
         }
+    _ = _commission_invoice_payload(c, discount_code=body.discount_code)
     use_wallet = bool(body.use_wallet_credit or body.use_all_wallet_credits)
     if use_wallet:
         c["commission_paid_at"] = datetime.now(timezone.utc).isoformat()
@@ -491,6 +534,14 @@ def home_info(contract_id: str, body: HomeInfoBody) -> Dict[str, Any]:
     c = _get(contract_id)
     nxt = body.next_step or "DATING"
     _apply_contract_step(c, nxt)
+    _merge_contract_parties(
+        c,
+        {
+            "postal_code": body.postal_code,
+            "area_m2": body.area_m2,
+            "property_use_type": body.property_use_type,
+        },
+    )
     return {"next_step": nxt}
 
 
@@ -506,6 +557,10 @@ def dating(contract_id: str, body: DatingBody) -> Dict[str, Any]:
     c = _get(contract_id)
     nxt = body.next_step or "MORTGAGE"
     _apply_contract_step(c, nxt)
+    upd: Dict[str, Any] = {"lease_start_date": body.start_date, "lease_end_date": body.end_date}
+    if body.delivery_date:
+        upd["delivery_date"] = body.delivery_date
+    _merge_contract_parties(c, upd)
     return {"next_step": nxt}
 
 
@@ -515,8 +570,17 @@ def mortgage(contract_id: str, body: MortgageBody) -> Dict[str, Any]:
     if stages_sum != body.total_amount:
         raise HTTPException(status_code=422, detail="stages_sum_mismatch")
     c = _get(contract_id)
+    if c.get("type") == "BUYING_AND_SELLING":
+        raise HTTPException(status_code=422, detail="use_sale_price_endpoint")
     nxt = body.next_step or mortgage_default_next(c["type"])
     _apply_contract_step(c, nxt)
+    _merge_contract_parties(
+        c,
+        {
+            "deposit_amount": body.total_amount,
+            "mortgage_payment_stages": [_stage_dump(s) for s in body.stages],
+        },
+    )
     return {"next_step": nxt}
 
 
@@ -525,6 +589,14 @@ def renting(contract_id: str, body: RentingBody) -> Dict[str, Any]:
     c = _get(contract_id)
     nxt = body.next_step or "SIGNING"
     _apply_contract_step(c, nxt)
+    if c.get("type") == "PROPERTY_RENT":
+        upd: Dict[str, Any] = {
+            "rent_amount": body.monthly_rent_amount,
+            "rent_payment_stages": [_stage_dump(s) for s in body.stages],
+        }
+        if body.rent_due_day_of_month is not None:
+            upd["rent_due_day_of_month"] = body.rent_due_day_of_month
+        _merge_contract_parties(c, upd)
     return {"next_step": nxt}
 
 
@@ -534,8 +606,17 @@ def sale_price(contract_id: str, body: SalePriceBody) -> Dict[str, Any]:
     if body.stages and stages_sum != body.total_price:
         raise HTTPException(status_code=422, detail="stages_sum_mismatch")
     c = _get(contract_id)
+    if c.get("type") != "BUYING_AND_SELLING":
+        raise HTTPException(status_code=422, detail="sale_price_contract_type")
     nxt = body.next_step or "SIGNING"
     _apply_contract_step(c, nxt)
+    _merge_contract_parties(
+        c,
+        {
+            "sale_price": body.total_price,
+            "sale_payment_stages": [_stage_dump(s) for s in body.stages],
+        },
+    )
     return {"next_step": nxt}
 
 

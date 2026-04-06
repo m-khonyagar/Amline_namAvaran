@@ -70,6 +70,8 @@ export const legalPersonSignerSchema = z.object({
 export const legalPersonSchema = z.object({
   national_nc: z.string().regex(/^\d{11}$/, 'شناسه ملی شرکت باید ۱۱ رقم باشد'),
   ceo_mobile: z.string().regex(/^09\d{9}$/, 'شماره موبایل مدیرعامل نامعتبر است'),
+  /** فقط UI / فیگما؛ به API ارسال نمی‌شود */
+  company_type: z.string().optional(),
   ownership_type: z.enum(['PRIVATE_DEED', 'LONG_TERM_LEASE']),
   is_knowledge_based: z.boolean(),
   postal_code: z.string().regex(/^\d{10}$/, 'کد پستی باید ۱۰ رقم باشد'),

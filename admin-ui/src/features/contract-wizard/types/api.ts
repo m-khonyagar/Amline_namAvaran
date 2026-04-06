@@ -15,12 +15,13 @@ export type LegalPersonOwnershipType = 'PRIVATE_DEED' | 'LONG_TERM_LEASE';
 
 export type LegalReviewStatus = 'NONE' | 'AWAITING_STAFF' | 'APPROVED' | 'REJECTED';
 
+/** parties شامل آرایه‌های landlords/tenants و فیلدهای مالی (sale_price، rent_amount، …) از بک‌اند */
 export interface ContractResponse {
   id: string;
   type: ContractType;
   status: ContractStatus;
   step: PRContractStep | null;
-  parties: Record<string, Party[]>;
+  parties: Record<string, unknown>;
   is_owner: boolean;
   key: string;
   password: string | null;
@@ -151,6 +152,13 @@ export interface AddMortgageDto {
   next_step: PRContractStep;
 }
 
+/** خرید و فروش — POST /contracts/:id/sale-price */
+export interface AddSalePriceDto {
+  total_price: number;
+  stages: PaymentStage[];
+  next_step: PRContractStep;
+}
+
 export interface AddRentDto {
   monthly_rent_amount: number;
   rent_due_day_of_month?: number | null;
@@ -202,6 +210,8 @@ export interface CommissionPayDto {
   use_wallet_credit?: boolean;
   use_all_wallet_credits?: boolean;
   wallet_credits?: number | null;
+  /** اگر بک‌اند پشتیبانی کند — اعمال کد تخفیف هنگام پرداخت */
+  discount_code?: string | null;
 }
 
 export interface CommissionPayResponse {
@@ -214,10 +224,23 @@ export interface CommissionPayResponse {
 
 /** پاسخ GET /contracts/:id/commission/invoice */
 export interface CommissionInvoiceResponse {
+  /** مبلغ پایه کمیسیون (ریال) در صورت برگردان از سرور */
+  commission?: number;
+  /** مالیات (ریال) */
+  tax?: number;
+  tracking_code_fee?: number;
   total_amount: number;
+  /** قبل از تخفیف؛ فقط وقتی تخفیف اعمال شده */
+  gross_total_amount?: number;
+  discount_amount?: number;
+  discount_percent?: number | null;
   landlord_share: number;
   tenant_share: number;
   invoice_id: string;
   commission_paid?: boolean;
   commission_paid_at?: string | null;
+  /** در صورت پشتیبانی API — مبلغ پایه قبل از مالیات */
+  commission_base_rial?: number | null;
+  vat_amount_rial?: number | null;
+  vat_percent?: number | null;
 }

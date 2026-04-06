@@ -75,6 +75,29 @@ class PRContractCommissionService:
         """Commission + tax."""
         return commission_amount + self.calculate_tax(commission_amount)
 
+    def calculate_sale_invoice(
+        self,
+        sale_amount_toman: int,
+        province: ProvinceType = ProvinceType.TEHRAN,
+        include_tracking_code: bool = True,
+    ) -> dict:
+        """
+        فاکتور کمیسیون خرید و فروش (مبالغ به تومان؛ هم‌ارز خروجی calculate_invoice).
+        """
+        per_party = self.calculate_sale_commission(sale_amount_toman, province)
+        commission_full = per_party * 2
+        tax = self.calculate_tax(commission_full)
+        tracking = self.tracking_code_generation_cost if include_tracking_code else 0
+        total = commission_full + tax + tracking
+        return {
+            "commission": commission_full,
+            "tax": tax,
+            "tracking_code_fee": tracking,
+            "total_amount": total,
+            "landlord_share": total // 2,
+            "tenant_share": total - (total // 2),
+        }
+
     def calculate_invoice(
         self,
         rent_amount: int,

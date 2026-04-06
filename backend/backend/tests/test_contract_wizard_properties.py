@@ -802,8 +802,8 @@ def _get_p2_client():
 @given(dummy=st.just(None))
 @settings(max_examples=10, deadline=None)
 def test_buying_and_selling_mortgage_next_step_is_signing(dummy: None) -> None:
-    """For any BUYING_AND_SELLING contract, after POST /contracts/{id}/mortgage,
-    the next_step must be 'SIGNING' not 'RENTING'.
+    """For any BUYING_AND_SELLING contract, after POST /contracts/{id}/sale-price,
+    the next_step must be 'SIGNING' (خرید و فروش از مسیر sale-price، نه mortgage).
 
     **Validates: Requirements 1.5, 6.3**
     """
@@ -819,18 +819,17 @@ def test_buying_and_selling_mortgage_next_step_is_signing(dummy: None) -> None:
     contract_id = r.json()["id"]
     _wizard_advance_to_mortgage(client, headers, contract_id)
 
-    # POST mortgage with valid data (stages sum == total_amount)
     total_amount = 1_000_000
     stages = [
         {"payment_type": "CASH", "due_date": "2025-06-01", "amount": total_amount}
     ]
     r = client.post(
-        f"/contracts/{contract_id}/mortgage",
-        json={"total_amount": total_amount, "stages": stages},
+        f"/contracts/{contract_id}/sale-price",
+        json={"total_price": total_amount, "stages": stages},
         headers=headers,
     )
     assert r.status_code == 201, (
-        f"Expected 201 from mortgage endpoint, got {r.status_code}: {r.text}"
+        f"Expected 201 from sale-price endpoint, got {r.status_code}: {r.text}"
     )
     data = r.json()
     assert "next_step" in data, f"Response missing 'next_step' field: {data}"

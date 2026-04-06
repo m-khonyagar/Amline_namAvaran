@@ -9,6 +9,7 @@ import type {
   AddDatingDto,
   AddHomeInfoDto,
   AddMortgageDto,
+  AddSalePriceDto,
   AddRentDto,
   AddWithnessDto,
   ContractResponse,
@@ -93,6 +94,9 @@ export const contractApi = {
 
   addMortgage: (id: string, dto: AddMortgageDto) =>
     apiClient.post(`/contracts/${id}/mortgage`, dto),
+
+  addSalePrice: (id: string, dto: AddSalePriceDto) =>
+    apiClient.post(`/contracts/${id}/sale-price`, dto),
 
   addRenting: (id: string, dto: AddRentDto) =>
     apiClient.post(`/contracts/${id}/renting`, dto),

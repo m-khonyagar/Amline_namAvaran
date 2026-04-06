@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\domain\commission_service.py
+# hypothesis_version: 6.151.10
+
+[0.001, 0.005, 0.006, 0.01, 0.1, 0.3, 0.4, 1000, 10000, 50000, 100000, 10000000, 'commission', 'landlord_share', 'tax', 'tenant_share', 'total_amount', 'tracking_code_fee']

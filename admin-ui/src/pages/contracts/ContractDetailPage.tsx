@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { apiClient } from '../../lib/api'
-import type { ContractResponse } from '../../features/contract-wizard/types/api'
+import type { ContractResponse, Party } from '../../features/contract-wizard/types/api'
 import type { ContractStatus } from '../../features/contract-wizard/types/wizard'
 import { AddendumForm } from '../../features/contract-wizard/components/AddendumForm'
 import { AddendumList } from '../../features/contract-wizard/components/AddendumList'
@@ -40,9 +40,25 @@ const LEGAL_REVIEW_LABELS: Record<string, string> = {
   REJECTED: 'رد حقوقی',
 }
 
-const PARTY_TYPE_LABELS: Record<string, string> = {
-  LANDLORD: 'موجر',
-  TENANT: 'مستأجر',
+function partyRoleLabels(contractType: string) {
+  if (contractType === 'BUYING_AND_SELLING') {
+    return { LANDLORD: 'فروشنده', TENANT: 'خریدار' } as const
+  }
+  return { LANDLORD: 'موجر', TENANT: 'مستأجر' } as const
+}
+
+function flattenPartiesRecord(parties: Record<string, unknown>): Party[] {
+  const landlords = parties.landlords
+  const tenants = parties.tenants
+  const a = Array.isArray(landlords) ? (landlords as Party[]) : []
+  const b = Array.isArray(tenants) ? (tenants as Party[]) : []
+  return [...a, ...b]
+}
+
+function toTomanRial(rial: unknown): string {
+  const n = typeof rial === 'number' ? rial : Number(rial)
+  if (!n || Number.isNaN(n)) return '—'
+  return (n / 10).toLocaleString('fa-IR')
 }
 
 function StatusBadge({ status }: { status: ContractStatus }) {
@@ -120,7 +136,12 @@ export default function ContractDetailPage() {
     )
   }
 
-  const allParties = Object.values(contract.parties).flat()
+  const allParties = flattenPartiesRecord(contract.parties)
+  const roleLabels = partyRoleLabels(contract.type)
+  const p = contract.parties
+  const salePrice = p.sale_price
+  const rentAmt = p.rent_amount
+  const depAmt = p.deposit_amount
 
   return (
     <div dir="rtl" className="p-6">
@@ -188,7 +209,7 @@ export default function ContractDetailPage() {
                   <div key={party.id} className="flex items-center justify-between rounded-lg bg-gray-50 p-3">
                     <div>
                       <span className="text-sm font-medium">
-                        {PARTY_TYPE_LABELS[party.party_type] ?? party.party_type}
+                        {roleLabels[party.party_type as keyof typeof roleLabels] ?? party.party_type}
                       </span>
                       <span className="mr-2 text-xs text-gray-500">({party.person_type})</span>
                     </div>
@@ -198,6 +219,35 @@ export default function ContractDetailPage() {
               </div>
             </div>
           )}
+
+          {(contract.type === 'BUYING_AND_SELLING' && salePrice != null && Number(salePrice) > 0) ||
+          (contract.type === 'PROPERTY_RENT' &&
+            ((rentAmt != null && Number(rentAmt) > 0) || (depAmt != null && Number(depAmt) > 0))) ? (
+            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <h2 className="mb-4 text-lg font-semibold text-gray-800">خلاصهٔ مالی ثبت‌شده</h2>
+              <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+                {contract.type === 'BUYING_AND_SELLING' && salePrice != null && Number(salePrice) > 0 ? (
+                  <div>
+                    <dt className="text-gray-500">قیمت فروش (ریال)</dt>
+                    <dd className="mt-1 font-medium">{Number(salePrice).toLocaleString('fa-IR')}</dd>
+                    <dd className="text-xs text-gray-500">معادل {toTomanRial(salePrice)} تومان</dd>
+                  </div>
+                ) : null}
+                {contract.type === 'PROPERTY_RENT' && rentAmt != null && Number(rentAmt) > 0 ? (
+                  <div>
+                    <dt className="text-gray-500">اجاره ماهانه (ریال)</dt>
+                    <dd className="mt-1 font-medium">{Number(rentAmt).toLocaleString('fa-IR')}</dd>
+                  </div>
+                ) : null}
+                {contract.type === 'PROPERTY_RENT' && depAmt != null && Number(depAmt) > 0 ? (
+                  <div>
+                    <dt className="text-gray-500">ودیعه (ریال)</dt>
+                    <dd className="mt-1 font-medium">{Number(depAmt).toLocaleString('fa-IR')}</dd>
+                  </div>
+                ) : null}
+              </dl>
+            </div>
+          ) : null}
 
           {/* Addendum */}
           <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
