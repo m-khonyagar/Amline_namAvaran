@@ -18,15 +18,15 @@ export function AppChrome({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-30 border-b border-[var(--amline-border)] bg-[var(--amline-surface)]/95 px-4 py-3 shadow-[var(--amline-shadow-sm)] backdrop-blur-md dark:border-slate-700 dark:bg-slate-900/95 sm:px-6">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
+        <div className="container-amline flex items-center justify-between gap-3">
           <Link
             href="/"
-            className="min-h-[44px] min-w-[44px] content-center text-lg font-bold text-[var(--amline-primary)] sm:text-xl"
+            className="min-h-[44px] min-w-[44px] shrink-0 content-center text-lg font-bold text-[var(--amline-primary)] sm:text-xl"
           >
             اَملاین
           </Link>
           <p className="hidden flex-1 text-center text-xs text-[var(--amline-fg-muted)] sm:block sm:text-sm">
-            پنل کاربری — قرارداد و املاک
+            پنل کاربری — قرارداد دیجیتال
           </p>
           <div className="flex items-center gap-3">
             {authenticated ? (
@@ -37,14 +37,14 @@ export function AppChrome({ children }: { children: ReactNode }) {
                   setAuthenticated(false);
                   router.push('/login');
                 }}
-                className="rounded-amline border border-[var(--amline-border)] px-3 py-1.5 text-xs font-medium text-[var(--amline-fg-muted)] transition hover:bg-[var(--amline-surface-muted)] dark:border-slate-700"
+                className="btn btn-outline min-h-10 px-3 py-1.5 text-xs dark:border-slate-700"
               >
                 خروج
               </button>
             ) : (
               <Link
                 href="/login"
-                className="rounded-amline border border-[var(--amline-border)] px-3 py-1.5 text-xs font-medium text-[var(--amline-primary)] transition hover:bg-[var(--amline-surface-muted)] dark:border-slate-700"
+                className="btn btn-outline min-h-10 px-3 py-1.5 text-xs font-medium text-[var(--amline-primary)] dark:border-slate-700"
               >
                 ورود
               </Link>

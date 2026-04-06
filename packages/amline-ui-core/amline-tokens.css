@@ -1,0 +1,105 @@
+/**
+ * Amline Design System — CSS variables
+ * منبع: Figma «Amline | Design System» (Cover + کتابخانهٔ Tokens)
+ * Primary: #179A9C | Brand warm: #A44225 | Canvas mint: #EAFAF5
+ */
+
+:root {
+  /* Brand */
+  --amline-primary: #179a9c;
+  --amline-primary-hover: #126d6f;
+  --amline-primary-muted: rgba(23, 154, 156, 0.14);
+  --amline-brand-terracotta: #a44225;
+  --amline-brand-terracotta-muted: rgba(164, 66, 37, 0.12);
+  /* Accent = همان تیل اصلی (سازگاری با کامپوننت‌های قبلی) */
+  --amline-accent: #179a9c;
+  --amline-accent-muted: rgba(23, 154, 156, 0.14);
+
+  /* Surfaces & text */
+  --amline-bg: #f2f8f6;
+  --amline-fg: #1e1e1f;
+  --amline-fg-muted: #565564;
+  --amline-fg-subtle: #9e9ea7;
+
+  --amline-surface: #ffffff;
+  --amline-surface-elevated: #ffffff;
+  --amline-surface-muted: #eafaf5;
+
+  --amline-border: #e7e7e9;
+  --amline-border-strong: #d7d9de;
+
+  --amline-ring: #179a9c;
+
+  /* Radius (هم‌راستا با ۸px / ۱۲px / ۱۶px رایج در موبایل فیگما) */
+  --amline-radius-sm: 0.5rem;
+  --amline-radius-md: 0.75rem;
+  --amline-radius-lg: 1rem;
+  --amline-radius-xl: 1.25rem;
+
+  --amline-shadow-sm: 0 1px 2px rgba(30, 30, 31, 0.06);
+  --amline-shadow-md: 0 4px 16px rgba(30, 30, 31, 0.08);
+  --amline-shadow-lg: 0 12px 40px rgba(30, 30, 31, 0.1);
+
+  /* Semantic */
+  --amline-success: #0d9488;
+  --amline-success-muted: rgba(13, 148, 136, 0.12);
+  --amline-warning: #f59e0b;
+  --amline-warning-muted: rgba(245, 158, 11, 0.14);
+  --amline-error: #dc2626;
+  --amline-error-muted: rgba(220, 38, 38, 0.1);
+  --amline-info: #0284c7;
+  --amline-info-muted: rgba(2, 132, 199, 0.1);
+
+  /* فاصلهٔ استاندارد (۴pt grid) */
+  --amline-space-1: 0.25rem;
+  --amline-space-2: 0.5rem;
+  --amline-space-3: 0.75rem;
+  --amline-space-4: 1rem;
+  --amline-space-5: 1.25rem;
+  --amline-space-6: 1.5rem;
+  --amline-space-8: 2rem;
+
+  /* Legacy aliases */
+  --primary: var(--amline-primary);
+  --primary-dark: var(--amline-primary-hover);
+  --primary-light: #5ec4c6;
+  --secondary: #64748b;
+  --secondary-dark: #475569;
+  --success: var(--amline-success);
+  --warning: var(--amline-warning);
+  --error: var(--amline-error);
+  --info: var(--amline-info);
+  --background: var(--amline-bg);
+  --foreground: var(--amline-fg);
+  --card: var(--amline-surface);
+  --border: var(--amline-border);
+  --radius: var(--amline-radius-md);
+}
+
+.dark {
+  --amline-bg: #0c1414;
+  --amline-fg: #f3f4f6;
+  --amline-fg-muted: #9ca3af;
+  --amline-fg-subtle: #6b7280;
+
+  --amline-surface: #111827;
+  --amline-surface-elevated: #1e293b;
+  --amline-surface-muted: #162022;
+
+  --amline-border: #334155;
+  --amline-border-strong: #475569;
+
+  --amline-primary: #2dd4bf;
+  --amline-primary-hover: #5eead4;
+  --amline-primary-muted: rgba(45, 212, 191, 0.15);
+  --amline-brand-terracotta: #e07a5f;
+  --amline-brand-terracotta-muted: rgba(224, 122, 95, 0.18);
+  --amline-accent: #2dd4bf;
+  --amline-accent-muted: rgba(45, 212, 191, 0.15);
+
+  --amline-ring: #2dd4bf;
+
+  --amline-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --amline-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --amline-shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.45);
+}

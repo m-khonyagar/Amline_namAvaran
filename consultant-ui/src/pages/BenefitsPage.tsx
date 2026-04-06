@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../lib/api';
+import { EmptyState } from '../components/EmptyState';
+import { PageLoader } from '../components/PageLoader';
 
 export default function BenefitsPage() {
-  const { data } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['consultant-dashboard'],
     queryFn: async () => {
       const res = await apiClient.get<{
@@ -13,15 +15,39 @@ export default function BenefitsPage() {
     },
   });
 
-  const tier = data?.profile.verification_tier ?? 'NONE';
+  if (isLoading) {
+    return <PageLoader message="در حال بارگذاری سطح مزایا…" />;
+  }
+
+  if (isError || !data) {
+    return (
+      <EmptyState
+        title="اطلاعات مزایا در دسترس نیست"
+        description="امکان دریافت وضعیت سطح و کارمزد از سرور نبود. لطفاً بعداً دوباره تلاش کنید."
+        action={
+          <button
+            type="button"
+            onClick={() => void refetch()}
+            className="min-h-11 rounded-[var(--amline-radius-md)] bg-[var(--amline-primary)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--amline-primary-hover)]"
+          >
+            تلاش مجدد
+          </button>
+        }
+      />
+    );
+  }
+
+  const tier = data.profile.verification_tier ?? 'NONE';
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">مزایا و مدل اعتبار</h1>
-      <p className="text-sm text-[var(--amline-fg-muted)] max-w-2xl">
-        الهام‌گرفته از بهترین تجربه‌های پلتفرم‌های تخصصی مشاور املاک: هرچه پروندهٔ شفاف‌تر و تأییدشده‌تر باشد،
-        در املاین به لید باکیفیت‌تر، کارمزد ترجیحی و ابزارهای CRM دسترسی بهتری دارید.
-      </p>
+      <div>
+        <h1 className="amline-display text-[var(--amline-fg)]">مزایا و مدل اعتبار</h1>
+        <p className="amline-body mt-2 max-w-2xl">
+          هرچه پروندهٔ شفاف‌تر و تأییدشده‌تر باشد، در املاین به لید باکیفیت‌تر، کارمزد ترجیحی و ابزارهای CRM دسترسی
+          بهتری خواهید داشت.
+        </p>
+      </div>
       <div className="grid gap-4 md:grid-cols-3">
         <TierCard
           name="پایه"
@@ -33,11 +59,7 @@ export default function BenefitsPage() {
           name="تأییدشده"
           code="VERIFIED"
           active={tier === 'VERIFIED'}
-          bullets={[
-            'افزایش درصد کارمزد همکاری',
-            'اولویت در صف لیدها',
-            '۱ اسلات آگهی ویژه',
-          ]}
+          bullets={['افزایش درصد کارمزد همکاری', 'اولویت در صف لیدها', '۱ اسلات آگهی ویژه']}
         />
         <TierCard
           name="ویژه املاین"
@@ -46,12 +68,15 @@ export default function BenefitsPage() {
           bullets={['بیشترین افزایش کارمزد', '۳ اسلات آگهی ویژه', 'پشتیبانی اختصاصی']}
         />
       </div>
-      {data && (
-        <div className="rounded-xl border border-[var(--amline-border)] bg-[var(--amline-surface)] p-5 text-sm">
-          <strong>وضعیت فعلی شما:</strong> سطح {tier} — افزایش کارمزد موثر{' '}
+      <div className="rounded-[var(--amline-radius-lg)] border border-[var(--amline-border)] bg-[var(--amline-surface)] p-5 text-sm shadow-[var(--amline-shadow-sm)] dark:border-slate-700">
+        <p className="text-[var(--amline-fg)]">
+          <span className="font-semibold">وضعیت فعلی شما:</span> سطح {tier} — افزایش کارمزد موثر{' '}
           {data.benefits.commission_boost_percent}٪
-        </div>
-      )}
+        </p>
+        <p className="amline-caption mt-2">
+          اعداد نمونه‌اند تا API نهایی متصل شود؛ پس از اتصال واقعی، همین بخش به‌صورت زنده به‌روز می‌شود.
+        </p>
+      </div>
     </div>
   );
 }
@@ -69,13 +94,15 @@ function TierCard({
 }) {
   return (
     <div
-      className={`rounded-xl border p-5 ${
-        active ? 'border-[var(--amline-primary)] ring-2 ring-teal-200 dark:ring-teal-900' : 'border-[var(--amline-border)]'
+      className={`rounded-[var(--amline-radius-lg)] border p-5 transition-shadow ${
+        active
+          ? 'border-[var(--amline-primary)] shadow-[var(--amline-shadow-md)] ring-2 ring-[var(--amline-primary)]/25 dark:ring-[var(--amline-primary)]/35'
+          : 'border-[var(--amline-border)] shadow-[var(--amline-shadow-sm)] dark:border-slate-700'
       } bg-[var(--amline-surface)]`}
     >
-      <div className="font-bold">{name}</div>
-      <div className="mb-3 text-xs text-[var(--amline-fg-muted)]">{code}</div>
-      <ul className="list-inside list-disc space-y-1 text-sm text-[var(--amline-fg-muted)]">
+      <div className="font-bold text-[var(--amline-fg)]">{name}</div>
+      <div className="amline-caption mb-3">{code}</div>
+      <ul className="list-inside list-disc space-y-2 amline-body">
         {bullets.map((b) => (
           <li key={b}>{b}</li>
         ))}

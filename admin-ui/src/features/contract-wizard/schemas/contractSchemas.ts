@@ -32,7 +32,7 @@ export const datingSchema = z
   });
 
 export const mortgageSchema = z.object({
-  total_amount: z.number().positive('مبلغ ودیعه باید بزرگ‌تر از صفر باشد'),
+  total_amount: z.number().positive('مبلغ رهن باید بزرگ‌تر از صفر باشد'),
   stages: z.array(paymentStageSchema),
 });
 

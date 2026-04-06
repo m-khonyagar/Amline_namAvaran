@@ -13,8 +13,12 @@ function Protected({ children }: { children: React.ReactNode }) {
   const { user, loading } = useConsultantAuth();
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--amline-bg)]">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-teal-600 border-t-transparent" />
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[var(--amline-bg)]" role="status" aria-live="polite">
+        <div
+          className="h-10 w-10 animate-spin rounded-full border-[3px] border-[var(--amline-border)] border-t-[var(--amline-primary)]"
+          aria-hidden
+        />
+        <p className="amline-body">در حال آماده‌سازی نشست…</p>
       </div>
     );
   }

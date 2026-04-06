@@ -75,6 +75,7 @@ def _out(c: WizardContract) -> Dict[str, Any]:
         "type": c.contract_type,
         "status": _effective_contract_status(c),
         "step": c.step,
+        "party_type": c.party_type,
         "parties": c.parties or {},
         "is_owner": True,
         "key": "key",

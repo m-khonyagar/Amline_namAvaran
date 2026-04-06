@@ -1,16 +1,20 @@
-/* هم‌تراز با متغیرهای فیگما (قرارداد رهن — frame اطلاعات مالک) */
+/* ویزارد قرارداد — نگاشت به Design System (متغیرهای سراسری amline-tokens.css) */
 .wizard-figma {
-  --wf-title: #0d0c22;
-  --wf-caption: #9e9ea7;
+  --wf-title: var(--amline-fg);
+  --wf-caption: var(--amline-fg-subtle);
   --wf-placeholder: #b6b6bd;
   --wf-disable-2: #b6b6bd;
-  --wf-border: #e7e7e9;
-  --wf-surface: #ffffff;
-  --wf-light-surface: #f3f3f4;
-  --wf-paragraph-2: #565564;
+  --wf-border: var(--amline-border);
+  --wf-surface: var(--amline-surface);
+  --wf-light-surface: var(--amline-surface-muted);
+  --wf-paragraph-2: var(--amline-fg-muted);
   --wf-field-radius: 13px;
   --wf-card-radius: 16px;
-  --wf-radio-selected: var(--amline-accent, #0d9488);
+  --wf-page-tint: var(--amline-surface-muted);
+  --wf-status-wait-pay: #f90;
+  --wf-primary-teal: var(--amline-primary);
+  --wf-tag-commission-bg: #aedcdc;
+  --wf-radio-selected: var(--amline-primary);
 }
 
 .wizard-figma .wf-body-s {

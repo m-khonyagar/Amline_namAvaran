@@ -15,25 +15,25 @@ export default function ConsultantLayout() {
 
   return (
     <div dir="rtl" className="min-h-screen bg-[var(--amline-bg)] text-[var(--amline-fg)]">
-      <header className="border-b border-[var(--amline-border)] bg-[var(--amline-surface)] px-4 py-3 shadow-sm">
+      <header className="border-b border-[var(--amline-border)] bg-[var(--amline-surface)] px-4 py-3 shadow-[var(--amline-shadow-sm)] dark:border-slate-700">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
           <div>
             <div className="text-lg font-bold text-[var(--amline-primary)]">اَملاین · مشاور</div>
-            <div className="text-xs text-[var(--amline-fg-muted)]">
+            <p className="amline-caption mt-0.5">
               {user?.full_name} — سطح {user?.verification_tier ?? '—'}
-            </div>
+            </p>
           </div>
-          <nav className="flex flex-wrap gap-1">
+          <nav className="flex flex-wrap gap-1" aria-label="ناوبری اصلی">
             {nav.map((n) => (
               <NavLink
                 key={n.to}
                 to={n.to}
                 className={({ isActive }) =>
                   cn(
-                    'rounded-lg px-3 py-2 text-sm transition-colors',
+                    'min-h-10 rounded-[var(--amline-radius-md)] px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--amline-ring)]',
                     isActive
-                      ? 'bg-teal-100 font-semibold text-teal-900 dark:bg-teal-950 dark:text-teal-100'
-                      : 'text-[var(--amline-fg-muted)] hover:bg-slate-100 dark:hover:bg-slate-800'
+                      ? 'bg-[var(--amline-primary-muted)] font-semibold text-[var(--amline-primary)]'
+                      : 'text-[var(--amline-fg-muted)] hover:bg-[var(--amline-surface-muted)] dark:hover:bg-slate-800/60'
                   )
                 }
               >
@@ -43,7 +43,7 @@ export default function ConsultantLayout() {
           </nav>
           <button
             type="button"
-            className="rounded-lg border border-[var(--amline-border)] px-3 py-1.5 text-sm"
+            className="min-h-10 rounded-[var(--amline-radius-md)] border border-[var(--amline-border)] bg-[var(--amline-surface)] px-3 py-1.5 text-sm font-medium text-[var(--amline-fg-muted)] transition hover:bg-[var(--amline-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--amline-ring)] dark:border-slate-700"
             onClick={() => {
               logout();
               navigate('/login');
@@ -53,7 +53,7 @@ export default function ConsultantLayout() {
           </button>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl p-4">
+      <main className="mx-auto max-w-6xl p-4 sm:p-6">
         <Outlet />
       </main>
     </div>

@@ -59,13 +59,13 @@ export function MortgageStep({ contractId, onComplete }: StepProps) {
 
   return (
     <div dir="rtl" className="space-y-4">
-      <h2 className="text-lg font-bold text-gray-800">ودیعه</h2>
+      <h2 className="text-lg font-bold text-gray-800">رهن</h2>
       <StepErrorBanner message={serverError} details={details} hint={hint} onDismiss={() => clear()} />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-        {/* مبلغ کل ودیعه */}
+        {/* مبلغ کل رهن */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">مبلغ ودیعه (ریال) *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">مبلغ رهن (ریال) *</label>
           <input
             {...register('total_amount', { valueAsNumber: true })}
             type="number"
@@ -171,7 +171,7 @@ export function MortgageStep({ contractId, onComplete }: StepProps) {
           disabled={isSubmitting}
           className="w-full bg-primary text-white rounded-lg py-2.5 font-medium disabled:opacity-50"
         >
-          {isSubmitting ? 'در حال ثبت...' : 'ثبت ودیعه و ادامه'}
+          {isSubmitting ? 'در حال ثبت...' : 'ثبت رهن و ادامه'}
         </button>
       </form>
     </div>

@@ -11,6 +11,7 @@ export default {
       },
       colors: {
         primary: amlineThemeTokens.colors.primary,
+        brand: amlineThemeTokens.colors.brand,
         accent: amlineThemeTokens.colors.accent,
         surface: amlineThemeTokens.colors.surface,
       },

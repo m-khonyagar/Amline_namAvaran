@@ -1,74 +1,10 @@
+@import '../../packages/amline-ui-core/amline-tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Design tokens — املاین (فارسی / RTL / Light & Dark) */
-:root {
-  --amline-primary: #1d6feb;
-  --amline-primary-hover: #155cc9;
-  --amline-primary-muted: rgba(29, 111, 235, 0.12);
-  --amline-accent: #0d9488;
-  --amline-accent-muted: rgba(13, 148, 136, 0.12);
-
-  --amline-bg: #f4f6f9;
-  --amline-fg: #0f172a;
-  --amline-fg-muted: #475569;
-  --amline-fg-subtle: #94a3b8;
-
-  --amline-surface: #ffffff;
-  --amline-surface-elevated: #ffffff;
-  --amline-surface-muted: #f1f5f9;
-
-  --amline-border: #e2e8f0;
-  --amline-border-strong: #cbd5e1;
-
-  --amline-ring: #1d6feb;
-  --amline-radius-sm: 0.375rem;
-  --amline-radius-md: 0.625rem;
-  --amline-radius-lg: 0.875rem;
-  --amline-radius-xl: 1.125rem;
-  --amline-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
-  --amline-shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
-  --amline-shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.1);
-
-  /* سازگاری با کلاس‌های قبلی */
-  --primary: var(--amline-primary);
-  --primary-dark: var(--amline-primary-hover);
-  --primary-light: #4a9ff5;
-  --secondary: #64748b;
-  --secondary-dark: #475569;
-  --success: #059669;
-  --warning: #d97706;
-  --error: #dc2626;
-  --info: #0284c7;
-  --background: var(--amline-bg);
-  --foreground: var(--amline-fg);
-  --card: var(--amline-surface);
-  --border: var(--amline-border);
-  --radius: var(--amline-radius-md);
-}
-
-.dark {
-  --amline-bg: #0b1120;
-  --amline-fg: #f1f5f9;
-  --amline-fg-muted: #94a3b8;
-  --amline-fg-subtle: #64748b;
-
-  --amline-surface: #111827;
-  --amline-surface-elevated: #1e293b;
-  --amline-surface-muted: #1e293b;
-
-  --amline-border: #334155;
-  --amline-border-strong: #475569;
-
-  --amline-primary: #3b82f6;
-  --amline-primary-hover: #2563eb;
-  --amline-primary-muted: rgba(59, 130, 246, 0.15);
-
-  --amline-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
-  --amline-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
-  --amline-shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.45);
-}
+/* لایهٔ اپ — بعد از توکن‌های مشترک amline-tokens.css */
 
 * {
   box-sizing: border-box;
@@ -196,7 +132,7 @@ body {
     @apply flex flex-col space-y-1 border-b border-[var(--amline-border)] p-5;
   }
   .card-title {
-    @apply text-lg font-semibold leading-none tracking-tight;
+    @apply text-lg font-semibold leading-none tracking-tight text-[var(--amline-fg)];
   }
   .card-description {
     @apply text-sm text-[var(--amline-fg-muted)];
@@ -214,16 +150,20 @@ body {
     @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors;
   }
   .badge-success {
-    @apply border-transparent bg-emerald-500 text-white;
+    @apply border-transparent text-white;
+    background-color: var(--amline-success);
   }
   .badge-warning {
-    @apply border-transparent bg-amber-500 text-white;
+    @apply border-transparent text-white;
+    background-color: var(--amline-warning);
   }
   .badge-error {
-    @apply border-transparent bg-red-500 text-white;
+    @apply border-transparent text-white;
+    background-color: var(--amline-error);
   }
   .badge-info {
-    @apply border-transparent bg-sky-500 text-white;
+    @apply border-transparent text-white;
+    background-color: var(--amline-info);
   }
 }
 
