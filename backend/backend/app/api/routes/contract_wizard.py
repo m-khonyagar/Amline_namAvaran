@@ -22,6 +22,7 @@ from app.domain.wizard_step_machine import (
 )
 from app.models.contract_wizard import WizardContract
 from app.models.user import User
+from app.services.pdf_client import request_contract_pdf
 from app.services.wallet_ledger import apply_delta, lock_wallet
 
 router = APIRouter()
@@ -480,12 +481,25 @@ def addendum_sign_initiate(contract_id: str, user: User = Depends(get_current_us
 
 
 @router.get("/{contract_id}/pdf")
-def contract_pdf(contract_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def contract_pdf(contract_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     c = _get_or_404(contract_id, db)
     _require_owner(c, user)
     if c.status == "DRAFT":
         raise HTTPException(status_code=400, detail="contract_not_ready")
-    return {"url": None, "status": "PENDING"}
+    parties = c.parties or {}
+    pdf_url = parties.get("pdf_url")
+    if pdf_url:
+        return {"url": pdf_url, "status": "READY"}
+    # درخواست تولید PDF از سرویس pdf-generator
+    pdf_url = await request_contract_pdf(str(c.id), parties)
+    if pdf_url:
+        # ذخیره URL در parties برای دفعات بعد
+        updated_parties = dict(parties)
+        updated_parties["pdf_url"] = pdf_url
+        c.parties = updated_parties
+        db.commit()
+        return {"url": pdf_url, "status": "READY"}
+    return {"url": None, "status": "PENDING", "contract_id": str(c.id)}
 
 
 # ─────────────────────────── signing ────────────────────────────
