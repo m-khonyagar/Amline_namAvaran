@@ -1,5 +1,8 @@
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../lib/api';
+import { EmptyState } from '../components/EmptyState';
+import { PageLoader } from '../components/PageLoader';
 
 interface Lead {
   id: string;
@@ -10,7 +13,7 @@ interface Lead {
 }
 
 export default function LeadsPage() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['consultant-leads'],
     queryFn: async () => {
       const res = await apiClient.get<{ items: Lead[]; total: number }>('/consultant/leads');
@@ -18,34 +21,66 @@ export default function LeadsPage() {
     },
   });
 
-  if (isLoading) return <div className="py-12 text-center">…</div>;
+  if (isLoading) {
+    return <PageLoader message="در حال بارگذاری لیدها…" />;
+  }
+
+  if (isError) {
+    return (
+      <EmptyState
+        title="بارگذاری لیدها ناموفق بود"
+        description="اتصال به سرور برقرار نشد. اتصال اینترنت را بررسی کنید و دوباره امتحان کنید."
+        action={
+          <button
+            type="button"
+            onClick={() => void refetch()}
+            className="min-h-11 rounded-[var(--amline-radius-md)] bg-[var(--amline-primary)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--amline-primary-hover)]"
+          >
+            تلاش مجدد
+          </button>
+        }
+      />
+    );
+  }
 
   const items = data?.items ?? [];
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">لیدهای اختصاصی</h1>
-      <p className="text-sm text-[var(--amline-fg-muted)]">
-        لیدهایی که از کانال املاین (وب، اپ، ربات) به شما تخصیص داده شده‌اند.
-      </p>
+      <div>
+        <h1 className="amline-display text-[var(--amline-fg)]">لیدهای اختصاصی</h1>
+        <p className="amline-body mt-2">
+          لیدهایی که از کانال املاین (وب، اپ یا ربات) به شما تخصیص داده شده‌اند؛ پس از تأیید پرونده، این فهرست فعال‌تر
+          می‌شود.
+        </p>
+      </div>
       {items.length === 0 ? (
-        <div className="rounded-xl border border-dashed p-8 text-center text-[var(--amline-fg-muted)]">
-          فعلاً لیدی ندارید؛ پس از تأیید پرونده و فعال‌سازی، لیدها اینجا نمایش داده می‌شوند.
-        </div>
+        <EmptyState
+          title="فعلاً لیدی ندارید"
+          description="پس از تأیید پروندهٔ حرفه‌ای و فعال‌سازی سطح مشاور، لیدهای جدید اینجا نمایش داده می‌شوند. وضعیت پرونده را از بخش «پرونده و تأیید» پیگیری کنید."
+          action={
+            <Link
+              to="/dossier"
+              className="inline-flex min-h-11 items-center justify-center rounded-[var(--amline-radius-md)] border border-[var(--amline-border)] bg-[var(--amline-surface)] px-5 text-sm font-semibold text-[var(--amline-primary)] transition hover:bg-[var(--amline-surface-muted)] dark:border-slate-700"
+            >
+              مشاهدهٔ پرونده
+            </Link>
+          }
+        />
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-3">
           {items.map((l) => (
             <li
               key={l.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[var(--amline-border)] bg-[var(--amline-surface)] p-4"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--amline-radius-lg)] border border-[var(--amline-border)] bg-[var(--amline-surface)] p-4 shadow-[var(--amline-shadow-sm)] dark:border-slate-700"
             >
               <div>
-                <div className="font-medium">{l.title}</div>
-                <div className="text-xs text-[var(--amline-fg-muted)]">
-                  {l.city} · {l.stage}
+                <div className="font-medium text-[var(--amline-fg)]">{l.title}</div>
+                <div className="amline-caption mt-1">
+                  {l.city} · مرحله: {l.stage}
                 </div>
               </div>
-              <span className="rounded-full bg-teal-100 px-2 py-0.5 text-xs text-teal-900 dark:bg-teal-950 dark:text-teal-200">
+              <span className="rounded-full bg-[var(--amline-primary-muted)] px-3 py-1 text-xs font-semibold text-[var(--amline-primary)]">
                 {l.stage}
               </span>
             </li>

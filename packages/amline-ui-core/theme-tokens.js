@@ -1,9 +1,17 @@
+/**
+ * Tailwind / JS bridge — مقادیر به CSS variables در amline-tokens.css وابسته‌اند.
+ * Figma: Amline | Design System
+ */
 export const amlineThemeTokens = {
   colors: {
     primary: {
       DEFAULT: 'var(--amline-primary)',
       dark: 'var(--amline-primary-hover)',
-      light: '#4a9ff5',
+      light: 'var(--primary-light)',
+    },
+    brand: {
+      warm: 'var(--amline-brand-terracotta)',
+      'warm-muted': 'var(--amline-brand-terracotta-muted)',
     },
     accent: {
       DEFAULT: 'var(--amline-accent)',
@@ -13,10 +21,10 @@ export const amlineThemeTokens = {
       elevated: 'var(--amline-surface-elevated)',
       muted: 'var(--amline-surface-muted)',
     },
-    success: '#059669',
-    warning: '#d97706',
-    error: '#dc2626',
-    info: '#0284c7',
+    success: 'var(--amline-success)',
+    warning: 'var(--amline-warning)',
+    error: 'var(--amline-error)',
+    info: 'var(--amline-info)',
   },
   radius: {
     amline: 'var(--amline-radius-lg)',

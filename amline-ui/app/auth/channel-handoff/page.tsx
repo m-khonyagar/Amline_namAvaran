@@ -4,34 +4,37 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Suspense } from 'react'
 
-/**
- * نقطهٔ ورود پس از ربات (تلگرام / بله / ایتا): بک‌اند توکن یک‌بار مصرف را با session وب مبادله می‌کند.
- * این صفحه فقط قرارداد URL و UX را نشان می‌دهد؛ منطق واقعی روی API است.
- */
 function ChannelHandoffInner() {
   const sp = useSearchParams()
   const token = sp.get('token')
   const target = sp.get('next') ?? '/contracts'
 
   return (
-    <div dir="rtl" className="mx-auto flex min-h-[60vh] max-w-lg flex-col justify-center gap-4 p-6">
-      <h1 className="text-xl font-bold text-slate-900">ورود از کانال املاین</h1>
-      <p className="text-sm text-slate-600">
+    <div
+      dir="rtl"
+      className="mx-auto flex min-h-[60vh] max-w-lg flex-col justify-center gap-5 p-6"
+    >
+      <h1 className="amline-display text-[var(--amline-fg)]">ورود از کانال اَملاین</h1>
+      <p className="amline-body">
         اگر از ربات بله، ایتا یا تلگرام به اینجا هدایت شده‌اید، سرور باید توکن{' '}
-        <code className="rounded bg-slate-100 px-1 text-xs">{token ? '…' + token.slice(-6) : '—'}</code>{' '}
+        <code className="rounded-[var(--amline-radius-sm)] bg-[var(--amline-surface-muted)] px-1.5 py-0.5 font-mono text-xs text-[var(--amline-fg)]">
+          {token ? '…' + token.slice(-6) : '—'}
+        </code>{' '}
         را تأیید و نشست وب را بسازد.
       </p>
       {!token ? (
-        <p className="text-amber-700 text-sm">توکن در آدرس نیست — لینک ربات را دوباره باز کنید.</p>
+        <p className="rounded-amline border border-amber-200 bg-[var(--amline-warning-muted)] px-3 py-2 text-sm text-amber-900 dark:border-amber-900/40 dark:text-amber-100">
+          توکن در آدرس نیست — لینک ربات را دوباره باز کنید.
+        </p>
       ) : null}
-      <div className="flex gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <Link
           href={target}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="btn btn-primary min-h-[48px] flex-1 justify-center px-5 font-semibold sm:flex-none"
         >
-          ادامه به داشبورد (پس از اتصال API)
+          ادامه به داشبورد
         </Link>
-        <Link href="/login" className="rounded-lg border border-slate-300 px-4 py-2 text-sm">
+        <Link href="/login" className="btn btn-outline min-h-[48px] flex-1 justify-center sm:flex-none">
           ورود معمولی
         </Link>
       </div>
@@ -41,7 +44,13 @@ function ChannelHandoffInner() {
 
 export default function ChannelHandoffPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center">…</div>}>
+    <Suspense
+      fallback={
+        <div className="flex min-h-[40vh] items-center justify-center p-8">
+          <p className="amline-body">در حال بارگذاری…</p>
+        </div>
+      }
+    >
       <ChannelHandoffInner />
     </Suspense>
   )

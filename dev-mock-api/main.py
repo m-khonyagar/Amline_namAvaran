@@ -226,6 +226,7 @@ def _contract_json(c: Dict[str, Any]) -> Dict[str, Any]:
         "type": c["type"],
         "status": _effective_status(c),
         "step": c["step"],
+        "party_type": c.get("party_type"),
         "parties": c.get("parties", {}),
         "is_owner": True,
         "key": "mock-key",
@@ -316,6 +317,7 @@ def contracts_start(body: StartBody) -> Dict[str, Any]:
         "type": ctype,
         "status": "DRAFT",
         "step": "LANDLORD_INFORMATION",
+        "party_type": body.party_type,
         "parties": {},
         "created_at": now,
     }

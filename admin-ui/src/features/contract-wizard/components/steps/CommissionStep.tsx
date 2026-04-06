@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { BadgePercent, X, Settings } from 'lucide-react';
+import { BadgePercent, X } from 'lucide-react';
 import { apiClient, contractApi } from '../../api/contractApi';
 import type { CommissionInvoiceResponse } from '../../types/api';
 import type { StepProps } from '../../types/wizard';
@@ -198,15 +198,24 @@ export function CommissionStep({ contractId, onCommissionContinue }: StepProps) 
   const discountRial = invoice?.discount_amount ?? 0;
   const payableRial = invoice ? Math.max(0, invoice.total_amount) : 0;
 
+  const canPayFromWallet = useWallet && creditRial >= payableRial && payableRial > 0;
+  const primaryPayLabel = paying
+    ? 'در حال پردازش…'
+    : canPayFromWallet
+      ? 'پرداخت از کیف پول'
+      : 'مشاهده پیش‌فاکتور و پرداخت';
+
   return (
-    <div dir="rtl" className="wizard-figma relative pb-24">
+    <div dir="rtl" className="wizard-figma relative min-h-[60vh] pb-24" style={{ backgroundColor: 'var(--wf-page-tint)' }}>
       <div className="flex flex-col shadow-sm">
-        <div className="flex h-14 items-center justify-between border-b-2 border-[var(--wf-border)] bg-[var(--wf-surface)] px-6 py-2">
-          <span className="w-9 shrink-0" aria-hidden />
-          <h2 className="min-w-0 flex-1 text-center wf-subtitle-m font-medium text-[var(--wf-title)]">
-            پرداخت کمیسیون
-          </h2>
-          <span className="w-9 shrink-0" aria-hidden />
+        <div className="flex min-h-14 flex-col items-center justify-center gap-1 border-b-2 border-[var(--wf-border)] bg-[var(--wf-surface)] px-4 py-3">
+          <span
+            className="rounded-lg px-3 py-0.5 text-center text-xs font-medium text-[var(--wf-title)]"
+            style={{ background: 'var(--wf-tag-commission-bg)' }}
+          >
+            پیش‌فاکتور
+          </span>
+          <h2 className="wf-subtitle-m text-center font-medium text-[var(--wf-title)]">پرداخت کمیسیون</h2>
         </div>
       </div>
 
@@ -237,7 +246,7 @@ export function CommissionStep({ contractId, onCommissionContinue }: StepProps) 
               className="rounded-[var(--wf-card-radius)] border border-emerald-200 bg-emerald-50 p-4 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-100"
               role="status"
             >
-              <p className="font-bold">کمیسیون این قرارداد پرداخت شده است.</p>
+              <p className="font-bold">کمیسیون این قرارداد ثبت و پرداخت شده است.</p>
               {invoice.commission_paid_at ? (
                 <p className="mt-1 text-sm opacity-90">زمان ثبت: {formatPaidAt(invoice.commission_paid_at)}</p>
               ) : null}
@@ -255,6 +264,14 @@ export function CommissionStep({ contractId, onCommissionContinue }: StepProps) 
 
           {!isPaid && (
             <>
+              <div
+                className="flex items-center justify-end gap-2 text-xs font-medium"
+                style={{ color: 'var(--wf-status-wait-pay)' }}
+                role="status"
+              >
+                <span>در انتظار پرداخت</span>
+                <span className="inline-block size-2 rounded-full border-2 border-dashed border-current" aria-hidden />
+              </div>
               <div
                 className="overflow-hidden rounded-[12px] border border-[var(--wf-border)] bg-[var(--wf-surface)] shadow-[0_0_4px_2px_rgba(0,0,0,0.06)]"
               >
@@ -298,7 +315,7 @@ export function CommissionStep({ contractId, onCommissionContinue }: StepProps) 
                       <span className="text-sm text-[var(--wf-title)]">{toToman(split.baseRial)}</span>
                       <span className="text-xs text-[var(--wf-caption)]">تومان</span>
                     </div>
-                    <span className="text-sm text-[var(--wf-title)]">کمیسیون مصوب اتحادیه املاک</span>
+                    <span className="text-sm text-[var(--wf-title)]">محاسبه کمیسیون</span>
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-end gap-1">
@@ -309,6 +326,15 @@ export function CommissionStep({ contractId, onCommissionContinue }: StepProps) 
                       ٪{invoice.vat_percent ?? 10} مالیات بر ارزش افزوده
                     </span>
                   </div>
+                  {(invoice.tracking_code_fee ?? 0) > 0 ? (
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-end gap-1">
+                        <span className="text-sm text-[var(--wf-title)]">{toToman(invoice.tracking_code_fee!)}</span>
+                        <span className="text-xs text-[var(--wf-caption)]">تومان</span>
+                      </div>
+                      <span className="text-sm text-[var(--wf-title)]">هزینه ارسال قرارداد</span>
+                    </div>
+                  ) : null}
                   {discountRial > 0 ? (
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-end gap-1">
@@ -324,9 +350,12 @@ export function CommissionStep({ contractId, onCommissionContinue }: StepProps) 
                       <span className="text-sm font-medium text-[var(--wf-title)]">{toToman(payableRial)}</span>
                       <span className="text-xs text-[var(--wf-caption)]">تومان</span>
                     </div>
-                    <span className="text-sm font-medium text-[var(--wf-title)]">مبلغ قابل پرداخت</span>
+                    <span className="text-sm font-medium text-[var(--wf-title)]">مبلغ قابل پرداخت:</span>
                   </div>
                 </div>
+                <p className="px-4 pb-3 text-center text-[11px] leading-relaxed text-[var(--wf-caption)]">
+                  در پنجرهٔ پیش‌فاکتور می‌توانید کد تخفیف را اعمال کنید؛ سپس از کیف پول یا درگاه بانکی پرداخت را انجام دهید.
+                </p>
               </div>
 
               {creditRial > 0 && (
@@ -357,10 +386,9 @@ export function CommissionStep({ contractId, onCommissionContinue }: StepProps) 
               type="button"
               onClick={() => void handlePayment()}
               disabled={paying}
-              className="flex h-10 w-full items-center justify-center gap-2 rounded-[10px] bg-[var(--amline-accent)] text-sm font-bold text-white disabled:opacity-50"
+              className="flex h-12 w-full items-center justify-center rounded-[12px] bg-[var(--wf-primary-teal)] text-sm font-bold text-white disabled:opacity-50"
             >
-              <span>{paying ? 'در حال پردازش…' : 'پرداخت'}</span>
-              <Settings className="size-5" strokeWidth={1.5} />
+              {primaryPayLabel}
             </button>
           </div>
         </div>

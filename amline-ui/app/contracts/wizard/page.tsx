@@ -10,7 +10,14 @@ const ContractWizardPage = dynamic(
     import('../../../../admin-ui/src/features/contract-wizard/ContractWizardPage').then(
       (m) => m.ContractWizardPage
     ),
-  { ssr: false, loading: () => <div className="p-8 text-center text-gray-500">بارگذاری ویزارد…</div> }
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex min-h-[40vh] items-center justify-center p-8">
+        <p className="amline-body text-center">بارگذاری ویزارد…</p>
+      </div>
+    ),
+  }
 )
 
 export default function UserContractWizardRoute() {
@@ -23,7 +30,7 @@ export default function UserContractWizardRoute() {
   }, [router])
 
   return (
-    <div className="min-h-screen bg-gray-50 py-4">
+    <div className="min-h-screen bg-[var(--amline-bg)] px-3 py-4 sm:px-4">
       <ContractWizardPage platform="user" />
     </div>
   )

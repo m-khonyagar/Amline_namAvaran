@@ -1,25 +1,42 @@
+@import '../../packages/amline-ui-core/amline-tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --amline-primary: #0d9488;
-  --amline-primary-hover: #0f766e;
-  --amline-bg: #f4f6f9;
-  --amline-fg: #0f172a;
-  --amline-fg-muted: #475569;
-  --amline-surface: #ffffff;
-  --amline-border: #e2e8f0;
+.amline-display {
+  @apply text-2xl font-bold tracking-tight text-[var(--amline-fg)] md:text-3xl;
+}
+.amline-title {
+  @apply text-lg font-semibold text-[var(--amline-fg)] md:text-xl;
+}
+.amline-body {
+  @apply text-sm leading-relaxed text-[var(--amline-fg-muted)] md:text-base;
+}
+.amline-caption {
+  @apply text-xs text-[var(--amline-fg-subtle)];
 }
 
-.dark {
-  --amline-bg: #0b1120;
-  --amline-fg: #f1f5f9;
-  --amline-fg-muted: #94a3b8;
-  --amline-surface: #111827;
-  --amline-border: #334155;
-  --amline-primary: #14b8a6;
-  --amline-primary-hover: #0d9488;
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--amline-surface-muted);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--amline-border-strong);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--amline-fg-subtle);
+}
+.dark ::-webkit-scrollbar-track {
+  background: var(--amline-surface);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
 }
 
 * {
@@ -34,6 +51,9 @@ body {
   background: var(--amline-bg);
   color: var(--amline-fg);
   min-height: 100%;
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-text-size-adjust: 100%;
 }
 
 #root {
