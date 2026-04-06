@@ -1,9 +1,25 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   experimental: {
     externalDir: true,
+  },
+  /**
+   * When Next.js compiles admin-ui code via externalDir relative imports,
+   * webpack resolves node_modules relative to the source file's location in
+   * admin-ui/.  In CI only amline-ui/node_modules is installed (npm ci runs
+   * only in amline-ui/).  Adding the amline-ui node_modules directory as an
+   * absolute fallback lets webpack find shared packages (axios, clsx, …).
+   */
+  webpack(config) {
+    config.resolve.modules = [
+      path.resolve(__dirname, 'node_modules'),
+      ...config.resolve.modules,
+    ];
+    return config;
   },
   eslint: {
     ignoreDuringBuilds: true,

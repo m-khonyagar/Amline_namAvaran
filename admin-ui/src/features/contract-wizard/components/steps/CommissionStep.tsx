@@ -94,7 +94,7 @@ export function CommissionStep({ contractId, onCommissionContinue }: StepProps) 
       .catch((err: unknown) => {
         const m = ensureMappedError(err);
         setError(m.message);
-        setErrorDetails(m.detailLines);
+        setErrorDetails(m.detailLines ?? []);
         setErrorHint(m.hint ?? null);
       })
       .finally(() => setIsLoading(false));
@@ -152,7 +152,7 @@ export function CommissionStep({ contractId, onCommissionContinue }: StepProps) 
     } catch (err: unknown) {
       const m = ensureMappedError(err);
       setError(m.message);
-      setErrorDetails(m.detailLines);
+      setErrorDetails(m.detailLines ?? []);
       setErrorHint(m.hint ?? null);
     } finally {
       setPaying(false);

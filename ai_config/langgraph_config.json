@@ -1,0 +1,80 @@
+{
+  "graph": {
+    "name": "self_improving_agent",
+    "description": "LangGraph workflow for the Self-Improving AI Agent pipeline",
+    "entry_point": "plan",
+    "nodes": [
+      {
+        "id": "plan",
+        "agent": "PlanningAgent",
+        "description": "Analyse the GitHub issue and produce a structured implementation plan",
+        "next": "code"
+      },
+      {
+        "id": "code",
+        "agent": "CodingAgent",
+        "description": "Implement the plan by generating and writing code files",
+        "next": "test"
+      },
+      {
+        "id": "test",
+        "agent": "TestingAgent",
+        "description": "Generate and run pytest unit tests for the new code",
+        "next": "review"
+      },
+      {
+        "id": "review",
+        "agent": "ReviewAgent",
+        "description": "Review code quality and apply improvements",
+        "next": "execute"
+      },
+      {
+        "id": "execute",
+        "agent": "ExecutorAgent",
+        "description": "Run the local CI pipeline (lint, test, build)",
+        "next": "pr"
+      },
+      {
+        "id": "pr",
+        "agent": "PRAgent",
+        "description": "Commit changes and open a GitHub pull request",
+        "next": "__end__"
+      }
+    ],
+    "conditional_edges": {
+      "review": {
+        "condition": "review_approved",
+        "true": "execute",
+        "false": "code"
+      }
+    },
+    "human_approval_required": ["merge", "deploy"],
+    "auto_nodes": ["plan", "code", "test", "review", "execute", "pr"]
+  },
+  "state_schema": {
+    "issue_number": "int",
+    "title": "str",
+    "body": "str",
+    "plan": "Plan",
+    "code_result": "CodeResult",
+    "test_result": "TestResult",
+    "review_result": "ReviewResult",
+    "exec_result": "ExecutionResult",
+    "pr_result": "PRResult",
+    "workspace": "Path",
+    "errors": "list[str]"
+  },
+  "checkpointing": {
+    "enabled": true,
+    "backend": "sqlite",
+    "path": "${AGENT_CHECKPOINT_DIR:/tmp/agent_checkpoints}/langgraph.db"
+  },
+  "parallel": {
+    "enabled": true,
+    "max_workers": 4
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  }
+}
