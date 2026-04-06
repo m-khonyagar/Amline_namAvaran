@@ -112,7 +112,8 @@ test('فلو ۳: Contract Wizard — شروع قرارداد رهن و اجار�
   // MSW پاسخ می‌دهد — باید به مرحله اطلاعات مالک برسیم
   await page.getByRole('button', { name: 'شروع قرارداد', exact: true }).click();
   await expect(page.getByRole('heading', { name: /اطلاعات مالک/ })).toBeVisible({ timeout: 15000 });
-  await expect(page.getByRole('button', { name: 'شخص حقیقی' })).toBeVisible();
+  // LandlordStep از WfLabeledRadio استفاده می‌کند که <label> است نه <button>
+  await expect(page.getByText('شخص حقیقی هستم')).toBeVisible();
   await screenshot(page, '10-wizard-after-start');
 });
 
