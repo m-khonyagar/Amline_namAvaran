@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import datetime as dt
 import uuid
+from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -11,19 +12,65 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.db.session import get_db
+from app.domain.commission_service import PRContractCommissionService
+from app.domain.contract_enums import ContractStatus, PartyType, ProvinceType
+from app.domain.pr_contract_step_manager import PRContractStepManager
+from app.domain.wizard_step_machine import (
+    InvalidStepTransitionError,
+    assert_valid_transition,
+    mortgage_default_next,
+)
 from app.models.contract_wizard import WizardContract
 from app.models.user import User
+from app.services.wallet_ledger import apply_delta, lock_wallet
 
 router = APIRouter()
 
+_step_manager = PRContractStepManager()
+_commission_svc = PRContractCommissionService()
+
+_WIZARD_STATUS_NO_COMMISSION_OVERLAY = frozenset({"REVOKED", "COMPLETED", "REJECTED"})
+
+
+def _apply_step(c: WizardContract, new_step: str) -> str:
+    try:
+        assert_valid_transition(c.step, new_step, c.contract_type)
+    except InvalidStepTransitionError as e:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "code": "invalid_step_transition",
+                "from": e.current_step,
+                "to": e.next_step,
+                "contract_type": e.contract_type,
+            },
+        ) from e
+    c.step = new_step
+    return new_step
+
 
 # ─────────────────────────── helpers ────────────────────────────
+
+def _effective_contract_status(c: WizardContract) -> str:
+    """در مرحلهٔ امضا تا قبل از پرداخت کمیسیون، برای UI و polling همان PENDING_COMMISSION برگردان."""
+    raw = c.status or "DRAFT"
+    if raw in _WIZARD_STATUS_NO_COMMISSION_OVERLAY:
+        return raw
+    if c.step == "SIGNING" and c.commission_paid_at is None:
+        return "PENDING_COMMISSION"
+    return raw
+
+
+def _require_commission_paid_for_signing(c: WizardContract) -> None:
+    if c.step == "SIGNING" and c.commission_paid_at is None:
+        raise HTTPException(status_code=400, detail="commission_required")
+
 
 def _out(c: WizardContract) -> Dict[str, Any]:
     return {
         "id": str(c.id),
         "type": c.contract_type,
-        "status": c.status,
+        "status": _effective_contract_status(c),
         "step": c.step,
         "parties": c.parties or {},
         "is_owner": True,
@@ -42,6 +89,12 @@ def _get_or_404(contract_id: str, db: Session) -> WizardContract:
     if not c:
         raise HTTPException(status_code=404, detail="not_found")
     return c
+
+
+def _require_owner(c: WizardContract, user: User) -> None:
+    """Only the wizard owner may read or mutate contract state (IDOR guard)."""
+    if c.owner_id != str(user.id):
+        raise HTTPException(status_code=403, detail="forbidden")
 
 
 # ─────────────────────────── DTOs ───────────────────────────────
@@ -89,13 +142,15 @@ class MortgageBody(BaseModel):
 
 class RentingBody(BaseModel):
     monthly_rent_amount: int
-    rent_due_day_of_month: int  # 1-31
+    rent_due_day_of_month: Optional[int] = None  # 1-31; None allowed (e.g. sale bridge)
     stages: List[PaymentStage]
     next_step: Optional[str] = None
 
     @field_validator("rent_due_day_of_month")
     @classmethod
-    def validate_day(cls, v: int) -> int:
+    def validate_day(cls, v: Optional[int]) -> Optional[int]:
+        if v is None:
+            return v
         if not 1 <= v <= 31:
             raise ValueError("rent_due_day_of_month must be between 1 and 31")
         return v
@@ -117,6 +172,12 @@ class SalePriceBody(BaseModel):
 class AddendumBody(BaseModel):
     subject: str
     content: str
+
+
+class CommissionPayBody(BaseModel):
+    use_wallet_credit: bool = False
+    use_all_wallet_credits: bool = False
+    wallet_credits: Optional[int] = None
 
 
 # ─────────────────────────── start ──────────────────────────────
@@ -153,26 +214,74 @@ def resolve_info(_: User = Depends(get_current_user)):
 @router.get("/{contract_id}")
 def contracts_get(contract_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     c = _get_or_404(contract_id, db)
-    if c.owner_id != str(user.id):
-        raise HTTPException(status_code=403, detail="forbidden")
+    _require_owner(c, user)
     return _out(c)
 
 
 @router.get("/{contract_id}/status")
-def contracts_status(contract_id: str, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def contracts_status(contract_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     c = _get_or_404(contract_id, db)
-    return {"status": c.status, "step": c.step, "contract_id": str(c.id), "type": c.contract_type}
+    _require_owner(c, user)
+    # محاسبه state واقعی از domain step manager
+    completed_steps = (c.parties or {}).get("completed_steps", [])
+    try:
+        owner_party = PartyType(c.party_type or "LANDLORD")
+        contract_status = ContractStatus(c.status or "DRAFT")
+        domain_state = _step_manager.get_contract_state(
+            completed_steps=completed_steps,
+            status=contract_status,
+            owner_party_type=owner_party,
+        )
+        state_value = domain_state.value
+    except (ValueError, Exception):
+        state_value = c.status or "DRAFT"
+    return {
+        "status": _effective_contract_status(c),
+        "step": c.step,
+        "contract_id": str(c.id),
+        "type": c.contract_type,
+        "state": state_value,
+    }
 
 
 @router.get("/{contract_id}/commission/invoice")
-def commission_invoice(contract_id: str, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def commission_invoice(contract_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     c = _get_or_404(contract_id, db)
-    return {"total_amount": 5_000_000, "landlord_share": 2_500_000, "tenant_share": 2_500_000, "invoice_id": f"inv-{c.id}"}
+    _require_owner(c, user)
+    # محاسبه کمیسیون واقعی از domain service
+    parties = c.parties or {}
+    rent_amount = parties.get("rent_amount", 0) or 0
+    deposit_amount = parties.get("deposit_amount", 0) or 0
+    province = ProvinceType.TEHRAN
+    if rent_amount > 0 or deposit_amount > 0:
+        invoice = _commission_svc.calculate_invoice(
+            rent_amount=int(rent_amount),
+            deposit_amount=int(deposit_amount),
+            province=province,
+        )
+    else:
+        # fallback اگر مبالغ هنوز ثبت نشده
+        invoice = {
+            "commission": 5_000_000,
+            "tax": 500_000,
+            "tracking_code_fee": 50_000,
+            "total_amount": 5_550_000,
+            "landlord_share": 2_775_000,
+            "tenant_share": 2_775_000,
+        }
+    paid = c.commission_paid_at is not None
+    return {
+        **invoice,
+        "invoice_id": f"inv-{c.id}",
+        "commission_paid": paid,
+        "commission_paid_at": c.commission_paid_at.isoformat() if c.commission_paid_at else None,
+    }
 
 
 @router.post("/{contract_id}/revoke")
-def contracts_revoke(contract_id: str, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def contracts_revoke(contract_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     c = _get_or_404(contract_id, db)
+    _require_owner(c, user)
     if c.status in ("REVOKED", "COMPLETED"):
         raise HTTPException(status_code=400, detail="invalid_state_transition")
     c.status = "REVOKED"
@@ -183,8 +292,9 @@ def contracts_revoke(contract_id: str, _: User = Depends(get_current_user), db: 
 # ─────────────────────────── party steps ────────────────────────
 
 @router.post("/{contract_id}/party/landlord", status_code=201)
-def party_landlord(contract_id: str, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def party_landlord(contract_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     c = _get_or_404(contract_id, db)
+    _require_owner(c, user)
     party_id = f"party-landlord-{int(dt.datetime.now().timestamp() * 1000)}"
     parties = dict(c.parties or {})
     parties.setdefault("landlords", []).append({"id": party_id, "party_type": "LANDLORD", "person_type": "NATURAL_PERSON"})
@@ -194,16 +304,19 @@ def party_landlord(contract_id: str, _: User = Depends(get_current_user), db: Se
 
 
 @router.post("/{contract_id}/party/landlord/set")
-def landlord_set(contract_id: str, body: SetStepBody, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def landlord_set(contract_id: str, body: SetStepBody, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     c = _get_or_404(contract_id, db)
-    c.step = body.next_step or "TENANT_INFORMATION"
+    _require_owner(c, user)
+    nxt = body.next_step or "TENANT_INFORMATION"
+    _apply_step(c, nxt)
     db.commit()
     return {"next_step": c.step}
 
 
 @router.post("/{contract_id}/party/tenant", status_code=201)
-def party_tenant(contract_id: str, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def party_tenant(contract_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     c = _get_or_404(contract_id, db)
+    _require_owner(c, user)
     party_id = f"party-tenant-{int(dt.datetime.now().timestamp() * 1000)}"
     parties = dict(c.parties or {})
     parties.setdefault("tenants", []).append({"id": party_id, "party_type": "TENANT", "person_type": "NATURAL_PERSON"})
@@ -213,37 +326,43 @@ def party_tenant(contract_id: str, _: User = Depends(get_current_user), db: Sess
 
 
 @router.post("/{contract_id}/party/tenant/set")
-def tenant_set(contract_id: str, body: SetStepBody, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def tenant_set(contract_id: str, body: SetStepBody, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     c = _get_or_404(contract_id, db)
-    c.step = body.next_step or "PLACE_INFORMATION"
+    _require_owner(c, user)
+    nxt = body.next_step or "PLACE_INFORMATION"
+    _apply_step(c, nxt)
     db.commit()
     return {"next_step": c.step}
 
 
 @router.patch("/{contract_id}/party/{party_id}")
-def party_patch(contract_id: str, party_id: str, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def party_patch(contract_id: str, party_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     c = _get_or_404(contract_id, db)
+    _require_owner(c, user)
     return {"id": party_id, "contract": _out(c), "party_type": "LANDLORD", "person_type": "NATURAL_PERSON"}
 
 
 @router.delete("/{contract_id}/party/{party_id}")
-def party_delete(contract_id: str, party_id: str, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    _get_or_404(contract_id, db)
+def party_delete(contract_id: str, party_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    c = _get_or_404(contract_id, db)
+    _require_owner(c, user)
     return {"ok": True}
 
 
 # ─────────────────────────── property/date/financial steps ──────
 
 @router.post("/{contract_id}/home-info", status_code=201)
-def home_info(contract_id: str, body: HomeInfoBody, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def home_info(contract_id: str, body: HomeInfoBody, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     c = _get_or_404(contract_id, db)
-    c.step = body.next_step or "DATING"
+    _require_owner(c, user)
+    nxt = body.next_step or "DATING"
+    _apply_step(c, nxt)
     db.commit()
     return {"next_step": c.step}
 
 
 @router.post("/{contract_id}/dating", status_code=201)
-def dating(contract_id: str, body: DatingBody, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def dating(contract_id: str, body: DatingBody, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     try:
         start = dt.date.fromisoformat(body.start_date)
         end = dt.date.fromisoformat(body.end_date)
@@ -252,47 +371,94 @@ def dating(contract_id: str, body: DatingBody, _: User = Depends(get_current_use
     if end <= start:
         raise HTTPException(status_code=422, detail="end_date_before_start_date")
     c = _get_or_404(contract_id, db)
-    c.step = body.next_step or "MORTGAGE"
+    _require_owner(c, user)
+    nxt = body.next_step or "MORTGAGE"
+    _apply_step(c, nxt)
     db.commit()
     return {"next_step": c.step}
 
 
 @router.post("/{contract_id}/mortgage", status_code=201)
-def mortgage(contract_id: str, body: MortgageBody, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def mortgage(contract_id: str, body: MortgageBody, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     stages_sum = sum(s.amount for s in body.stages)
     if stages_sum != body.total_amount:
         raise HTTPException(status_code=422, detail="stages_sum_mismatch")
     c = _get_or_404(contract_id, db)
-    c.step = body.next_step or ("SIGNING" if c.contract_type == "BUYING_AND_SELLING" else "RENTING")
+    _require_owner(c, user)
+    nxt = body.next_step or mortgage_default_next(c.contract_type)
+    _apply_step(c, nxt)
     db.commit()
     return {"next_step": c.step}
 
 
 @router.post("/{contract_id}/renting", status_code=201)
-def renting(contract_id: str, body: RentingBody, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def renting(contract_id: str, body: RentingBody, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     c = _get_or_404(contract_id, db)
-    c.step = body.next_step or "SIGNING"
+    _require_owner(c, user)
+    nxt = body.next_step or "SIGNING"
+    _apply_step(c, nxt)
     db.commit()
     return {"next_step": c.step}
 
 
 @router.post("/{contract_id}/sale-price", status_code=201)
-def sale_price(contract_id: str, body: SalePriceBody, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def sale_price(contract_id: str, body: SalePriceBody, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     c = _get_or_404(contract_id, db)
-    c.step = body.next_step or "SIGNING"
+    _require_owner(c, user)
+    nxt = body.next_step or "SIGNING"
+    _apply_step(c, nxt)
     db.commit()
     return {"next_step": c.step}
 
 
 @router.post("/{contract_id}/commission/pay")
-def commission_pay(contract_id: str, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    _get_or_404(contract_id, db)
-    return {"ok": True, "redirect_url": "/financials/bank/gateway", "used_wallet": False}
+def commission_pay(
+    contract_id: str,
+    body: CommissionPayBody,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    c = _get_or_404(contract_id, db)
+    _require_owner(c, user)
+    if c.commission_paid_at is not None:
+        return {"ok": True, "redirect_url": "/", "used_wallet": False, "already_paid": True}
+
+    # محاسبه مبلغ واقعی
+    parties = c.parties or {}
+    rent_amount = int(parties.get("rent_amount", 0) or 0)
+    deposit_amount = int(parties.get("deposit_amount", 0) or 0)
+    if rent_amount > 0 or deposit_amount > 0:
+        invoice = _commission_svc.calculate_invoice(rent_amount, deposit_amount)
+        commission_total = Decimal(str(invoice["total_amount"]))
+    else:
+        commission_total = Decimal("5550000")
+
+    want_wallet = body.use_wallet_credit or body.use_all_wallet_credits
+    if want_wallet:
+        w = lock_wallet(db, user_id=user.id)
+        bal = Decimal(str(w.balance or 0))
+        if bal >= commission_total:
+            apply_delta(
+                db,
+                user_id=user.id,
+                delta=-commission_total,
+                type="wizard_commission",
+                reference_id=str(c.id),
+            )
+            c.commission_paid_at = dt.datetime.now(dt.timezone.utc)
+            db.commit()
+            return {"ok": True, "redirect_url": "/", "used_wallet": True}
+    return {
+        "ok": True,
+        "redirect_url": f"/financials/bank/gateway?contract_id={contract_id}",
+        "used_wallet": False,
+    }
 
 
 @router.post("/{contract_id}/addendum", status_code=201)
 def addendum_create(contract_id: str, body: AddendumBody, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     c = _get_or_404(contract_id, db)
+    _require_owner(c, user)
     if c.status in ("REVOKED", "REJECTED"):
         raise HTTPException(status_code=400, detail="addendum_not_allowed")
     addendum_id = str(uuid.uuid4())
@@ -300,20 +466,23 @@ def addendum_create(contract_id: str, body: AddendumBody, user: User = Depends(g
 
 
 @router.get("/{contract_id}/addendums")
-def addendums_list(contract_id: str, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    _get_or_404(contract_id, db)
+def addendums_list(contract_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    c = _get_or_404(contract_id, db)
+    _require_owner(c, user)
     return []
 
 
 @router.post("/{contract_id}/addendum/sign/initiate")
-def addendum_sign_initiate(contract_id: str, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    _get_or_404(contract_id, db)
+def addendum_sign_initiate(contract_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    c = _get_or_404(contract_id, db)
+    _require_owner(c, user)
     return {"ok": True}
 
 
 @router.get("/{contract_id}/pdf")
-def contract_pdf(contract_id: str, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def contract_pdf(contract_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     c = _get_or_404(contract_id, db)
+    _require_owner(c, user)
     if c.status == "DRAFT":
         raise HTTPException(status_code=400, detail="contract_not_ready")
     return {"url": None, "status": "PENDING"}
@@ -322,43 +491,55 @@ def contract_pdf(contract_id: str, _: User = Depends(get_current_user), db: Sess
 # ─────────────────────────── signing ────────────────────────────
 
 @router.post("/{contract_id}/sign", status_code=201)
-def sign(contract_id: str, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    _get_or_404(contract_id, db)
+def sign(contract_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    c = _get_or_404(contract_id, db)
+    _require_owner(c, user)
+    _require_commission_paid_for_signing(c)
     return {}
 
 
 @router.post("/{contract_id}/sign/verify")
-def sign_verify(contract_id: str, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    _get_or_404(contract_id, db)
+def sign_verify(contract_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    c = _get_or_404(contract_id, db)
+    _require_owner(c, user)
+    _require_commission_paid_for_signing(c)
     return {"ok": True}
 
 
 @router.post("/{contract_id}/sign/set")
-def sign_set(contract_id: str, body: SetStepBody, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def sign_set(contract_id: str, body: SetStepBody, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     c = _get_or_404(contract_id, db)
-    c.step = body.next_step or "WITNESS"
+    _require_owner(c, user)
+    _require_commission_paid_for_signing(c)
+    nxt = body.next_step or "WITNESS"
+    _apply_step(c, nxt)
     db.commit()
     return {"next_step": c.step}
 
 
 @router.post("/{contract_id}/add-witness")
-def add_witness(contract_id: str, body: SetStepBody, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def add_witness(contract_id: str, body: SetStepBody, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     c = _get_or_404(contract_id, db)
-    c.step = body.next_step or "WITNESS"
+    _require_owner(c, user)
+    nxt = body.next_step or "WITNESS"
+    _apply_step(c, nxt)
     db.commit()
     return {"next_step": c.step}
 
 
 @router.post("/{contract_id}/witness/send-otp", status_code=201)
-def witness_send_otp(contract_id: str, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    _get_or_404(contract_id, db)
+def witness_send_otp(contract_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    c = _get_or_404(contract_id, db)
+    _require_owner(c, user)
     return {}
 
 
 @router.post("/{contract_id}/witness/verify")
-def witness_verify(contract_id: str, body: SetStepBody, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def witness_verify(contract_id: str, body: SetStepBody, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     c = _get_or_404(contract_id, db)
-    c.step = body.next_step or "FINISH"
+    _require_owner(c, user)
+    nxt = body.next_step or "FINISH"
+    _apply_step(c, nxt)
     c.status = "COMPLETED"
     db.commit()
     return {"ok": True, "next_step": c.step}

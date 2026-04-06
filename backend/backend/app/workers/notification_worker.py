@@ -3,6 +3,8 @@ from __future__ import annotations
 import time
 import uuid
 
+import logging
+
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -22,6 +24,7 @@ from app.services.notification_queue import (
 
 
 CONSUMER = f"worker-{uuid.uuid4().hex[:8]}"
+logger = logging.getLogger(__name__)
 
 
 def _db() -> Session:
@@ -37,7 +40,13 @@ def process_one(db: Session, notification_id: uuid.UUID) -> None:
     if n.status in {"sent", "failed"}:
         return
 
-    # TODO: integrate actual channels (SMS/Email/Push/Telegram).
+    # Channel delivery (SMS / email / push / Telegram) plugs in here; until then we log and mark sent for queue drain.
+    logger.info(
+        "notification_delivered_stub id=%s channel=%s recipient=%s",
+        n.id,
+        getattr(n, "channel", None),
+        getattr(n, "recipient", None),
+    )
     n.status = "sent"
     db.commit()
 

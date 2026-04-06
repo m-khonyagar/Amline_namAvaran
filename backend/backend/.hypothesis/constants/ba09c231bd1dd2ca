@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\api\routes\arbitration_summary.py
+# hypothesis_version: 6.151.10
+
+[403, 404, 422, 'Admin', 'Moderator', 'forbidden', 'value']

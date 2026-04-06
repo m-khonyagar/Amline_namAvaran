@@ -92,5 +92,4 @@ def history(user: User = Depends(get_current_user), db: Session = Depends(get_db
 
 @router.post("/refund")
 def refund_stub(_: User = Depends(get_current_user)):
-    # TODO: implement real refund logic
-    return {"ok": True}
+    raise HTTPException(status_code=501, detail="refund_not_implemented")

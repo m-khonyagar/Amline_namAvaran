@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\models\referral.py
+# hypothesis_version: 6.151.10
+
+['RESTRICT', 'referrals', 'users.id']

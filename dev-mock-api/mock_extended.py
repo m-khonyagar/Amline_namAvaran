@@ -4,6 +4,7 @@
 """
 from __future__ import annotations
 
+import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
@@ -193,8 +194,13 @@ def register_extended_routes(app: FastAPI) -> None:
     def contract_addendum(
         contract_id: str, payload: AddendumBody = Body(...)
     ) -> Dict[str, Any]:
-        m._get(contract_id)
-        return {"id": f"add-{contract_id}", "ok": True}
+        c = m._get(contract_id)
+        if c.get("status") in ("REVOKED", "REJECTED"):
+            raise HTTPException(status_code=400, detail="addendum_not_allowed")
+        aid = str(uuid.uuid4())
+        row = {"id": aid, "subject": payload.subject, "status": "DRAFT", "content": payload.content}
+        c.setdefault("addendums", []).append(row)
+        return {"id": aid, "subject": payload.subject, "status": "DRAFT"}
 
     @app.post("/contracts/{contract_id}/addendum/sign/initiate")
     def contract_addendum_sign_initiate(contract_id: str) -> Dict[str, Any]:

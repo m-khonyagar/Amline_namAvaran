@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\api\routes\auth.py
+# hypothesis_version: 6.151.10
+
+[400, 401, '/refresh-token', '/send-otp', '/verify-otp', 'dev', 'invalid_token', 'invalid_token_type', 'jti', 'refresh', 'refresh_revoked', 'sub', 'type']

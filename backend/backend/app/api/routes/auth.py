@@ -16,6 +16,7 @@ from app.schemas.auth import (
 )
 from app.services import auth_tokens
 from app.services.otp import generate_code, store_otp, verify_otp
+from app.services.sms import send_otp_sms
 from app.services.users_bootstrap import ensure_referral_code, ensure_user_wallet
 
 router = APIRouter()
@@ -26,10 +27,10 @@ def send_otp(req: SendOtpRequest):
     code = generate_code()
     store_otp(req.mobile, code)
 
-    # TODO: integrate SMS provider.
     if settings.env == "dev":
         return SendOtpResponse(ok=True, dev_code=code)
 
+    send_otp_sms(req.mobile, code)
     return SendOtpResponse(ok=True)
 
 

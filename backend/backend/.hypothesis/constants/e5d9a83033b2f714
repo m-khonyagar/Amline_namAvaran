@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\main.py
+# hypothesis_version: 6.151.10
+
+[201, 413, 415, 1024, '*', '/files/upload', '/financials/wallets', '/health', '/provinces', '/provinces/cities', '0.2.0', 'ACTIVE', 'Amline API', 'application/pdf', 'credit', 'env', 'file_too_large', 'id', 'image/jpeg', 'image/png', 'ok', 'startup', 'status', 'url', 'wallet-stub']

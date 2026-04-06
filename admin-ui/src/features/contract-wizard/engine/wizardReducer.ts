@@ -56,6 +56,15 @@ export function wizardReducer(state: WizardState, action: WizardAction): WizardS
         error: null,
       };
 
+    case 'COMMISSION_PAID_CONTINUE':
+      return {
+        ...state,
+        contractStatus: action.payload.status,
+        currentStep: action.payload.nextStep,
+        isLoading: false,
+        error: null,
+      };
+
     case 'SET_STATUS':
       return { ...state, contractStatus: action.payload.status };
 

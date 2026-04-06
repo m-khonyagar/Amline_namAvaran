@@ -71,11 +71,6 @@ def provinces():
     return []
 
 
-@app.get("/financials/wallets")
-def wallets_stub():
-    return {"id": "wallet-stub", "credit": 0, "status": "ACTIVE"}
-
-
 @app.on_event("startup")
 def _startup():
     ensure_bucket()

@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\services\documents.py
+# hypothesis_version: 6.151.10
+
+[3600, '%Y%m%dT%H%M%SZ', 'Bucket', 'Key', 'contract.html', 'contract.mustache', 'contract.pdf', 'get_object', 's3_not_configured', 'templates', 'utf-8', 'var', 'wkhtmltopdf']

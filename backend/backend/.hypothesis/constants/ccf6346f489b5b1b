@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\core\security.py
+# hypothesis_version: 6.151.10
+
+['HS256', 'exp', 'iat', 'invalid_token', 'iss', 'jti', 'sub', 'type']

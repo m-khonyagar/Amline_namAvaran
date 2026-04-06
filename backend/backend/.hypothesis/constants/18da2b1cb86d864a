@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\api\routes\admin_auth.py
+# hypothesis_version: 6.151.10
+
+[400, '/login', '/otp/send', 'Admin', 'Agent', 'Moderator', 'User', 'access_token', 'ads:read', 'ads:write', 'audit:read', 'auth.login', 'contracts:read', 'contracts:write', 'crm:read', 'crm:write', 'dev', 'dev_code', 'full_name', 'id', 'message', 'mobile', 'notifications:read', 'ok', 'permissions', 'refresh_token', 'reports:read', 'role', 'role_id', 'roles:read', 'roles:write', 'settings:read', 'settings:write', 'success', 'user', 'users:read', 'users:write', 'value', 'wallets:read', 'wallets:write']

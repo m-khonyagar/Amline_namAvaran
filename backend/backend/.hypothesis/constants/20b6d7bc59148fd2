@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\api\routes\users.py
+# hypothesis_version: 6.151.10
+
+[404, 422, '/lookup', '/me', '/profile', '/{user_id}', '09', 'invalid_mobile', 'invalid_user_id', 'user_not_found', 'value']

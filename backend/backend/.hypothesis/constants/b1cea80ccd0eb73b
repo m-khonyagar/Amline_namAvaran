@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\api\routes\consultant.py
+# hypothesis_version: 6.151.10
+
+[201, 400, 404, '/application', '/auth/login', '/auth/register', '/dashboard/summary', '/leads', '/me', 'access_token', 'agency_name', 'application_status', 'assigned_leads_count', 'benefits', 'city', 'consultant_not_found', 'created_at', 'credit_score', 'full_name', 'id', 'license_no', 'mobile', 'national_code', 'need_type', 'next_steps', 'notes', 'profile', 'refresh_token', 'status', 'submitted_at', 'updated_at', 'user', 'user_id', 'user_not_found', 'verification_tier']

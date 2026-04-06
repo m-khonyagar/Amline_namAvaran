@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\api\router.py
+# hypothesis_version: 6.151.10
+
+['/admin', '/analytics', '/arbitrations', '/auth', '/auth/me', '/campaigns', '/consultant', '/contracts', '/contracts-v2', '/documents', '/financials', '/notifications', '/payments', '/properties', '/referrals', '/tenant-score', '/users', '/wallet', 'admin', 'admin-auth', 'admin-contracts', 'admin-panel', 'analytics', 'arbitrations', 'auth', 'campaigns', 'consultant', 'contracts-v2', 'documents', 'financials', 'full_name', 'id', 'mobile', 'notifications', 'payments', 'permissions', 'properties', 'referrals', 'role', 'role_id', 'tenant-score', 'users', 'value', 'wallet', 'wizard']

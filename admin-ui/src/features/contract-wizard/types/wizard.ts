@@ -69,6 +69,10 @@ export type WizardAction =
       };
     }
   | { type: 'APPLY_NEXT_STEP'; payload: { nextStep: PRContractStep } }
+  | {
+      type: 'COMMISSION_PAID_CONTINUE';
+      payload: { status: ContractStatus; nextStep: PRContractStep };
+    }
   | { type: 'SET_STATUS'; payload: { status: ContractStatus } }
   | { type: 'SET_EDITABLE_STEPS'; payload: { steps: PRContractStep[] } }
   | { type: 'SET_LOADING'; payload: boolean }
@@ -91,6 +95,8 @@ export interface StepProps {
   isScribeMode: boolean;
   signingParties?: SigningParty[];
   onComplete: (nextStep: PRContractStep) => void;
+  /** پس از پرداخت کمیسیون، خروج از گیت PENDING_COMMISSION و همگام‌سازی با GET /status */
+  onCommissionContinue?: () => void | Promise<void>;
 }
 
 export interface StepMeta {
