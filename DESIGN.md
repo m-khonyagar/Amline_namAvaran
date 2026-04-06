@@ -45,3 +45,9 @@
 ## تغییرات بعدی
 
 هر تغییر در پالت یا شعاع، ابتدا در `amline-tokens.css` و سپس در صورت نیاز در `theme-tokens.js` (برای Tailwind) اعمال شود تا همهٔ اپ‌ها یک‌جا به‌روز شوند.
+
+## اسناد مرتبط
+
+- استقرار و امنیت env: `docs/PRODUCTION_CHECKLIST.md`
+- اجرای لوکال mock + پنل کاربر: `docs/LOCAL_DEV.md` و `scripts/dev-user-stack.ps1`
+- Issueهای پیشنهادی: `docs/BACKLOG.md`
