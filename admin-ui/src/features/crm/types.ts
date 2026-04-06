@@ -21,3 +21,29 @@ export interface LeadActivity {
   created_by: string
   created_at: string
 }
+
+export interface LeadTask {
+  id: string
+  lead_id: string
+  title: string
+  due_date: string | null
+  done: boolean
+  created_at: string
+}
+
+export interface CrmStats {
+  active_leads: number
+  contracted_leads: number
+  total_leads: number
+  conversion_rate: number
+  leads_this_month: number
+  lost_leads: number
+}
+
+export interface ConversionReport {
+  total_leads: number
+  converted_leads: number
+  lost_leads: number
+  conversion_rate: number
+  monthly_breakdown: Array<{ month: string; count: number }>
+}

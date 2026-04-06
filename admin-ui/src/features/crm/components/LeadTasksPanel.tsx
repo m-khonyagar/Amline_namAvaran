@@ -1,53 +1,66 @@
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-
-export type LeadTask = { id: string; title: string; due?: string; done: boolean }
-
-function storageKey(leadId: string) {
-  return `amline-lead-tasks:${leadId}`
-}
+import { loadTasks, createTask, updateTask, deleteTask } from '../crmService'
+import type { LeadTask } from '../types'
 
 export function LeadTasksPanel({ leadId }: { leadId: string }) {
   const [tasks, setTasks] = useState<LeadTask[]>([])
+  const [isLoading, setIsLoading] = useState(false)
   const [title, setTitle] = useState('')
   const [due, setDue] = useState('')
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(storageKey(leadId))
-      setTasks(raw ? (JSON.parse(raw) as LeadTask[]) : [])
-    } catch {
-      setTasks([])
-    }
+    setIsLoading(true)
+    loadTasks(leadId)
+      .then(setTasks)
+      .catch(() => toast.error('بارگذاری وظایف ممکن نشد'))
+      .finally(() => setIsLoading(false))
   }, [leadId])
 
-  const persist = (next: LeadTask[]) => {
-    setTasks(next)
+  const add = async () => {
+    const t = title.trim()
+    if (!t) return
+    setIsLoading(true)
     try {
-      localStorage.setItem(storageKey(leadId), JSON.stringify(next))
+      const task = await createTask(leadId, {
+        lead_id: leadId,
+        title: t,
+        due_date: due || null,
+        done: false,
+      })
+      setTasks((prev) => [...prev, task])
+      setTitle('')
+      setDue('')
+      toast.success('وظیفه اضافه شد')
     } catch {
-      toast.error('ذخیرهٔ وظایف ممکن نشد')
+      toast.error('افزودن وظیفه ممکن نشد')
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  const add = () => {
-    const t = title.trim()
-    if (!t) return
-    persist([
-      ...tasks,
-      { id: crypto.randomUUID(), title: t, due: due || undefined, done: false },
-    ])
-    setTitle('')
-    setDue('')
-    toast.success('وظیفه اضافه شد')
+  const toggle = async (task: LeadTask) => {
+    setIsLoading(true)
+    try {
+      const updated = await updateTask(leadId, task.id, { done: !task.done })
+      setTasks((prev) => prev.map((x) => (x.id === updated.id ? updated : x)))
+    } catch {
+      toast.error('به‌روزرسانی وظیفه ممکن نشد')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const toggle = (id: string) => {
-    persist(tasks.map((x) => (x.id === id ? { ...x, done: !x.done } : x)))
-  }
-
-  const remove = (id: string) => {
-    persist(tasks.filter((x) => x.id !== id))
+  const remove = async (taskId: string) => {
+    setIsLoading(true)
+    try {
+      await deleteTask(leadId, taskId)
+      setTasks((prev) => prev.filter((x) => x.id !== taskId))
+    } catch {
+      toast.error('حذف وظیفه ممکن نشد')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -59,40 +72,65 @@ export function LeadTasksPanel({ leadId }: { leadId: string }) {
           placeholder="عنوان وظیفه"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          disabled={isLoading}
         />
         <input
           type="date"
           className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800"
           value={due}
           onChange={(e) => setDue(e.target.value)}
+          disabled={isLoading}
         />
         <button
           type="button"
           onClick={add}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          disabled={isLoading}
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
           افزودن
         </button>
       </div>
-      <ul className="space-y-2">
-        {tasks.length === 0 ? (
-          <li className="text-sm text-gray-500 dark:text-slate-400">وظیفه‌ای ثبت نشده.</li>
-        ) : (
-          tasks.map((t) => (
-            <li
-              key={t.id}
-              className="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/80"
-            >
-              <input type="checkbox" checked={t.done} onChange={() => toggle(t.id)} aria-label="انجام شد" />
-              <span className={`flex-1 text-sm ${t.done ? 'text-gray-400 line-through' : ''}`}>{t.title}</span>
-              {t.due ? <span className="text-xs text-gray-500">{t.due}</span> : null}
-              <button type="button" className="text-xs text-red-600 hover:underline" onClick={() => remove(t.id)}>
-                حذف
-              </button>
-            </li>
-          ))
-        )}
-      </ul>
+
+      {isLoading && (
+        <div className="flex justify-center py-4">
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+        </div>
+      )}
+
+      {!isLoading && (
+        <ul className="space-y-2">
+          {tasks.length === 0 ? (
+            <li className="text-sm text-gray-500 dark:text-slate-400">وظیفه‌ای ثبت نشده.</li>
+          ) : (
+            tasks.map((t) => (
+              <li
+                key={t.id}
+                className="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/80"
+              >
+                <input
+                  type="checkbox"
+                  checked={t.done}
+                  onChange={() => toggle(t)}
+                  aria-label="انجام شد"
+                />
+                <span className={`flex-1 text-sm ${t.done ? 'text-gray-400 line-through' : ''}`}>
+                  {t.title}
+                </span>
+                {t.due_date ? (
+                  <span className="text-xs text-gray-500">{t.due_date}</span>
+                ) : null}
+                <button
+                  type="button"
+                  className="text-xs text-red-600 hover:underline"
+                  onClick={() => remove(t.id)}
+                >
+                  حذف
+                </button>
+              </li>
+            ))
+          )}
+        </ul>
+      )}
     </div>
   )
 }

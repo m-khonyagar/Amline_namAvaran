@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api'
-import type { Lead, LeadActivity } from './types'
+import type { Lead, LeadActivity, LeadTask, CrmStats, ConversionReport } from './types'
 
 export async function remoteListLeads(): Promise<Lead[]> {
   const { data } = await apiClient.get<Lead[]>('/admin/crm/leads')
@@ -45,5 +45,52 @@ export async function remoteAddActivity(
     `/admin/crm/leads/${leadId}/activities`,
     payload
   )
+  return data
+}
+
+export async function remoteDeleteLead(id: string): Promise<void> {
+  await apiClient.delete(`/admin/crm/leads/${id}`)
+}
+
+export async function remoteListTasks(leadId: string): Promise<LeadTask[]> {
+  const { data } = await apiClient.get<LeadTask[]>(`/admin/crm/leads/${leadId}/tasks`)
+  return Array.isArray(data) ? data : []
+}
+
+export async function remoteCreateTask(
+  leadId: string,
+  payload: Omit<LeadTask, 'id' | 'created_at'>
+): Promise<LeadTask> {
+  const { data } = await apiClient.post<LeadTask>(`/admin/crm/leads/${leadId}/tasks`, payload)
+  return data
+}
+
+export async function remotePatchTask(
+  leadId: string,
+  taskId: string,
+  patch: Partial<LeadTask>
+): Promise<LeadTask> {
+  const { data } = await apiClient.patch<LeadTask>(
+    `/admin/crm/leads/${leadId}/tasks/${taskId}`,
+    patch
+  )
+  return data
+}
+
+export async function remoteDeleteTask(leadId: string, taskId: string): Promise<void> {
+  await apiClient.delete(`/admin/crm/leads/${leadId}/tasks/${taskId}`)
+}
+
+export async function remoteGetStats(): Promise<CrmStats> {
+  const { data } = await apiClient.get<CrmStats>('/admin/crm/stats')
+  return data
+}
+
+export async function remoteGetConversionReport(
+  params?: { from_date?: string; to_date?: string }
+): Promise<ConversionReport> {
+  const { data } = await apiClient.get<ConversionReport>('/admin/crm/reports/conversion', {
+    params,
+  })
   return data
 }

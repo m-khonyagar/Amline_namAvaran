@@ -46,9 +46,24 @@
 3. `amline-ui`: `NEXT_PUBLIC_DEV_PROXY_TARGET=http://127.0.0.1:8080` (یا `localhost`).
 4. بعد از تغییر mock: `cd dev-mock-api && python -m pytest tests/test_smoke.py -v`.
 5. build فرانت ادمین: `cd admin-ui && npm run build`.
+6. چک خودکار (سلامت 8080، Docker، pytest، vitest): از ریشهٔ مخزن `powershell -ExecutionPolicy Bypass -File .\scripts\verify-stack.ps1` (یا `pwsh` اگر نصب است)
+
+## Docker Desktop روی ویندوز (خطای «unable to start»)
+
+اگر `docker ps` خطا بدهد یا Docker Desktop بالا نماند:
+
+1. **WSL2** را می‌توان با `winget install Microsoft.WSL` نصب کرد؛ سپس یک توزیع مثل Ubuntu: `wsl --install -d Ubuntu` (یا همان دستور پس از نصب WSL).
+2. نصب‌کنندهٔ WSL اغلب می‌گوید اگر **Virtual Machine Platform** تازه فعال شده، **یک بار ری‌استارت ویندوز** لازم است؛ بعد از ری‌استارت Docker Desktop را باز کنید و تا سبز شدن Engine صبر کنید.
+3. **Redis لوکال (بدون Docker):** با `winget install Redis.Redis` قابل نصب است؛ سرویس را با `redis-server` و فایل `redis.windows.conf` در `C:\Program Files\Redis` بالا بیاورید (پورت پیش‌فرض 6379). اگر بک‌اند شما `redis://:رمز@...` دارد، باید `requirepass` در همان conf با `.env` هم‌خوان شود یا URL بدون رمز برای dev استفاده شود.
+4. اگر Docker نمی‌خواهید، از **mock روی 8080** (`dev-mock-api`) یا **backend لوکال** استفاده کنید؛ تست‌های Python با `fakeredis` در `tests/conftest.py` بدون Redis واقعی هم سبز می‌شوند.
+
+## منابع کلون محلی (Hamgit / آرشیو ZIP)
+
+اگر روی دیسک پوشهٔ `D:\فنی املاین\clone Code` یا `amline_repos_cloned.zip` دارید، برای **نحوهٔ استفادهٔ حرفه‌ای** (بدون جایگزینی بی‌قیدوشرط monorepo) ببینید: [CLONE_SOURCES_AND_PORTING.md](./CLONE_SOURCES_AND_PORTING.md)، شکاف API: [CLONE_API_GAP_admin_ui.md](./CLONE_API_GAP_admin_ui.md)، و فهرست فیچر/parity: [HAMGIT_FEATURES_PARITY.md](./HAMGIT_FEATURES_PARITY.md). برای UI هاب ادغام در ادمین: `VITE_FLAG_HAMGIT_PORT=true` در `.env.local`.
 
 ## مستندات مرتبط
 
+- [نقشهٔ راه Go-Live](./PLATFORM_GO_LIVE_ROADMAP.md) — آماده‌سازی برای کاربر واقعی (فازبندی و چک‌لیست)
 - [README اصلی](../README.md) — دستورات اجرا
 - [dev-mock-api/README](../dev-mock-api/README.md) — endpointهای mock
 - [DEV_MOCK_GAP_MATRIX.md](./DEV_MOCK_GAP_MATRIX.md) — تطبیق فرانت / mock / MSW

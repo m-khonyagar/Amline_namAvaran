@@ -19,6 +19,18 @@ import ConsultantsReviewPage from './pages/consultants/ConsultantsReviewPage'
 import WorkspacePage from './pages/workspace/WorkspacePage'
 import CRMPage from './pages/crm/CRMPage'
 import NotificationsInboxPage from './pages/admin/NotificationsInboxPage'
+import HamgitPortLayout from './pages/hamgit-port/HamgitPortLayout'
+import HamgitPortHubPage from './pages/hamgit-port/HamgitPortHubPage'
+import {
+  HamgitAdsAdvancedPage,
+  HamgitClausesPage,
+  HamgitInvoicesPage,
+  HamgitMarketPage,
+  HamgitPromoPage,
+  HamgitRequirementsPage,
+  HamgitSettlementsPage,
+  HamgitWalletToolsPage,
+} from './pages/hamgit-port/HamgitSectionPages'
 import { useAuth } from './hooks/useAuth'
 import { PermissionGuard } from './components/auth/PermissionGuard'
 import { featureEnabled } from './lib/featureFlags'
@@ -238,6 +250,27 @@ function AppRoutes() {
               </PermissionGuard>
             }
           />
+
+          {featureEnabled('HAMGIT_PORT') ? (
+            <Route
+              path="admin/hamgit-port"
+              element={
+                <PermissionGuard permission="settings:read">
+                  <HamgitPortLayout />
+                </PermissionGuard>
+              }
+            >
+              <Route index element={<HamgitPortHubPage />} />
+              <Route path="requirements" element={<HamgitRequirementsPage />} />
+              <Route path="ads" element={<HamgitAdsAdvancedPage />} />
+              <Route path="settlements" element={<HamgitSettlementsPage />} />
+              <Route path="invoices" element={<HamgitInvoicesPage />} />
+              <Route path="clauses" element={<HamgitClausesPage />} />
+              <Route path="promo" element={<HamgitPromoPage />} />
+              <Route path="market" element={<HamgitMarketPage />} />
+              <Route path="wallet-tools" element={<HamgitWalletToolsPage />} />
+            </Route>
+          ) : null}
 
           <Route path="crm">
             <Route

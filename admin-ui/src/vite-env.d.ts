@@ -18,6 +18,8 @@ interface ImportMetaEnv {
   readonly VITE_SENTRY_DSN: string
   /** true = ارسال خطا به سنتری حتی در dev */
   readonly VITE_SENTRY_DEV: string
+  /** هاب و زیرصفحه‌های پورت Hamgit (`/admin/hamgit-port`) */
+  readonly VITE_FLAG_HAMGIT_PORT: string
 }
 
 interface ImportMeta {

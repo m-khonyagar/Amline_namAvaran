@@ -161,11 +161,11 @@ test('فلو ۵: صفحه قراردادها و navigation', async ({ page }) =>
 
   await page.locator('nav a span:text-is("قراردادها")').click();
   await expect(page).toHaveURL(`${BASE}/contracts`);
-  await expect(page.getByRole('button', { name: /قرارداد جدید/i })).toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole('button', { name: '+ قرارداد جدید' })).toBeVisible({ timeout: 10000 });
   await screenshot(page, '12-contracts-list');
 
-  // کلیک روی «قرارداد جدید» باید به wizard هدایت کند
-  await page.getByRole('button', { name: /قرارداد جدید/i }).click();
+  // دکمهٔ اصلی لیست: «+ قرارداد جدید» (جدا از «شروع قرارداد جدید» در بنر)
+  await page.getByRole('button', { name: '+ قرارداد جدید' }).click();
   await expect(page).toHaveURL(`${BASE}/contracts/wizard`);
   await screenshot(page, '13-contracts-to-wizard');
 });

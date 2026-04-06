@@ -92,3 +92,26 @@ def test_admin_consultant_applications(client: TestClient) -> None:
     r = client.get("/admin/consultants/applications")
     assert r.status_code == 200
     assert "items" in r.json()
+
+
+def test_hamgit_financials_wallets_alias(client: TestClient) -> None:
+    r = client.get("/admin/financials/wallets")
+    assert r.status_code == 200
+    data = r.json()
+    assert "items" in data and data["total"] >= 0
+    mc = client.post("/admin/financials/wallets/manual-charge", json={})
+    assert mc.status_code == 200
+
+
+def test_pr_contracts_list(client: TestClient) -> None:
+    r = client.get("/admin/pr-contracts/list")
+    assert r.status_code == 200
+    assert r.json().get("items") == []
+
+
+def test_hamgit_port_stubs(client: TestClient) -> None:
+    assert client.get("/admin/settlements/users").status_code == 200
+    assert client.get("/admin/custom-invoices/users").status_code == 200
+    assert client.get("/admin/ads/properties").status_code == 200
+    assert client.get("/admin/contracts/base-clauses").status_code == 200
+    assert client.get("/financials/promos").status_code == 200
