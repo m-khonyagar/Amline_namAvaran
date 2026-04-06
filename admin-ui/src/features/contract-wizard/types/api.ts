@@ -208,4 +208,16 @@ export interface CommissionPayResponse {
   ok: boolean;
   redirect_url?: string;
   used_wallet?: boolean;
+  /** پرداخت از قبل ثبت شده (idempotent) */
+  already_paid?: boolean;
+}
+
+/** پاسخ GET /contracts/:id/commission/invoice */
+export interface CommissionInvoiceResponse {
+  total_amount: number;
+  landlord_share: number;
+  tenant_share: number;
+  invoice_id: string;
+  commission_paid?: boolean;
+  commission_paid_at?: string | null;
 }

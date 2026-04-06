@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\api\routes\arbitrations.py
+# hypothesis_version: 6.151.10
+
+[400, 403, 404, 413, 422, 1024, 3600, '/{arbitration_id}', 'Admin', 'Moderator', 'arbitration_closed', 'arbitration_created', 'attachment', 'attachment_not_found', 'contract_not_found', 'empty_body', 'empty_file', 'file_too_large', 'forbidden', 'invalid_ids', 'invalid_respondent', 'invalid_status', 'value']

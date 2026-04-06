@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\services\notification_queue.py
+# hypothesis_version: 6.151.10
+
+[200, 300, 1000, '+', '-', '0', 'BUSYGROUP', 'amline', 'attempt', 'notification_id', 'notifications', 'notifications:dlq', 'reason', 'ts_ms', 'visible_at_ms']

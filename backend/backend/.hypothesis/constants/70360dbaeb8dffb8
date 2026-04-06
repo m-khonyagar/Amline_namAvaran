@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\models\tenant_score_event.py
+# hypothesis_version: 6.151.10
+
+['RESTRICT', 'tenant_score_events', 'users.id']

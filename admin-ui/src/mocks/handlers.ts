@@ -171,6 +171,7 @@ interface MockContract {
   party_preview?: { full_name?: string }[];
   tracking_code?: string | null;
   legal_review_status?: 'NONE' | 'AWAITING_STAFF' | 'APPROVED' | 'REJECTED';
+  commission_paid_at?: string | null;
 }
 
 const contracts = new Map<string, MockContract>();
@@ -350,11 +351,22 @@ function nextId(): string {
   return `contract-${String(idCounter++).padStart(3, '0')}`;
 }
 
+/** هم‌تراز با بک‌اند: در SIGNING تا قبل از پرداخت کمیسیون، status مؤثر PENDING_COMMISSION */
+const WIZARD_STATUS_NO_COMMISSION_OVERLAY = new Set(['REVOKED', 'COMPLETED', 'REJECTED']);
+
+function effectiveContractStatus(c: MockContract): string {
+  const raw = c.status ?? 'DRAFT';
+  if (WIZARD_STATUS_NO_COMMISSION_OVERLAY.has(raw)) return raw;
+  if (c.step === 'SIGNING' && !c.commission_paid_at) return 'PENDING_COMMISSION';
+  if (raw === 'PENDING_COMMISSION' && c.commission_paid_at) return 'DRAFT';
+  return raw;
+}
+
 function contractJson(c: MockContract) {
   return {
     id: c.id,
     type: c.type,
-    status: c.status,
+    status: effectiveContractStatus(c),
     step: c.step,
     parties: c.party_preview?.length ? c.party_preview : c.parties,
     is_owner: true,
@@ -504,8 +516,12 @@ export const handlers = [
   http.get('*/contracts/:id/status', ({ params }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
+    if (c.commission_paid_at && c.status === 'PENDING_COMMISSION') {
+      c.status = 'DRAFT';
+      setStep(c, 'SIGNING');
+    }
     return HttpResponse.json({
-      status: c.status,
+      status: effectiveContractStatus(c),
       step: c.step,
       contract_id: c.id,
       type: c.type,
@@ -515,21 +531,37 @@ export const handlers = [
   http.get('*/contracts/:id/commission/invoice', ({ params }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
+    const paid = Boolean(c.commission_paid_at);
     return HttpResponse.json({
       total_amount: 5_000_000,
       landlord_share: 2_500_000,
       tenant_share: 2_500_000,
       invoice_id: `inv-${c.id}`,
+      commission_paid: paid,
+      commission_paid_at: c.commission_paid_at ?? null,
     });
   }),
 
-  http.post('*/contracts/:id/commission/pay', ({ params }) => {
+  http.post('*/contracts/:id/commission/pay', async ({ params, request }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
+    const body = (await request.json().catch(() => ({}))) as {
+      use_wallet_credit?: boolean;
+      use_all_wallet_credits?: boolean;
+    };
+    const tryWallet = Boolean(body.use_wallet_credit || body.use_all_wallet_credits);
+    if (tryWallet) {
+      c.commission_paid_at = new Date().toISOString();
+      if (c.status === 'PENDING_COMMISSION') {
+        c.status = 'DRAFT';
+        setStep(c, 'SIGNING');
+      }
+      return HttpResponse.json({ ok: true, redirect_url: '/', used_wallet: true });
+    }
     return HttpResponse.json({
       ok: true,
-      redirect_url: '/financials/bank/gateway',
-      used_wallet: true,
+      redirect_url: `/financials/bank/gateway?contract_id=${params.id}`,
+      used_wallet: false,
     });
   }),
 
@@ -640,13 +672,30 @@ export const handlers = [
     return HttpResponse.json({ next_step: next }, { status: 201 });
   }),
 
-  http.post('*/contracts/:id/sign', () => HttpResponse.json({}, { status: 201 })),
+  http.post('*/contracts/:id/sign', ({ params }) => {
+    const c = getContract(params.id as string);
+    if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
+    if (c.step === 'SIGNING' && !c.commission_paid_at) {
+      return HttpResponse.json({ detail: 'commission_required' }, { status: 400 });
+    }
+    return HttpResponse.json({}, { status: 201 });
+  }),
 
-  http.post('*/contracts/:id/sign/verify', () => HttpResponse.json({ ok: true })),
+  http.post('*/contracts/:id/sign/verify', ({ params }) => {
+    const c = getContract(params.id as string);
+    if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
+    if (c.step === 'SIGNING' && !c.commission_paid_at) {
+      return HttpResponse.json({ detail: 'commission_required' }, { status: 400 });
+    }
+    return HttpResponse.json({ ok: true });
+  }),
 
   http.post('*/contracts/:id/sign/set', async ({ params, request }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
+    if (c.step === 'SIGNING' && !c.commission_paid_at) {
+      return HttpResponse.json({ detail: 'commission_required' }, { status: 400 });
+    }
     const body = (await request.json().catch(() => ({}))) as { next_step?: string };
     const next = body.next_step ?? 'WITNESS';
     setStep(c, next);
@@ -692,6 +741,28 @@ export const handlers = [
       status: 'ACTIVE',
     })
   ),
+
+  http.get('*/financials/bank/gateway', () =>
+    new HttpResponse(
+      '<!DOCTYPE html><html lang="fa" dir="rtl"><meta charset="utf-8"/><title>درگاه (MSW)</title><body style="font-family:sans-serif;padding:1.5rem"><h1>درگاه آزمایشی</h1><p>برای ثبت پرداخت در MSW دکمه را بزنید.</p><button type="button" id="go">تأیید پرداخت</button><p><button type="button" onclick="history.back()">بازگشت</button></p><script>document.getElementById("go").onclick=function(){var p=new URLSearchParams(location.search);var cid=p.get("contract_id");if(!cid){alert("contract_id");return;}fetch("/financials/bank/mock-verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contract_id:cid})}).then(function(r){if(r.ok)history.back();else alert(r.status);});};</script></body></html>',
+      {
+        status: 200,
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      }
+    )
+  ),
+
+  http.post('*/financials/bank/mock-verify', async ({ request }) => {
+    const body = (await request.json()) as { contract_id: string };
+    const c = getContract(body.contract_id);
+    if (!c) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
+    c.commission_paid_at = new Date().toISOString();
+    if (c.status === 'PENDING_COMMISSION') {
+      c.status = 'DRAFT';
+      setStep(c, 'SIGNING');
+    }
+    return HttpResponse.json({ ok: true });
+  }),
 
   ...consultantPlatformHandlers(),
 

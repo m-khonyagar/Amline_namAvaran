@@ -1,12 +1,16 @@
 """Dev mock API for local frontend testing (no production use)."""
 from __future__ import annotations
 
+from datetime import date as date_cls
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from fastapi.responses import HTMLResponse
+from pydantic import BaseModel, field_validator
+
+from wizard_step_machine import InvalidStepTransitionError, assert_valid_transition, mortgage_default_next
 
 app = FastAPI(title="Amline Dev Mock API", version="0.1.0")
 
@@ -133,6 +137,24 @@ def _audit_event(
 
 contracts: Dict[str, Dict[str, Any]] = {}
 id_counter = 1
+_file_upload_seq = 10_000
+
+
+def _apply_contract_step(c: Dict[str, Any], new_step: str) -> str:
+    try:
+        assert_valid_transition(c["step"], new_step, c["type"])
+    except InvalidStepTransitionError as e:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "code": "invalid_step_transition",
+                "from": e.current_step,
+                "to": e.next_step,
+                "contract_type": e.contract_type,
+            },
+        ) from e
+    c["step"] = new_step
+    return new_step
 
 
 def _next_id() -> str:
@@ -142,11 +164,28 @@ def _next_id() -> str:
     return cid
 
 
+_WIZARD_STATUS_NO_COMMISSION_OVERLAY = frozenset({"REVOKED", "COMPLETED", "REJECTED"})
+
+
+def _effective_status(c: Dict[str, Any]) -> str:
+    raw = c.get("status") or "DRAFT"
+    if raw in _WIZARD_STATUS_NO_COMMISSION_OVERLAY:
+        return raw
+    if c.get("step") == "SIGNING" and not c.get("commission_paid_at"):
+        return "PENDING_COMMISSION"
+    return raw
+
+
+def _require_commission_paid_for_signing_mock(c: Dict[str, Any]) -> None:
+    if c.get("step") == "SIGNING" and not c.get("commission_paid_at"):
+        raise HTTPException(status_code=400, detail="commission_required")
+
+
 def _contract_json(c: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "id": c["id"],
         "type": c["type"],
-        "status": c["status"],
+        "status": _effective_status(c),
         "step": c["step"],
         "parties": c.get("parties", {}),
         "is_owner": True,
@@ -228,6 +267,8 @@ class StartBody(BaseModel):
 
 @app.post("/contracts/start", status_code=201)
 def contracts_start(body: StartBody) -> Dict[str, Any]:
+    if not body.party_type:
+        raise HTTPException(status_code=422, detail="party_type is required")
     ctype = body.contract_type or "PROPERTY_RENT"
     cid = _next_id()
     now = datetime.now(timezone.utc).isoformat()
@@ -248,6 +289,11 @@ def contracts_list() -> List[Dict[str, Any]]:
     return [_contract_json(x) for x in contracts.values()]
 
 
+@app.get("/contracts/resolve-info")
+def resolve_info() -> Dict[str, str]:
+    return {"result": "ok"}
+
+
 @app.get("/contracts/{contract_id}")
 def contracts_get(contract_id: str) -> Dict[str, Any]:
     return _contract_json(_get(contract_id))
@@ -257,7 +303,7 @@ def contracts_get(contract_id: str) -> Dict[str, Any]:
 def contracts_status(contract_id: str) -> Dict[str, Any]:
     c = _get(contract_id)
     return {
-        "status": c["status"],
+        "status": _effective_status(c),
         "step": c["step"],
         "contract_id": c["id"],
         "type": c["type"],
@@ -267,11 +313,14 @@ def contracts_status(contract_id: str) -> Dict[str, Any]:
 @app.get("/contracts/{contract_id}/commission/invoice")
 def commission_invoice(contract_id: str) -> Dict[str, Any]:
     c = _get(contract_id)
+    paid = bool(c.get("commission_paid_at"))
     return {
         "total_amount": 5_000_000,
         "landlord_share": 2_500_000,
         "tenant_share": 2_500_000,
         "invoice_id": f"inv-{c['id']}",
+        "commission_paid": paid,
+        "commission_paid_at": c.get("commission_paid_at"),
     }
 
 
@@ -283,18 +332,30 @@ class CommissionPayBody(BaseModel):
 
 @app.post("/contracts/{contract_id}/commission/pay")
 def commission_pay(contract_id: str, body: CommissionPayBody) -> Dict[str, Any]:
-    _get(contract_id)
+    c = _get(contract_id)
+    if c.get("commission_paid_at"):
+        return {
+            "ok": True,
+            "redirect_url": "/",
+            "used_wallet": False,
+            "already_paid": True,
+        }
     use_wallet = bool(body.use_wallet_credit or body.use_all_wallet_credits)
+    if use_wallet:
+        c["commission_paid_at"] = datetime.now(timezone.utc).isoformat()
+        return {"ok": True, "redirect_url": "/", "used_wallet": True}
     return {
         "ok": True,
-        "redirect_url": "/financials/bank/gateway",
-        "used_wallet": use_wallet,
+        "redirect_url": f"/financials/bank/gateway?contract_id={contract_id}",
+        "used_wallet": False,
     }
 
 
 @app.post("/contracts/{contract_id}/revoke")
 def contracts_revoke(contract_id: str) -> Dict[str, Any]:
     c = _get(contract_id)
+    if c["status"] in ("REVOKED", "COMPLETED"):
+        raise HTTPException(status_code=400, detail="invalid_state_transition")
     c["status"] = "REVOKED"
     return {"ok": True}
 
@@ -329,11 +390,70 @@ class SetStepBody(BaseModel):
     next_step: Optional[str] = None
 
 
+class HomeInfoBody(BaseModel):
+    postal_code: str = "0000000000"
+    area_m2: float = 100.0
+    property_use_type: str = "RESIDENTIAL"
+    restroom_type: str = "WC"
+    heating_system_type: str = "CENTRAL"
+    cooling_system_type: str = "SPLIT"
+    next_step: Optional[str] = None
+
+
+class DatingBody(BaseModel):
+    start_date: str
+    end_date: str
+    delivery_date: Optional[str] = None
+    next_step: Optional[str] = None
+
+
+class PaymentStage(BaseModel):
+    due_date: str
+    payment_type: str
+    amount: int
+    cheque_image_file_id: Optional[int] = None
+
+
+class MortgageBody(BaseModel):
+    total_amount: int
+    stages: List[PaymentStage]
+    next_step: Optional[str] = None
+
+
+class RentingBody(BaseModel):
+    monthly_rent_amount: int
+    rent_due_day_of_month: Optional[int] = None
+    stages: List[PaymentStage] = []
+    next_step: Optional[str] = None
+
+    @field_validator("rent_due_day_of_month")
+    @classmethod
+    def validate_day(cls, v: Optional[int]) -> Optional[int]:
+        if v is None:
+            return v
+        if not 1 <= v <= 31:
+            raise ValueError("rent_due_day_of_month must be between 1 and 31")
+        return v
+
+
+class SalePriceBody(BaseModel):
+    total_price: int
+    stages: List[PaymentStage]
+    next_step: Optional[str] = None
+
+    @field_validator("total_price")
+    @classmethod
+    def positive(cls, v: int) -> int:
+        if v <= 0:
+            raise ValueError("total_price must be positive")
+        return v
+
+
 @app.post("/contracts/{contract_id}/party/landlord/set")
 def landlord_set(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
     c = _get(contract_id)
     nxt = body.next_step or "TENANT_INFORMATION"
-    c["step"] = nxt
+    _apply_contract_step(c, nxt)
     return {"next_step": nxt}
 
 
@@ -356,7 +476,7 @@ def party_tenant(contract_id: str) -> Dict[str, Any]:
 def tenant_set(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
     c = _get(contract_id)
     nxt = body.next_step or "PLACE_INFORMATION"
-    c["step"] = nxt
+    _apply_contract_step(c, nxt)
     return {"next_step": nxt}
 
 
@@ -367,54 +487,78 @@ def party_delete(contract_id: str, party_id: str) -> Dict[str, bool]:
 
 
 @app.post("/contracts/{contract_id}/home-info", status_code=201)
-def home_info(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
+def home_info(contract_id: str, body: HomeInfoBody) -> Dict[str, Any]:
     c = _get(contract_id)
     nxt = body.next_step or "DATING"
-    c["step"] = nxt
+    _apply_contract_step(c, nxt)
     return {"next_step": nxt}
 
 
 @app.post("/contracts/{contract_id}/dating", status_code=201)
-def dating(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
+def dating(contract_id: str, body: DatingBody) -> Dict[str, Any]:
+    try:
+        start = date_cls.fromisoformat(body.start_date)
+        end = date_cls.fromisoformat(body.end_date)
+    except ValueError:
+        raise HTTPException(status_code=422, detail="invalid_date_format")
+    if end <= start:
+        raise HTTPException(status_code=422, detail="end_date_before_start_date")
     c = _get(contract_id)
     nxt = body.next_step or "MORTGAGE"
-    c["step"] = nxt
+    _apply_contract_step(c, nxt)
     return {"next_step": nxt}
 
 
 @app.post("/contracts/{contract_id}/mortgage", status_code=201)
-def mortgage(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
+def mortgage(contract_id: str, body: MortgageBody) -> Dict[str, Any]:
+    stages_sum = sum(s.amount for s in body.stages)
+    if stages_sum != body.total_amount:
+        raise HTTPException(status_code=422, detail="stages_sum_mismatch")
     c = _get(contract_id)
-    nxt = body.next_step or (
-        "SIGNING" if c["type"] == "BUYING_AND_SELLING" else "RENTING"
-    )
-    c["step"] = nxt
+    nxt = body.next_step or mortgage_default_next(c["type"])
+    _apply_contract_step(c, nxt)
     return {"next_step": nxt}
 
 
 @app.post("/contracts/{contract_id}/renting", status_code=201)
-def renting(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
+def renting(contract_id: str, body: RentingBody) -> Dict[str, Any]:
     c = _get(contract_id)
     nxt = body.next_step or "SIGNING"
-    c["step"] = nxt
+    _apply_contract_step(c, nxt)
+    return {"next_step": nxt}
+
+
+@app.post("/contracts/{contract_id}/sale-price", status_code=201)
+def sale_price(contract_id: str, body: SalePriceBody) -> Dict[str, Any]:
+    stages_sum = sum(s.amount for s in body.stages)
+    if body.stages and stages_sum != body.total_price:
+        raise HTTPException(status_code=422, detail="stages_sum_mismatch")
+    c = _get(contract_id)
+    nxt = body.next_step or "SIGNING"
+    _apply_contract_step(c, nxt)
     return {"next_step": nxt}
 
 
 @app.post("/contracts/{contract_id}/sign", status_code=201)
-def sign(_contract_id: str) -> Dict[str, Any]:
+def sign(contract_id: str) -> Dict[str, Any]:
+    c = _get(contract_id)
+    _require_commission_paid_for_signing_mock(c)
     return {}
 
 
 @app.post("/contracts/{contract_id}/sign/verify")
-def sign_verify(_contract_id: str) -> Dict[str, Any]:
+def sign_verify(contract_id: str) -> Dict[str, Any]:
+    c = _get(contract_id)
+    _require_commission_paid_for_signing_mock(c)
     return {"ok": True}
 
 
 @app.post("/contracts/{contract_id}/sign/set")
 def sign_set(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
     c = _get(contract_id)
+    _require_commission_paid_for_signing_mock(c)
     nxt = body.next_step or "WITNESS"
-    c["step"] = nxt
+    _apply_contract_step(c, nxt)
     return {"next_step": nxt}
 
 
@@ -422,7 +566,7 @@ def sign_set(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
 def add_witness(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
     c = _get(contract_id)
     nxt = body.next_step or "WITNESS"
-    c["step"] = nxt
+    _apply_contract_step(c, nxt)
     return {"next_step": nxt}
 
 
@@ -435,20 +579,30 @@ def witness_send_otp(_contract_id: str) -> Dict[str, Any]:
 def witness_verify(contract_id: str, body: SetStepBody) -> Dict[str, Any]:
     c = _get(contract_id)
     nxt = body.next_step or "FINISH"
-    c["step"] = nxt
+    _apply_contract_step(c, nxt)
     c["status"] = "COMPLETED"
     return {"ok": True, "next_step": nxt}
 
 
-@app.get("/contracts/resolve-info")
-def resolve_info() -> Dict[str, str]:
-    return {"result": "ok"}
+@app.get("/contracts/{contract_id}/addendums")
+def contract_addendums_list(contract_id: str) -> List[Any]:
+    c = _get(contract_id)
+    return list(c.get("addendums") or [])
+
+
+@app.get("/contracts/{contract_id}/pdf")
+def contract_pdf(contract_id: str) -> Dict[str, Any]:
+    c = _get(contract_id)
+    if c["status"] == "DRAFT":
+        raise HTTPException(status_code=400, detail="contract_not_ready")
+    return {"url": None, "status": "PENDING"}
 
 
 @app.post("/files/upload", status_code=201)
 def files_upload() -> Dict[str, Any]:
-    # id عددی برای سازگاری با cheque_image_file_id در DTO مراحل پرداخت
-    return {"id": "10001", "url": None}
+    global _file_upload_seq
+    _file_upload_seq += 1
+    return {"id": _file_upload_seq, "url": None}
 
 
 @app.get("/provinces/cities")
@@ -469,6 +623,27 @@ def wallets() -> Dict[str, Any]:
         "user_id": "mock-001",
         "status": "ACTIVE",
     }
+
+
+@app.get("/financials/bank/gateway", response_class=HTMLResponse)
+def bank_gateway_mock() -> HTMLResponse:
+    return HTMLResponse(
+        "<!DOCTYPE html><html lang=fa dir=rtl><meta charset=utf-8><title>درگاه (mock)</title>"
+        "<body style=font-family:sans-serif;padding:1.5rem><h1>درگاه آزمایشی</h1>"
+        "<p>در dev-mock-api پرداخت واقعی ثبت نمی‌شود؛ دکمه بازگشت را بزنید.</p>"
+        "<button type=button onclick=history.back()>بازگشت</button></body></html>"
+    )
+
+
+class MockBankBody(BaseModel):
+    contract_id: str
+
+
+@app.post("/financials/bank/mock-verify")
+def bank_mock_verify(body: MockBankBody) -> Dict[str, Any]:
+    c = _get(body.contract_id)
+    c["commission_paid_at"] = datetime.now(timezone.utc).isoformat()
+    return {"ok": True}
 
 
 # --- Admin enterprise: roles, audit, activity, metrics, notifications ---

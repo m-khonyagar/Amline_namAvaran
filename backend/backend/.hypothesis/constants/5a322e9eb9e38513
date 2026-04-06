@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\api\routes\admin.py
+# hypothesis_version: 6.151.10
+
+[404, 422, '/notifications/dlq', 'attempt', 'invalid_user_id', 'notification_id', 'ok', 'reason', 'role', 'ts_ms', 'user_id', 'user_not_found']

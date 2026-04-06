@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\main.py
+# hypothesis_version: 6.151.10
+
+[201, 413, 415, 1024, '*', ',', '/files/upload', '/health', '/provinces', '/provinces/cities', '0.2.0', 'AMLINE_CORS_ORIGINS', 'Amline API', 'application/pdf', 'env', 'file_too_large', 'id', 'image/jpeg', 'image/png', 'ok', 'startup', 'status', 'url']

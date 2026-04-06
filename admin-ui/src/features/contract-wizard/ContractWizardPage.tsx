@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { WizardProvider, useWizard } from './engine/WizardContext';
+import { contractApi } from './api/contractApi';
 import { ProgressBar } from './components/ProgressBar';
 import { WizardErrorBoundary } from './components/WizardErrorBoundary';
 import { ContractStatusBanner } from './components/ContractStatusBanner';
@@ -18,13 +19,62 @@ interface WizardInnerProps {
   platform: 'admin' | 'user';
 }
 
+function coerceWizardStep(step: string | null | undefined): PRContractStep {
+  if (step && (STEP_ORDER as readonly string[]).includes(step)) {
+    return step as PRContractStep;
+  }
+  return 'SIGNING';
+}
+
 function WizardInner({ platform }: WizardInnerProps) {
   const { state, dispatch } = useWizard();
+
+  const handleCommissionContinue = useCallback(async () => {
+    if (!state.contractId) return;
+    try {
+      const res = await contractApi.getStatus(state.contractId);
+      let status: ContractStatus = res.data.status;
+      let nextStep = coerceWizardStep(
+        typeof res.data.step === 'string' ? res.data.step : undefined
+      );
+      if (status === 'PENDING_COMMISSION') {
+        status = 'DRAFT';
+        nextStep = 'SIGNING';
+      }
+      dispatch({
+        type: 'COMMISSION_PAID_CONTINUE',
+        payload: { status, nextStep },
+      });
+    } catch {
+      dispatch({
+        type: 'COMMISSION_PAID_CONTINUE',
+        payload: { status: 'DRAFT', nextStep: 'SIGNING' },
+      });
+    }
+  }, [state.contractId, dispatch]);
 
   // Polling وضعیت قرارداد
   useContractStatusPolling(state.contractId, (status: ContractStatus) => {
     dispatch({ type: 'SET_STATUS', payload: { status } });
   });
+
+  /** بلافاصله پس از ورود به امضا، وضعیت مؤثر (مثلاً PENDING_COMMISSION) را از API بگیر — بدون انتظار برای interval پولینگ */
+  useEffect(() => {
+    if (!state.contractId || state.currentStep !== 'SIGNING') return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await contractApi.getStatus(state.contractId!);
+        if (cancelled) return;
+        dispatch({ type: 'SET_STATUS', payload: { status: res.data.status as ContractStatus } });
+      } catch {
+        /* پولینگ بعداً همگام می‌کند */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [state.contractId, state.currentStep, dispatch]);
 
   // ذخیره draft پس از هر تغییر مرحله
   useEffect(() => {
@@ -129,6 +179,7 @@ function WizardInner({ platform }: WizardInnerProps) {
           platform={platform}
           isScribeMode={state.isScribeMode}
           onComplete={handleStepComplete}
+          onCommissionContinue={handleCommissionContinue}
         />
       </div>
     );

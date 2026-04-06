@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\api\routes\payments.py
+# hypothesis_version: 6.151.10
+
+[400, 403, 404, 422, 501, '/history', '/pay-rent', '/refund', 'contract_not_found', 'forbidden', 'invalid_amount', 'invalid_contract_id', 'payment_completed', 'rent_payment', 'value']

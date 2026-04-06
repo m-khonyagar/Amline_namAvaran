@@ -17,6 +17,7 @@ from app.api.routes import (
     contract_wizard,
     contracts,
     documents,
+    financials,
     notifications,
     payments,
     properties,
@@ -37,6 +38,7 @@ api_router.include_router(properties.router, prefix="/properties", tags=["proper
 api_router.include_router(contracts.router, prefix="/contracts-v2", tags=["contracts-v2"])
 api_router.include_router(payments.router, prefix="/payments", tags=["payments"])
 api_router.include_router(wallet.router, prefix="/wallet", tags=["wallet"])
+api_router.include_router(financials.router, prefix="/financials", tags=["financials"])
 api_router.include_router(referrals.router, prefix="/referrals", tags=["referrals"])
 api_router.include_router(campaigns.router, prefix="/campaigns", tags=["campaigns"])
 api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])

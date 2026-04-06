@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\models\arbitration.py
+# hypothesis_version: 6.151.10
+
+[128, 'RESTRICT', 'SET NULL', 'arbitrations', 'contracts.id', 'open', 'rejected', 'resolved', 'under_review', 'users.id']

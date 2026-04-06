@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\api\deps.py
+# hypothesis_version: 6.151.10
+
+[401, 'access', 'invalid_token', 'invalid_token_type', 'missing_bearer_token', 'sub', 'type', 'user_not_found']

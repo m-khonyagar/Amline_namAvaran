@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\models\arbitration_attachment.py
+# hypothesis_version: 6.151.10
+
+[128, 256, 512, 'CASCADE', 'RESTRICT', 'arbitrations.id', 'users.id']

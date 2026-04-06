@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\api\routes\analytics.py
+# hypothesis_version: 6.151.10
+
+[-0.1, 0.0, 0.05, 0.1, 0.15, 0.18, 0.25, 0.28, 0.5, 0.6, 0.75, 0.8, 0.85, 0.9, 1.0, 1.2, 60.0, 200.0, 1000000.0, 365, 403, 404, 422, 1390, 3000, 3650, 5000, '/market/rent-summary', '/rent-estimate', 'Admin', 'Moderator', 'city_required', 'fallback_baseline', 'forbidden', 'invalid_property_id', 'property_not_found', 'rent', 'value']
