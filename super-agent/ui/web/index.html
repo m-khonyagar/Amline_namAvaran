@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Super-Agent</title>
     <link rel="stylesheet" href="/ui-assets/styles.css" />
+    <!-- highlight.js — syntax highlighting for code blocks -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      id="hljs-theme-dark"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      id="hljs-theme-light"
+      disabled
+    />
   </head>
   <body>
     <div class="shell">
@@ -30,11 +42,20 @@
           <span class="pip-step" data-agent="executor">⚡ اجرا</span>
         </nav>
 
-        <div class="topbar-status">
-          <span class="status-dot" id="statusDot"></span>
-          <span class="status-label" id="statusLabel">بررسی…</span>
+        <div class="topbar-right">
+          <div class="topbar-status">
+            <span class="status-dot" id="statusDot"></span>
+            <span class="status-label" id="statusLabel">بررسی…</span>
+          </div>
+          <button class="icon-btn" id="themeToggle" title="تغییر تم (روشن/تاریک)" aria-label="تغییر تم">☀️</button>
+          <button class="icon-btn" id="shortcutBtn" title="کلیدهای میانبر (?)" aria-label="کلیدهای میانبر">⌨️</button>
         </div>
       </header>
+
+      <!-- Progress bar (sits flush under topbar) -->
+      <div class="progress-rail" aria-hidden="true">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
 
       <!-- ── Body (sidebar + main) ──────────────────────── -->
       <div class="body">
@@ -44,6 +65,14 @@
           <div class="sidebar-header">
             <span>تاریخچه</span>
             <button class="new-btn" id="newBtn" title="درخواست جدید">＋</button>
+          </div>
+          <div class="sidebar-search">
+            <input
+              type="search"
+              id="searchInput"
+              placeholder="جستجو…"
+              aria-label="جستجو در تاریخچه جلسات"
+            />
           </div>
           <div class="session-list" id="sessionList">
             <p class="sidebar-empty">هنوز جلسه‌ای ثبت نشده</p>
@@ -107,6 +136,8 @@
               placeholder="توکن (اختیاری)"
               aria-label="توکن احراز هویت"
             />
+            <button id="downloadBtn" class="dl-btn" hidden aria-label="دانلود نتیجه جلسه">⬇ دانلود</button>
+            <button id="stopBtn" class="stop-btn" hidden aria-label="توقف اجرا">◼ توقف</button>
             <button id="sendBtn" class="send-btn" aria-label="ارسال درخواست">
               <span id="sendLabel">ارسال</span>
               <span class="send-icon">↵</span>
@@ -116,6 +147,25 @@
       </footer>
 
     </div><!-- .shell -->
+
+    <!-- ── Keyboard shortcut modal ─────────────────────── -->
+    <div class="modal-overlay" id="shortcutModal" hidden role="dialog" aria-modal="true" aria-label="کلیدهای میانبر">
+      <div class="modal">
+        <div class="modal-header">
+          <span>کلیدهای میانبر</span>
+          <button class="modal-close" id="closeShortcutModal" aria-label="بستن">✕</button>
+        </div>
+        <table class="shortcut-table">
+          <tbody>
+            <tr><td><kbd>Ctrl</kbd> + <kbd>Enter</kbd></td><td>ارسال درخواست</td></tr>
+            <tr><td><kbd>?</kbd></td><td>نمایش / بستن این پانل</td></tr>
+            <tr><td><kbd>Esc</kbd></td><td>بستن پانل</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="/ui-assets/app.js"></script>
   </body>
 </html>
