@@ -1,14 +1,22 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { hasAccessToken, logout } from '../lib/auth';
 import { ThemeToggle } from './ThemeToggle';
 
+const NAV = [
+  { href: '/contracts', label: 'قراردادها' },
+  { href: '/needs', label: 'نیازمندی' },
+  { href: '/browse', label: 'بازار' },
+  { href: '/wallet', label: 'کیف پول' },
+] as const;
+
 export function AppChrome({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -25,9 +33,27 @@ export function AppChrome({ children }: { children: ReactNode }) {
           >
             اَملاین
           </Link>
-          <p className="hidden flex-1 text-center text-xs text-[var(--amline-fg-muted)] sm:block sm:text-sm">
-            پنل کاربری — قرارداد دیجیتال
-          </p>
+          <nav
+            className="flex max-w-[min(100%,28rem)] flex-1 flex-nowrap items-center justify-start gap-x-2 overflow-x-auto text-xs text-[var(--amline-fg-muted)] [-ms-overflow-style:none] [scrollbar-width:none] sm:max-w-none sm:justify-center sm:gap-x-3 sm:text-sm [&::-webkit-scrollbar]:hidden"
+            aria-label="ناوبری اصلی"
+          >
+            {NAV.map(({ href, label }) => {
+              const active = pathname === href || pathname.startsWith(`${href}/`);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`min-h-[36px] content-center rounded-md px-2 py-1 transition-colors ${
+                    active
+                      ? 'font-semibold text-[var(--amline-primary)]'
+                      : 'hover:text-[var(--amline-fg)]'
+                  }`}
+                >
+                  {label}
+                </Link>
+              );
+            })}
+          </nav>
           <div className="flex items-center gap-3">
             {authenticated ? (
               <button

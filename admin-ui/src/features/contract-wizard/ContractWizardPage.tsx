@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { WizardProvider, useWizard } from './engine/WizardContext';
 import { contractApi } from './api/contractApi';
 import { ProgressBar } from './components/ProgressBar';
@@ -13,11 +13,16 @@ import { localDraftStorage } from './storage/draftStorage';
 import type { DraftEntry } from './storage/draftStorage';
 import { signingPartiesStorage } from './storage/signingPartiesStorage';
 import { useContractStatusPolling } from './hooks/useContractStatusPolling';
-import type { ContractStatus, PRContractStep } from './types/wizard';
+import { isMappedApiError } from '../../lib/errorMapper';
+import type { ContractStatus, ContractType, PRContractStep } from './types/wizard';
 
 interface WizardInnerProps {
   platform: 'admin' | 'user';
+  resumeContractId?: string | null;
 }
+
+const RESUME_UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function coerceWizardStep(step: string | null | undefined): PRContractStep {
   if (step && (STEP_ORDER as readonly string[]).includes(step)) {
@@ -26,8 +31,84 @@ function coerceWizardStep(step: string | null | undefined): PRContractStep {
   return 'SIGNING';
 }
 
-function WizardInner({ platform }: WizardInnerProps) {
+/** بازگشایی از API: «DRAFT» را به اولین مرحلهٔ فرم تبدیل می‌کند تا UI گیر نکند. */
+function coerceResumeStep(step: string | null | undefined): PRContractStep {
+  if (step && (STEP_ORDER as readonly string[]).includes(step)) {
+    const s = step as PRContractStep;
+    if (s === 'DRAFT') return 'LANDLORD_INFORMATION';
+    return s;
+  }
+  return 'LANDLORD_INFORMATION';
+}
+
+function coerceContractType(t: unknown): ContractType {
+  if (t === 'BUYING_AND_SELLING') return 'BUYING_AND_SELLING';
+  return 'PROPERTY_RENT';
+}
+
+function WizardInner({ platform, resumeContractId = null }: WizardInnerProps) {
   const { state, dispatch } = useWizard();
+  const idForResume = resumeContractId?.trim() ?? '';
+  const resumeIdValid = RESUME_UUID_RE.test(idForResume);
+
+  const [resumeBusy, setResumeBusy] = useState(() => resumeIdValid);
+  const [resumeError, setResumeError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!idForResume) {
+      setResumeBusy(false);
+      setResumeError(null);
+      return;
+    }
+    if (!resumeIdValid) {
+      setResumeBusy(false);
+      setResumeError('شناسه قرارداد در نشانی نامعتبر است.');
+      return;
+    }
+    let cancelled = false;
+    setResumeBusy(true);
+    setResumeError(null);
+    void (async () => {
+      try {
+        const res = await contractApi.getStatus(idForResume);
+        if (cancelled) return;
+        const data = res.data;
+        const nextStep = coerceResumeStep(typeof data.step === 'string' ? data.step : undefined);
+        const contractType = coerceContractType(data.type);
+        const draft = localDraftStorage.load(idForResume);
+        const isScribeMode = draft?.isScribeMode ?? false;
+        dispatch({
+          type: 'RESUME_CONTRACT',
+          payload: {
+            contractId: idForResume,
+            nextStep,
+            contractType,
+            isScribeMode,
+            status: data.status as ContractStatus,
+          },
+        });
+        localDraftStorage.save({
+          contractId: idForResume,
+          contractType,
+          currentStep: nextStep,
+          isScribeMode,
+        });
+      } catch (err: unknown) {
+        if (!cancelled) {
+          setResumeError(
+            isMappedApiError(err)
+              ? err.message
+              : 'امکان بازیابی این قرارداد نبود. دوباره تلاش کنید یا از لیست قراردادها باز کنید.'
+          );
+        }
+      } finally {
+        if (!cancelled) setResumeBusy(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [idForResume, resumeIdValid, dispatch]);
 
   const handleCommissionContinue = useCallback(async () => {
     if (!state.contractId) return;
@@ -102,6 +183,18 @@ function WizardInner({ platform }: WizardInnerProps) {
     dispatch({ type: 'APPLY_NEXT_STEP', payload: { nextStep } });
   }
 
+  if (resumeBusy && !state.contractId) {
+    return (
+      <div
+        dir="rtl"
+        className="mx-auto flex min-h-[40vh] w-full max-w-3xl flex-col items-center justify-center gap-3 rounded-[var(--amline-radius-xl)] border border-[var(--amline-border)] bg-[var(--amline-surface)] p-8 shadow-amline dark:border-slate-700 dark:bg-[var(--amline-surface-elevated)]"
+      >
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--amline-primary)] border-t-transparent" />
+        <p className="text-sm text-[var(--amline-fg-muted)]">در حال باز کردن قرارداد…</p>
+      </div>
+    );
+  }
+
   function handleStepNavigation(nextStep: PRContractStep) {
     if (!state.contractId || !state.contractType) {
       dispatch({ type: 'APPLY_NEXT_STEP', payload: { nextStep } });
@@ -132,6 +225,14 @@ function WizardInner({ platform }: WizardInnerProps) {
         dir="rtl"
         className="mx-auto w-full max-w-3xl space-y-6 rounded-[var(--amline-radius-xl)] border border-[var(--amline-border)] bg-[var(--amline-surface)] p-4 shadow-amline sm:p-6 lg:p-8 dark:border-slate-700 dark:bg-[var(--amline-surface-elevated)]"
       >
+        {resumeError ? (
+          <div
+            role="alert"
+            className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-50"
+          >
+            {resumeError}
+          </div>
+        ) : null}
         <DraftBanner
           onContinue={(draft: DraftEntry) => {
             dispatch({
@@ -267,13 +368,18 @@ function WizardInner({ platform }: WizardInnerProps) {
 
 interface ContractWizardPageProps {
   platform?: 'admin' | 'user';
+  /** اگر مثلاً از `/contracts/wizard?resume=<uuid>` پر شود، همان قرارداد از API باز می‌شود. */
+  resumeContractId?: string | null;
 }
 
-export function ContractWizardPage({ platform = 'user' }: ContractWizardPageProps) {
+export function ContractWizardPage({
+  platform = 'user',
+  resumeContractId = null,
+}: ContractWizardPageProps) {
   return (
     <WizardProvider platform={platform}>
       <WizardErrorBoundary>
-        <WizardInner platform={platform} />
+        <WizardInner platform={platform} resumeContractId={resumeContractId} />
       </WizardErrorBoundary>
     </WizardProvider>
   );
