@@ -26,6 +26,8 @@ const nextConfig = {
       { source: '/admin/:path*', destination: `${base}/admin/:path*` },
       { source: '/financials/:path*', destination: `${base}/financials/:path*` },
       { source: '/consultant/:path*', destination: `${base}/consultant/:path*` },
+      { source: '/requirements/:path*', destination: `${base}/requirements/:path*` },
+      { source: '/market/:path*', destination: `${base}/market/:path*` },
     ]
   },
 }
