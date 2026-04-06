@@ -64,8 +64,7 @@ docs/gsc_data/*.csv
 .DS_Store
 Thumbs.db
 
-# Embedded git repos
-backend/backend/
+# Embedded git repos (فقط پوشه‌های موقت)
 تست برنامه نویسی/
 Google Dos/
 

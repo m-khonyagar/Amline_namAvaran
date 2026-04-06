@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>قرارداد اجاره | املاین</title>
+    <style>
+      @page { size: A4; margin: 18mm 14mm; }
+      html, body { padding: 0; margin: 0; }
+      body {
+        font-family: "DejaVu Sans", Arial, sans-serif;
+        direction: rtl;
+        color: #111;
+        font-size: 12.5px;
+        line-height: 1.9;
+      }
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 10px;
+        margin-bottom: 14px;
+      }
+      h1 {
+        font-size: 18px;
+        margin: 0;
+      }
+      .meta {
+        font-size: 11px;
+        color: #444;
+        text-align: left;
+        direction: ltr;
+      }
+      .section {
+        margin-top: 14px;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+      }
+      .section h2 {
+        font-size: 13px;
+        margin: 0 0 8px 0;
+      }
+      .kv {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .kv td {
+        padding: 6px 0;
+        vertical-align: top;
+      }
+      .k {
+        width: 28%;
+        color: #333;
+      }
+      .v {
+        width: 72%;
+        font-weight: 600;
+      }
+      .small { font-size: 11px; color: #444; font-weight: 400; }
+      .sig {
+        margin-top: 22px;
+        display: flex;
+        gap: 22px;
+      }
+      .sig .box {
+        width: 50%;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 12px;
+      }
+      .sig .line {
+        margin-top: 14px;
+        border-top: 1px dashed #999;
+        padding-top: 10px;
+        color: #444;
+      }
+      .pill {
+        display: inline-block;
+        padding: 2px 8px;
+        border: 1px solid #ddd;
+        border-radius: 999px;
+        font-size: 11px;
+        color: #444;
+      }
+      .ltr { direction: ltr; text-align: left; font-family: "DejaVu Sans", Arial, sans-serif; }
+    </style>
+  </head>
+  <body>
+    <div class="top">
+      <h1>قرارداد اجاره</h1>
+      <div class="meta">
+        <div>کد رهگیری: <span class="pill">{{tracking_code}}</span></div>
+        <div class="small">contract_id: {{contract_id}}</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>اطلاعات طرفین</h2>
+      <table class="kv">
+        <tr>
+          <td class="k">موجر (مالک)</td>
+          <td class="v">{{owner_name}} <span class="small">{{owner_mobile}}</span></td>
+        </tr>
+        <tr>
+          <td class="k">مستاجر</td>
+          <td class="v">{{tenant_name}} <span class="small">{{tenant_mobile}}</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>مشخصات ملک</h2>
+      <table class="kv">
+        <tr>
+          <td class="k">شهر</td>
+          <td class="v">{{property_city}}</td>
+        </tr>
+        <tr>
+          <td class="k">آدرس</td>
+          <td class="v">{{property_address}}</td>
+        </tr>
+        <tr>
+          <td class="k">نوع / اتاق / متراژ</td>
+          <td class="v">{{property_type}} / {{property_rooms}} / {{property_area}} متر</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>شرایط مالی و مدت</h2>
+      <table class="kv">
+        <tr>
+          <td class="k">اجاره ماهانه</td>
+          <td class="v"><span class="ltr">{{rent_amount}}</span> تومان</td>
+        </tr>
+        <tr>
+          <td class="k">ودیعه</td>
+          <td class="v"><span class="ltr">{{deposit_amount}}</span> تومان</td>
+        </tr>
+        <tr>
+          <td class="k">تاریخ شروع</td>
+          <td class="v"><span class="ltr">{{start_date}}</span></td>
+        </tr>
+        <tr>
+          <td class="k">تاریخ پایان</td>
+          <td class="v"><span class="ltr">{{end_date}}</span></td>
+        </tr>
+      </table>
+      <div class="small" style="margin-top: 10px;">
+        این سند در MVP به عنوان نمونه تولید می‌شود و برای استفاده حقوقی نهایی نیاز به بازبینی و تطبیق با قوانین جاری دارد.
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>وضعیت امضا</h2>
+      <div class="sig">
+        <div class="box">
+          <div><strong>امضای موجر:</strong> {{owner_signed}}</div>
+          <div class="small">زمان امضا: <span class="ltr">{{owner_signed_at}}</span></div>
+          <div class="line">محل امضا</div>
+        </div>
+        <div class="box">
+          <div><strong>امضای مستاجر:</strong> {{tenant_signed}}</div>
+          <div class="small">زمان امضا: <span class="ltr">{{tenant_signed_at}}</span></div>
+          <div class="line">محل امضا</div>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>
