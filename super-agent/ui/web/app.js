@@ -171,23 +171,35 @@
     card.className = 'step-card';
     card.dataset.agent = agent;
     card.dataset.start = Date.now();
-    card.innerHTML = `
-      <div class="step-header">
-        <span class="step-icon">${meta.icon}</span>
-        <span class="step-agent">${esc(meta.label)}</span>
-        <span class="step-status">
-          <span class="spin"></span>
-          <span class="step-status-text">در حال اجرا…</span>
-        </span>
-        <span class="step-elapsed"></span>
-      </div>
-      <div class="step-body"><div class="running-row"><span class="spin"></span> در حال پردازش…</div></div>
-    `;
 
-    // Toggle collapse on header click
-    card.querySelector('.step-header').addEventListener('click', () => {
-      card.querySelector('.step-body').classList.toggle('collapsed');
-    });
+    // Build header via DOM API — avoids innerHTML for server-derived agent name/icon
+    const header = document.createElement('div');
+    header.className = 'step-header';
+
+    const iconEl = document.createElement('span');
+    iconEl.className = 'step-icon';
+    iconEl.textContent = meta.icon;
+
+    const agentEl = document.createElement('span');
+    agentEl.className = 'step-agent';
+    agentEl.textContent = meta.label;
+
+    const statusEl = document.createElement('span');
+    statusEl.className = 'step-status';
+    statusEl.innerHTML = '<span class="spin"></span><span class="step-status-text">در حال اجرا…</span>';
+
+    const elapsedEl = document.createElement('span');
+    elapsedEl.className = 'step-elapsed';
+
+    header.append(iconEl, agentEl, statusEl, elapsedEl);
+
+    const body = document.createElement('div');
+    body.className = 'step-body';
+    body.innerHTML = '<div class="running-row"><span class="spin"></span> در حال پردازش…</div>';
+
+    card.append(header, body);
+
+    header.addEventListener('click', () => body.classList.toggle('collapsed'));
 
     feed.appendChild(card);
     card.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -199,11 +211,13 @@
     const statusEl = card.querySelector('.step-status');
     const elapsedEl = card.querySelector('.step-elapsed');
 
-    if (status === 'error') {
-      statusEl.innerHTML = '<span class="badge-err">✗ خطا</span>';
-    } else {
-      statusEl.innerHTML = '<span class="badge-ok">✓ انجام شد</span>';
-    }
+    // Use DOM API — avoids innerHTML for status text
+    statusEl.textContent = '';
+    const badge = document.createElement('span');
+    badge.className = status === 'error' ? 'badge-err' : 'badge-ok';
+    badge.textContent = status === 'error' ? '✗ خطا' : '✓ انجام شد';
+    statusEl.appendChild(badge);
+
     elapsedEl.textContent = `${elapsed}s`;
 
     const body = card.querySelector('.step-body');
@@ -474,7 +488,16 @@
   loadSessions();
   renderSidebar();
   checkReady();
-  setInterval(checkReady, 30_000);
+  // Poll status only when the tab is visible
+  let statusInterval = setInterval(checkReady, 30_000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      clearInterval(statusInterval);
+    } else {
+      checkReady();
+      statusInterval = setInterval(checkReady, 30_000);
+    }
+  });
   goalInput.focus();
 })();
 
