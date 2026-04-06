@@ -1,0 +1,78 @@
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - 'seo-dashboard/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Copy files to server
+        run: |
+          rsync -az --delete \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='.next' \
+            --exclude='__pycache__' \
+            --exclude='.venv' \
+            --exclude='*.pyc' \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            ./ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/amline/app/
+
+      - name: Deploy on server
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} 'bash -s' << 'REMOTE'
+            set -e
+            cd /opt/amline/app
+
+            # اطمینان از وجود .env
+            if [ ! -f .env ]; then
+              echo "ERROR: .env file not found on server. Create it first."
+              exit 1
+            fi
+
+            echo "==> Pulling latest images and rebuilding..."
+            docker compose pull --ignore-pull-failures || true
+            docker compose build --no-cache backend admin-ui amline-ui consultant-ui
+
+            echo "==> Running migrations..."
+            docker compose run --rm db-init
+
+            echo "==> Starting all services..."
+            docker compose up -d --remove-orphans
+
+            echo "==> Waiting for backend health..."
+            for i in $(seq 1 30); do
+              if curl -sf http://localhost:8080/health > /dev/null 2>&1; then
+                echo "Backend is healthy."
+                break
+              fi
+              echo "Waiting... ($i/30)"
+              sleep 3
+            done
+
+            echo "==> Cleanup old images..."
+            docker image prune -f
+
+            echo "==> Deploy complete."
+            docker compose ps
+          REMOTE
