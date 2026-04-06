@@ -5,10 +5,10 @@ export default function HomePage() {
     <main className="mx-auto max-w-lg px-4 py-8 sm:px-6 sm:py-10">
       <h1 className="amline-display text-[var(--amline-fg)]">پنل کاربری اَملاین</h1>
       <p className="amline-body mt-3">
-        قراردادهای خود، نقش کاتب، طرف قرارداد یا شاهد را از اینجا مدیریت کنید.
+        قرارداد دیجیتال، ثبت نیازمندی (خرید، رهن، معاوضه) و مرور بازار از یک نقطه در دسترس است.
       </p>
       <p className="amline-caption mt-2 sm:text-sm">
-        برای شروع انعقاد قرارداد، ابتدا از مسیر ورود با شماره موبایل وارد شوید.
+        برای بخش‌های حساس ابتدا با شماره موبایل وارد شوید.
       </p>
       <ul className="mt-8 space-y-3">
         <li>
@@ -29,6 +29,30 @@ export default function HomePage() {
         </li>
         <li>
           <Link
+            href="/needs"
+            className="card flex min-h-[52px] items-center px-4 py-3 font-medium text-[var(--amline-fg)] transition-shadow hover:shadow-[var(--amline-shadow-md)] dark:border-slate-700 dark:bg-[var(--amline-surface-elevated)]"
+          >
+            ثبت نیازمندی (خرید / رهن / معاوضه)
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/browse"
+            className="card flex min-h-[52px] items-center px-4 py-3 font-medium text-[var(--amline-fg)] transition-shadow hover:shadow-[var(--amline-shadow-md)] dark:border-slate-700 dark:bg-[var(--amline-surface-elevated)]"
+          >
+            بازار — نیازمندی‌ها و آگهی‌ها
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/wallet"
+            className="card flex min-h-[52px] items-center px-4 py-3 font-medium text-[var(--amline-fg)] transition-shadow hover:shadow-[var(--amline-shadow-md)] dark:border-slate-700 dark:bg-[var(--amline-surface-elevated)]"
+          >
+            کیف پول و پرداخت
+          </Link>
+        </li>
+        <li>
+          <Link
             href="/contracts/wizard"
             className="card flex min-h-[52px] items-center px-4 py-3 font-medium text-[var(--amline-fg)] transition-shadow hover:shadow-[var(--amline-shadow-md)] dark:border-slate-700 dark:bg-[var(--amline-surface-elevated)]"
           >
@@ -36,6 +60,9 @@ export default function HomePage() {
           </Link>
         </li>
       </ul>
+      <p className="amline-caption mx-auto mt-8 max-w-md text-center text-[var(--amline-fg-subtle)]">
+        دادهٔ بازار و انتشار نیازمندی در محیط تولید به API متصل می‌شود؛ فعلاً فرم‌ها و لیست نمونه برای تجربهٔ یکدست رابط است.
+      </p>
     </main>
   )
 }

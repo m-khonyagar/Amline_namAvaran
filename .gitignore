@@ -29,6 +29,9 @@ downloads/
 eggs/
 .eggs/
 lib/
+# استثنا: کتابخانهٔ سورس فرانت کاربر (مسیر lib/ سراسری Python را اشتباهی نادیده می‌گرفت)
+!amline-ui/lib/
+!amline-ui/lib/**
 lib64/
 parts/
 sdist/

@@ -6,7 +6,9 @@ import { useEffect, useState } from 'react'
 import { hasAccessToken } from '../../../lib/auth'
 import { ensureMappedError } from '../../../lib/errorMapper'
 import { fetchJson } from '../../../lib/fetchJson'
+import { ContractProgressTimeline } from '../../../components/ContractProgressTimeline'
 import { labelPartyType, labelPersonType, labelStatus, labelStep } from '../../../lib/contractLabels'
+import { buildContractProgressRows } from '../../../lib/contractProgressTimeline'
 
 interface ContractDetail {
   id: string
@@ -59,8 +61,20 @@ export default function ContractDetailPage() {
     }
   }, [id, router])
 
+  const progressRows =
+    data != null
+      ? buildContractProgressRows({
+          status: data.status,
+          step: data.step,
+          created_at: data.created_at,
+          tracking_code: data.tracking_code,
+        })
+      : []
+
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 sm:py-8">
+    <main
+      className={`mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 sm:py-8 ${data ? 'pb-28 sm:pb-32' : ''}`}
+    >
       <Link
         href="/contracts"
         className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-[var(--amline-primary)] transition hover:opacity-90"
@@ -105,6 +119,10 @@ export default function ContractDetailPage() {
       )}
 
       {data && (
+        <>
+        <div className="mt-5">
+          <ContractProgressTimeline rows={progressRows} />
+        </div>
         <div className="card mt-5 space-y-4 p-5 shadow-amline dark:border-slate-700 dark:bg-[var(--amline-surface-elevated)]">
           <div className="grid grid-cols-2 gap-3 text-sm text-[var(--amline-fg)]">
             <div>
@@ -163,6 +181,26 @@ export default function ContractDetailPage() {
             </div>
           </div>
         </div>
+        <div className="fixed inset-x-0 bottom-0 z-20 border-t border-[var(--amline-border)] bg-[var(--amline-surface)]/95 backdrop-blur-sm dark:border-slate-700 dark:bg-[var(--amline-bg)]/95">
+          <div
+            className="mx-auto flex max-w-3xl gap-2 px-4 pt-3"
+            style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
+          >
+            <Link
+              href={`/contracts/wizard?resume=${encodeURIComponent(data.id)}`}
+              className="btn btn-outline flex min-h-[48px] flex-1 items-center justify-center text-center font-semibold dark:border-slate-700"
+            >
+              پیش‌نویس قرارداد
+            </Link>
+            <Link
+              href="/wallet"
+              className="btn btn-primary flex min-h-[48px] flex-1 items-center justify-center text-center font-semibold"
+            >
+              سابقه پرداخت
+            </Link>
+          </div>
+        </div>
+        </>
       )}
     </main>
   )

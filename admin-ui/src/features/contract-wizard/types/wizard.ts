@@ -68,6 +68,16 @@ export type WizardAction =
         isScribeMode: boolean;
       };
     }
+  | {
+      type: 'RESUME_CONTRACT';
+      payload: {
+        contractId: string;
+        nextStep: PRContractStep;
+        contractType: ContractType;
+        isScribeMode: boolean;
+        status: ContractStatus;
+      };
+    }
   | { type: 'APPLY_NEXT_STEP'; payload: { nextStep: PRContractStep } }
   | {
       type: 'COMMISSION_PAID_CONTINUE';
