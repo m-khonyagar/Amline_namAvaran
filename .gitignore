@@ -32,6 +32,9 @@ lib/
 # استثنا: کتابخانهٔ سورس فرانت کاربر (مسیر lib/ سراسری Python را اشتباهی نادیده می‌گرفت)
 !amline-ui/lib/
 !amline-ui/lib/**
+# استثنا: ماژول‌های lib/ کد منبع admin-ui (TypeScript)
+!admin-ui/src/lib/
+!admin-ui/src/lib/**
 lib64/
 parts/
 sdist/
