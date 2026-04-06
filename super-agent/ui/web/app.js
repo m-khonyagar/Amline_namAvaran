@@ -258,7 +258,7 @@
       feed.appendChild(footer);
     }
     const agentCount = s.events.filter((e) => e.status !== 'running').length;
-    footer.textContent = `✓ تکمیل شد — ${s.totalElapsed.toFixed(1)}s | ${agentCount} agent`;
+    footer.textContent = `✓ تکمیل شد — ${s.totalElapsed.toFixed(1)}s | ${agentCount} ${agentCount === 1 ? 'agent' : 'agents'}`;
   }
 
   // ── Feature 6: Download ───────────────────────────────────────
@@ -392,10 +392,12 @@
     const body = card.querySelector('.step-body');
 
     // Feature 1: Typewriter for brain in live mode
+    // All content written below goes through renderBody which applies esc() to every
+    // piece of server-derived data before inserting it into innerHTML.
     if (agent === 'brain' && !replay && !error && output) {
       const plan = output.llm_plan || '';
       if (plan) {
-        body.innerHTML = renderBody(agent, output, error);
+        body.innerHTML = renderBody(agent, output, error); // esc() applied in renderBody
         highlightCodeBlocks(body);
         typewriterReveal(body);
         attachCopyBtns(body);
@@ -403,7 +405,7 @@
       }
     }
 
-    body.innerHTML = renderBody(agent, output, error);
+    body.innerHTML = renderBody(agent, output, error); // esc() applied in renderBody
     attachCopyBtns(body);
     highlightCodeBlocks(body);
   }
@@ -762,18 +764,20 @@
   });
 
   // ── Init ──────────────────────────────────────────────────────
+  const STATUS_POLL_MS = 30_000;
+
   loadSessions();
   renderSidebar();
   checkReady();
   tryRestoreLastSession();
 
-  let statusInterval = setInterval(checkReady, 30_000);
+  let statusInterval = setInterval(checkReady, STATUS_POLL_MS);
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
+    if (document.visibilityState === 'hidden') {
       clearInterval(statusInterval);
     } else {
       checkReady();
-      statusInterval = setInterval(checkReady, 30_000);
+      statusInterval = setInterval(checkReady, STATUS_POLL_MS);
     }
   });
 
