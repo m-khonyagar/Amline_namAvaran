@@ -1,0 +1,91 @@
+name: Merge Approval Gate
+
+# This workflow enforces that only humans can merge agent-created PRs.
+# It runs on every PR targeting main that was created by the AI agent.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled]
+
+jobs:
+  require-human-approval:
+    runs-on: ubuntu-latest
+    # Only enforce on agent-created PRs
+    if: startsWith(github.head_ref, 'agent/')
+
+    permissions:
+      pull-requests: write
+      statuses: write
+
+    steps:
+      - name: Post merge-approval reminder
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            const alreadyLabeled = labels.includes('agent-pr');
+            if (!alreadyLabeled) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ['agent-pr'],
+              });
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: [
+                '## 🤖 AI Agent Pull Request',
+                '',
+                'This PR was created automatically by the Self-Improving AI Agent.',
+                '',
+                '**⚠️ Human review and approval are required before merging.**',
+                '',
+                'Please verify:',
+                '- [ ] The implementation matches the issue requirements',
+                '- [ ] All tests pass (see CI status below)',
+                '- [ ] Code quality is acceptable',
+                '- [ ] No unintended side-effects',
+                '',
+                'Once satisfied, approve this PR and merge it manually.',
+              ].join('\n'),
+            });
+
+  # Block auto-merge: require at least one human approval
+  check-approvals:
+    runs-on: ubuntu-latest
+    if: startsWith(github.head_ref, 'agent/')
+    needs: require-human-approval
+
+    permissions:
+      pull-requests: read
+      statuses: write
+
+    steps:
+      - name: Verify human approval exists
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: reviews } = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+
+            const approvals = reviews.filter(
+              r => r.state === 'APPROVED' && r.user.type !== 'Bot'
+            );
+
+            if (approvals.length === 0) {
+              core.setFailed(
+                'This agent PR requires at least one human approval before it can be merged.'
+              );
+            } else {
+              console.log(`Found ${approvals.length} human approval(s). Merge allowed.`);
+            }
