@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\services\pdf_client.py
+# hypothesis_version: 6.151.10
+
+[30.0, 200, 'PROPERTY_RENT', 'address', 'amount', 'area', 'area_m2', 'buyer_display_name', 'clauses', 'contract_id', 'contract_kind', 'deposit', 'deposit_amount', 'description', 'due_date', 'end_date', 'file_url', 'full_name', 'landlord', 'landlord_mobile', 'landlord_name', 'landlord_national_id', 'lease_end_date', 'lease_start_date', 'monthly_rent', 'national_id', 'payment_stages', 'payment_type', 'payments', 'phone', 'postal_code', 'property', 'property_address', 'property_use_type', 'rent_amount', 'rent_payment_stages', 'sale_payment_stages', 'sale_price', 'sale_total_price', 'save_to_minio', 'seller_display_name', 'start_date', 'tenant', 'tenant_mobile', 'tenant_name', 'tenant_national_id', 'type', 'مسکونی', 'نامشخص']

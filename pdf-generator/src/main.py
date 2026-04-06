@@ -57,7 +57,7 @@ class PaymentInfo(BaseModel):
     amount: int = Field(..., description="مبلغ به تومان")
     due_date: str = Field(..., description="تاریخ سررسید")
     payment_type: str = Field(..., description="نوع پرداخت (ودیعه، اجاره، شارژ)")
-    description: Optional[str] = Field(None, description="توضیحات")
+    description: Optional[str] = Field(default=None, description="توضیحات")
 
 
 class ContractClause(BaseModel):
@@ -75,8 +75,13 @@ class PRContractRequest(BaseModel):
     landlord: LandlordInfo = Field(..., description="اطلاعات موجر")
     tenant: TenantInfo = Field(..., description="اطلاعات مستأجر")
     property: PropertyInfo = Field(..., description="اطلاعات ملک")
-    monthly_rent: int = Field(..., description="اجاره ماهانه به تومان")
-    deposit: int = Field(..., description="ودیعه به تومان")
+    monthly_rent: int = Field(default=0, description="اجاره ماهانه به تومان")
+    deposit: int = Field(default=0, description="ودیعه به تومان")
+    contract_kind: str = Field(
+        default="PROPERTY_RENT",
+        description="PROPERTY_RENT (رهن و اجاره) یا BUYING_AND_SELLING (خرید و فروش)",
+    )
+    sale_total_price: int = Field(default=0, description="مبلغ توافقی فروش به تومان")
     payments: List[PaymentInfo] = Field(default_factory=list, description="لیست پرداخت‌ها")
     clauses: List[ContractClause] = Field(default_factory=list, description="بنود قرارداد")
     save_to_minio: bool = Field(True, description="آیا فایل در MinIO ذخیره شود؟")

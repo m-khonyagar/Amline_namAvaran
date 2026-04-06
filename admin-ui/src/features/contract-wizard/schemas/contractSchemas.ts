@@ -42,10 +42,17 @@ export const rentingSchema = z.object({
   stages: z.array(paymentStageSchema),
 });
 
-export const salePriceSchema = z.object({
-  total_price: z.number().positive('قیمت فروش باید بزرگ‌تر از صفر باشد'),
-  stages: z.array(paymentStageSchema),
-});
+export const salePriceSchema = z
+  .object({
+    total_price: z.number().positive('قیمت فروش باید بزرگ‌تر از صفر باشد'),
+    stages: z.array(paymentStageSchema),
+  })
+  .refine(
+    (d) =>
+      d.stages.length === 0 ||
+      d.stages.reduce((sum, s) => sum + (Number(s.amount) || 0), 0) === d.total_price,
+    { message: 'جمع مبالغ مراحل پرداخت باید برابر قیمت کل باشد', path: ['stages'] }
+  );
 
 export type DatingFormData = z.infer<typeof datingSchema>;
 export type MortgageFormData = z.infer<typeof mortgageSchema>;

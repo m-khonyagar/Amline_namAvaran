@@ -9,8 +9,12 @@ import { PartyList } from './PartyList';
 import type { NaturalPersonFormData, LegalPersonFormData } from '../../schemas/partySchema';
 import { signingPartiesStorage } from '../../storage/signingPartiesStorage';
 import { useMappedStepError } from '../../hooks/useMappedStepError';
+import { WfLabeledRadio } from '../wizardFigma/Primitives';
+import '../wizardFigma/wizardFigma.css';
 
 type PersonKind = 'NATURAL' | 'LEGAL';
+
+const PARTY_ORDINAL_FA = ['اول', 'دوم', 'سوم', 'چهارم', 'پنجم', 'ششم', 'هفتم', 'هشتم', 'نهم', 'دهم'];
 
 export function TenantStep({ contractId, contractType, onComplete, isScribeMode }: StepProps) {
   const [parties, setParties] = useState<AddContractPartyResponse[]>([]);
@@ -123,51 +127,59 @@ export function TenantStep({ contractId, contractType, onComplete, isScribeMode 
     }
   }
 
+  const partyOrdinal = PARTY_ORDINAL_FA[parties.length] ?? String(parties.length + 1);
+  const stepTitle = `اطلاعات ${partyLabel} ${partyOrdinal}`;
+
   return (
-    <div dir="rtl" className="space-y-6">
-      <h2 className="text-lg font-bold text-gray-800">
+    <div dir="rtl" className="wizard-figma space-y-6">
+      <h2 className="text-lg font-bold text-[var(--wf-title)] dark:text-slate-100">
         اطلاعات {partyLabel}
-        {isScribeMode && <span className="text-sm font-normal text-gray-500 mr-2">(حالت کاتب)</span>}
+        {isScribeMode && <span className="mr-2 text-sm font-normal text-[var(--wf-caption)]">(حالت کاتب)</span>}
       </h2>
 
       <StepErrorBanner message={error} details={details} hint={hint} onDismiss={() => clear()} />
 
-      <div className="flex gap-2 rounded-xl border border-gray-200 bg-white p-1">
-        <button
-          type="button"
-          onClick={() => setPersonKind('NATURAL')}
-          className={[
-            'flex-1 rounded-lg py-2 text-sm font-medium transition-colors',
-            personKind === 'NATURAL' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-50',
-          ].join(' ')}
-        >
-          شخص حقیقی
-        </button>
-        <button
-          type="button"
-          onClick={() => setPersonKind('LEGAL')}
-          className={[
-            'flex-1 rounded-lg py-2 text-sm font-medium transition-colors',
-            personKind === 'LEGAL' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-50',
-          ].join(' ')}
-        >
-          شخص حقوقی
-        </button>
-      </div>
+      <div
+        className="flex flex-col gap-5 border border-[var(--wf-border)] bg-[var(--wf-surface)] p-3 dark:border-slate-600 dark:bg-slate-900/35"
+        style={{ borderRadius: 'var(--wf-card-radius)' }}
+      >
+        <div className="flex min-h-8 items-center justify-between gap-3">
+          <span className="wf-body-m text-[var(--wf-caption)] dark:text-slate-400">{stepTitle}</span>
+        </div>
 
-      {personKind === 'NATURAL' ? (
-        <NaturalPersonForm
-          onSubmit={handleAddNatural}
-          isLoading={isLoading}
-          submitLabel={`افزودن ${partyLabel}`}
-        />
-      ) : (
-        <LegalPersonForm
-          onSubmit={handleAddLegal}
-          isLoading={isLoading}
-          submitLabel={`افزودن ${partyLabel} (حقوقی)`}
-        />
-      )}
+        <div className="flex flex-row-reverse flex-wrap items-center justify-end gap-6">
+          <WfLabeledRadio
+            label="شخص حقوقی هستم"
+            name="tenant_person_kind"
+            value="LEGAL"
+            id="tn-kind-legal"
+            checked={personKind === 'LEGAL'}
+            onChange={() => setPersonKind('LEGAL')}
+          />
+          <WfLabeledRadio
+            label="شخص حقیقی هستم"
+            name="tenant_person_kind"
+            value="NATURAL"
+            id="tn-kind-natural"
+            checked={personKind === 'NATURAL'}
+            onChange={() => setPersonKind('NATURAL')}
+          />
+        </div>
+
+        {personKind === 'NATURAL' ? (
+          <NaturalPersonForm
+            onSubmit={handleAddNatural}
+            isLoading={isLoading}
+            submitLabel={`افزودن ${partyLabel}`}
+          />
+        ) : (
+          <LegalPersonForm
+            onSubmit={handleAddLegal}
+            isLoading={isLoading}
+            submitLabel={`افزودن ${partyLabel} (حقوقی)`}
+          />
+        )}
+      </div>
 
       <PartyList
         parties={parties}
@@ -181,7 +193,7 @@ export function TenantStep({ contractId, contractType, onComplete, isScribeMode 
           type="button"
           onClick={handleConfirm}
           disabled={isLoading}
-          className="w-full bg-green-600 text-white rounded-lg py-2.5 font-medium disabled:opacity-50"
+          className="w-full rounded-[var(--wf-field-radius)] bg-[var(--amline-accent)] py-2.5 font-medium text-white hover:opacity-95 disabled:opacity-50 dark:bg-teal-600"
         >
           {isLoading ? 'در حال ثبت...' : `تأیید ${partyLabel}ان و ادامه`}
         </button>

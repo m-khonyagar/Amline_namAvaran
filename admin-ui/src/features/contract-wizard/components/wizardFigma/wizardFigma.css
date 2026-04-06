@@ -1,0 +1,30 @@
+/* هم‌تراز با متغیرهای فیگما (قرارداد رهن — frame اطلاعات مالک) */
+.wizard-figma {
+  --wf-title: #0d0c22;
+  --wf-caption: #9e9ea7;
+  --wf-placeholder: #b6b6bd;
+  --wf-disable-2: #b6b6bd;
+  --wf-border: #e7e7e9;
+  --wf-surface: #ffffff;
+  --wf-light-surface: #f3f3f4;
+  --wf-paragraph-2: #565564;
+  --wf-field-radius: 13px;
+  --wf-card-radius: 16px;
+  --wf-radio-selected: var(--amline-accent, #0d9488);
+}
+
+.wizard-figma .wf-body-s {
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.wizard-figma .wf-body-m {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.wizard-figma .wf-subtitle-m {
+  font-size: 14px;
+  line-height: 1.6;
+  font-weight: 500;
+}

@@ -45,8 +45,8 @@ export function SalePriceStep({ contractId, onComplete }: StepProps) {
         }
         return base;
       });
-      const res = await contractApi.addMortgage(contractId, {
-        total_amount: data.total_price,
+      const res = await contractApi.addSalePrice(contractId, {
+        total_price: data.total_price,
         stages,
         next_step: 'SIGNING',
       });

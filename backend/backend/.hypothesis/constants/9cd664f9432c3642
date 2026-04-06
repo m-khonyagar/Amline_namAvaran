@@ -1,0 +1,4 @@
+# file: D:\فنی املاین\مدیریتی\Amline_namAvaran\backend\backend\app\domain\commission_discount.py
+# hypothesis_version: 6.151.10
+
+[100, ',', ':', 'discount_amount', 'discount_percent', 'gross_total_amount', 'landlord_share', 'tenant_share', 'total_amount']

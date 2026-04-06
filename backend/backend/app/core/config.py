@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     # PDF Generator service URL
     pdf_generator_url: str = "http://pdf-generator:8000"
 
+    # CSV: CODE:percent_off_total (e.g. AMLINE50:50). Empty = no promotional codes.
+    commission_discount_codes: str = ""
+
     # Notification worker settings
     notification_max_attempts: int = 5
     notification_retry_base_seconds: int = 5

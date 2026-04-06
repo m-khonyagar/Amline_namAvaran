@@ -109,6 +109,8 @@ def test_wizard_commission_paid_from_wallet_when_balance_sufficient():
         )
         assert r.status_code == 201
         cid = r.json()["id"]
+        inv_before = client.get(f"/contracts/{cid}/commission/invoice", headers=h).json()
+        expected_fee = float(inv_before.get("total_amount", 5_550_000))
         r = client.post(
             f"/contracts/{cid}/commission/pay",
             headers=h,
@@ -119,7 +121,7 @@ def test_wizard_commission_paid_from_wallet_when_balance_sufficient():
         assert data.get("used_wallet") is True
         assert data.get("redirect_url") == "/"
         bal = float(client.get("/wallet/balance", headers=h).json()["balance"])
-        assert bal == 1_000_000.0
+        assert bal == 6_000_000.0 - expected_fee
         inv = client.get(f"/contracts/{cid}/commission/invoice", headers=h).json()
         assert inv.get("commission_paid") is True
 
