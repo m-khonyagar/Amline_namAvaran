@@ -24,6 +24,9 @@ class Settings(BaseSettings):
 
     otp_ttl_seconds: int = 120
 
+    # PDF Generator service URL
+    pdf_generator_url: str = "http://pdf-generator:8000"
+
     # Notification worker settings
     notification_max_attempts: int = 5
     notification_retry_base_seconds: int = 5
