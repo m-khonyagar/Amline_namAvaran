@@ -106,8 +106,13 @@ class PRAgent:
 
     def _git_commit_and_push(self, workspace: Path, branch: str, plan: Plan) -> None:
         repo_root = Path(os.environ.get("GITHUB_WORKSPACE", str(Path.cwd())))
-        env = {**os.environ, "GIT_AUTHOR_NAME": "AI Agent", "GIT_AUTHOR_EMAIL": "agent@amline.dev",
-               "GIT_COMMITTER_NAME": "AI Agent", "GIT_COMMITTER_EMAIL": "agent@amline.dev"}
+        env = {
+            **os.environ,
+            "GIT_AUTHOR_NAME": "AI Agent",
+            "GIT_AUTHOR_EMAIL": "agent@amline.dev",
+            "GIT_COMMITTER_NAME": "AI Agent",
+            "GIT_COMMITTER_EMAIL": "agent@amline.dev",
+        }
 
         cmds = [
             ["git", "checkout", "-b", branch],
