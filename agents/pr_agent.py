@@ -17,6 +17,12 @@ from agents.planning_agent import Plan
 
 log = logging.getLogger(__name__)
 
+try:
+    from github import Github, GithubException  # type: ignore[import]
+    _PYGITHUB_AVAILABLE = True
+except ImportError:
+    _PYGITHUB_AVAILABLE = False
+
 
 @dataclass
 class PRResult:
@@ -59,9 +65,7 @@ class PRAgent:
                 message="GITHUB_TOKEN not set; PR not created.",
             )
 
-        try:
-            from github import Github, GithubException  # type: ignore[import]
-        except ImportError:
+        if not _PYGITHUB_AVAILABLE:
             log.error("PRAgent: PyGithub not installed — pip install PyGithub")
             return PRResult(
                 branch_name=branch,
