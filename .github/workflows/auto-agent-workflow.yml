@@ -67,29 +67,11 @@ jobs:
           AGENT_BASE_BRANCH: main
           AGENT_LOG_LEVEL: INFO
           AGENT_PARALLEL: 'true'
-        run: |
-          python - <<'EOF'
-          import os, sys, json, logging
-          sys.path.insert(0, '.')
-          logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(name)s: %(message)s')
-
-          from agents.main_orchestrator import MainOrchestrator
-          from agents.config import AgentConfig
-
-          issue_number = int(os.environ.get('ISSUE_NUMBER', '${{ github.event.issue.number || inputs.issue_number }}'))
-          title        = os.environ.get('ISSUE_TITLE',  '${{ github.event.issue.title  || inputs.title }}')
-          body         = os.environ.get('ISSUE_BODY',   '${{ github.event.issue.body   || inputs.body  }}')
-
-          cfg = AgentConfig.from_env()
-          orch = MainOrchestrator(config=cfg)
-          report = orch.run(issue_number=issue_number, title=title, body=body)
-
-          print(json.dumps(report, indent=2, default=str))
-
-          if report.get('errors'):
-              print('Errors encountered:', report['errors'], file=sys.stderr)
-              sys.exit(1)
-          EOF
+          # Issue fields passed as env vars — never interpolated into code — to prevent injection
+          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
+          ISSUE_TITLE: ${{ github.event.issue.title || inputs.title }}
+          ISSUE_BODY: ${{ github.event.issue.body || inputs.body }}
+        run: python agents/run_agent.py
 
       - name: Comment on issue with agent report
         if: always() && github.event_name == 'issues'
