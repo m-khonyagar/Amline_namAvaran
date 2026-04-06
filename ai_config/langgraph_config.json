@@ -67,7 +67,7 @@
   "checkpointing": {
     "enabled": true,
     "backend": "sqlite",
-    "path": "/tmp/agent_checkpoints/langgraph.db"
+    "path": "${AGENT_CHECKPOINT_DIR:/tmp/agent_checkpoints}/langgraph.db"
   },
   "parallel": {
     "enabled": true,

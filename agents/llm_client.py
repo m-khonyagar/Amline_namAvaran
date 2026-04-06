@@ -19,7 +19,7 @@ from agents.config import AgentConfig
 
 log = logging.getLogger(__name__)
 
-_TIMEOUT = 120
+_TIMEOUT = 120  # seconds — generous for slow local Ollama / remote HuggingFace calls
 _OFFLINE_REPLY = (
     '{"steps": ["Analyse", "Implement", "Test", "Review", "PR"], '
     '"estimated_files": [], "branch_name": "agent/offline-stub"}'
