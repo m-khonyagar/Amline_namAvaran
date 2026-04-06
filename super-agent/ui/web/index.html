@@ -3,42 +3,119 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Super-Agent — درخواست و خروجی</title>
+    <title>Super-Agent</title>
     <link rel="stylesheet" href="/ui-assets/styles.css" />
   </head>
   <body>
-    <div class="wrap">
-      <header>
-        <h1>Super-Agent</h1>
-        <p>درخواست خود را بنویسید؛ سیستم برنامه، نیازمندی‌ها، نمونه کد و تست را آماده می‌کند.</p>
-      </header>
+    <div class="shell">
 
-      <div id="status" class="status">…</div>
-
-      <form id="form">
-        <label for="goal">متن درخواست</label>
-        <textarea
-          id="goal"
-          name="goal"
-          placeholder="مثال: یک اسکریپت پایتون برای تبدیل CSV به JSON بنویس و مراحل را خلاصه کن."
-          required
-        ></textarea>
-
-        <div class="row">
-          <label><input type="checkbox" id="planOnly" /> فقط برنامه‌ریزی (سریع‌تر)</label>
-          <label><input type="checkbox" id="skipBrain" /> بدون مدل زبانی (خروجی آزمایشی)</label>
+      <!-- ── Top bar ────────────────────────────────────── -->
+      <header class="topbar">
+        <div class="topbar-logo">
+          <span class="logo-icon">⚡</span>
+          <span class="logo-text">Super-Agent</span>
         </div>
 
-        <label for="token">توکن اختیاری (اگر سرور SUPER_AGENT_DEPLOY_TOKEN دارد)</label>
-        <input type="password" id="token" name="token" autocomplete="off" placeholder="خالی بگذارید اگر لازم نیست" />
+        <nav class="pipeline" id="pipeline" aria-label="مراحل پردازش">
+          <span class="pip-step" data-agent="planner">📋 برنامه</span>
+          <span class="pip-arrow">›</span>
+          <span class="pip-step" data-agent="brain">🧠 تحلیل</span>
+          <span class="pip-arrow">›</span>
+          <span class="pip-step" data-agent="researcher">🔍 تحقیق</span>
+          <span class="pip-arrow">›</span>
+          <span class="pip-step" data-agent="coder">💻 کد</span>
+          <span class="pip-arrow">›</span>
+          <span class="pip-step" data-agent="tester">🧪 تست</span>
+          <span class="pip-arrow">›</span>
+          <span class="pip-step" data-agent="executor">⚡ اجرا</span>
+        </nav>
 
-        <button type="submit" class="primary" id="submit">اجرا و دریافت خروجی</button>
-        <p class="hint">API برای ادغام: <code>POST /v1/run</code> — سلامت: <code>/health</code> — آمادگی: <code>/ready</code></p>
-      </form>
+        <div class="topbar-status">
+          <span class="status-dot" id="statusDot"></span>
+          <span class="status-label" id="statusLabel">بررسی…</span>
+        </div>
+      </header>
 
-      <p id="err" class="error" role="alert"></p>
-      <div id="output" class="out"></div>
-    </div>
+      <!-- ── Body (sidebar + main) ──────────────────────── -->
+      <div class="body">
+
+        <!-- Sidebar: session history -->
+        <aside class="sidebar">
+          <div class="sidebar-header">
+            <span>تاریخچه</span>
+            <button class="new-btn" id="newBtn" title="درخواست جدید">＋</button>
+          </div>
+          <div class="session-list" id="sessionList">
+            <p class="sidebar-empty">هنوز جلسه‌ای ثبت نشده</p>
+          </div>
+        </aside>
+
+        <!-- Main content: welcome or live step feed -->
+        <main class="main">
+
+          <!-- Welcome screen -->
+          <div class="welcome" id="welcome">
+            <div class="welcome-icon">⚡</div>
+            <h2 class="welcome-title">Super-Agent</h2>
+            <p class="welcome-sub">درخواست خود را در پایین بنویسید.</p>
+            <div class="examples">
+              <p class="examples-label">نمونه‌ها:</p>
+              <button class="example-btn" data-goal="یک API برای مدیریت کاربران با FastAPI بنویس">
+                API کاربران با FastAPI
+              </button>
+              <button class="example-btn" data-goal="تابعی برای تبدیل تاریخ شمسی به میلادی در Python بنویس">
+                تبدیل تاریخ شمسی
+              </button>
+              <button class="example-btn" data-goal="یک component React برای نمایش جدول داده‌ها با قابلیت مرتب‌سازی بنویس">
+                جدول React با مرتب‌سازی
+              </button>
+            </div>
+          </div>
+
+          <!-- Live step feed -->
+          <div class="steps-feed" id="stepsFeed" hidden></div>
+
+          <!-- Error banner -->
+          <div class="error-banner" id="errorBanner" hidden role="alert"></div>
+
+        </main>
+      </div>
+
+      <!-- ── Input bar ───────────────────────────────────── -->
+      <footer class="inputbar">
+        <div class="inputbar-inner">
+          <textarea
+            id="goalInput"
+            class="goal-input"
+            placeholder="درخواست خود را بنویسید…  (Ctrl+Enter یا ⌘Enter برای ارسال)"
+            rows="2"
+            aria-label="متن درخواست"
+          ></textarea>
+          <div class="inputbar-controls">
+            <label class="toggle-label">
+              <input type="checkbox" id="planOnly" />
+              <span>فقط برنامه‌ریزی</span>
+            </label>
+            <label class="toggle-label">
+              <input type="checkbox" id="skipBrain" />
+              <span>بدون LLM</span>
+            </label>
+            <input
+              type="password"
+              id="tokenInput"
+              class="token-input"
+              placeholder="توکن (اختیاری)"
+              aria-label="توکن احراز هویت"
+            />
+            <button id="sendBtn" class="send-btn" aria-label="ارسال درخواست">
+              <span id="sendLabel">ارسال</span>
+              <span class="send-icon">↵</span>
+            </button>
+          </div>
+        </div>
+      </footer>
+
+    </div><!-- .shell -->
     <script src="/ui-assets/app.js"></script>
   </body>
 </html>
