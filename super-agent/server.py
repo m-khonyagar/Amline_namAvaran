@@ -33,6 +33,7 @@ from runtime import merge_runtime_env, resolve_config_path, run_session, setup_l
 log = logging.getLogger(__name__)
 _bearer = HTTPBearer(auto_error=False)
 _stream_executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="sa_stream")
+_POLL_INTERVAL_SECONDS = 0.35  # how often to check the DB for new pipeline events
 
 
 def _max_event_id(db_path: Path) -> int:
@@ -103,7 +104,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logs_dir = ROOT / paths.get("logs_dir", "logs")
     setup_logging(logs_dir, cfg.get("logging", {}).get("level", "INFO"), force=True)
     log.info("Super-Agent API starting (config=%s)", cfg_path)
-    yield
+    try:
+        yield
+    finally:
+        _stream_executor.shutdown(wait=False)
+        log.info("Super-Agent API shut down")
 
 
 app = FastAPI(title="Super-Agent", version="2.1", lifespan=lifespan)
@@ -242,7 +247,7 @@ async def run_stream(
                     yield f"event: done\ndata: {json.dumps(done_payload, ensure_ascii=False)}\n\n"
                     return
 
-                await asyncio.sleep(0.35)
+                await asyncio.sleep(_POLL_INTERVAL_SECONDS)
         except asyncio.CancelledError:
             pass
 
