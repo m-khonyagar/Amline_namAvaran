@@ -13,7 +13,7 @@ from app.db.session import get_db
 from app.models.audit_log import AuditLog
 from app.models.user import User, UserRole
 from app.services import auth_tokens
-from app.services.otp import generate_code, store_otp, verify_otp
+from app.services.otp import _allows_fixed_test_otp, generate_code, store_otp, verify_otp
 from app.services.sms import send_otp_sms
 from app.services.users_bootstrap import ensure_referral_code, ensure_user_wallet
 
@@ -59,8 +59,11 @@ def otp_send(body: OtpBody):
     code = generate_code()
     store_otp(body.mobile, code)
     if settings.env == "dev":
-        # در محیط dev کد را در response برمی‌گردانیم
-        return {"success": True, "message": "ok", "dev_code": code}
+        # در dev کد واقعی در Redis؛ برای موبایل تست ثابت همان OTP کانونی را هم در dev_code نشان می‌دهیم.
+        dev_hint = code
+        if _allows_fixed_test_otp() and body.mobile.strip() == settings.fixed_test_mobile.strip():
+            dev_hint = settings.fixed_test_otp
+        return {"success": True, "message": "ok", "dev_code": dev_hint}
     # در staging/production SMS واقعی ارسال می‌شود
     send_otp_sms(body.mobile, code)
     return {"success": True, "message": "ok"}

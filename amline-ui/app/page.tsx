@@ -61,7 +61,7 @@ export default function HomePage() {
         </li>
       </ul>
       <p className="amline-caption mx-auto mt-8 max-w-md text-center text-[var(--amline-fg-subtle)]">
-        دادهٔ بازار و انتشار نیازمندی در محیط تولید به API متصل می‌شود؛ فعلاً فرم‌ها و لیست نمونه برای تجربهٔ یکدست رابط است.
+        بازار و نیازمندی از طریق API بک‌اند یا mock محلی بارگذاری می‌شود؛ پس از ورود همهٔ مسیرها از همین پنل در دسترس است.
       </p>
     </main>
   )

@@ -15,7 +15,7 @@ from app.schemas.auth import (
     VerifyOtpRequest,
 )
 from app.services import auth_tokens
-from app.services.otp import generate_code, store_otp, verify_otp
+from app.services.otp import _allows_fixed_test_otp, generate_code, store_otp, verify_otp
 from app.services.sms import send_otp_sms
 from app.services.users_bootstrap import ensure_referral_code, ensure_user_wallet
 
@@ -28,7 +28,10 @@ def send_otp(req: SendOtpRequest):
     store_otp(req.mobile, code)
 
     if settings.env == "dev":
-        return SendOtpResponse(ok=True, dev_code=code)
+        dev_hint = code
+        if _allows_fixed_test_otp() and req.mobile.strip() == settings.fixed_test_mobile.strip():
+            dev_hint = settings.fixed_test_otp
+        return SendOtpResponse(ok=True, dev_code=dev_hint)
 
     send_otp_sms(req.mobile, code)
     return SendOtpResponse(ok=True)

@@ -62,6 +62,34 @@ def _profile_out(p: ConsultantProfile) -> Dict[str, Any]:
     }
 
 
+# ─────────────────────────── base clauses (Hamgit-aligned) ───────
+
+_BASE_CONTRACT_CLAUSES: list[Dict[str, Any]] = [
+    {
+        "id": "bc-default-1",
+        "kind": "default",
+        "title": "بند عمومی — تعهدات طرفین",
+        "body": (
+            "طرفین متعهد می‌شوند مفاد این قرارداد و ضمائم آن را در تمام مدت اجرا رعایت نمایند."
+        ),
+    },
+    {
+        "id": "bc-guaranteed-1",
+        "kind": "guaranteed",
+        "title": "بند ضمانتی — تخلیه و جریمه",
+        "body": (
+            "در صورت تخلف از تعهدات مالی یا عدم تخلیه به‌موقع، طرف متخلف مسئول خسارات قانونی و قراردادی است."
+        ),
+    },
+]
+
+
+@router.get("/contracts/base-clauses")
+def admin_base_clauses(_: User = Depends(require_admin)) -> Dict[str, Any]:
+    """متن‌های پیش‌فرض بندهای قرارداد — نسخهٔ قابل‌گسترش (CMS/DB در فاز بعد)."""
+    return {"items": list(_BASE_CONTRACT_CLAUSES), "total": len(_BASE_CONTRACT_CLAUSES)}
+
+
 # ─────────────────────────── contracts ──────────────────────────
 
 @router.get("/pr-contracts/list")

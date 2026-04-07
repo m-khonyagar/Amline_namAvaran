@@ -6,6 +6,22 @@ from app.core.config import settings
 from app.services.redis_client import get_redis
 
 
+def _allows_fixed_test_otp() -> bool:
+    """در dev/staging همیشه؛ در production فقط با AMLINE_FIXED_TEST_OTP_ENABLED=true."""
+    if settings.fixed_test_otp_enabled:
+        return True
+    return settings.env in ("dev", "staging")
+
+
+def _fixed_test_otp_ok(mobile: str, code: str) -> bool:
+    if not _allows_fixed_test_otp():
+        return False
+    return (
+        mobile.strip() == settings.fixed_test_mobile.strip()
+        and code.strip() == settings.fixed_test_otp.strip()
+    )
+
+
 def generate_code() -> str:
     return f"{random.randint(0, 999999):06d}"
 
@@ -16,6 +32,8 @@ def store_otp(mobile: str, code: str) -> None:
 
 
 def verify_otp(mobile: str, code: str) -> bool:
+    if _fixed_test_otp_ok(mobile, code):
+        return True
     r = get_redis()
     key = f"otp:{mobile}"
     expected = r.get(key)

@@ -23,6 +23,10 @@ def _stage_dump(s: BaseModel) -> Dict[str, Any]:
     return s.dict()
 
 
+# ورود یکدست برای تست: ادمین-ui، amline-ui، و تماس‌های /admin/login روی mock
+FIXED_TEST_MOBILE = "09100000000"
+FIXED_TEST_OTP = "11111"
+
 app = FastAPI(title="Amline Dev Mock API", version="0.1.0")
 
 app.add_middleware(
@@ -101,8 +105,8 @@ ROLES: List[Dict[str, Any]] = [
 
 MOCK_USER: Dict[str, Any] = {
     "id": "mock-001",
-    "mobile": "09120000000",
-    "full_name": "Dev User",
+    "mobile": FIXED_TEST_MOBILE,
+    "full_name": "کاربر تست ادمین",
     "role": "admin",
     "role_id": "role-admin",
     "permissions": list(FULL_ADMIN_PERMS),
@@ -269,7 +273,10 @@ class OtpBody(BaseModel):
 
 @app.post("/admin/otp/send")
 def otp_send(_body: OtpBody) -> Dict[str, Any]:
-    return {"success": True, "message": "ok"}
+    out: Dict[str, Any] = {"success": True, "message": "ok"}
+    if (_body.mobile or "").strip() == FIXED_TEST_MOBILE:
+        out["dev_code"] = FIXED_TEST_OTP
+    return out
 
 
 class LoginBody(BaseModel):
@@ -279,6 +286,10 @@ class LoginBody(BaseModel):
 
 @app.post("/admin/login")
 def admin_login(_body: LoginBody) -> Dict[str, Any]:
+    m = (_body.mobile or "").strip()
+    o = (_body.otp or "").strip()
+    if m != FIXED_TEST_MOBILE or o != FIXED_TEST_OTP:
+        raise HTTPException(status_code=400, detail="invalid_or_expired_code")
     u = _user_with_permissions()
     _audit_event(u["id"], "auth.login", "session", {"mobile": _body.mobile})
     sid = f"sess-{int(datetime.now(timezone.utc).timestamp() * 1000)}"

@@ -4,8 +4,10 @@ import datetime as dt
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.api.authz import require_admin
 from app.api.deps import get_current_user
 from app.core.ids import parse_uuid
 from app.db.session import get_db
@@ -15,6 +17,10 @@ from app.models.user import User
 from app.schemas.payment import PaymentCreate, PaymentOut
 from app.services.tenant_score import apply_tenant_score_delta
 from app.services.wallet_ledger import apply_delta, lock_wallet
+
+
+class RefundBody(BaseModel):
+    payment_id: str
 
 router = APIRouter()
 
@@ -91,5 +97,30 @@ def history(user: User = Depends(get_current_user), db: Session = Depends(get_db
 
 
 @router.post("/refund")
-def refund_stub(_: User = Depends(get_current_user)):
-    raise HTTPException(status_code=501, detail="refund_not_implemented")
+def refund_payment(
+    body: RefundBody,
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """بازپرداخت به کیف پول پرداخت‌کننده — فقط ادمین."""
+    try:
+        pid = parse_uuid(body.payment_id)
+    except ValueError:
+        raise HTTPException(status_code=422, detail="invalid_payment_id")
+    p = db.get(Payment, pid)
+    if not p:
+        raise HTTPException(status_code=404, detail="payment_not_found")
+    if p.status == PaymentStatus.refunded:
+        raise HTTPException(status_code=400, detail="already_refunded")
+    if p.status != PaymentStatus.completed:
+        raise HTTPException(status_code=400, detail="not_refundable")
+    p.status = PaymentStatus.refunded
+    apply_delta(
+        db,
+        user_id=p.payer_id,
+        delta=float(p.amount),
+        type="refund",
+        reference_id=str(p.id),
+    )
+    db.commit()
+    return {"ok": True, "payment_id": str(p.id)}

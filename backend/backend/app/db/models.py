@@ -23,3 +23,4 @@ from app.models.contract_wizard import WizardContract  # noqa: F401
 from app.models.crm_lead import CrmLead, CrmActivity, CrmTask  # noqa: F401
 from app.models.role import Role  # noqa: F401
 from app.models.consultant_profile import ConsultantProfile  # noqa: F401
+from app.models.market_requirement import MarketRequirement, PromoCode  # noqa: F401

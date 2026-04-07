@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
-import { hasAccessToken } from '../../../lib/auth'
+import { useAuthReady } from '../../../lib/useAuthReady'
 import { getRequirement } from '../../../lib/needsApi'
 import { QUEUE_MESSAGE } from '../../../lib/needsConstants'
 
@@ -63,12 +63,21 @@ function SuccessInner() {
 
 export default function NeedSuccessPage() {
   const router = useRouter()
+  const authReady = useAuthReady()
 
   useEffect(() => {
-    if (!hasAccessToken()) router.replace('/login')
-  }, [router])
+    if (authReady === false) router.replace('/login')
+  }, [authReady, router])
 
-  if (!hasAccessToken()) {
+  if (authReady === null) {
+    return (
+      <main className="mx-auto max-w-lg px-4 py-10">
+        <p className="amline-body text-center text-[var(--amline-fg-muted)]">در حال بارگذاری…</p>
+      </main>
+    )
+  }
+
+  if (!authReady) {
     return (
       <main className="mx-auto max-w-lg px-4 py-10">
         <p className="amline-body text-center">در حال هدایت به ورود…</p>

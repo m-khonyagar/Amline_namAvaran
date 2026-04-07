@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import secrets
 import uuid
 from typing import Any, Dict
 
@@ -10,9 +11,11 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.api.authz import require_admin
 from app.api.deps import get_current_user
 from app.db.session import get_db
 from app.models.contract_wizard import WizardContract
+from app.models.market_requirement import PromoCode
 from app.models.user import User
 from app.models.wallet import Wallet
 
@@ -114,3 +117,81 @@ def bank_mock_verify(
     c.commission_paid_at = dt.datetime.now(dt.timezone.utc)
     db.commit()
     return {"ok": True}
+
+
+# ── Hamgit-aligned promos (ذخیره در PostgreSQL) ─────────────────
+
+
+class PromoGenerateBody(BaseModel):
+    discount_type: str = "PERCENTAGE"
+    discount_value: float = 10.0
+    note: str | None = None
+
+
+class PromoBulkBody(BaseModel):
+    count: int = 1
+    discount_type: str = "PERCENTAGE"
+    discount_value: float = 5.0
+
+
+@router.get("/promos")
+def promos_list(
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    items = db.query(PromoCode).order_by(PromoCode.created_at.desc()).all()
+    return {
+        "items": [
+            {
+                "id": str(p.id),
+                "code": p.code,
+                "discount_type": p.discount_type,
+                "discount_value": float(p.discount_value),
+                "active": p.active,
+                "note": p.note,
+                "created_at": p.created_at.isoformat(),
+            }
+            for p in items
+        ],
+        "total": len(items),
+    }
+
+
+@router.post("/promos/generate")
+def promos_generate(
+    body: PromoGenerateBody,
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    code = f"AML-{secrets.token_hex(4).upper()}"
+    p = PromoCode(
+        code=code,
+        discount_type=body.discount_type,
+        discount_value=body.discount_value,
+        note=body.note,
+    )
+    db.add(p)
+    db.commit()
+    db.refresh(p)
+    return {"ok": True, "code": code, "discount_type": p.discount_type, "id": str(p.id)}
+
+
+@router.post("/promos/bulk-generate")
+def promos_bulk_generate(
+    body: PromoBulkBody,
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    if body.count < 1 or body.count > 500:
+        raise HTTPException(status_code=422, detail="invalid_count")
+    for _ in range(body.count):
+        code = f"AML-{secrets.token_hex(4).upper()}"
+        db.add(
+            PromoCode(
+                code=code,
+                discount_type=body.discount_type,
+                discount_value=body.discount_value,
+            )
+        )
+    db.commit()
+    return {"ok": True, "count": body.count}

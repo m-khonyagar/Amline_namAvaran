@@ -1,62 +1,49 @@
-/**
- * Google Workspace share-URL parser.
- *
- * Converts a Google Drive share URL into an embeddable preview URL
- * and detects the document type (doc / sheet / slide / drive).
- *
- * Usage:
- *   const parsed = parseGoogleShareUrl(url)
- *   if (parsed) <iframe src={parsed.embedUrl} />
- */
+export type GoogleEmbedKind = 'document' | 'spreadsheet' | 'unknown';
 
-export type GoogleDocType = 'doc' | 'sheet' | 'slide' | 'drive';
-/** Values used by WorkspacePage when classifying uploaded workspace files. */
-export type GoogleDocKind = 'document' | 'spreadsheet' | 'presentation' | 'file';
-
-export interface ParsedGoogleUrl {
+export interface ParsedGoogleEmbed {
+  kind: GoogleEmbedKind;
+  id: string;
+  /** URL مناسب iframe؛ سند باید برای «هر کس با لینک» باز باشد */
   embedUrl: string;
-  type: GoogleDocType;
-  /** Human-readable kind used by workspace file upload logic. */
-  kind: GoogleDocKind;
-  fileId: string;
 }
 
-const PATTERNS: Array<{ re: RegExp; type: GoogleDocType; kind: GoogleDocKind; embed: (id: string) => string }> = [
-  {
-    re: /docs\.google\.com\/document\/d\/([^/]+)/,
-    type: 'doc',
-    kind: 'document',
-    embed: (id) => `https://docs.google.com/document/d/${id}/preview`,
-  },
-  {
-    re: /docs\.google\.com\/spreadsheets\/d\/([^/]+)/,
-    type: 'sheet',
-    kind: 'spreadsheet',
-    embed: (id) => `https://docs.google.com/spreadsheets/d/${id}/preview`,
-  },
-  {
-    re: /docs\.google\.com\/presentation\/d\/([^/]+)/,
-    type: 'slide',
-    kind: 'presentation',
-    embed: (id) => `https://docs.google.com/presentation/d/${id}/preview`,
-  },
-  {
-    re: /drive\.google\.com\/(?:file\/d\/|open\?id=)([^/&?]+)/,
-    type: 'drive',
-    kind: 'file',
-    embed: (id) => `https://drive.google.com/file/d/${id}/preview`,
-  },
-];
+const DOC_PATH = /\/document\/d\/([a-zA-Z0-9-_]+)/;
+const SHEET_PATH = /\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/;
 
-/** Parse a Google Workspace share URL and return an embeddable form, or null. */
-export function parseGoogleShareUrl(url: string): ParsedGoogleUrl | null {
-  if (!url) return null;
-  for (const { re, type, kind, embed } of PATTERNS) {
-    const match = url.match(re);
-    if (match?.[1]) {
-      const fileId = match[1];
-      return { embedUrl: embed(fileId), type, kind, fileId };
-    }
+/**
+ * از لینک اشتراک‌گذاری گوگل، شناسه استخراج و URL پیش‌نمایش قابل embed می‌سازد.
+ * برای شیت، در صورت مسدود بودن iframe توسط گوگل، از «منتشر کردن در وب» در منوی فایل استفاده کنید.
+ */
+export function parseGoogleShareUrl(raw: string): ParsedGoogleEmbed | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  let url: URL;
+  try {
+    url = new URL(trimmed);
+  } catch {
+    return null;
   }
+  if (!url.hostname.includes('docs.google.com')) return null;
+
+  const docMatch = url.pathname.match(DOC_PATH);
+  if (docMatch) {
+    const id = docMatch[1];
+    return {
+      kind: 'document',
+      id,
+      embedUrl: `https://docs.google.com/document/d/${id}/preview?rm=minimal&embedded=true`,
+    };
+  }
+
+  const sheetMatch = url.pathname.match(SHEET_PATH);
+  if (sheetMatch) {
+    const id = sheetMatch[1];
+    return {
+      kind: 'spreadsheet',
+      id,
+      embedUrl: `https://docs.google.com/spreadsheets/d/${id}/preview?rm=minimal&widget=true&headers=false`,
+    };
+  }
+
   return null;
 }
