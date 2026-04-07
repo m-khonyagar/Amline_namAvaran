@@ -9,6 +9,10 @@ export interface AuthUser {
   permissions: string[];
 }
 
+/** کانون تست لوکال — هم‌تراز با dev-mock-api و بک‌اند. */
+export const DEV_FIXED_TEST_MOBILE = '09100000000';
+export const DEV_FIXED_TEST_OTP = '11111';
+
 export function isDevBypassEnabled(): boolean {
   return (
     process.env.NODE_ENV === 'development' &&
@@ -46,7 +50,7 @@ export async function loginWithOtp(mobile: string, otp: string): Promise<AuthUse
 export function devLogin(): AuthUser {
   const mockUser: AuthUser = {
     id: 'dev-user-001',
-    mobile: '09120000000',
+    mobile: DEV_FIXED_TEST_MOBILE,
     full_name: 'کاربر آزمایشی',
     role: 'user',
     permissions: ['contracts:read', 'contracts:write'],

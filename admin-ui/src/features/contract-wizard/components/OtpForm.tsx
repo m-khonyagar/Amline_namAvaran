@@ -7,9 +7,11 @@ interface OtpFormProps {
   onResend: () => Promise<void>;
   isLoading?: boolean;
   error?: string | null;
+  /** When set (dev only from callers), shows a one-click confirm with this OTP. */
+  devQuickOtp?: string;
 }
 
-export function OtpForm({ mobile, onVerify, onResend, isLoading, error }: OtpFormProps) {
+export function OtpForm({ mobile, onVerify, onResend, isLoading, error, devQuickOtp }: OtpFormProps) {
   const { secondsLeft, isExpired, reset } = useOtpTimer(120);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -83,6 +85,17 @@ export function OtpForm({ mobile, onVerify, onResend, isLoading, error }: OtpFor
         >
           {isLoading ? 'در حال تأیید...' : 'تأیید کد'}
         </button>
+
+        {devQuickOtp ? (
+          <button
+            type="button"
+            disabled={isLoading}
+            onClick={() => void onVerify(devQuickOtp)}
+            className="w-full rounded-lg border border-amber-400 bg-amber-50 py-2 text-sm font-medium text-amber-900 disabled:opacity-50 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200"
+          >
+            تأیید آزمایشی توسعه ({devQuickOtp})
+          </button>
+        ) : null}
       </form>
     </div>
   );

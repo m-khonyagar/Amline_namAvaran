@@ -4,6 +4,7 @@
  */
 import { useState, useEffect, useCallback } from 'react'
 import { apiClient } from '../lib/api'
+import { DEV_FIXED_TEST_MOBILE } from '../lib/devLocalAuth'
 import { ensureMappedError } from '../lib/errorMapper'
 import { CookieNames, getCookie, removeCookie, setCookie } from '../lib/cookies'
 
@@ -48,7 +49,7 @@ export function useAuth() {
       }
       // اگه userData نبود، mock user بساز
       const mockUser: User = {
-        id: 'dev-001', mobile: '09120000000',
+        id: 'dev-001', mobile: DEV_FIXED_TEST_MOBILE,
         full_name: 'کاربر آزمایشی', role: 'admin', role_id: 'role-admin',
         permissions: ['users:read','users:write','contracts:read','contracts:write',
           'ads:read','ads:write','wallets:read','wallets:write','settings:read','settings:write',
@@ -108,17 +109,17 @@ export function useAuth() {
       return { success: true }
     } catch (error: unknown) {
       const m = ensureMappedError(error)
-      return { success: false, message: m.message }
+      return { success: false, message: m.message, hint: m.hint }
     }
   }
 
   const sendOtp = async (mobile: string) => {
     try {
       await apiClient.post('/admin/otp/send', { mobile })
-      return { success: true }
+      return { success: true as const }
     } catch (error: unknown) {
       const m = ensureMappedError(error)
-      return { success: false, message: m.message }
+      return { success: false as const, message: m.message, hint: m.hint }
     }
   }
 

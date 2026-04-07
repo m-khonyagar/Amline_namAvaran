@@ -6,10 +6,11 @@ import { useMemo, useState, useEffect } from 'react'
 import { ensureMappedError } from '../../../lib/errorMapper'
 import { createRequirement } from '../../../lib/needsApi'
 import { CITY_OPTIONS, PROPERTY_TYPE_OPTIONS } from '../../../lib/needsConstants'
-import { hasAccessToken } from '../../../lib/auth'
+import { useAuthReady } from '../../../lib/useAuthReady'
 
 export default function NeedBarterPage() {
   const router = useRouter()
+  const authReady = useAuthReady()
   const [cityId, setCityId] = useState('')
   const [neighborhoodId, setNeighborhoodId] = useState('')
   const [propertyTypeId, setPropertyTypeId] = useState('')
@@ -20,8 +21,8 @@ export default function NeedBarterPage() {
   const [submitError, setSubmitError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!hasAccessToken()) router.replace('/login')
-  }, [router])
+    if (authReady === false) router.replace('/login')
+  }, [authReady, router])
 
   const city = CITY_OPTIONS.find((c) => c.id === cityId)
   const nhoods = city?.neighborhoods ?? []
@@ -57,7 +58,15 @@ export default function NeedBarterPage() {
     }
   }
 
-  if (!hasAccessToken()) {
+  if (authReady === null) {
+    return (
+      <main className="mx-auto max-w-lg px-4 py-10">
+        <p className="amline-body text-center text-[var(--amline-fg-muted)]">در حال بارگذاری…</p>
+      </main>
+    )
+  }
+
+  if (!authReady) {
     return (
       <main className="mx-auto max-w-lg px-4 py-10">
         <p className="amline-body text-center">در حال هدایت به ورود…</p>

@@ -39,5 +39,11 @@ class Settings(BaseSettings):
     # Dev convenience: if set, this mobile becomes Admin on login.
     bootstrap_admin_mobile: str | None = None
 
+    # OTP ثابت برای تست لوکال/استیجینگ (و دمو آنلاین با فلگ صریح)
+    # در production فقط وقتی true است که روی سرور عمداً فعال کرده باشید.
+    fixed_test_otp_enabled: bool = False
+    fixed_test_mobile: str = "09100000000"
+    fixed_test_otp: str = "11111"
+
 
 settings = Settings()

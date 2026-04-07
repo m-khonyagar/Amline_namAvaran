@@ -4,9 +4,10 @@ import path from 'path'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
+  // بدون .env، به جای پروداکشن به mock/بک‌اند لوکال وصل شو تا خطای شبکه کمتر شود.
   const proxyTarget =
     env.VITE_DEV_PROXY_TARGET ||
-    'https://api.amline.ir'
+    'http://127.0.0.1:8080'
 
   const bypassHtmlRequest = (req: { headers?: Record<string, string | undefined>; url?: string }) => {
     const accept = req.headers?.accept ?? ''
