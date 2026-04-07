@@ -40,3 +40,13 @@ def test_health_and_auth_wallet_flow():
         assert fw.get("status") == "ACTIVE"
         assert float(fw.get("credit", -1)) == 0.0
         assert fw.get("user_id")
+
+
+def test_admin_login_fixed_test_otp_without_prior_send():
+    """کانون تست: 09100000000 + 11111 در env=dev بدون /admin/otp/send."""
+    with TestClient(app) as client:
+        r = client.post("/admin/login", json={"mobile": "09100000000", "otp": "11111"})
+        assert r.status_code == 200
+        body = r.json()
+        assert body.get("access_token")
+        assert (body.get("user") or {}).get("mobile") == "09100000000"

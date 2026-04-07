@@ -6,12 +6,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ensureMappedError } from '../../lib/errorMapper'
 import { fetchMarketFeed, type MarketFeedItem, type NeedKindApi } from '../../lib/needsApi'
 import { CITY_OPTIONS } from '../../lib/needsConstants'
-import { hasAccessToken } from '../../lib/auth'
+import { useAuthReady } from '../../lib/useAuthReady'
 
 type Tab = NeedKindApi
 
 export default function BrowsePage() {
   const router = useRouter()
+  const authReady = useAuthReady()
   const [tab, setTab] = useState<Tab>('buy')
   const [filterOpen, setFilterOpen] = useState(false)
   const [cityFilter, setCityFilter] = useState('')
@@ -41,15 +42,23 @@ export default function BrowsePage() {
   }, [tab, cityFilter, query])
 
   useEffect(() => {
-    if (!hasAccessToken()) router.replace('/login')
-  }, [router])
+    if (authReady === false) router.replace('/login')
+  }, [authReady, router])
 
   useEffect(() => {
-    if (!hasAccessToken()) return
+    if (authReady !== true) return
     void load()
-  }, [load])
+  }, [authReady, load])
 
-  if (!hasAccessToken()) {
+  if (authReady === null) {
+    return (
+      <main className="mx-auto max-w-lg px-4 py-10">
+        <p className="amline-body text-center text-[var(--amline-fg-muted)]">در حال بارگذاری…</p>
+      </main>
+    )
+  }
+
+  if (!authReady) {
     return (
       <main className="mx-auto max-w-lg px-4 py-10">
         <p className="amline-body text-center">در حال هدایت به ورود…</p>

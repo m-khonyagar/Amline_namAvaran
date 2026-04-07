@@ -11,3 +11,18 @@ export function buildWebHandoffUrl(baseUrl: string, path: string, token: string)
 export function consultantPanelDeepLink(consultantUiOrigin: string, handoffToken: string): string {
   return buildWebHandoffUrl(consultantUiOrigin, '/login', handoffToken);
 }
+
+/** پیش‌نمایش URL ورود از کانال — پس از صدور توکن واقعی جایگزین `token` شود. */
+export function buildChannelHandoffPreview(params: {
+  baseUrl: string;
+  channel: string;
+  externalUserId: string;
+  nextPath?: string;
+}): string {
+  const base = params.baseUrl.replace(/\/$/, '');
+  const u = new URL(`${base}/auth/channel-handoff`);
+  u.searchParams.set('channel', params.channel);
+  u.searchParams.set('ext_uid', params.externalUserId);
+  if (params.nextPath) u.searchParams.set('next', params.nextPath);
+  return u.toString();
+}
