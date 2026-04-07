@@ -48,6 +48,11 @@ def health():
     return {"status": "ok", "env": settings.env}
 
 
+@app.get("/api/ping")
+def ping():
+    return {"status": "ok"}
+
+
 @app.post("/files/upload", status_code=201)
 async def files_upload(file: UploadFile):
     global _file_id_counter
