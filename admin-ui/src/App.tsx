@@ -17,6 +17,7 @@ import AuditLogPage from './pages/admin/AuditLogPage'
 import ActivityReportPage from './pages/admin/ActivityReportPage'
 import ConsultantsReviewPage from './pages/consultants/ConsultantsReviewPage'
 import WorkspacePage from './pages/workspace/WorkspacePage'
+import PlanePage from './pages/workspace/PlanePage'
 import CRMPage from './pages/crm/CRMPage'
 import NotificationsInboxPage from './pages/admin/NotificationsInboxPage'
 import HamgitPortLayout from './pages/hamgit-port/HamgitPortLayout'
@@ -250,6 +251,17 @@ function AppRoutes() {
               </PermissionGuard>
             }
           />
+
+          {featureEnabled('PLANE_INTEGRATION') ? (
+            <Route
+              path="admin/plane"
+              element={
+                <PermissionGuard permission="plane:read">
+                  <PlanePage />
+                </PermissionGuard>
+              }
+            />
+          ) : null}
 
           {featureEnabled('HAMGIT_PORT') ? (
             <Route
