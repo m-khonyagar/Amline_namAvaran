@@ -1,24 +1,22 @@
+import * as Sentry from '@sentry/react'
+
 /**
- * Optional Sentry initialisation — only activates when VITE_SENTRY_DSN is set.
- * Gracefully no-ops in development / CI where Sentry is not configured.
+ * با `VITE_SENTRY_DSN` در env استقرار (نه در ریپو).
+ * در dev به‌طور پیش‌فرض خاموش است مگر `VITE_SENTRY_DEV=true`.
  */
-
 export function initOptionalSentry(): void {
-  try {
-    const env = (import.meta as unknown as { env?: Record<string, string> }).env ?? {};
-    const dsn = env['VITE_SENTRY_DSN'];
-    if (!dsn) return;
+  const dsn = (import.meta.env.VITE_SENTRY_DSN as string | undefined)?.trim()
+  if (!dsn) return
+  const allowDev = import.meta.env.VITE_SENTRY_DEV === 'true'
+  if (import.meta.env.DEV && !allowDev) return
 
-    // Dynamically import Sentry to avoid bundling it when not needed.
-    void import('@sentry/react').then(({ init, browserTracingIntegration }) => {
-      init({
-        dsn,
-        integrations: [browserTracingIntegration()],
-        tracesSampleRate: 0.2,
-        environment: env['VITE_ENV'] ?? 'production',
-      });
-    });
-  } catch {
-    // Never let Sentry initialisation crash the app
-  }
+  Sentry.init({
+    dsn,
+    environment: import.meta.env.MODE,
+    sendDefaultPii: false,
+    integrations: [Sentry.browserTracingIntegration()],
+    tracesSampleRate: import.meta.env.PROD ? 0.12 : 1,
+  })
 }
+
+export { Sentry }

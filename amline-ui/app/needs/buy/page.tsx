@@ -4,16 +4,25 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { BuyRentNeedForm } from '../../../components/needs/BuyRentNeedForm'
-import { hasAccessToken } from '../../../lib/auth'
+import { useAuthReady } from '../../../lib/useAuthReady'
 
 export default function NeedBuyPage() {
   const router = useRouter()
+  const authReady = useAuthReady()
 
   useEffect(() => {
-    if (!hasAccessToken()) router.replace('/login')
-  }, [router])
+    if (authReady === false) router.replace('/login')
+  }, [authReady, router])
 
-  if (!hasAccessToken()) {
+  if (authReady === null) {
+    return (
+      <main className="mx-auto max-w-lg px-4 py-10">
+        <p className="amline-body text-center text-[var(--amline-fg-muted)]">در حال بارگذاری…</p>
+      </main>
+    )
+  }
+
+  if (!authReady) {
     return (
       <main className="mx-auto max-w-lg px-4 py-10">
         <p className="amline-body text-center">در حال هدایت به ورود…</p>

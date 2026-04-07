@@ -25,7 +25,7 @@ nano .env   # مقادیر را پر کنید
 # JWT_SECRET  → openssl rand -hex 32
 # SECRET_KEY  → openssl rand -hex 32
 # POSTGRES_PASSWORD → یک پسورد قوی
-# BOOTSTRAP_ADMIN_MOBILE → شماره موبایل اولین ادمین
+# BOOTSTRAP_ADMIN_MOBILE → مثال کانون تست: 09100000000 (با OTP از SMS یا با AMLINE_FIXED_TEST_OTP_ENABLED=true و کد 11111)
 # CORS_ORIGINS → دامنه‌های frontend
 
 # ۳. دیپلوی

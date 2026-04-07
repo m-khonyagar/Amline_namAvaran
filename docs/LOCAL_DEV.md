@@ -12,6 +12,12 @@ powershell -ExecutionPolicy Bypass -File .\scripts\dev-user-stack.ps1
 
 سپس در مرورگر: **http://localhost:3000**
 
+### ورود یکدست (mock و backend dev/staging)
+
+- **موبایل:** `09100000000`
+- **کد OTP:** `11111`  
+روی **dev-mock-api** فقط همین جفت پذیرفته می‌شود. روی **backend** واقعی این OTP برای همان شماره در `env` های `dev` و `staging` فعال است؛ در `production` فقط اگر `AMLINE_FIXED_TEST_OTP_ENABLED=true` بگذارید.
+
 ## دستی
 
 1. **Mock API** (پایتون با وابستگی‌های نصب‌شده):

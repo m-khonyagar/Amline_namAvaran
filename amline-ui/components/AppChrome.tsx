@@ -21,7 +21,7 @@ export function AppChrome({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setAuthenticated(hasAccessToken());
-  }, []);
+  }, [pathname]);
 
   return (
     <div className="flex min-h-screen flex-col">

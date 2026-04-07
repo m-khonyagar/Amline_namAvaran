@@ -19,6 +19,7 @@ import {
   WfInput,
 } from '../wizardFigma/Primitives';
 import '../wizardFigma/wizardFigma.css';
+import { DEV_FIXED_TEST_OTP, isAdminDevBypassEnabled } from '../../../../lib/devLocalAuth';
 
 const witnessFieldSchema = z.object({
   national_code: z.string().length(10).refine(validateIranianNationalCode, 'کد ملی نامعتبر است'),
@@ -37,6 +38,7 @@ interface WitnessSlotState {
 const initialSlot: WitnessSlotState = { phase: 'form', data: null };
 
 export function WitnessStep({ contractId, contractType, onComplete }: StepProps) {
+  const devQuickOtp = isAdminDevBypassEnabled() ? DEV_FIXED_TEST_OTP : undefined;
   const { dispatch } = useWizard();
   const [landlord, setLandlord] = useState<WitnessSlotState>(initialSlot);
   const [tenant, setTenant] = useState<WitnessSlotState>(initialSlot);
@@ -221,6 +223,7 @@ export function WitnessStep({ contractId, contractType, onComplete }: StepProps)
               onResend={() => resendOtp('landlord', 'LANDLORD')}
               isLoading={loadingSlot === 'landlord'}
               error={otpErrors.landlord}
+              devQuickOtp={devQuickOtp}
             />
           )}
         </WitnessSection>
@@ -290,6 +293,7 @@ export function WitnessStep({ contractId, contractType, onComplete }: StepProps)
               onResend={() => resendOtp('tenant', 'TENANT')}
               isLoading={loadingSlot === 'tenant'}
               error={otpErrors.tenant}
+              devQuickOtp={devQuickOtp}
             />
           )}
         </WitnessSection>

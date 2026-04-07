@@ -62,6 +62,18 @@ npm run dev
 # ورود نمونه با موبایل 09121112233 (در mock از قبل ثبت شده)
 ```
 
+**هاب یکپارچهٔ محلی (بدون کد؛ لینک به همهٔ پنل‌ها):** فایل `local-dev-hub/index.html` را باز کنید، یا از ریشهٔ ریپو:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\start-platform-local-hub.ps1
+```
+
+برای باز کردن هم‌زمان چند پنجرهٔ dev (mock از قبل یا همین اسکریپت):
+
+```powershell
+.\scripts\start-platform-local-hub.ps1 -WithUserUi -WithAdminUi -WithConsultantUi
+```
+
 ### متغیرهای محیطی
 
 جزئیات پورت‌ها، تضاد 8080، و پروفایل MSW در مقابل proxy: **[docs/LOCAL_DEV.md](docs/LOCAL_DEV.md)**.

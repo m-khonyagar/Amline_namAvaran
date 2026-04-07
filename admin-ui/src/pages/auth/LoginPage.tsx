@@ -8,6 +8,11 @@ import { ThemeToggle } from '../../components/ThemeToggle';
 import { Button } from '../../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
 import { Input } from '../../ui/input';
+import {
+  DEV_FIXED_TEST_MOBILE,
+  DEV_FIXED_TEST_OTP,
+  isAdminDevBypassEnabled,
+} from '../../lib/devLocalAuth';
 
 export default function LoginPage() {
   const [mobile, setMobile] = useState('');
@@ -16,13 +21,12 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { login, sendOtp } = useAuth();
   const navigate = useNavigate();
-  const isDevBypassEnabled =
-    import.meta.env.DEV && import.meta.env.VITE_ENABLE_DEV_BYPASS !== 'false';
+  const isDevBypassEnabled = isAdminDevBypassEnabled();
 
   const handleDevLogin = () => {
     const mockUser = {
       id: 'dev-001',
-      mobile: '09120000000',
+      mobile: DEV_FIXED_TEST_MOBILE,
       full_name: 'کاربر آزمایشی',
       role: 'admin',
       role_id: 'role-admin',
@@ -52,6 +56,32 @@ export default function LoginPage() {
     navigate('/dashboard');
   };
 
+  const handleDevTrialSendOtp = async () => {
+    setLoading(true);
+    setMobile(DEV_FIXED_TEST_MOBILE);
+    const result = await sendOtp(DEV_FIXED_TEST_MOBILE);
+    setLoading(false);
+    if (result.success) {
+      setStep('otp');
+      setOtp('');
+      toast.success('کد برای شماره تست ارسال شد؛ با ۱۱۱۱۱ یا دکمهٔ تأیید آزمایشی وارد شوید.');
+    } else {
+      toast.error(result.message || 'خطا در ارسال کد', result.hint ? { description: result.hint } : undefined);
+    }
+  };
+
+  const handleDevTrialVerifyOtp = async () => {
+    setLoading(true);
+    const result = await login(DEV_FIXED_TEST_MOBILE, DEV_FIXED_TEST_OTP);
+    setLoading(false);
+    if (result.success) {
+      toast.success('ورود آزمایشی با OTP انجام شد.');
+      navigate('/dashboard');
+    } else {
+      toast.error(result.message || 'خطا در ورود', result.hint ? { description: result.hint } : undefined);
+    }
+  };
+
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!mobile || mobile.length !== 11) {
@@ -67,7 +97,7 @@ export default function LoginPage() {
       setStep('otp');
       toast.success('کد تأیید به شماره شما ارسال شد');
     } else {
-      toast.error(result.message || 'خطا در ارسال کد');
+      toast.error(result.message || 'خطا در ارسال کد', result.hint ? { description: result.hint } : undefined);
     }
   };
 
@@ -86,7 +116,7 @@ export default function LoginPage() {
       toast.success('خوش آمدید!');
       navigate('/dashboard');
     } else {
-      toast.error(result.message || 'خطا در ورود');
+      toast.error(result.message || 'خطا در ورود', result.hint ? { description: result.hint } : undefined);
     }
   };
 
@@ -122,6 +152,18 @@ export default function LoginPage() {
                 <Button type="submit" className="w-full" size="lg" loading={loading} disabled={loading}>
                   ارسال کد تأیید
                 </Button>
+                {isDevBypassEnabled ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full border-amber-300 text-amber-800 dark:border-amber-700 dark:text-amber-300"
+                    loading={loading}
+                    disabled={loading}
+                    onClick={() => void handleDevTrialSendOtp()}
+                  >
+                    ارسال کد آزمایشی (۰۹۱۰۰۰۰۰۰۰۰۰)
+                  </Button>
+                ) : null}
               </form>
             ) : (
               <form onSubmit={handleLogin} className="space-y-5" noValidate>
@@ -143,6 +185,18 @@ export default function LoginPage() {
                 <Button type="submit" className="w-full" size="lg" loading={loading} disabled={loading}>
                   ورود
                 </Button>
+                {isDevBypassEnabled ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full border-amber-300 text-amber-800 dark:border-amber-700 dark:text-amber-300"
+                    loading={loading}
+                    disabled={loading}
+                    onClick={() => void handleDevTrialVerifyOtp()}
+                  >
+                    تأیید آزمایشی توسعه ({DEV_FIXED_TEST_OTP})
+                  </Button>
+                ) : null}
                 <Button
                   type="button"
                   variant="ghost"
@@ -166,7 +220,7 @@ export default function LoginPage() {
                   className="w-full border-amber-300 text-amber-800 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-950/50"
                   onClick={handleDevLogin}
                 >
-                  ورود آزمایشی (فقط توسعه)
+                  ورود آزمایشی بدون OTP (فقط توسعه)
                 </Button>
               </div>
             )}
