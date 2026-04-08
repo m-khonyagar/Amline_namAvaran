@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 
 from app.core.errors import AmlineError
 from app.repositories.memory.state import get_store
@@ -68,6 +68,23 @@ def crm_lead_patch(lead_id: str, body: CrmLeadPatchBody) -> dict:
         s.mock_user["id"], "crm.lead.update", "lead", {"lead_id": lead_id, **patch}
     )
     return row
+
+
+@router.delete("/admin/crm/leads/{lead_id}")
+def crm_lead_delete(lead_id: str) -> Response:
+    s = get_store()
+    idx = next((i for i, l in enumerate(s.crm_leads) if l["id"] == lead_id), None)
+    if idx is None:
+        raise AmlineError(
+            "RESOURCE_NOT_FOUND",
+            "لید یافت نشد.",
+            status_code=404,
+            details={"entity": "lead", "lead_id": lead_id},
+        )
+    s.crm_leads.pop(idx)
+    s.crm_activities.pop(lead_id, None)
+    s.audit_event(s.mock_user["id"], "crm.lead.delete", "lead", {"lead_id": lead_id})
+    return Response(status_code=204)
 
 
 @router.get("/admin/crm/leads/{lead_id}/activities")
