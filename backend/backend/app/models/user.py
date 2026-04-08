@@ -27,7 +27,13 @@ class User(Base):
     national_code: Mapped[str | None] = mapped_column(String(16), nullable=True, index=True)
     name: Mapped[str | None] = mapped_column(String(128), nullable=True)
     role: Mapped[UserRole] = mapped_column(
-        SAEnum(UserRole, name="userrole", values_callable=lambda o: [e.value for e in o]),
+        SAEnum(
+            UserRole,
+            name="userrole",
+            native_enum=False,
+            values_callable=lambda o: [e.value for e in o],
+            length=32,
+        ),
         nullable=False,
         server_default=UserRole.user.value,
     )
