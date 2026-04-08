@@ -1,0 +1,59 @@
+# Validates Sweep config. Hosted Sweep GitHub App is deprecated; this keeps SSOT rules merge-safe.
+
+name: Sweep AI
+
+on:
+  issues:
+    types: [opened, edited, labeled, unlabeled]
+  issue_comment:
+    types: [created]
+  pull_request:
+    types: [opened, reopened, synchronize]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+concurrency:
+  group: sweep-ai-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-sweep-config:
+    runs-on: ubuntu-latest
+    env:
+      SWEEP_API_KEY: ${{ secrets.SWEEP_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate sweep.yaml and .sweep.yaml
+        run: |
+          python3 <<'PY'
+          import pathlib, sys
+          try:
+              import yaml
+          except ImportError:
+              import subprocess
+              subprocess.check_call([sys.executable, "-m", "pip", "install", "--quiet", "pyyaml"])
+              import yaml
+
+          root = pathlib.Path(".")
+          required = (
+              "gha_enabled", "branch", "description", "repo_intelligence",
+              "product_spec_enforcement", "agent_behavior", "rules",
+              "blocked_dirs", "include_exts", "docs",
+          )
+          a = yaml.safe_load((root / "sweep.yaml").read_text(encoding="utf-8"))
+          b = yaml.safe_load((root / ".sweep.yaml").read_text(encoding="utf-8"))
+          assert a == b, "sweep.yaml must match .sweep.yaml"
+          for k in required:
+              assert k in a, f"missing {k}"
+          assert a["agent_behavior"].get("commit_style") == "structured"
+          print("OK: Sweep config valid and files in sync")
+          PY
+
+      - name: Secret placeholder (never print value)
+        run: |
+          if [ -n "${SWEEP_API_KEY:-}" ]; then echo "SWEEP_API_KEY is set."; else echo "SWEEP_API_KEY optional."; fi
