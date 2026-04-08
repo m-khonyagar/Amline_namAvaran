@@ -136,7 +136,8 @@ sleep 5
 
 echo "=== compose: images + build ==="
 docker compose pull postgres redis minio
-docker compose build backend pdf-generator db-init minio-init
+# Long builds: log to file so a dropped SSH client does not cancel docker build
+docker compose build backend pdf-generator db-init minio-init 2>&1 | tee /tmp/amline-compose-build.log
 
 echo "=== up infra ==="
 docker compose up -d postgres redis minio
@@ -247,6 +248,9 @@ def main() -> int:
         allow_agent=False,
         look_for_keys=False,
     )
+    transport = client.get_transport()
+    if transport:
+        transport.set_keepalive(30)
     try:
         code = _run_remote(client, REMOTE_BOOTSTRAP, timeout=1800)
         if code != 0:

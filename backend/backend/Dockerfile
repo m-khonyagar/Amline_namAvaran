@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.12-slim-bookworm
 WORKDIR /app
 # Use Arvan mirror when building from networks where deb.debian.org is slow or blocked (e.g. some IR VPS).
 RUN set -eux; \
