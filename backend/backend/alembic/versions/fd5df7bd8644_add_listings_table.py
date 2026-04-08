@@ -1,7 +1,7 @@
 """add listings table
 
 Revision ID: fd5df7bd8644
-Revises: 
+Revises: 0009_merge_heads
 Create Date: 2026-04-03 04:12:54.362375
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = 'fd5df7bd8644'
-down_revision: Union[str, None] = None
+down_revision: Union[str, None] = "0009_merge_heads"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
