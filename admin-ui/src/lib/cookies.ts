@@ -5,10 +5,15 @@ export enum CookieNames {
 }
 
 export function getCookie(name: string): string | undefined {
-  return document.cookie
-    .split('; ')
-    .find((r) => r.startsWith(`${name}=`))
-    ?.split('=')[1];
+  if (typeof document === 'undefined') return undefined;
+  const row = document.cookie.split('; ').find((r) => r.startsWith(`${name}=`));
+  const raw = row?.split('=').slice(1).join('=');
+  if (raw === undefined) return undefined;
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
 }
 
 export function setCookie(name: string, value: string, days: number): void {

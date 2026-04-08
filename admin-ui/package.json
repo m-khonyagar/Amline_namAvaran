@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "vite",
     "prebuild": "node scripts/assert-safe-production-env.mjs",
+    "dev:e2e": "vite --mode e2e",
+    "dev:local": "vite --port 3005 --strictPort",
     "build": "tsc && vite build",
     "verify": "npx tsc --noEmit && vitest run",
     "preview": "vite preview",
@@ -14,7 +16,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:a11y": "playwright test accessibility-axe.spec.ts"
+    "test:a11y": "playwright test accessibility-axe.spec.ts",
+    "test:e2e:staging": "playwright test staging-admin-smoke.spec.ts --config=playwright.staging.config.ts",
+    "test:e2e:staging:all": "playwright test tests/staging-admin-smoke.spec.ts tests/staging-full-routes.spec.ts --config=playwright.staging.config.ts"
   },
   "dependencies": {
     "@sentry/react": "^8.55.1",

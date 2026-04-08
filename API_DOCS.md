@@ -4,7 +4,7 @@
 ## Base URL
 ```
 Production: https://api.amline.ir
-Staging: https://amline-backend-staging.darkube.app
+Staging (پروکسی Caddy روی admin.staging): پیش‌فرض `https://api.amline.ir` با strip مسیر `/api/v1` — یا `STAGING_API_URL` برای Darkube/سرویس دیگر
 Local: http://localhost:8080
 ```
 
