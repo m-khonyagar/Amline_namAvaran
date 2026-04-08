@@ -1,27 +1,22 @@
-import { mapAxiosLikeError } from './errorMapper';
-import { CookieNames, getCookie } from './cookies';
+import { fetchJson as coreFetchJson } from '../../packages/amline-ui-core/src/api/fetchJson'
 
-export async function fetchJson<T>(input: RequestInfo | URL, init?: RequestInit): Promise<T> {
-  const headers = new Headers(init?.headers);
-  if (!headers.has('Authorization')) {
-    const t = getCookie(CookieNames.ACCESS_TOKEN);
-    if (t) {
-      headers.set('Authorization', t.startsWith('Bearer ') ? t : `Bearer ${t}`);
-    }
-  }
-  const res = await fetch(input, {
-    ...init,
-    headers,
-    credentials: init?.credentials ?? 'include',
-  });
-  let data: unknown = {};
+function accessTokenFromCookie(): string | null {
+  if (typeof document === 'undefined') return null
+  const row = document.cookie.split('; ').find((r) => r.startsWith('access_token='))
+  if (!row) return null
+  const v = row.split('=').slice(1).join('=')
   try {
-    data = await res.json();
+    return decodeURIComponent(v)
   } catch {
-    data = {};
+    return v
   }
-  if (!res.ok) {
-    throw mapAxiosLikeError({ response: { status: res.status, data } });
+}
+
+export async function fetchJson<T>(input: string, init?: RequestInit): Promise<T> {
+  const headers = new Headers(init?.headers)
+  const tok = accessTokenFromCookie()
+  if (tok && !headers.has('Authorization')) {
+    headers.set('Authorization', tok.startsWith('Bearer ') ? tok : `Bearer ${tok}`)
   }
-  return data as T;
+  return coreFetchJson<T>(input, { ...init, headers })
 }

@@ -1,28 +1,25 @@
-import { CookieNames, removeCookie } from '../lib/cookies';
+import { CookieNames, removeCookie } from '../lib/cookies'
 
-type SessionHandler = () => void;
+type SessionExpiredHandler = () => void
 
-const handlers = new Set<SessionHandler>();
+let sessionExpiredHandler: SessionExpiredHandler | null = null
 
-export function clearAuthCookies(): void {
-  removeCookie(CookieNames.ACCESS_TOKEN);
-  removeCookie(CookieNames.REFRESH_TOKEN);
-  removeCookie(CookieNames.USER);
-}
-
-export function notifySessionExpired(): void {
-  for (const h of handlers) {
-    try {
-      h();
-    } catch {
-      /* ignore */
-    }
+/** ثبت توسط AuthProvider؛ هنگام 401 سراسری فراخوانی می‌شود. */
+export function registerSessionExpiredHandler(fn: SessionExpiredHandler): () => void {
+  sessionExpiredHandler = fn
+  return () => {
+    if (sessionExpiredHandler === fn) sessionExpiredHandler = null
   }
 }
 
-export function registerSessionExpiredHandler(cb: SessionHandler): () => void {
-  handlers.add(cb);
-  return () => {
-    handlers.delete(cb);
-  };
+export function clearAuthCookies(): void {
+  removeCookie(CookieNames.ACCESS_TOKEN)
+  removeCookie(CookieNames.REFRESH_TOKEN)
+  removeCookie(CookieNames.USER)
+}
+
+/** پاک کردن کوکی‌ها + به‌روزرسانی UI (بدون reload صفحه). */
+export function notifySessionExpired(): void {
+  clearAuthCookies()
+  sessionExpiredHandler?.()
 }

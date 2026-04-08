@@ -1,0 +1,682 @@
+{
+  "entries": [
+    {
+      "file": "amline-ui/next.config.js",
+      "line": 25,
+      "path": "/admin/:path*",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 159,
+      "path": "/admin/activity",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 152,
+      "path": "/admin/audit",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
+      "line": 292,
+      "path": "/admin/audit",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
+      "line": 345,
+      "path": "/admin/audit",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "amline-ui/lib/auth.ts",
+      "line": 56,
+      "path": "/admin/login",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "amline-ui/lib/auth.ts",
+      "line": 43,
+      "path": "/admin/otp/send",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 145,
+      "path": "/admin/roles",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 88,
+      "path": "/ads",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/components/SiteNav.tsx",
+      "line": 14,
+      "path": "/agencies",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/components/landing/LandingHome.tsx",
+      "line": 108,
+      "path": "/agencies",
+      "surface": "other_slash"
+    },
+    {
+      "file": "amline-ui/next.config.js",
+      "line": 21,
+      "path": "/api/:path*",
+      "surface": "legacy_api_prefix"
+    },
+    {
+      "file": "admin-ui/src/features/contract-wizard/components/steps/FinishStep.tsx",
+      "line": 35,
+      "path": "/api/contracts/${contractId}/pdf",
+      "surface": "legacy_api_prefix"
+    },
+    {
+      "file": "admin-ui/src/lib/api.ts",
+      "line": 3,
+      "path": "/api/v1",
+      "surface": "canonical_v1"
+    },
+    {
+      "file": "admin-ui/src/lib/apiPaths.ts",
+      "line": 5,
+      "path": "/api/v1",
+      "surface": "canonical_v1"
+    },
+    {
+      "file": "admin-ui/src/mocks/handlers.ts",
+      "line": 6,
+      "path": "/api/v1",
+      "surface": "canonical_v1"
+    },
+    {
+      "file": "admin-ui/src/lib/api.ts",
+      "line": 2,
+      "path": "/api/v1/...",
+      "surface": "canonical_v1"
+    },
+    {
+      "file": "admin-ui/src/lib/apiPaths.ts",
+      "line": 2,
+      "path": "/api/v1/...",
+      "surface": "canonical_v1"
+    },
+    {
+      "file": "amline-ui/next.config.js",
+      "line": 20,
+      "path": "/api/v1/:path*",
+      "surface": "canonical_v1"
+    },
+    {
+      "file": "amline-ui/app/billing/page.tsx",
+      "line": 29,
+      "path": "/api/v1/billing/invoice/latest",
+      "surface": "canonical_v1"
+    },
+    {
+      "file": "amline-ui/app/billing/page.tsx",
+      "line": 52,
+      "path": "/api/v1/billing/invoice/latest",
+      "surface": "canonical_v1"
+    },
+    {
+      "file": "amline-ui/app/billing/page.tsx",
+      "line": 26,
+      "path": "/api/v1/billing/me",
+      "surface": "canonical_v1"
+    },
+    {
+      "file": "amline-ui/app/billing/page.tsx",
+      "line": 49,
+      "path": "/api/v1/billing/me",
+      "surface": "canonical_v1"
+    },
+    {
+      "file": "amline-ui/app/billing/page.tsx",
+      "line": 24,
+      "path": "/api/v1/billing/plans",
+      "surface": "canonical_v1"
+    },
+    {
+      "file": "amline-ui/app/billing/page.tsx",
+      "line": 44,
+      "path": "/api/v1/billing/subscribe",
+      "surface": "canonical_v1"
+    },
+    {
+      "file": "admin-ui/src/mocks/handlers.ts",
+      "line": 125,
+      "path": "/api/v1/crm/*",
+      "surface": "canonical_v1"
+    },
+    {
+      "file": "amline-ui/next.config.js",
+      "line": 24,
+      "path": "/auth/:path*",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 113,
+      "path": "/billing",
+      "surface": "other_slash"
+    },
+    {
+      "file": "amline-ui/app/page.tsx",
+      "line": 40,
+      "path": "/billing",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/app/blog/[slug]/page.tsx",
+      "line": 101,
+      "path": "/blog",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/app/blog/[slug]/page.tsx",
+      "line": 186,
+      "path": "/blog",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/components/SiteFooter.tsx",
+      "line": 24,
+      "path": "/blog",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/components/SiteNav.tsx",
+      "line": 13,
+      "path": "/blog",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/components/landing/ChannelsSection.tsx",
+      "line": 46,
+      "path": "/blog",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/components/landing/LandingHome.tsx",
+      "line": 114,
+      "path": "/blog",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/app/blog/page.tsx",
+      "line": 87,
+      "path": "/blog/${post.slug}",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/app/blog/page.tsx",
+      "line": 100,
+      "path": "/blog/${post.slug}",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 49,
+      "path": "/contracts",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/layouts/MainLayout.tsx",
+      "line": 149,
+      "path": "/contracts",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/pages/contracts/ContractDetailPage.tsx",
+      "line": 122,
+      "path": "/contracts",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/pages/contracts/PRContractsPage.tsx",
+      "line": 79,
+      "path": "/contracts",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "amline-ui/app/contracts/[id]/page.tsx",
+      "line": 62,
+      "path": "/contracts",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "amline-ui/app/login/page.tsx",
+      "line": 47,
+      "path": "/contracts",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "amline-ui/app/login/page.tsx",
+      "line": 119,
+      "path": "/contracts",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "amline-ui/app/page.tsx",
+      "line": 24,
+      "path": "/contracts",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "amline-ui/e2e/user-wizard.spec.ts",
+      "line": 30,
+      "path": "/contracts",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/pages/contracts/ContractsPage.tsx",
+      "line": 198,
+      "path": "/contracts/${c.id}",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/pages/users/UserDetailPage.tsx",
+      "line": 198,
+      "path": "/contracts/${c.id}",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "amline-ui/app/contracts/page.tsx",
+      "line": 137,
+      "path": "/contracts/${c.id}",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "amline-ui/app/contracts/[id]/page.tsx",
+      "line": 41,
+      "path": "/contracts/${id}",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/pages/contracts/LegalReviewQueuePage.tsx",
+      "line": 85,
+      "path": "/contracts/${row.contract_id}",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "amline-ui/next.config.js",
+      "line": 22,
+      "path": "/contracts/:path*",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 69,
+      "path": "/contracts/legal-queue",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/pages/contracts/PRContractsPage.tsx",
+      "line": 61,
+      "path": "/contracts/legal-queue",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
+      "line": 283,
+      "path": "/contracts/legal-queue",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "amline-ui/app/contracts/page.tsx",
+      "line": 41,
+      "path": "/contracts/list",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 56,
+      "path": "/contracts/pr-contracts",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 62,
+      "path": "/contracts/wizard",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/pages/contracts/ContractsPage.tsx",
+      "line": 113,
+      "path": "/contracts/wizard",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/pages/contracts/LegalReviewQueuePage.tsx",
+      "line": 46,
+      "path": "/contracts/wizard",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/pages/contracts/PRContractsPage.tsx",
+      "line": 22,
+      "path": "/contracts/wizard",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
+      "line": 387,
+      "path": "/contracts/wizard",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "amline-ui/app/contracts/page.tsx",
+      "line": 67,
+      "path": "/contracts/wizard",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "amline-ui/app/page.tsx",
+      "line": 32,
+      "path": "/contracts/wizard",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "amline-ui/e2e/user-wizard.spec.ts",
+      "line": 42,
+      "path": "/contracts/wizard",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 81,
+      "path": "/crm",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/pages/crm/LeadDetailPage.tsx",
+      "line": 85,
+      "path": "/crm",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
+      "line": 274,
+      "path": "/crm",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
+      "line": 307,
+      "path": "/crm",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
+      "line": 401,
+      "path": "/crm",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/pages/crm/LeadDetailPage.tsx",
+      "line": 78,
+      "path": "/crm/${id}",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/features/crm/components/KanbanBoard.tsx",
+      "line": 121,
+      "path": "/crm/${lid}",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/App.tsx",
+      "line": 83,
+      "path": "/dashboard",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/App.tsx",
+      "line": 205,
+      "path": "/dashboard",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/components/auth/AccessDenied.tsx",
+      "line": 20,
+      "path": "/dashboard",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 38,
+      "path": "/dashboard",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/layouts/MainLayout.tsx",
+      "line": 149,
+      "path": "/dashboard",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/pages/auth/LoginPage.tsx",
+      "line": 35,
+      "path": "/dashboard",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/pages/auth/LoginPage.tsx",
+      "line": 70,
+      "path": "/dashboard",
+      "surface": "other_slash"
+    },
+    {
+      "file": "amline-ui/next.config.js",
+      "line": 23,
+      "path": "/files/:path*",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/lib/api.ts",
+      "line": 3,
+      "path": "/financials",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "amline-ui/next.config.js",
+      "line": 26,
+      "path": "/financials/:path*",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/features/contract-wizard/components/steps/CommissionStep.tsx",
+      "line": 42,
+      "path": "/financials/bank/gateway",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 138,
+      "path": "/integrations",
+      "surface": "other_slash"
+    },
+    {
+      "file": "amline-ui/next.config.js",
+      "line": 27,
+      "path": "/listings/:path*",
+      "surface": "legacy_mount"
+    },
+    {
+      "file": "admin-ui/src/App.tsx",
+      "line": 43,
+      "path": "/login",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/App.tsx",
+      "line": 73,
+      "path": "/login",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/layouts/MainLayout.tsx",
+      "line": 57,
+      "path": "/login",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/pages/settings/SettingsPage.tsx",
+      "line": 306,
+      "path": "/login",
+      "surface": "other_slash"
+    },
+    {
+      "file": "amline-ui/app/contracts/[id]/page.tsx",
+      "line": 31,
+      "path": "/login",
+      "surface": "other_slash"
+    },
+    {
+      "file": "amline-ui/app/contracts/page.tsx",
+      "line": 32,
+      "path": "/login",
+      "surface": "other_slash"
+    },
+    {
+      "file": "amline-ui/app/contracts/wizard/page.tsx",
+      "line": 21,
+      "path": "/login",
+      "surface": "other_slash"
+    },
+    {
+      "file": "amline-ui/app/page.tsx",
+      "line": 16,
+      "path": "/login",
+      "surface": "other_slash"
+    },
+    {
+      "file": "amline-ui/components/AppChrome.tsx",
+      "line": 38,
+      "path": "/login",
+      "surface": "other_slash"
+    },
+    {
+      "file": "amline-ui/components/AppChrome.tsx",
+      "line": 46,
+      "path": "/login",
+      "surface": "other_slash"
+    },
+    {
+      "file": "amline-ui/e2e/user-wizard.spec.ts",
+      "line": 22,
+      "path": "/login",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/components/SiteFooter.tsx",
+      "line": 54,
+      "path": "/miniapp",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/components/SiteNav.tsx",
+      "line": 16,
+      "path": "/miniapp",
+      "surface": "other_slash"
+    },
+    {
+      "file": "site/components/landing/ChannelsSection.tsx",
+      "line": 89,
+      "path": "/miniapp",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/components/NotificationsBell.tsx",
+      "line": 63,
+      "path": "/notifications",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 120,
+      "path": "/notifications",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
+      "line": 265,
+      "path": "/notifications",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 107,
+      "path": "/payments",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/pages/ads/AdsPage.tsx",
+      "line": 241,
+      "path": "/search/listings",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 132,
+      "path": "/settings",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 95,
+      "path": "/users",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/pages/dashboard/DashboardPage.tsx",
+      "line": 410,
+      "path": "/users",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/pages/users/UserDetailPage.tsx",
+      "line": 108,
+      "path": "/users",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/pages/users/UsersPage.tsx",
+      "line": 142,
+      "path": "/users/${u.id}",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/config/adminNav.ts",
+      "line": 101,
+      "path": "/wallets",
+      "surface": "other_slash"
+    },
+    {
+      "file": "admin-ui/src/pages/payments/PaymentsPage.tsx",
+      "line": 78,
+      "path": "/wallets",
+      "surface": "other_slash"
+    }
+  ],
+  "entry_count": 111,
+  "generator": "scripts/inventory_frontend_http_calls.py",
+  "repo_root_hint": "Amline_namAvaran",
+  "scan_roots": [
+    "amline-ui",
+    "admin-ui/src",
+    "site/app",
+    "site/components",
+    "packages/amline-ui-core/src"
+  ],
+  "sha256_prefix": "260a777fa215823f",
+  "version": 1
+}

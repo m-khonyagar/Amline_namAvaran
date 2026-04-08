@@ -1,31 +1,39 @@
-from __future__ import annotations
-
-import datetime as dt
-import enum
-import uuid
-
-from sqlalchemy import DateTime, Enum, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
-
-from app.db.base import Base, TimestampCreatedMixin, UUIDPkMixin
+from enum import Enum
 
 
-class UserRole(str, enum.Enum):
-    user = "User"
-    agent = "Agent"
-    admin = "Admin"
-    moderator = "Moderator"
+class UserRole(Enum):
+    USER = "USER"
+    CONSULTANT = "CONSULTANT"
+    EXPERT = "EXPERT"
+    ADMIN = "ADMIN"
 
 
-class User(UUIDPkMixin, TimestampCreatedMixin, Base):
-    __tablename__ = "users"
+class UserStatus(Enum):
+    ACTIVE = "ACTIVE"
+    SUSPENDED = "SUSPENDED"
+    DELETED = "DELETED"
 
-    mobile: Mapped[str] = mapped_column(String(32), unique=True, index=True)
-    national_code: Mapped[str | None] = mapped_column(String(16), nullable=True, index=True)
-    name: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    role: Mapped[UserRole] = mapped_column(Enum(UserRole, values_callable=lambda x: [e.value for e in x]), default=UserRole.user)
-    tenant_score: Mapped[int] = mapped_column(Integer, default=0)
-    referral_code: Mapped[str | None] = mapped_column(String(32), unique=True, nullable=True, index=True)
 
-    # For future: KYC timestamps, etc.
+class User:
+    def __init__(
+        self,
+        phone_number,
+        email,
+        profile_picture,
+        national_id,
+        otp,
+        status=UserStatus.ACTIVE,
+        role=UserRole.USER,
+    ):
+        self.phone_number = phone_number
+        self.email = email
+        self.profile_picture = profile_picture
+        self.national_id = national_id
+        self.otp = otp
+        self.status = status
+        self.role = role
+        self.contracts = []  # Placeholder for contracts relationship
+        self.listings = []  # Placeholder for listings relationship
 
+    def __repr__(self):
+        return f"<User {self.phone_number}, {self.email}, {self.role}, {self.status}>\nContracts: {self.contracts}\nListings: {self.listings}"

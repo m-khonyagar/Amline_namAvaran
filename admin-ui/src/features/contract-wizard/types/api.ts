@@ -36,6 +36,8 @@ export interface ContractStatusApiResponse {
   step: PRContractStep | string;
   contract_id?: string;
   type?: ContractType;
+  /** نگاشت محصول v2 — docs/STATUS_MAPPING_v2.md */
+  lifecycle_v2?: string;
 }
 
 export interface Party {

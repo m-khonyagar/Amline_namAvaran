@@ -41,8 +41,10 @@ export default defineConfig({
       stderr: 'pipe',
       env: {
         ...process.env,
+        NODE_ENV: 'development',
         NEXT_PUBLIC_DEV_PROXY_TARGET: 'http://127.0.0.1:8080',
         NEXT_PUBLIC_ENABLE_DEV_BYPASS: 'true',
+        NEXT_PUBLIC_E2E_DEV_BYPASS: 'true',
       },
     },
   ],

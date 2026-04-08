@@ -57,7 +57,9 @@ const SALE_REGISTRY: Record<PRContractStep, StepMeta> = {
 };
 
 export function getStepRegistry(contractType: ContractType): Record<PRContractStep, StepMeta> {
-  return contractType === 'PROPERTY_RENT' ? RENT_REGISTRY : SALE_REGISTRY;
+  if (contractType === 'PROPERTY_RENT') return RENT_REGISTRY;
+  /* خرید/فروش و سایر انواع v2: همان مسیر فروش تا فرم اختصاصی هر نوع تکمیل شود */
+  return SALE_REGISTRY;
 }
 
 export function getProgress(currentStep: PRContractStep): number {

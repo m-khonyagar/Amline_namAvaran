@@ -1,7 +1,10 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../../hooks/useAuth'
 import { cn } from '../../lib/cn'
+import { apiClient } from '../../lib/api'
+import { apiV1 } from '../../lib/apiPaths'
 
 type Tab = 'profile' | 'security' | 'notifications' | 'system'
 
@@ -199,7 +202,43 @@ function NotificationsTab() {
   )
 }
 
+type MetaContext = {
+  agency_scope_enabled: boolean
+  agencies: { id: string; name_fa?: string; name?: string }[]
+}
+
 function SystemTab() {
+  const { hasPermission } = useAuth()
+  const [agencyId, setAgencyId] = useState('')
+
+  useEffect(() => {
+    try {
+      setAgencyId(localStorage.getItem('amline_x_agency_id') ?? '')
+    } catch {
+      setAgencyId('')
+    }
+  }, [])
+
+  const metaQ = useQuery({
+    queryKey: ['meta-context'],
+    queryFn: async () => {
+      const res = await apiClient.get<MetaContext>(apiV1('meta/context'))
+      return res.data
+    },
+    enabled: hasPermission('listings:read'),
+  })
+
+  const persistAgency = (id: string) => {
+    const v = id.trim()
+    try {
+      if (v) localStorage.setItem('amline_x_agency_id', v)
+      else localStorage.removeItem('amline_x_agency_id')
+    } catch {
+      /* ignore */
+    }
+    setAgencyId(v)
+  }
+
   const envItems = [
     { label: 'نسخه پنل', value: '1.0.0' },
     { label: 'محیط', value: import.meta.env.MODE },
@@ -209,6 +248,37 @@ function SystemTab() {
 
   return (
     <div className="space-y-6">
+      {metaQ.data?.agency_scope_enabled ? (
+        <div className="rounded-xl border border-blue-100 bg-blue-50/80 p-4 dark:border-blue-900/40 dark:bg-blue-950/20">
+          <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-200">حوزهٔ آژانس (سرور)</h3>
+          <p className="mt-1 text-xs text-blue-800/90 dark:text-blue-300/90">
+            با فعال بودن <code className="rounded bg-white/60 px-1 dark:bg-slate-900/60">AMLINE_AGENCY_SCOPE_ENABLED</code>، هدر{' '}
+            <code className="rounded bg-white/60 px-1 dark:bg-slate-900/60">X-Agency-Id</code> روی لیست آگهی و CRM اعمال می‌شود.
+          </p>
+          <label className="mt-3 block text-xs font-medium text-blue-900 dark:text-blue-200">
+            آژانس فعال برای درخواست‌های API
+            <select
+              className="mt-1 block w-full max-w-md rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm text-gray-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+              value={agencyId}
+              onChange={(e) => persistAgency(e.target.value)}
+            >
+              <option value="">— بدون فیلتر —</option>
+              {(metaQ.data?.agencies ?? []).map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name_fa || a.name || a.id}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      ) : metaQ.isSuccess && hasPermission('listings:read') ? (
+        <p className="text-xs text-gray-500 dark:text-slate-400">
+          حوزهٔ چند آژانسی روی سرور غیرفعال است؛ در صورت نیاز{' '}
+          <code className="rounded bg-gray-100 px-1 dark:bg-slate-800">AMLINE_AGENCY_SCOPE_ENABLED=1</code> و{' '}
+          <code className="rounded bg-gray-100 px-1 dark:bg-slate-800">AMLINE_AGENCIES_JSON</code> را تنظیم کنید.
+        </p>
+      ) : null}
+
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-900">
         <table className="min-w-full text-right text-sm">
           <tbody>

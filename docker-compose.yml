@@ -85,8 +85,10 @@ services:
       dockerfile: Dockerfile
     container_name: amline-backend
     environment:
-      - AMLINE_ENV=${APP_ENV:-staging}
-      - AMLINE_DATABASE_URL=postgresql+psycopg://${POSTGRES_USER:-amline}:${POSTGRES_PASSWORD:-amline_secret}@postgres:5432/${POSTGRES_DB:-amline}
+      - AMLINE_ENV=staging
+      # FastAPI app/db/session.py reads DATABASE_URL (SQLAlchemy)
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-amline}:${POSTGRES_PASSWORD:-amline_secret}@postgres:5432/${POSTGRES_DB:-amline}
+      - AMLINE_DATABASE_URL=postgresql://${POSTGRES_USER:-amline}:${POSTGRES_PASSWORD:-amline_secret}@postgres:5432/${POSTGRES_DB:-amline}
       - AMLINE_REDIS_URL=redis://:${REDIS_PASSWORD:-amline_redis_secret}@redis:6379/0
       - AMLINE_JWT_SECRET=${JWT_SECRET:-change-me-in-production}
       - AMLINE_JWT_ISSUER=amline
@@ -96,8 +98,9 @@ services:
       - AMLINE_S3_ACCESS_KEY=${MINIO_ACCESS_KEY:-amline}
       - AMLINE_S3_SECRET_KEY=${MINIO_SECRET_KEY:-amline_minio_secret}
       - AMLINE_S3_BUCKET=amline-docs
-      - AMLINE_BOOTSTRAP_ADMIN_MOBILE=${BOOTSTRAP_ADMIN_MOBILE:-09100000000}
-      - AMLINE_CORS_ORIGINS=${CORS_ORIGINS:-}
+      - AMLINE_BOOTSTRAP_ADMIN_MOBILE=${BOOTSTRAP_ADMIN_MOBILE:-09120000000}
+      - AMLINE_METRICS_ENABLED=${AMLINE_METRICS_ENABLED:-1}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-}
     ports:
       - "8080:8000"
     depends_on:
@@ -146,14 +149,15 @@ services:
   # ==================== Frontend Applications ====================
   admin-ui:
     build:
-      context: .
-      dockerfile: admin-ui/Dockerfile
+      context: ./admin-ui
+      dockerfile: Dockerfile
+      args:
+        # برای استیجینگ عمومی: https://amline-backend-staging.darkube.app — برای لوکال خالی بگذارید تا nginx/paths نسبی
+        VITE_API_URL: ${VITE_STAGING_API_URL:-}
+        VITE_USE_MSW: ${VITE_ADMIN_USE_MSW:-false}
+        VITE_ENABLE_DEV_BYPASS: ${VITE_ADMIN_DEV_BYPASS:-false}
+        VITE_USE_CRM_API: ${VITE_ADMIN_USE_CRM_API:-true}
     container_name: amline-admin-ui
-    environment:
-      - VITE_API_BASE_URL=
-      - VITE_API_URL=
-      - VITE_USE_MSW=false
-      - VITE_ENABLE_DEV_BYPASS=false
     ports:
       - "3002:80"
     depends_on:
@@ -182,21 +186,9 @@ services:
       dockerfile: Dockerfile
     container_name: amline-site
     environment:
-      - NEXT_PUBLIC_API_BASE_URL=http://backend:8000
+      - NEXT_PUBLIC_API_BASE_URL=http://backend
     ports:
       - "3001:80"
-    depends_on:
-      - backend
-    networks:
-      - amline-network
-
-  consultant-ui:
-    build:
-      context: .
-      dockerfile: consultant-ui/Dockerfile
-    container_name: amline-consultant-ui
-    ports:
-      - "3004:80"
     depends_on:
       - backend
     networks:
@@ -222,28 +214,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
-    networks:
-      - amline-network
-
-  channel-gateway:
-    build:
-      context: ./channel-gateway
-      dockerfile: Dockerfile
-    container_name: amline-channel-gateway
-    environment:
-      - CHANNEL_GATEWAY_PORT=3090
-      - AMLINE_PUBLIC_URL=${AMLINE_PUBLIC_URL:-https://app.amline.ir}
-    ports:
-      - "3090:3090"
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "node -e \"require('http').get('http://127.0.0.1:3090/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))\"",
-        ]
-      interval: 30s
-      timeout: 5s
-      retries: 3
     networks:
       - amline-network
 
@@ -295,11 +265,269 @@ services:
     networks:
       - amline-network
 
+  # ==================== Integrations (docker compose --profile integrations) ====================
+  meilisearch:
+    image: getmeili/meilisearch:v1.11
+    container_name: amline-meilisearch
+    environment:
+      MEILI_NO_ANALYTICS: "true"
+      MEILI_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-dev_master_key}
+    ports:
+      - "7700:7700"
+    volumes:
+      - meilisearch_data:/meili_data
+    networks:
+      - amline-network
+    profiles:
+      - integrations
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: amline-n8n
+    ports:
+      - "5678:5678"
+    environment:
+      N8N_HOST: 0.0.0.0
+      N8N_PORT: 5678
+      WEBHOOK_URL: http://localhost:5678/
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - amline-network
+    profiles:
+      - integrations
+
+  thumbor:
+    image: minimalcompact/thumbor:latest
+    container_name: amline-thumbor
+    environment:
+      THUMBOR_SECURITY_KEY: ${THUMBOR_SECURITY_KEY:-amline_thumbor_dev}
+    ports:
+      - "8888:80"
+    networks:
+      - amline-network
+    profiles:
+      - integrations
+
+  metabase-db-init:
+    image: postgres:15-alpine
+    container_name: amline-metabase-db-init
+    environment:
+      PGUSER: ${POSTGRES_USER:-amline}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-amline_secret}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        until pg_isready -h postgres; do sleep 2; done
+        psql -h postgres -d postgres -tc "SELECT 1 FROM pg_database WHERE datname = 'metabase'" | grep -q 1 || psql -h postgres -d postgres -c "CREATE DATABASE metabase;"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - amline-network
+    profiles:
+      - integrations
+
+  metabase:
+    image: metabase/metabase:v0.49.23
+    container_name: amline-metabase
+    ports:
+      - "3005:3000"
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabase
+      MB_DB_PORT: 5432
+      MB_DB_USER: ${POSTGRES_USER:-amline}
+      MB_DB_PASS: ${POSTGRES_PASSWORD:-amline_secret}
+      MB_DB_HOST: postgres
+    depends_on:
+      metabase-db-init:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    networks:
+      - amline-network
+    profiles:
+      - integrations
+
+  tempo:
+    image: grafana/tempo:2.3.1
+    container_name: amline-tempo
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./docker/tempo.yaml:/etc/tempo.yaml:ro
+    ports:
+      - "3200:3200"
+    networks:
+      - amline-network
+    profiles:
+      - integrations
+
+  grafana:
+    image: grafana/grafana:10.2.3
+    container_name: amline-grafana
+    ports:
+      - "3010:3000"
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+    volumes:
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - tempo
+      - loki
+      - prometheus
+    networks:
+      - amline-network
+    profiles:
+      - integrations
+
+  loki:
+    image: grafana/loki:2.9.3
+    container_name: amline-loki
+    command: ["-config.file=/etc/loki/config.yaml"]
+    volumes:
+      - ./docker/loki-config.yaml:/etc/loki/config.yaml:ro
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+    networks:
+      - amline-network
+    profiles:
+      - integrations
+
+  promtail:
+    image: grafana/promtail:2.9.3
+    container_name: amline-promtail
+    command: ["-config.file=/etc/promtail/config.yml"]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./docker/promtail-config.yaml:/etc/promtail/config.yml:ro
+    depends_on:
+      - loki
+    networks:
+      - amline-network
+    profiles:
+      - integrations
+
+  prometheus:
+    image: prom/prometheus:v2.48.1
+    container_name: amline-prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - backend
+    networks:
+      - amline-network
+    profiles:
+      - integrations
+
+  temporal-postgresql:
+    image: postgres:15-alpine
+    container_name: amline-temporal-postgres
+    environment:
+      POSTGRES_USER: temporal
+      POSTGRES_PASSWORD: temporal
+      POSTGRES_DB: temporal
+    volumes:
+      - temporal_pg_data:/var/lib/postgresql/data
+    networks:
+      - amline-network
+    profiles:
+      - integrations
+
+  temporal:
+    image: temporalio/auto-setup:1.22.7
+    container_name: amline-temporal
+    depends_on:
+      - temporal-postgresql
+    environment:
+      - DB=postgresql
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=temporal
+      - POSTGRES_SEEDS=temporal-postgresql
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
+    ports:
+      - "7233:7233"
+      - "8233:8233"
+    networks:
+      - amline-network
+    profiles:
+      - integrations
+
+  temporal-worker:
+    build:
+      context: ./backend/backend
+      dockerfile: Dockerfile
+    container_name: amline-temporal-worker
+    command: ["python", "-m", "app.temporal.run_worker"]
+    environment:
+      AMLINE_TEMPORAL_HOST: temporal:7233
+    depends_on:
+      - temporal
+    networks:
+      - amline-network
+    profiles:
+      - integrations
+
+  ml-pricing:
+    build:
+      context: ./services/ml-pricing
+      dockerfile: Dockerfile
+    container_name: amline-ml-pricing
+    ports:
+      - "8090:8090"
+    networks:
+      - amline-network
+    profiles:
+      - integrations
+
+  synapse:
+    image: matrixdotorg/synapse:v1.115.0
+    container_name: amline-synapse
+    volumes:
+      - matrix_synapse_data:/data
+    ports:
+      - "8008:8008"
+    environment:
+      SYNAPSE_SERVER_NAME: localhost
+      SYNAPSE_REPORT_STATS: "no"
+    networks:
+      - amline-network
+    profiles:
+      - integrations
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.96.0
+    container_name: amline-otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./docker/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4318:4318"
+    depends_on:
+      - tempo
+    networks:
+      - amline-network
+    profiles:
+      - integrations
+
 volumes:
   postgres_data:
   redis_data:
   minio_data:
   rabbitmq_data:
+  meilisearch_data:
+  n8n_data:
+  temporal_pg_data:
+  loki_data:
+  matrix_synapse_data:
 
 networks:
   amline-network:

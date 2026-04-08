@@ -1,4 +1,5 @@
 /**
- * احراز هویت — پیاده‌سازی در `auth/AuthProvider.tsx`؛ این فایل فقط برای importهای پایدار `hooks/useAuth` است.
+ * احراز هویت — منطق در AuthProvider؛ این فایل فقط برای import پایدار از `hooks/useAuth` است.
+ * جزئیات: docs/HTTPONLY_AUTH.md
  */
-export { AuthProvider, useAuth, type User, type AuthContextValue } from '../auth/AuthProvider';
+export { useAuth, type User } from '../auth/AuthProvider'

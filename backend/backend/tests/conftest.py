@@ -1,50 +1,68 @@
-"""Test configuration — ensure all tables exist before any test runs."""
+"""Pytest: in-memory SQLite + schema before importing the app."""
 from __future__ import annotations
 
+import json
+import os
+import uuid
+from datetime import datetime, timezone
+
+# اجرای pytest همیشه روی SQLite حافظه‌ای (همراه StaticPool در session.py برای یکسان‌سازی اتصال‌ها).
+os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+os.environ.setdefault("AMLINE_OTP_DEBUG", "1")
+os.environ.setdefault("AMLINE_RBAC_ENFORCE", "0")
+
 import pytest
-from sqlalchemy import inspect, text
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
-from app.db import models  # noqa: F401 — registers all models with Base.metadata
 from app.db.base import Base
-from app.db.session import engine
+from app.db.session import SessionLocal, engine
+
+# قبل از create_all: بارگذاری کامل اپ تا همهٔ مدل‌ها روی metadata ثبت شوند (Linux/CI).
+import app.models  # noqa: F401
+import app.main  # noqa: F401
 
 
-def _ensure_wizard_commission_column() -> None:
-    """Lightweight migration for tests when DB predates `commission_paid_at` (create_all won't alter)."""
-    insp = inspect(engine)
-    if not insp.has_table("wizard_contracts"):
-        return
-    names = {c["name"] for c in insp.get_columns("wizard_contracts")}
-    if "commission_paid_at" in names:
-        return
-    url = str(engine.url).lower()
-    with engine.begin() as conn:
-        if "sqlite" in url:
-            conn.execute(text("ALTER TABLE wizard_contracts ADD COLUMN commission_paid_at TIMESTAMP"))
-        else:
-            conn.execute(
-                text(
-                    "ALTER TABLE wizard_contracts ADD COLUMN IF NOT EXISTS "
-                    "commission_paid_at TIMESTAMP WITH TIME ZONE"
-                )
-            )
+def _seed_minimal_rbac_geo(db: Session) -> None:
+    now = datetime.now(timezone.utc)
+    roles = [
+        ("admin", "Admin", json.dumps(["*"])),
+        ("agent", "Agent", json.dumps(["crm:read", "visits:write"])),
+        ("manager", "Manager", json.dumps(["crm:*"])),
+        ("support", "Support", json.dumps(["crm:read"])),
+    ]
+    for code, label, perms in roles:
+        db.execute(
+            text(
+                "INSERT OR IGNORE INTO rbac_roles (code, label, permissions_json, created_at) "
+                "VALUES (:c,:l,:p,:t)"
+            ),
+            {"c": code, "l": label, "p": perms, "t": now},
+        )
+    db.execute(
+        text(
+            "INSERT OR IGNORE INTO provinces (id, name_fa, sort_order, created_at) "
+            "VALUES ('08', 'تهران', 8, :t)"
+        ),
+        {"t": now},
+    )
+    db.execute(
+        text(
+            "INSERT OR IGNORE INTO cities (id, province_id, name_fa, created_at) "
+            "VALUES (:id, '08', 'تهران', :t)"
+        ),
+        {"id": str(uuid.uuid4()), "t": now},
+    )
+    db.commit()
 
 
 @pytest.fixture(scope="session", autouse=True)
-def create_tables():
-    """Create all tables (including newly added ones) before the test session."""
+def _init_sqlite_schema() -> None:
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
-    _ensure_wizard_commission_column()
-    yield
-
-
-@pytest.fixture(scope="session", autouse=True)
-def fake_redis_for_tests():
-    """In-memory fake Redis for notification streams (no daemon required)."""
-    import fakeredis
-
-    import app.services.notification_queue as nq
-
-    _fake = fakeredis.FakeRedis(decode_responses=True)
-    nq.get_redis = lambda: _fake
+    db = SessionLocal()
+    try:
+        _seed_minimal_rbac_geo(db)
+    finally:
+        db.close()
     yield

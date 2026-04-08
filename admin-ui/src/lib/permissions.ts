@@ -3,26 +3,6 @@ export function isDevBypassEnv(): boolean {
   return import.meta.env.DEV && import.meta.env.VITE_ENABLE_DEV_BYPASS !== 'false';
 }
 
-export function normalizeMobileDigits(mobile: string): string {
-  return mobile.replace(/\D/g, '').slice(0, 11);
-}
-
-function normalizeOtpDigits(otp: string): string {
-  return otp.replace(/\D/g, '').slice(0, 6);
-}
-
-/** تست استیجینگ — در باندل قابل مشاهده است. */
-export const TEST_LOGIN_MOBILE = '09120000999';
-export const TEST_LOGIN_OTP = '11111';
-export const TEST_LOGIN_ACCESS_TOKEN = 'test-fixed-otp-v1';
-
-export function isTestFixedOtpCredentials(mobile: string, otp: string): boolean {
-  return (
-    normalizeMobileDigits(mobile) === TEST_LOGIN_MOBILE &&
-    normalizeOtpDigits(otp) === TEST_LOGIN_OTP
-  );
-}
-
 /**
  * تطبیق با منطق backend: `rbac_deps._perm_match` (ستاره کامل، پیشوند با *)
  */

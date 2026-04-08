@@ -1,127 +1,71 @@
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useMemo, useState } from 'react'
-import { apiClient } from '../../lib/api'
-import { downloadCsv } from '../../lib/exportCsv'
-import { TableSkeleton } from '../../components/patterns/TableSkeleton'
-import { EmptyState } from '../../components/patterns/EmptyState'
+import { apiClient } from '@/lib/api'
+import { apiV1 } from '@/lib/apiPaths'
+import { useAuth } from '@/hooks/useAuth'
+import { Button } from '@/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
+import { Input } from '@/ui/input'
 
-interface WalletRow {
-  id: string
+interface BalanceResponse {
   user_id: string
-  mobile: string
-  balance: number
+  balance_cents: number
   currency: string
-  status: string
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  ACTIVE: 'فعال',
-  FROZEN: 'مسدود',
-  PENDING: 'در انتظار',
 }
 
 export default function WalletsPage() {
-  const [statusFilter, setStatusFilter] = useState('')
-  const { data, isLoading } = useQuery({
-    queryKey: ['admin-wallets'],
+  const { user } = useAuth()
+  const defaultUid = import.meta.env.VITE_DEV_USER_ID || user?.id || 'mock-001'
+  const [userId, setUserId] = useState(defaultUid)
+
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['wallet-balance', userId],
     queryFn: async () => {
-      const res = await apiClient.get<{ items: WalletRow[]; total: number }>('/admin/wallets')
+      const res = await apiClient.get<BalanceResponse>(apiV1(`wallets/${encodeURIComponent(userId)}/balance`))
       return res.data
     },
+    enabled: Boolean(userId),
   })
 
-  const items = data?.items ?? []
-  const filtered = useMemo(() => {
-    if (!statusFilter) return items
-    return items.filter((w) => w.status === statusFilter)
-  }, [items, statusFilter])
-
-  const exportCsv = () => {
-    downloadCsv(
-      'wallets-export.csv',
-      ['شناسه کیف', 'کاربر', 'موبایل', 'موجودی', 'واحد', 'وضعیت'],
-      filtered.map((w) => [
-        w.id,
-        w.user_id,
-        w.mobile,
-        String(w.balance),
-        w.currency,
-        STATUS_LABELS[w.status] ?? w.status,
-      ])
-    )
-  }
-
-  const fmtMoney = (n: number) =>
-    new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 0 }).format(n)
-
   return (
-    <div dir="rtl" className="space-y-6 p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">کیف پول</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
-            نمای خلاصه کیف‌های کاربران (mock ادمین).
-          </p>
-        </div>
-        <span className="text-sm text-gray-500">{filtered.length} کیف</span>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        <select
-          aria-label="فیلتر وضعیت کیف پول"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900"
-        >
-          <option value="">همه وضعیت‌ها</option>
-          {Object.entries(STATUS_LABELS).map(([k, v]) => (
-            <option key={k} value={k}>
-              {v}
-            </option>
-          ))}
-        </select>
-        <button
-          type="button"
-          onClick={exportCsv}
-          disabled={filtered.length === 0}
-          className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-40 hover:bg-emerald-700"
-        >
-          خروجی CSV
-        </button>
-      </div>
-
-      {isLoading ? (
-        <TableSkeleton rows={5} columns={6} />
-      ) : filtered.length === 0 ? (
-        <EmptyState title="کیفی یافت نشد" description="داده‌ای برای نمایش وجود ندارد یا فیلتر خالی است." />
-      ) : (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-900">
-          <table className="min-w-full text-right text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50 dark:border-slate-700 dark:bg-slate-800">
-              <tr>
-                <th className="px-4 py-3 font-medium">موبایل</th>
-                <th className="px-4 py-3 font-medium">موجودی</th>
-                <th className="px-4 py-3 font-medium">وضعیت</th>
-                <th className="px-4 py-3 font-medium">شناسه کاربر</th>
-                <th className="px-4 py-3 font-medium">شناسه کیف</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((w) => (
-                <tr key={w.id} className="border-b border-gray-100 dark:border-slate-800">
-                  <td className="px-4 py-3 font-mono text-xs">{w.mobile}</td>
-                  <td className="px-4 py-3 font-medium tabular-nums">
-                    {fmtMoney(w.balance)} {w.currency === 'IRR' ? 'ریال' : w.currency}
-                  </td>
-                  <td className="px-4 py-3">{STATUS_LABELS[w.status] ?? w.status}</td>
-                  <td className="px-4 py-3 font-mono text-xs text-gray-500">{w.user_id}</td>
-                  <td className="px-4 py-3 font-mono text-xs text-gray-500">{w.id}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+    <div dir="rtl" className="mx-auto max-w-lg space-y-4">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">کیف پول</h1>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">موجودی (ledger)</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+            شناسه کاربر
+            <Input
+              className="mt-1"
+              dir="ltr"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              placeholder="mock-001"
+            />
+          </label>
+          <Button type="button" variant="outline" onClick={() => void refetch()}>
+            به‌روزرسانی
+          </Button>
+          {isLoading && <p className="text-sm text-gray-500">در حال بارگذاری…</p>}
+          {error && (
+            <p className="text-sm text-red-600">
+              خطا در دریافت موجودی. مجوز <code className="rounded bg-gray-100 px-1">wallets:read</code> یا * لازم است.
+            </p>
+          )}
+          {data && !error && (
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-slate-600 dark:bg-slate-800">
+              <p className="text-sm text-gray-600 dark:text-slate-400">کاربر: {data.user_id}</p>
+              <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-slate-100">
+                {data.balance_cents.toLocaleString('fa-IR')}{' '}
+                <span className="text-base font-normal text-gray-600 dark:text-slate-400">{data.currency}</span>
+              </p>
+              <p className="mt-1 text-xs text-gray-500">منبع: GET /api/v1/wallets/&#123;user_id&#125;/balance</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

@@ -2,7 +2,13 @@
 // Contract Wizard — Core Types
 // ============================================================
 
-export type ContractType = 'PROPERTY_RENT' | 'BUYING_AND_SELLING';
+export type ContractType =
+  | 'PROPERTY_RENT'
+  | 'BUYING_AND_SELLING'
+  | 'EXCHANGE'
+  | 'CONSTRUCTION'
+  | 'PRE_SALE'
+  | 'LEASE_TO_OWN';
 
 export type ContractRole = 'PARTY' | 'WITNESS' | 'SCRIBE';
 

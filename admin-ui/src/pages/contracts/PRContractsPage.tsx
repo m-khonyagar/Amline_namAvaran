@@ -1,93 +1,85 @@
-import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
-import { apiClient } from '../../lib/api'
-import { EmptyState } from '../../components/patterns/EmptyState'
-import { TableSkeleton } from '../../components/patterns/TableSkeleton'
-
-interface PRContractRow {
-  id: string
-  title?: string
-  status?: string
-  created_at?: string
-}
+import { Link } from 'react-router-dom';
+import { ArrowLeft, FileText, ListChecks, PenLine } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function PRContractsPage() {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['admin-pr-contracts-list'],
-    queryFn: async () => {
-      const res = await apiClient.get<{
-        items: PRContractRow[]
-        total: number
-      }>('/admin/pr-contracts/list')
-      return res.data
-    },
-  })
-
-  if (isLoading) {
-    return (
-      <div className="space-y-4 p-6">
-        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">قراردادهای PR</h1>
-        <TableSkeleton rows={5} columns={4} />
-      </div>
-    )
-  }
-
-  if (isError) {
-    return (
-      <div className="p-6">
-        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">قراردادهای PR</h1>
-        <p className="mt-4 text-red-600 dark:text-red-400">خطا در بارگذاری لیست. اتصال به API یا dev-mock را بررسی کنید.</p>
-      </div>
-    )
-  }
-
-  const items = data?.items ?? []
-
+  const { hasPermission } = useAuth();
+  const canCreate = hasPermission('contracts:write');
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">قراردادهای PR</h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            مسیر Hamgit قدیمی (<code className="rounded bg-slate-100 px-1 dark:bg-slate-800">/admin/pr-contracts/*</code>)؛
-            در این نسخه ابتدا لیست و هم‌ترازی mock انجام شده است.
-          </p>
-        </div>
+    <div dir="rtl" className="mx-auto max-w-3xl space-y-8 p-4 sm:p-6">
+      <div>
+        <p className="amline-page-eyebrow mb-2">قرارداد</p>
+        <h1 className="amline-display text-2xl md:text-3xl">رهن و اجاره</h1>
+        <p className="amline-body mt-3">
+          قراردادهای نوع رهن و اجاره (PROPERTY_RENT) را از اینجا مدیریت کنید: ثبت جدید، لیست و صف
+          بررسی حقوقی.
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {canCreate ? (
+          <Link
+            to="/contracts/wizard"
+            className="group flex flex-col rounded-[var(--amline-radius-lg)] border border-[var(--amline-border)] bg-[var(--amline-surface)] p-5 shadow-[var(--amline-shadow-sm)] transition-all hover:border-[var(--amline-primary)]/35 hover:shadow-[var(--amline-shadow-md)] dark:border-slate-700"
+          >
+            <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-amline-md bg-[var(--amline-primary-muted)] text-[var(--amline-primary)]">
+              <PenLine className="h-5 w-5" strokeWidth={2} aria-hidden />
+            </span>
+            <span className="font-semibold text-[var(--amline-fg)]">قرارداد جدید</span>
+            <span className="amline-caption mt-1 flex-1">شروع ویزارد رهن و اجاره</span>
+            <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[var(--amline-primary)]">
+              ادامه
+              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" aria-hidden />
+            </span>
+          </Link>
+        ) : (
+          <div className="flex flex-col rounded-[var(--amline-radius-lg)] border border-dashed border-[var(--amline-border)] bg-[var(--amline-surface-muted)]/50 p-5 dark:border-slate-600">
+            <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-amline-md bg-slate-500/10 text-[var(--amline-fg-muted)]">
+              <PenLine className="h-5 w-5" strokeWidth={2} aria-hidden />
+            </span>
+            <span className="font-semibold text-[var(--amline-fg-muted)]">قرارداد جدید</span>
+            <span className="amline-caption mt-1">برای ثبت قرارداد به مجوز «contracts:write» نیاز دارید.</span>
+          </div>
+        )}
+
         <Link
-          to="/contracts/wizard"
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          to="/contracts?type=PROPERTY_RENT"
+          className="group flex flex-col rounded-[var(--amline-radius-lg)] border border-[var(--amline-border)] bg-[var(--amline-surface)] p-5 shadow-[var(--amline-shadow-sm)] transition-all hover:border-[var(--amline-primary)]/35 hover:shadow-[var(--amline-shadow-md)] dark:border-slate-700"
         >
-          قرارداد جدید (ویزارد)
+          <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-amline-md bg-slate-500/10 text-slate-700 dark:text-slate-200">
+            <ListChecks className="h-5 w-5" strokeWidth={2} aria-hidden />
+          </span>
+          <span className="font-semibold text-[var(--amline-fg)]">لیست قراردادها</span>
+          <span className="amline-caption mt-1 flex-1">فقط قراردادهای رهن و اجاره</span>
+          <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[var(--amline-primary)]">
+            مشاهده لیست
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" aria-hidden />
+          </span>
+        </Link>
+
+        <Link
+          to="/contracts/legal-queue"
+          className="group flex flex-col rounded-[var(--amline-radius-lg)] border border-[var(--amline-border)] bg-[var(--amline-surface)] p-5 shadow-[var(--amline-shadow-sm)] transition-all hover:border-[var(--amline-primary)]/35 hover:shadow-[var(--amline-shadow-md)] dark:border-slate-700 sm:col-span-2"
+        >
+          <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-amline-md bg-amber-500/10 text-amber-800 dark:text-amber-200">
+            <FileText className="h-5 w-5" strokeWidth={2} aria-hidden />
+          </span>
+          <span className="font-semibold text-[var(--amline-fg)]">صف حقوقی</span>
+          <span className="amline-caption mt-1">
+            بررسی و تأیید قراردادها توسط تیم حقوقی (نیاز به مجوز جداگانه)
+          </span>
+          <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[var(--amline-primary)]">
+            رفتن به صف
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" aria-hidden />
+          </span>
         </Link>
       </div>
 
-      {items.length === 0 ? (
-        <EmptyState
-          title="قرارداد PR ثبت نشده"
-          description="با backend کامل Hamgit یا دادهٔ نمونه در dev-mock می‌توانید ردیف اضافه کنید."
-        />
-      ) : (
-        <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
-          <table className="min-w-full text-right text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-900">
-              <tr>
-                <th className="px-4 py-2 font-medium">شناسه</th>
-                <th className="px-4 py-2 font-medium">عنوان</th>
-                <th className="px-4 py-2 font-medium">وضعیت</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((row) => (
-                <tr key={row.id} className="border-t border-slate-200 dark:border-slate-700">
-                  <td className="px-4 py-2 font-mono text-xs">{row.id}</td>
-                  <td className="px-4 py-2">{row.title ?? '—'}</td>
-                  <td className="px-4 py-2">{row.status ?? '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <p className="amline-caption text-center">
+        <Link to="/contracts" className="text-[var(--amline-primary)] underline-offset-2 hover:underline">
+          همه انواع قرارداد
+        </Link>
+      </p>
     </div>
-  )
+  );
 }
