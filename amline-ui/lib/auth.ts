@@ -1,67 +1,63 @@
-import { CookieNames, getCookie, removeCookie, setCookie } from './cookies';
-import { fetchJson } from './fetchJson';
+import { fetchJson } from './fetchJson'
 
-export interface AuthUser {
-  id: string;
-  mobile: string;
-  full_name?: string;
-  role: string;
-  permissions: string[];
+const ACCESS = 'access_token'
+const REFRESH = 'refresh_token'
+
+function setCookie(name: string, value: string, days: number) {
+  if (typeof document === 'undefined') return
+  const maxAge = days * 24 * 60 * 60
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; SameSite=Lax`
 }
 
-/** کانون تست لوکال — هم‌تراز با dev-mock-api و بک‌اند. */
-export const DEV_FIXED_TEST_MOBILE = '09100000000';
-export const DEV_FIXED_TEST_OTP = '11111';
-
-export function isDevBypassEnabled(): boolean {
-  return (
-    process.env.NODE_ENV === 'development' &&
-    process.env.NEXT_PUBLIC_ENABLE_DEV_BYPASS === 'true'
-  );
+function removeCookie(name: string) {
+  if (typeof document === 'undefined') return
+  document.cookie = `${name}=; path=/; max-age=0`
 }
 
 export function hasAccessToken(): boolean {
-  return Boolean(getCookie(CookieNames.ACCESS_TOKEN));
+  if (typeof document === 'undefined') return false
+  return document.cookie.split('; ').some((r) => r.startsWith(`${ACCESS}=`))
+}
+
+export function logout(): void {
+  removeCookie(ACCESS)
+  removeCookie(REFRESH)
+}
+
+export function isDevBypassEnabled(): boolean {
+  if (process.env.NEXT_PUBLIC_ENABLE_DEV_BYPASS !== 'true') return false
+  if (process.env.NODE_ENV === 'production') return false
+  // Playwright گاهی NODE_ENV والد را `test` می‌گذارد؛ سرور Next آن را به ارث می‌برد.
+  return (
+    process.env.NODE_ENV === 'development' ||
+    process.env.NODE_ENV === 'test' ||
+    process.env.NEXT_PUBLIC_E2E_DEV_BYPASS === 'true'
+  )
+}
+
+export async function devLogin(): Promise<void> {
+  setCookie(ACCESS, 'dev-token-12345', 1)
 }
 
 export async function sendOtp(mobile: string): Promise<void> {
-  await fetchJson('/admin/otp/send', {
+  await fetchJson<unknown>('/admin/otp/send', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ mobile }),
-  });
+  })
 }
 
-export async function loginWithOtp(mobile: string, otp: string): Promise<AuthUser> {
-  const payload = await fetchJson<{ access_token?: string; refresh_token?: string }>('/admin/login', {
+interface LoginResponse {
+  access_token?: string
+  refresh_token?: string
+}
+
+export async function loginWithOtp(mobile: string, otp: string): Promise<void> {
+  const data = await fetchJson<LoginResponse>('/admin/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ mobile, otp }),
-  });
-
-  if (payload.access_token) setCookie(CookieNames.ACCESS_TOKEN, payload.access_token, 1);
-  if (payload.refresh_token) setCookie(CookieNames.REFRESH_TOKEN, payload.refresh_token, 30);
-
-  const me = await fetchJson<AuthUser>('/auth/me');
-  setCookie(CookieNames.USER, JSON.stringify(me), 1);
-  return me;
-}
-
-export function devLogin(): AuthUser {
-  const mockUser: AuthUser = {
-    id: 'dev-user-001',
-    mobile: DEV_FIXED_TEST_MOBILE,
-    full_name: 'کاربر آزمایشی',
-    role: 'user',
-    permissions: ['contracts:read', 'contracts:write'],
-  };
-  setCookie(CookieNames.ACCESS_TOKEN, 'dev-token-12345', 1);
-  setCookie(CookieNames.USER, JSON.stringify(mockUser), 1);
-  return mockUser;
-}
-
-export function logout() {
-  removeCookie(CookieNames.ACCESS_TOKEN);
-  removeCookie(CookieNames.REFRESH_TOKEN);
-  removeCookie(CookieNames.USER);
+  })
+  if (data.access_token) setCookie(ACCESS, data.access_token, 1)
+  if (data.refresh_token) setCookie(REFRESH, data.refresh_token, 30)
 }

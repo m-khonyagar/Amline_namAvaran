@@ -1,12 +1,14 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { BrowserRouter } from 'react-router-dom'
-import { I18nProvider } from './contexts/I18nContext'
-import { AuthProvider } from './hooks/useAuth'
-import { initOptionalSentry } from './lib/optionalSentry'
 import App from './App'
+import { AuthProvider } from './auth/AuthProvider'
+import { initPosthog } from './lib/posthog'
 import './index.css'
+
+initPosthog()
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,17 +32,17 @@ async function enableMocking() {
 }
 
 enableMocking().then(() => {
-  initOptionalSentry()
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
-        <I18nProvider>
-          <BrowserRouter>
-            <AuthProvider>
-              <App />
-            </AuthProvider>
-          </BrowserRouter>
-        </I18nProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </BrowserRouter>
+        {import.meta.env.DEV ? (
+          <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
+        ) : null}
       </QueryClientProvider>
     </React.StrictMode>,
   )

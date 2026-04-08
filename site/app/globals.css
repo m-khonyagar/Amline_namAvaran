@@ -1,18 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap');
-@import '../../packages/amline-ui-core/amline-tokens.css';
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-html {
-  scroll-behavior: smooth;
-  direction: rtl;
+:root {
+  --brand: #2563eb;
+  --brand-mid: #0891b2;
 }
 
+html {
+  scroll-behavior: smooth;
+}
 body {
-  font-family: 'Vazirmatn', 'Vazir', 'Tahoma', system-ui, sans-serif;
-  background-color: var(--amline-bg);
-  color: var(--amline-fg);
-  -webkit-text-size-adjust: 100%;
+  font-family: 'Vazirmatn', system-ui, sans-serif;
+}
+::selection {
+  background: rgba(34, 211, 238, 0.35);
+  color: #fff;
 }

@@ -1,0 +1,89 @@
+{
+  "name": "Amline webhook fan-out",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "amline-events",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "Webhook",
+      "name": "AmlineWebhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "amline-events"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body.event }}",
+              "operation": "equals",
+              "value2": "crm.lead.created"
+            }
+          ]
+        }
+      },
+      "id": "IfLead",
+      "name": "IsLead",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [480, 200]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "note",
+              "value": "=Lead {{ $json.body.payload.lead_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "SetLead",
+      "name": "HandleLead",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [720, 120]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a2",
+              "name": "note",
+              "value": "=Other event: {{ $json.body.event }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "SetOther",
+      "name": "HandleOther",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [720, 320]
+    }
+  ],
+  "connections": {
+    "AmlineWebhook": {
+      "main": [[{ "node": "IsLead", "type": "main", "index": 0 }]]
+    },
+    "IsLead": {
+      "main": [
+        [{ "node": "HandleLead", "type": "main", "index": 0 }],
+        [{ "node": "HandleOther", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}

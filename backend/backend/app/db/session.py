@@ -1,22 +1,31 @@
-from __future__ import annotations
+import os
+from collections.abc import Generator
+from pathlib import Path
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import StaticPool
 
-from app.core.config import settings
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/amline.db")
 
-_url = settings.database_url
-_kwargs: dict = {"pool_pre_ping": True}
+if DATABASE_URL.startswith("sqlite"):
+    _sqlite_path = DATABASE_URL.replace("sqlite:///", "", 1)
+    if _sqlite_path != ":memory:" and not _sqlite_path.startswith(":memory:"):
+        Path(_sqlite_path).parent.mkdir(parents=True, exist_ok=True)
 
-# SQLite needs check_same_thread=False for FastAPI
-if _url.startswith("sqlite"):
-    _kwargs["connect_args"] = {"check_same_thread": False}
+_connect_args = {}
+_engine_kwargs: dict = {}
+if DATABASE_URL.startswith("sqlite"):
+    _connect_args = {"check_same_thread": False}
+    # یک DB واقعاً مشترک برای همهٔ اتصال‌ها (وگرنه create_all و get_db روی :memory: جدا می‌افتند)
+    if ":memory:" in DATABASE_URL:
+        _engine_kwargs["poolclass"] = StaticPool
 
-engine = create_engine(_url, **_kwargs)
-SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+engine = create_engine(DATABASE_URL, connect_args=_connect_args, **_engine_kwargs)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def get_db():
+def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
     try:
         yield db

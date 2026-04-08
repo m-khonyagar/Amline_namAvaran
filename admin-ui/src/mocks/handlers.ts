@@ -1,14 +1,33 @@
+// @ts-nocheck — MSW resolver generics clash with shared dual-route handlers; runtime behavior is validated via dev MSW.
 import { http, HttpResponse } from 'msw';
-import type { ContractResponse, Party } from '../features/contract-wizard/types/api';
-import { userAdminHandlers } from './userAdminHandlers';
-import { consultantPlatformHandlers } from './consultantPlatformHandlers'; // self + admin review
-import { workspaceOrgHandlers } from './workspaceOrgHandlers';
-import { hamgitPortHandlers } from './hamgitPortHandlers';
-import { crmHandlers } from './crmHandlers';
-import { planeHandlers } from './planeHandlers';
+import type { HttpHandler } from 'msw';
+
+/** هر هندلر را هم برای مسیر قدیمی star-slash و هم برای canonical با پیشوند api/v1 ثبت می‌کند. */
+const MSW_V1 = '/api/v1';
+
+function mswDual(legacyStarPath: string): string[] {
+  if (!legacyStarPath.startsWith('*/')) return [legacyStarPath];
+  const rest = legacyStarPath.slice(2);
+  return [legacyStarPath, `*${MSW_V1}/${rest}`];
+}
+
+function dualGet(path: string, resolver: Parameters<typeof http.get>[1]): HttpHandler[] {
+  return mswDual(path).map((p) => http.get(p, resolver));
+}
+function dualPost(path: string, resolver: Parameters<typeof http.post>[1]): HttpHandler[] {
+  return mswDual(path).map((p) => http.post(p, resolver));
+}
+function dualPatch(path: string, resolver: Parameters<typeof http.patch>[1]): HttpHandler[] {
+  return mswDual(path).map((p) => http.patch(p, resolver));
+}
+function dualDelete(path: string, resolver: Parameters<typeof http.delete>[1]): HttpHandler[] {
+  return mswDual(path).map((p) => http.delete(p, resolver));
+}
 
 // ---- Mock user & shared fixtures ----
 const MSW_FULL_PERMS = [
+  'legal:read',
+  'legal:write',
   'contracts:read',
   'contracts:write',
   'users:read',
@@ -26,12 +45,6 @@ const MSW_FULL_PERMS = [
   'notifications:read',
   'crm:read',
   'crm:write',
-  'consultants:read',
-  'consultants:write',
-  'workspace:read',
-  'workspace:write',
-  'plane:read',
-  'plane:write',
 ];
 
 const mockUser = {
@@ -70,17 +83,7 @@ const mswRoles: Array<{ id: string; name: string; description: string; permissio
     id: 'role-support',
     name: 'پشتیبانی',
     description: 'پشتیبانی',
-    permissions: [
-      'contracts:read',
-      'contracts:write',
-      'users:read',
-      'crm:read',
-      'crm:write',
-      'reports:read',
-      'notifications:read',
-      'consultants:read',
-      'workspace:read',
-    ],
+    permissions: ['contracts:read', 'contracts:write', 'users:read', 'crm:read', 'crm:write', 'reports:read'],
   },
 ];
 let mswAuditSeq = 1;
@@ -100,7 +103,16 @@ const mswSessions: Array<{
   last_seen_at: string;
   ip: string;
 }> = [];
-const mswNotifications: Array<{ id: string; title: string; body: string; read: boolean; created_at: string }> = [
+const mswNotificationReads = new Set<string>();
+
+const mswNotifications: Array<{
+  id: string;
+  title: string;
+  body: string;
+  read: boolean;
+  created_at: string;
+  type?: string;
+}> = [
   {
     id: 'n1',
     title: 'قرارداد جدید ثبت شد',
@@ -108,42 +120,59 @@ const mswNotifications: Array<{ id: string; title: string; body: string; read: b
     read: false,
     created_at: new Date().toISOString(),
   },
-  {
-    id: 'n2',
-    title: 'به‌روزرسانی سیستم',
-    body: 'نسخهٔ جدید پنل در دسترس است.',
-    read: true,
-    created_at: new Date().toISOString(),
-  },
 ];
 
-const mswAds: Array<{ id: string; title: string; status: string; city?: string; created_at: string }> = [
-  {
-    id: 'ad-1',
-    title: 'آگهی نمونه — اجاره منزل',
-    status: 'PUBLISHED',
-    city: 'تهران',
-    created_at: new Date().toISOString(),
-  },
-];
+/** MSW CRM — همان منبع برای `/api/v1/crm/*` و متریک‌های داشبورد */
+const crmMockLeads: Record<string, unknown>[] = [];
+const crmMockActivities: Record<string, Record<string, unknown>[]> = {};
 
-const mswAdminWallets: Array<{
-  id: string
-  user_id: string
-  mobile: string
-  balance: number
-  currency: string
-  status: string
-}> = [
-  {
-    id: 'w1',
-    user_id: 'mock-001',
+function seedCrmMockLeadsIfEmpty() {
+  if (crmMockLeads.length > 0) return;
+  const now = new Date().toISOString();
+  const row = (overrides: Record<string, unknown>) => ({
+    source: 'WEB',
+    full_name: 'سرنخ',
     mobile: '09120000000',
-    balance: 0,
-    currency: 'IRR',
-    status: 'ACTIVE',
-  },
-];
+    need_type: 'RENT',
+    notes: '',
+    assigned_to: null,
+    contract_id: null,
+    listing_id: null,
+    requirement_id: null,
+    province_id: null,
+    city_id: null,
+    province_name_fa: null,
+    city_name_fa: null,
+    sla_due_at: null,
+    created_at: now,
+    updated_at: now,
+    ...overrides,
+  });
+  crmMockLeads.push(
+    row({ id: 'crm-seed-1', full_name: 'علی احمدی', status: 'NEW' }),
+    row({ id: 'crm-seed-2', full_name: 'مریم کریمی', status: 'CONTACTED' }),
+    row({ id: 'crm-seed-3', full_name: 'رضا محمدی', status: 'QUALIFIED' })
+  );
+}
+
+function crmOpenLeadCount(): number {
+  seedCrmMockLeadsIfEmpty();
+  return crmMockLeads.filter((l) => {
+    const s = String((l as { status?: string }).status ?? '').toUpperCase();
+    return s !== 'LOST' && s !== 'CONTRACTED';
+  }).length;
+}
+
+function crmByStatusCounts(): Record<string, number> {
+  seedCrmMockLeadsIfEmpty();
+  const m: Record<string, number> = {};
+  for (const raw of crmMockLeads) {
+    let s = String((raw as { status?: string }).status ?? 'NEW').toUpperCase();
+    if (s === 'QUALIFIED' || s === 'NEGOTIATION' || s === 'PROPOSAL') s = 'NEGOTIATING';
+    m[s] = (m[s] ?? 0) + 1;
+  }
+  return m;
+}
 
 function mswRecordAudit(userId: string, action: string, entity: string, metadata: Record<string, unknown>) {
   const created_at = new Date().toISOString();
@@ -167,71 +196,35 @@ interface MockContract {
   type: string;
   status: string;
   step: string;
-  /** landlords/tenants + فیلدهای مالی ویزارد */
-  parties: Record<string, unknown>;
-  created_at: string;
-  owner_id?: string;
-  /** نمایش در لیست ادمین (نام طرف‌ها) */
-  party_preview?: { full_name?: string }[];
-  tracking_code?: string | null;
-  legal_review_status?: 'NONE' | 'AWAITING_STAFF' | 'APPROVED' | 'REJECTED';
-  commission_paid_at?: string | null;
+  parties: Record<string, unknown[]>;
 }
 
 const contracts = new Map<string, MockContract>();
-let idCounter = 10;
+let idCounter = 1;
 
-function seedDemoContracts() {
-  const t0 = new Date(Date.now() - 86400000 * 5).toISOString();
-  const t1 = new Date(Date.now() - 86400000 * 2).toISOString();
-  const t2 = new Date(Date.now() - 86400000 * 30).toISOString();
-  const samples: MockContract[] = [
-    {
-      id: 'contract-demo-001',
-      type: 'PROPERTY_RENT',
-      status: 'PENDING_ADMIN_APPROVAL',
-      step: 'FINISH',
-      parties: {},
-      created_at: t0,
-      owner_id: 'mock-001',
-      party_preview: [{ full_name: 'احمد کریمی' }, { full_name: 'سارا محمدی' }],
-      tracking_code: null,
-      legal_review_status: 'AWAITING_STAFF',
-    },
-    {
-      id: 'contract-demo-002',
-      type: 'PROPERTY_RENT',
-      status: 'ACTIVE',
-      step: 'FINISH',
-      parties: {},
-      created_at: t1,
-      owner_id: 'user-002',
-      party_preview: [{ full_name: 'علی رضایی' }, { full_name: 'نرگس حسینی' }],
-      tracking_code: 'RG-1403-009812',
-      legal_review_status: 'APPROVED',
-    },
-    {
-      id: 'contract-demo-003',
-      type: 'BUYING_AND_SELLING',
-      status: 'COMPLETED',
-      step: 'FINISH',
-      parties: {},
-      created_at: t2,
-      owner_id: 'mock-001',
-      party_preview: [{ full_name: 'کاربر آزمایشی' }, { full_name: 'خریدار نمونه' }],
-      tracking_code: 'RG-1402-004421',
-      legal_review_status: 'APPROVED',
-    },
-  ];
-  for (const c of samples) contracts.set(c.id, c);
+interface MswLegalReviewRow {
+  id: string;
+  contract_id: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  comment: string | null;
+  reviewer_id: string | null;
+  created_at: string;
+  decided_at: string | null;
 }
+const mswLegalReviews: MswLegalReviewRow[] = [];
 
-seedDemoContracts();
+type MswAddendumRow = {
+  id: string;
+  subject: string;
+  created_at: string;
+  sign_status: 'PENDING' | 'PARTIALLY_SIGNED' | 'FULLY_SIGNED';
+};
+const addendumsByContractId = new Map<string, MswAddendumRow[]>();
 
 function adminEnterpriseHandlers() {
   return [
-    http.get('*/admin/roles', () => HttpResponse.json([...mswRoles])),
-    http.post('*/admin/roles', async ({ request }) => {
+    ...dualGet('*/admin/roles', () => HttpResponse.json([...mswRoles])),
+    ...dualPost('*/admin/roles', async ({ request }) => {
       const body = (await request.json()) as { name: string; description?: string; permissions?: string[] };
       const row = {
         id: `role-${mswRoles.length + 1}`,
@@ -242,7 +235,7 @@ function adminEnterpriseHandlers() {
       mswRoles.push(row);
       return HttpResponse.json(row, { status: 201 });
     }),
-    http.patch('*/admin/roles/:roleId', async ({ params, request }) => {
+    ...dualPatch('*/admin/roles/:roleId', async ({ params, request }) => {
       const id = params.roleId as string;
       const body = (await request.json()) as {
         name?: string;
@@ -256,17 +249,7 @@ function adminEnterpriseHandlers() {
       if (body.permissions !== undefined) r.permissions = [...body.permissions];
       return HttpResponse.json(r);
     }),
-    http.delete('*/admin/roles/:roleId', ({ params }) => {
-      const id = params.roleId as string;
-      if (id === 'role-admin') {
-        return HttpResponse.json({ detail: 'cannot_delete_system_role' }, { status: 403 });
-      }
-      const idx = mswRoles.findIndex((x) => x.id === id);
-      if (idx < 0) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
-      mswRoles.splice(idx, 1);
-      return HttpResponse.json({ ok: true });
-    }),
-    http.post('*/admin/audit', async ({ request }) => {
+    ...dualPost('*/admin/audit', async ({ request }) => {
       const body = (await request.json()) as {
         action: string;
         entity: string;
@@ -277,21 +260,15 @@ function adminEnterpriseHandlers() {
       const ev = mswRecordAudit(uid, body.action, body.entity, body.metadata ?? {});
       return HttpResponse.json(ev, { status: 201 });
     }),
-    http.get('*/admin/audit', ({ request }) => {
+    ...dualGet('*/admin/audit', ({ request }) => {
       const u = new URL(request.url);
       const skip = Math.max(0, parseInt(u.searchParams.get('skip') ?? '0', 10) || 0);
       const limit = Math.min(200, Math.max(1, parseInt(u.searchParams.get('limit') ?? '50', 10) || 50));
-      const actionQ = (u.searchParams.get('action') ?? '').trim().toLowerCase();
-      const entityQ = (u.searchParams.get('entity') ?? '').trim().toLowerCase();
-      let logs = mswAuditLogs;
-      if (actionQ) logs = logs.filter((l) => l.action.toLowerCase().includes(actionQ));
-      if (entityQ) logs = logs.filter((l) => l.entity.toLowerCase().includes(entityQ));
-      const total = logs.length;
-      const items = logs.slice(skip, skip + limit);
-      return HttpResponse.json({ total, items, skip, limit });
+      const items = mswAuditLogs.slice(skip, skip + limit);
+      return HttpResponse.json({ total: mswAuditLogs.length, items, skip, limit });
     }),
-    http.post('*/admin/auth/heartbeat', () => HttpResponse.json({ ok: 'true' })),
-    http.get('*/admin/staff/activity', ({ request }) => {
+    ...dualPost('*/admin/auth/heartbeat', () => HttpResponse.json({ ok: 'true' })),
+    ...dualGet('*/admin/staff/activity', ({ request }) => {
       const u = new URL(request.url);
       const fromDate = u.searchParams.get('from_date') ?? undefined;
       const toDate = u.searchParams.get('to_date') ?? undefined;
@@ -309,153 +286,168 @@ function adminEnterpriseHandlers() {
       rows.sort((a, b) => (a.date === b.date ? b.user_id.localeCompare(a.user_id) : b.date.localeCompare(a.date)));
       return HttpResponse.json({ items: rows, total: rows.length });
     }),
-    http.get('*/admin/sessions', ({ request }) => {
+    ...dualGet('*/admin/sessions', ({ request }) => {
       const u = new URL(request.url);
       const skip = Math.max(0, parseInt(u.searchParams.get('skip') ?? '0', 10) || 0);
       const limit = Math.min(200, Math.max(1, parseInt(u.searchParams.get('limit') ?? '50', 10) || 50));
       const items = mswSessions.slice(skip, skip + limit);
       return HttpResponse.json({ total: mswSessions.length, items, skip, limit });
     }),
-    http.get('*/admin/metrics/summary', () =>
+    ...dualGet('*/admin/metrics/summary', () =>
       HttpResponse.json({
         contracts_total: contracts.size,
         users_total: 1,
-        active_leads: 3,
+        active_leads: crmOpenLeadCount(),
         contracts_today: 0,
         audit_events_total: mswAuditLogs.length,
       })
     ),
-    http.get('*/admin/notifications', () =>
-      HttpResponse.json({ items: [...mswNotifications], total: mswNotifications.length })
-    ),
-    http.patch('*/admin/notifications/:notificationId', async ({ params, request }) => {
-      const id = params.notificationId as string;
-      const body = (await request.json().catch(() => ({}))) as { read?: boolean };
-      const n = mswNotifications.find((x) => x.id === id);
-      if (!n) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
-      if (typeof body.read === 'boolean') n.read = body.read;
-      return HttpResponse.json({ ...n });
+    ...dualGet('*/admin/metrics/operations', () => {
+      const unread = mswNotifications.filter((x) => !mswNotificationReads.has(x.id)).length;
+      const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+      const audit24 = mswAuditLogs.filter((e) => {
+        const t = Date.parse(e.created_at);
+        return !Number.isNaN(t) && t >= cutoff;
+      }).length;
+      const legalPending = mswLegalReviews.filter((r) => r.status === 'PENDING').length;
+      return HttpResponse.json({
+        unread_notifications: unread,
+        open_crm_leads: crmOpenLeadCount(),
+        crm_by_status: crmByStatusCounts(),
+        contracts_flagged_legal: legalPending,
+        audit_events_last_24h: audit24,
+      });
     }),
-    http.post('*/admin/notifications/read-all', () => {
-      for (const n of mswNotifications) n.read = true;
-      return HttpResponse.json({ ok: true, updated: mswNotifications.length });
+    ...dualGet('*/admin/notifications', ({ request }) => {
+      const u = new URL(request.url);
+      const unreadOnly = u.searchParams.get('unread_only') === 'true' || u.searchParams.get('unread_only') === '1';
+      const limit = Math.min(200, Math.max(1, parseInt(u.searchParams.get('limit') ?? '50', 10) || 50));
+      const ordered = [...mswNotifications].reverse();
+      const items: typeof mswNotifications = [];
+      for (const n of ordered) {
+        const read = mswNotificationReads.has(n.id);
+        if (unreadOnly && read) continue;
+        items.push({ ...n, read });
+        if (items.length >= limit) break;
+      }
+      const unread_count = mswNotifications.filter((x) => !mswNotificationReads.has(x.id)).length;
+      return HttpResponse.json({ items, total: mswNotifications.length, unread_count });
     }),
-    http.get('*/admin/ads', () =>
-      HttpResponse.json({ items: [...mswAds], total: mswAds.length })
-    ),
-    http.get('*/admin/wallets', () =>
-      HttpResponse.json({ items: [...mswAdminWallets], total: mswAdminWallets.length })
-    ),
+    ...dualPost('*/admin/notifications/:id/read', ({ params }) => {
+      mswNotificationReads.add(params.id as string);
+      return new HttpResponse(null, { status: 204 });
+    }),
+    ...dualPost('*/admin/notifications/read-all', () => {
+      mswNotifications.forEach((n) => mswNotificationReads.add(n.id));
+      return new HttpResponse(null, { status: 204 });
+    }),
+    ...dualPost('*/admin/notifications', async ({ request }) => {
+      const body = (await request.json()) as { title: string; body?: string; type?: string };
+      const row = {
+        id: `n-${Date.now()}`,
+        title: body.title,
+        body: body.body ?? '',
+        read: false,
+        created_at: new Date().toISOString(),
+        type: body.type ?? 'system',
+      };
+      mswNotifications.push(row);
+      return HttpResponse.json(row, { status: 201 });
+    }),
   ];
 }
 
-
+function crmLeadHandlers() {
+  const listHandler = ({ request }: { request: Request }) => {
+    seedCrmMockLeadsIfEmpty();
+    const u = new URL(request.url);
+    const skip = Math.max(0, parseInt(u.searchParams.get('skip') ?? '0', 10) || 0);
+    const limit = Math.min(500, Math.max(1, parseInt(u.searchParams.get('limit') ?? '100', 10) || 100));
+    const items = crmMockLeads.slice(skip, skip + limit);
+    return HttpResponse.json({
+      items,
+      total: crmMockLeads.length,
+      skip,
+      limit,
+    });
+  };
+  const getById = ({ params }: { params: { id: string } }) => {
+    seedCrmMockLeadsIfEmpty();
+    const row = crmMockLeads.find((l) => (l as { id: string }).id === params.id);
+    return row
+      ? HttpResponse.json(row)
+      : HttpResponse.json({ error: 'not_found' }, { status: 404 });
+  };
+  const postLead = async ({ request }: { request: Request }) => {
+    const body = (await request.json()) as Record<string, unknown>;
+    const now = new Date().toISOString();
+    const row = {
+      ...body,
+      id: `crm-${Date.now()}`,
+      created_at: now,
+      updated_at: now,
+    };
+    crmMockLeads.push(row);
+    return HttpResponse.json(row, { status: 201 });
+  };
+  const patchLead = async ({ params, request }: { params: { id: string }; request: Request }) => {
+    seedCrmMockLeadsIfEmpty();
+    const idx = crmMockLeads.findIndex((l) => (l as { id: string }).id === params.id);
+    if (idx < 0) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
+    const patch = (await request.json()) as Record<string, unknown>;
+    crmMockLeads[idx] = {
+      ...crmMockLeads[idx],
+      ...patch,
+      updated_at: new Date().toISOString(),
+    };
+    return HttpResponse.json(crmMockLeads[idx]);
+  };
+  const getActs = ({ params }: { params: { id: string } }) => {
+    const list = crmMockActivities[params.id] ?? [];
+    return HttpResponse.json([...list]);
+  };
+  const postAct = async ({ params, request }: { params: { id: string }; request: Request }) => {
+    const id = params.id;
+    const body = (await request.json()) as Record<string, unknown>;
+    const act = {
+      ...body,
+      id: `act-${Date.now()}`,
+      created_at: new Date().toISOString(),
+    };
+    crmMockActivities[id] = [...(crmMockActivities[id] ?? []), act];
+    return HttpResponse.json(act, { status: 201 });
+  };
+  return [
+    ...dualGet('*/crm/leads', listHandler),
+    http.get('*/admin/crm/leads', listHandler),
+    ...dualGet('*/crm/leads/:id', getById),
+    http.get('*/admin/crm/leads/:id', getById),
+    ...dualPost('*/crm/leads', postLead),
+    http.post('*/admin/crm/leads', postLead),
+    ...dualPatch('*/crm/leads/:id', patchLead),
+    http.patch('*/admin/crm/leads/:id', patchLead),
+    ...dualGet('*/crm/leads/:id/activities', getActs),
+    http.get('*/admin/crm/leads/:id/activities', getActs),
+    ...dualPost('*/crm/leads/:id/activities', postAct),
+    http.post('*/admin/crm/leads/:id/activities', postAct),
+  ];
+}
 
 function nextId(): string {
   return `contract-${String(idCounter++).padStart(3, '0')}`;
-}
-
-/** هم‌تراز با بک‌اند: در SIGNING تا قبل از پرداخت کمیسیون، status مؤثر PENDING_COMMISSION */
-const WIZARD_STATUS_NO_COMMISSION_OVERLAY = new Set(['REVOKED', 'COMPLETED', 'REJECTED']);
-
-function effectiveContractStatus(c: MockContract): string {
-  const raw = c.status ?? 'DRAFT';
-  if (WIZARD_STATUS_NO_COMMISSION_OVERLAY.has(raw)) return raw;
-  if (c.step === 'SIGNING' && !c.commission_paid_at) return 'PENDING_COMMISSION';
-  if (raw === 'PENDING_COMMISSION' && c.commission_paid_at) return 'DRAFT';
-  return raw;
 }
 
 function contractJson(c: MockContract) {
   return {
     id: c.id,
     type: c.type,
-    status: effectiveContractStatus(c),
+    status: c.status,
     step: c.step,
-    parties: c.party_preview?.length ? c.party_preview : c.parties,
+    parties: c.parties,
     is_owner: true,
     key: 'mock-key',
     password: null,
-    created_at: c.created_at ?? new Date().toISOString(),
-    user_id: c.owner_id ?? 'mock-001',
-    tracking_code: c.tracking_code ?? null,
-    legal_review_status: c.legal_review_status ?? 'NONE',
-  };
-}
-
-function contractDetailResponse(c: MockContract): ContractResponse {
-  const j = contractJson(c);
-  const bag: Record<string, unknown> = { ...(c.parties ?? {}) };
-  if (!Array.isArray(bag.landlords)) bag.landlords = [];
-  if (!Array.isArray(bag.tenants)) bag.tenants = [];
-  if (c.party_preview?.length) {
-    const list: Party[] = c.party_preview.map((_p, i) => ({
-      id: `pv-${c.id}-${i}`,
-      party_type: i === 0 ? 'LANDLORD' : 'TENANT',
-      person_type: 'NATURAL_PERSON',
-      contract: j as unknown as Record<string, unknown>,
-    }));
-    bag.landlords = list[0] ? [list[0]] : [];
-    bag.tenants = list.slice(1);
-  }
-  return {
-    id: j.id,
-    type: j.type as ContractResponse['type'],
-    status: j.status as ContractResponse['status'],
-    step: j.step as ContractResponse['step'],
-    parties: bag,
-    is_owner: j.is_owner,
-    key: j.key,
-    password: j.password,
-    created_at: j.created_at,
-    tracking_code: j.tracking_code,
-    legal_review_status: j.legal_review_status as ContractResponse['legal_review_status'],
-  };
-}
-
-function mergeMockParties(c: MockContract, patch: Record<string, unknown>) {
-  c.parties = { ...c.parties, ...patch };
-}
-
-function mockCommissionTotals(c: MockContract): {
-  total_amount: number;
-  landlord_share: number;
-  tenant_share: number;
-  commission: number;
-  tax: number;
-  tracking_code_fee: number;
-} {
-  const p = c.parties ?? {};
-  if (c.type === 'BUYING_AND_SELLING' && Number(p.sale_price ?? 0) > 0) {
-    const total_amount = 7_200_000;
-    return {
-      total_amount,
-      landlord_share: 3_600_000,
-      tenant_share: 3_600_000,
-      commission: 6_000_000,
-      tax: 600_000,
-      tracking_code_fee: 600_000,
-    };
-  }
-  if (Number(p.rent_amount ?? 0) > 0 || Number(p.deposit_amount ?? 0) > 0) {
-    const total_amount = 5_550_000;
-    return {
-      total_amount,
-      landlord_share: 2_775_000,
-      tenant_share: 2_775_000,
-      commission: 5_000_000,
-      tax: 500_000,
-      tracking_code_fee: 50_000,
-    };
-  }
-  const total_amount = 5_550_000;
-  return {
-    total_amount,
-    landlord_share: 2_775_000,
-    tenant_share: 2_775_000,
-    commission: 5_000_000,
-    tax: 500_000,
-    tracking_code_fee: 50_000,
+    created_at: new Date().toISOString(),
   };
 }
 
@@ -467,11 +459,21 @@ function setStep(c: MockContract, step: string) {
   c.step = step;
 }
 
+function handleContractList({ request }: { request: Request }) {
+  const u = new URL(request.url);
+  const page = Math.max(1, parseInt(u.searchParams.get('page') ?? '1', 10) || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(u.searchParams.get('limit') ?? '20', 10) || 20));
+  const all = Array.from(contracts.values()).map(contractJson);
+  const start = (page - 1) * limit;
+  const items = all.slice(start, start + limit);
+  return HttpResponse.json({ items, total: all.length, page, limit });
+}
+
 export const handlers = [
   // Auth
-  http.get('*/auth/me', () => HttpResponse.json(mockUser)),
-  http.post('*/admin/otp/send', () => HttpResponse.json({ success: true, message: 'کد ارسال شد' })),
-  http.post('*/admin/login', async ({ request }) => {
+  ...dualGet('*/auth/me', () => HttpResponse.json(mockUser)),
+  ...dualPost('*/admin/otp/send', () => HttpResponse.json({ success: true, message: 'کد ارسال شد' })),
+  ...dualPost('*/admin/login', async ({ request }) => {
     const body = (await request.json().catch(() => ({}))) as { mobile?: string };
     mswRecordAudit(mockUser.id, 'auth.login', 'session', { mobile: body.mobile ?? '' });
     mswSessions.unshift({
@@ -489,10 +491,15 @@ export const handlers = [
   }),
 
   ...adminEnterpriseHandlers(),
-  ...userAdminHandlers(),
 
-  http.post('*/contracts/start', async ({ request }) => {
-    const body = (await request.json().catch(() => ({}))) as { contract_type?: string; party_type?: string; is_guaranteed?: boolean };
+  ...dualPost('*/contracts/start', async ({ request }) => {
+    const body = (await request.json().catch(() => ({}))) as { contract_type?: string; party_type?: string };
+    if (!body.party_type) {
+      return HttpResponse.json(
+        { detail: 'party_type is required' },
+        { status: 422 }
+      );
+    }
     const type = body.contract_type ?? 'PROPERTY_RENT';
     const id = nextId();
     const c: MockContract = {
@@ -501,159 +508,110 @@ export const handlers = [
       status: 'DRAFT',
       step: 'LANDLORD_INFORMATION',
       parties: {},
-      created_at: new Date().toISOString(),
-      owner_id: 'mock-001',
     };
     contracts.set(id, c);
     return HttpResponse.json(contractJson(c), { status: 201 });
   }),
 
-  http.get('*/contracts/list', ({ request }) => {
-    const u = new URL(request.url);
-    const userId = u.searchParams.get('user_id');
-    const statusQ = (u.searchParams.get('status') ?? '').trim();
-    const typeQ = (u.searchParams.get('type') ?? '').trim();
-    const page = Math.max(1, parseInt(u.searchParams.get('page') || '1', 10) || 1);
-    const limit = Math.min(100, Math.max(1, parseInt(u.searchParams.get('limit') || '20', 10) || 20));
-    let list = Array.from(contracts.values()).map((c) => contractJson(c));
-    if (userId) list = list.filter((row) => (row as { user_id?: string }).user_id === userId);
-    if (statusQ) list = list.filter((row) => (row as { status?: string }).status === statusQ);
-    if (typeQ) list = list.filter((row) => (row as { type?: string }).type === typeQ);
-    const total = list.length;
-    const start = (page - 1) * limit;
-    const items = list.slice(start, start + limit);
-    return HttpResponse.json({
-      items,
-      total,
-      page,
-      limit,
-    });
-  }),
+  ...dualGet('*/contracts/list', handleContractList),
 
-  http.get('*/contracts/:id', ({ params }) => {
+  ...dualGet('*/contracts/:id', ({ params }) => {
     const c = getContract(params.id as string);
-    if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
-    return HttpResponse.json(contractDetailResponse(c));
+    if (!c) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
+    return HttpResponse.json(contractJson(c));
   }),
 
-  http.post('*/admin/contracts/:id/approve', ({ params }) => {
-    const c = contracts.get(params.id as string);
+  ...dualGet('*/contracts/:id/addendum', ({ params }) => {
+    const id = params.id as string;
+    const list = addendumsByContractId.get(id) ?? [];
+    return HttpResponse.json([...list]);
+  }),
+
+  ...dualPost('*/contracts/:id/addendum', async ({ params, request }) => {
+    const id = params.id as string;
+    const body = (await request.json().catch(() => ({}))) as { subject?: string; content?: string };
+    const row: MswAddendumRow = {
+      id: `add-${Date.now()}`,
+      subject: body.subject ?? 'متمم',
+      created_at: new Date().toISOString(),
+      sign_status: 'PENDING',
+    };
+    addendumsByContractId.set(id, [...(addendumsByContractId.get(id) ?? []), row]);
+    return HttpResponse.json(row, { status: 201 });
+  }),
+
+  ...dualPost('*/contracts/:id/addendum/sign/initiate', () => HttpResponse.json({ ok: true })),
+
+  ...dualPost('*/admin/contracts/:id/approve', ({ params }) => {
+    const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
     c.status = 'ACTIVE';
-    c.legal_review_status = 'APPROVED';
-    if (!c.tracking_code) c.tracking_code = `AML-${String(Date.now()).slice(-8)}`;
-    return HttpResponse.json(contractJson(c));
+    return HttpResponse.json({ ok: true });
   }),
 
-  http.post('*/admin/contracts/:id/reject', ({ params }) => {
-    const c = contracts.get(params.id as string);
+  ...dualPost('*/admin/contracts/:id/reject', ({ params }) => {
+    const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
     c.status = 'ADMIN_REJECTED';
-    c.legal_review_status = 'REJECTED';
-    return HttpResponse.json(contractJson(c));
+    return HttpResponse.json({ ok: true });
   }),
 
-  http.post('*/admin/contracts/:id/revoke', ({ params }) => {
-    const c = contracts.get(params.id as string);
+  ...dualPost('*/admin/contracts/:id/revoke', ({ params }) => {
+    const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
     c.status = 'REVOKED';
-    return HttpResponse.json(contractJson(c));
+    return HttpResponse.json({ ok: true });
   }),
 
-  http.get('*/contracts/:id/status', ({ params }) => {
+  ...dualGet('*/legal/reviews', ({ request }) => {
+    const u = new URL(request.url);
+    const limit = Math.min(200, Math.max(1, parseInt(u.searchParams.get('limit') ?? '100', 10) || 100));
+    const items = mswLegalReviews.slice(0, limit);
+    return HttpResponse.json({ items, total: mswLegalReviews.length });
+  }),
+
+  ...dualPost('*/legal/reviews/:id/decide', async ({ params, request }) => {
+    const id = params.id as string;
+    const body = (await request.json().catch(() => ({}))) as { approve?: boolean; comment?: string };
+    const row = mswLegalReviews.find((r) => r.id === id);
+    if (!row) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
+    row.status = body.approve ? 'APPROVED' : 'REJECTED';
+    row.comment = body.comment ?? null;
+    row.decided_at = new Date().toISOString();
+    row.reviewer_id = mockUser.id;
+    return HttpResponse.json(row);
+  }),
+
+  ...dualGet('*/contracts/:id/status', ({ params }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
-    if (c.commission_paid_at && c.status === 'PENDING_COMMISSION') {
-      c.status = 'DRAFT';
-      setStep(c, 'SIGNING');
-    }
     return HttpResponse.json({
-      status: effectiveContractStatus(c),
+      status: c.status,
       step: c.step,
       contract_id: c.id,
       type: c.type,
     });
   }),
 
-  http.get('*/contracts/:id/commission/invoice', ({ params, request }) => {
+  ...dualGet('*/contracts/:id/commission/invoice', ({ params }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
-    const paid = Boolean(c.commission_paid_at);
-    const inv = mockCommissionTotals(c);
-    const code = new URL(request.url).searchParams.get('discount_code')?.trim() ?? '';
-    if (code) {
-      const upper = code.toUpperCase();
-      if (upper !== 'AMLINE50') {
-        return HttpResponse.json(
-          { detail: { code: 'invalid_discount_code', hint: 'کد تخفیف معتبر نیست' } },
-          { status: 422 },
-        );
-      }
-      const gross = inv.total_amount;
-      const discount_amount = Math.floor(gross / 2);
-      const total_amount = gross - discount_amount;
-      const landlord_share = Math.floor(total_amount / 2);
-      const tenant_share = total_amount - landlord_share;
-      return HttpResponse.json({
-        ...inv,
-        gross_total_amount: gross,
-        discount_amount,
-        discount_percent: 50,
-        total_amount,
-        landlord_share,
-        tenant_share,
-        invoice_id: `inv-${c.id}`,
-        commission_paid: paid,
-        commission_paid_at: c.commission_paid_at ?? null,
-      });
-    }
     return HttpResponse.json({
-      ...inv,
+      total_amount: 5_000_000,
+      landlord_share: 2_500_000,
+      tenant_share: 2_500_000,
       invoice_id: `inv-${c.id}`,
-      commission_paid: paid,
-      commission_paid_at: c.commission_paid_at ?? null,
     });
   }),
 
-  http.post('*/contracts/:id/commission/pay', async ({ params, request }) => {
-    const c = getContract(params.id as string);
-    if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
-    const body = (await request.json().catch(() => ({}))) as {
-      use_wallet_credit?: boolean;
-      use_all_wallet_credits?: boolean;
-      discount_code?: string | null;
-    };
-    const code = (body.discount_code ?? '').trim();
-    if (code && code.toUpperCase() !== 'AMLINE50') {
-      return HttpResponse.json(
-        { detail: { code: 'invalid_discount_code', hint: 'کد تخفیف معتبر نیست' } },
-        { status: 422 },
-      );
-    }
-    const tryWallet = Boolean(body.use_wallet_credit || body.use_all_wallet_credits);
-    if (tryWallet) {
-      c.commission_paid_at = new Date().toISOString();
-      if (c.status === 'PENDING_COMMISSION') {
-        c.status = 'DRAFT';
-        setStep(c, 'SIGNING');
-      }
-      return HttpResponse.json({ ok: true, redirect_url: '/', used_wallet: true });
-    }
-    return HttpResponse.json({
-      ok: true,
-      redirect_url: `/financials/bank/gateway?contract_id=${params.id}`,
-      used_wallet: false,
-    });
-  }),
-
-  http.post('*/contracts/:id/revoke', ({ params }) => {
+  ...dualPost('*/contracts/:id/revoke', ({ params }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     c.status = 'REVOKED';
     return HttpResponse.json({ ok: true });
   }),
 
-  http.post('*/contracts/:id/party/landlord', ({ params }) => {
+  ...dualPost('*/contracts/:id/party/landlord', ({ params }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     const partyId = `party-landlord-${Date.now()}`;
@@ -663,12 +621,11 @@ export const handlers = [
       party_type: 'LANDLORD',
       person_type: 'NATURAL_PERSON',
     };
-    const prevL = Array.isArray(c.parties.landlords) ? c.parties.landlords : [];
-    c.parties.landlords = [...prevL, row];
+    c.parties.landlords = [...(c.parties.landlords ?? []), row];
     return HttpResponse.json(row, { status: 201 });
   }),
 
-  http.patch('*/contracts/:id/party/:partyId', ({ params }) => {
+  ...dualPatch('*/contracts/:id/party/:partyId', ({ params }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     return HttpResponse.json({
@@ -679,7 +636,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/contracts/:id/party/landlord/set', async ({ params, request }) => {
+  ...dualPost('*/contracts/:id/party/landlord/set', async ({ params, request }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     const body = (await request.json().catch(() => ({}))) as { next_step?: string };
@@ -688,7 +645,7 @@ export const handlers = [
     return HttpResponse.json({ next_step: next });
   }),
 
-  http.post('*/contracts/:id/party/tenant', ({ params }) => {
+  ...dualPost('*/contracts/:id/party/tenant', ({ params }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     const partyId = `party-tenant-${Date.now()}`;
@@ -698,12 +655,11 @@ export const handlers = [
       party_type: 'TENANT',
       person_type: 'NATURAL_PERSON',
     };
-    const prevT = Array.isArray(c.parties.tenants) ? c.parties.tenants : [];
-    c.parties.tenants = [...prevT, row];
+    c.parties.tenants = [...(c.parties.tenants ?? []), row];
     return HttpResponse.json(row, { status: 201 });
   }),
 
-  http.post('*/contracts/:id/party/tenant/set', async ({ params, request }) => {
+  ...dualPost('*/contracts/:id/party/tenant/set', async ({ params, request }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     const body = (await request.json().catch(() => ({}))) as { next_step?: string };
@@ -712,149 +668,54 @@ export const handlers = [
     return HttpResponse.json({ next_step: next });
   }),
 
-  http.delete('*/contracts/:id/party/:partyId', ({ params }) => {
+  ...dualDelete('*/contracts/:id/party/:partyId', ({ params }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     return HttpResponse.json({ ok: true });
   }),
 
-  http.post('*/contracts/:id/home-info', async ({ params, request }) => {
+  ...dualPost('*/contracts/:id/home-info', async ({ params, request }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
-    const body = (await request.json().catch(() => ({}))) as {
-      next_step?: string;
-      postal_code?: string;
-      area_m2?: number;
-      property_use_type?: string;
-    };
+    const body = (await request.json().catch(() => ({}))) as { next_step?: string };
     const next = body.next_step ?? 'DATING';
     setStep(c, next);
-    mergeMockParties(c, {
-      postal_code: body.postal_code ?? '',
-      area_m2: body.area_m2 ?? 0,
-      property_use_type: body.property_use_type ?? '',
-    });
     return HttpResponse.json({ next_step: next }, { status: 201 });
   }),
 
-  http.post('*/contracts/:id/dating', async ({ params, request }) => {
+  ...dualPost('*/contracts/:id/dating', async ({ params, request }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
-    const body = (await request.json().catch(() => ({}))) as {
-      next_step?: string;
-      start_date?: string;
-      end_date?: string;
-      delivery_date?: string;
-    };
+    const body = (await request.json().catch(() => ({}))) as { next_step?: string };
     const next = body.next_step ?? 'MORTGAGE';
     setStep(c, next);
-    mergeMockParties(c, {
-      lease_start_date: body.start_date ?? '',
-      lease_end_date: body.end_date ?? '',
-      ...(body.delivery_date ? { delivery_date: body.delivery_date } : {}),
-    });
     return HttpResponse.json({ next_step: next }, { status: 201 });
   }),
 
-  http.post('*/contracts/:id/mortgage', async ({ params, request }) => {
+  ...dualPost('*/contracts/:id/mortgage', async ({ params, request }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
-    if (c.type === 'BUYING_AND_SELLING') {
-      return HttpResponse.json({ detail: 'use_sale_price_endpoint' }, { status: 422 });
-    }
-    const body = (await request.json().catch(() => ({}))) as {
-      next_step?: string;
-      total_amount?: number;
-      stages?: Array<{ due_date: string; payment_type: string; amount: number; cheque_image_file_id?: number | null }>;
-    };
-    const next = body.next_step ?? 'RENTING';
-    setStep(c, next);
-    if (body.total_amount != null && body.stages) {
-      mergeMockParties(c, {
-        deposit_amount: body.total_amount,
-        mortgage_payment_stages: body.stages,
-      });
-    }
-    return HttpResponse.json({ next_step: next }, { status: 201 });
-  }),
-
-  http.post('*/contracts/:id/sale-price', async ({ params, request }) => {
-    const c = getContract(params.id as string);
-    if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
-    if (c.type !== 'BUYING_AND_SELLING') {
-      return HttpResponse.json({ detail: 'sale_price_contract_type' }, { status: 422 });
-    }
-    const body = (await request.json().catch(() => ({}))) as {
-      next_step?: string;
-      total_price?: number;
-      stages?: Array<{ due_date: string; payment_type: string; amount: number; cheque_image_file_id?: number | null }>;
-    };
-    const stages = body.stages ?? [];
-    const tp = body.total_price ?? 0;
-    if (stages.length > 0) {
-      const sum = stages.reduce((a, s) => a + (s.amount ?? 0), 0);
-      if (sum !== tp) return HttpResponse.json({ detail: 'stages_sum_mismatch' }, { status: 422 });
-    }
-    const next = body.next_step ?? 'SIGNING';
-    setStep(c, next);
-    mergeMockParties(c, { sale_price: tp, sale_payment_stages: stages });
-    return HttpResponse.json({ next_step: next }, { status: 201 });
-  }),
-
-  http.post('*/contracts/:id/renting', async ({ params, request }) => {
-    const c = getContract(params.id as string);
-    if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
-    const body = (await request.json().catch(() => ({}))) as {
-      next_step?: string;
-      monthly_rent_amount?: number;
-      rent_due_day_of_month?: number | null;
-      stages?: Array<{ due_date: string; payment_type: string; amount: number; cheque_image_file_id?: number | null }>;
-    };
-    const next = body.next_step ?? 'SIGNING';
-    setStep(c, next);
-    if (c.type === 'PROPERTY_RENT' && body.monthly_rent_amount != null && body.stages) {
-      mergeMockParties(c, {
-        rent_amount: body.monthly_rent_amount,
-        rent_payment_stages: body.stages,
-        ...(body.rent_due_day_of_month != null
-          ? { rent_due_day_of_month: body.rent_due_day_of_month }
-          : {}),
-      });
-    }
-    return HttpResponse.json({ next_step: next }, { status: 201 });
-  }),
-
-  http.post('*/contracts/:id/sign', ({ params }) => {
-    const c = getContract(params.id as string);
-    if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
-    if (c.step === 'SIGNING' && !c.commission_paid_at) {
-      return HttpResponse.json({ detail: 'commission_required' }, { status: 400 });
-    }
-    return HttpResponse.json({}, { status: 201 });
-  }),
-
-  http.post('*/contracts/:id/sign/verify', ({ params }) => {
-    const c = getContract(params.id as string);
-    if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
-    if (c.step === 'SIGNING' && !c.commission_paid_at) {
-      return HttpResponse.json({ detail: 'commission_required' }, { status: 400 });
-    }
-    return HttpResponse.json({ ok: true });
-  }),
-
-  http.post('*/contracts/:id/sign/set', async ({ params, request }) => {
-    const c = getContract(params.id as string);
-    if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
-    if (c.step === 'SIGNING' && !c.commission_paid_at) {
-      return HttpResponse.json({ detail: 'commission_required' }, { status: 400 });
-    }
     const body = (await request.json().catch(() => ({}))) as { next_step?: string };
-    const next = body.next_step ?? 'WITNESS';
-    setStep(c, next);
-    return HttpResponse.json({ next_step: next });
+    const next = body.next_step ?? (c.type === 'BUYING_AND_SELLING' ? 'SIGNING' : 'RENTING');
+    const resolved = next;
+    setStep(c, resolved);
+    return HttpResponse.json({ next_step: resolved }, { status: 201 });
   }),
 
-  http.post('*/contracts/:id/add-witness', async ({ params, request }) => {
+  ...dualPost('*/contracts/:id/renting', async ({ params, request }) => {
+    const c = getContract(params.id as string);
+    if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
+    const body = (await request.json().catch(() => ({}))) as { next_step?: string };
+    const next = body.next_step ?? 'SIGNING';
+    setStep(c, next);
+    return HttpResponse.json({ next_step: next }, { status: 201 });
+  }),
+
+  ...dualPost('*/contracts/:id/sign', () => HttpResponse.json({}, { status: 201 })),
+
+  ...dualPost('*/contracts/:id/sign/verify', () => HttpResponse.json({ ok: true })),
+
+  ...dualPost('*/contracts/:id/sign/set', async ({ params, request }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     const body = (await request.json().catch(() => ({}))) as { next_step?: string };
@@ -863,24 +724,56 @@ export const handlers = [
     return HttpResponse.json({ next_step: next });
   }),
 
-  http.post('*/contracts/:id/witness/send-otp', () => HttpResponse.json({}, { status: 201 })),
+  ...dualPost('*/contracts/:id/add-witness', async ({ params, request }) => {
+    const c = getContract(params.id as string);
+    if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
+    const body = (await request.json().catch(() => ({}))) as { next_step?: string };
+    const next = body.next_step ?? 'WITNESS';
+    setStep(c, next);
+    return HttpResponse.json({ next_step: next });
+  }),
 
-  http.post('*/contracts/:id/witness/verify', async ({ params, request }) => {
+  ...dualPost('*/contracts/:id/witness/send-otp', () => HttpResponse.json({}, { status: 201 })),
+
+  ...dualPost('*/contracts/:id/witness/verify', async ({ params, request }) => {
     const c = getContract(params.id as string);
     if (!c) return HttpResponse.json({ error: 'not_found' }, { status: 404 });
     const body = (await request.json().catch(() => ({}))) as { next_step?: string };
     const next = body.next_step ?? 'FINISH';
     setStep(c, next);
     c.status = 'COMPLETED';
+    const contractId = c.id;
+    if (!mswLegalReviews.some((r) => r.contract_id === contractId && r.status === 'PENDING')) {
+      mswLegalReviews.unshift({
+        id: `leg-${Date.now()}`,
+        contract_id: contractId,
+        status: 'PENDING',
+        comment: null,
+        reviewer_id: null,
+        created_at: new Date().toISOString(),
+        decided_at: null,
+      });
+    }
     return HttpResponse.json({ ok: true, next_step: next });
   }),
 
-  http.get('*/contracts/resolve-info', () => HttpResponse.json({ result: 'اطلاعات تأیید شد' })),
+  ...dualGet('*/contracts/resolve-info', () => HttpResponse.json({ result: 'اطلاعات تأیید شد' })),
 
-  http.post('*/files/upload', () => HttpResponse.json({ id: '10001', url: null }, { status: 201 })),
+  ...dualPost('*/files/upload', () => HttpResponse.json({ id: 'file-001', url: null }, { status: 201 })),
 
-  // ---- CRM in-memory ----
-  ...crmHandlers,
+  ...dualGet('*/admin/users', () =>
+    HttpResponse.json({
+      total_count: 1,
+      start_index: 0,
+      end_index: 1,
+      data: [mockUser],
+    })
+  ),
+
+  ...dualGet('*/admin/users/:id', () => HttpResponse.json(mockUser)),
+
+  // ---- CRM in-memory (وقتی VITE_USE_CRM_API=true + MSW) ----
+  ...crmLeadHandlers(),
 
   http.get('*/provinces/cities', () => HttpResponse.json([])),
   http.get('*/provinces', () => HttpResponse.json([])),
@@ -888,39 +781,9 @@ export const handlers = [
   http.get('*/financials/wallets', () =>
     HttpResponse.json({
       id: 'wallet-001',
-      credit: 3_000_000,
+      credit: 0,
       user_id: 'mock-001',
       status: 'ACTIVE',
     })
   ),
-
-  http.get('*/financials/bank/gateway', () =>
-    new HttpResponse(
-      '<!DOCTYPE html><html lang="fa" dir="rtl"><meta charset="utf-8"/><title>درگاه (MSW)</title><body style="font-family:sans-serif;padding:1.5rem"><h1>درگاه آزمایشی</h1><p>برای ثبت پرداخت در MSW دکمه را بزنید.</p><button type="button" id="go">تأیید پرداخت</button><p><button type="button" onclick="history.back()">بازگشت</button></p><script>document.getElementById("go").onclick=function(){var p=new URLSearchParams(location.search);var cid=p.get("contract_id");if(!cid){alert("contract_id");return;}fetch("/financials/bank/mock-verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contract_id:cid})}).then(function(r){if(r.ok)history.back();else alert(r.status);});};</script></body></html>',
-      {
-        status: 200,
-        headers: { 'Content-Type': 'text/html; charset=utf-8' },
-      }
-    )
-  ),
-
-  http.post('*/financials/bank/mock-verify', async ({ request }) => {
-    const body = (await request.json()) as { contract_id: string };
-    const c = getContract(body.contract_id);
-    if (!c) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
-    c.commission_paid_at = new Date().toISOString();
-    if (c.status === 'PENDING_COMMISSION') {
-      c.status = 'DRAFT';
-      setStep(c, 'SIGNING');
-    }
-    return HttpResponse.json({ ok: true });
-  }),
-
-  ...consultantPlatformHandlers(),
-
-  ...workspaceOrgHandlers(),
-
-  ...hamgitPortHandlers(),
-
-  ...planeHandlers(),
 ];

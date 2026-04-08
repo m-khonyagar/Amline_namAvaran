@@ -132,9 +132,9 @@ test('داشبورد: navigation بین صفحات', async ({ page }) => {
 // ================================================================
 test('تم: انتخاب تیره و ماندگاری در localStorage', async ({ page }) => {
   await devLogin(page);
-  const themeSelect = page.locator('#app-sidebar select[aria-labelledby="theme-label"]');
-  await expect(themeSelect).toBeVisible({ timeout: 15000 });
-  await themeSelect.selectOption('dark');
+  const darkBtn = page.locator('#app-sidebar [aria-label="انتخاب تم"] [aria-label="تیره"]');
+  await expect(darkBtn).toBeVisible({ timeout: 15000 });
+  await darkBtn.click();
   await expect(page.locator('html')).toHaveClass(/dark/);
   const stored = await page.evaluate(() => localStorage.getItem('amline_theme'));
   expect(stored).toBe('dark');

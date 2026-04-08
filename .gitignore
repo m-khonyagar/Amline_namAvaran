@@ -28,13 +28,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-# استثنا: کتابخانهٔ سورس فرانت کاربر (مسیر lib/ سراسری Python را اشتباهی نادیده می‌گرفت)
-!amline-ui/lib/
-!amline-ui/lib/**
-# استثنا: کد منبع TypeScript پنل ادمین (rule سراسری lib/ مربوط به پایتون است)
-!admin-ui/src/lib/
-!admin-ui/src/lib/**
+# Root-level Python lib artifacts only — keep e.g. admin-ui/src/lib tracked
+/lib/
 lib64/
 parts/
 sdist/
@@ -70,7 +65,7 @@ docs/gsc_data/*.csv
 .DS_Store
 Thumbs.db
 
-# Embedded git repos (فقط پوشه‌های موقت)
+# Embedded git repos / پوشه‌های محلی خارج از مونوریپو
 تست برنامه نویسی/
 Google Dos/
 
@@ -83,24 +78,15 @@ Google Dos/
 id_rsa*
 id_ed25519*
 
-# Master reference doc (contains credentials — local only)
-docs/AMLINE_MASTER_REFERENCE.md
-
 # SEO Dashboard secrets
 seo-dashboard/.env.local
 
 # Playwright / E2E (regenerated locally; do not version screenshots or traces)
 admin-ui/test-results/
 amline-ui/test-results/
-qa-amline-tests/test-results/
-playwright-report/
-*.trace.zip
 
 # QA Playwright HTML report output
 qa-amline-tests/playwright-report/
-
-# Local extract from amline_repos_cloned.zip for diff only (never commit)
-.reference/
 
 # Scratch / temporary backend checkout (not part of monorepo source)
 _temp_backend/
@@ -113,8 +99,3 @@ seo-dashboard-deploy.tar.gz
 
 # Offline VPN bundle (contains keys + vpn.auth; never commit)
 vpn-setup/offline-vpn-bundle/READY_TO_COPY/
-
-# Future artifact hygiene
-**/portable_runtime/
-اسناد فنی/*.zip
-اسناد فنی/*.rar

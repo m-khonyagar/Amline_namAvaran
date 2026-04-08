@@ -1,10 +1,8 @@
-export type {
-  ApiErrorKind,
-  MappedApiError,
-} from '../../../../admin-ui/src/lib/errorMapper';
+export type { ApiErrorKind, MappedApiError } from '../api/errorMapper'
 export {
   ensureMappedError,
   isMappedApiError,
   mapAxiosLikeError,
+  parseAmlineErrorBody,
   parseFastApiValidationDetail,
-} from '../../../../admin-ui/src/lib/errorMapper';
+} from '../api/errorMapper'

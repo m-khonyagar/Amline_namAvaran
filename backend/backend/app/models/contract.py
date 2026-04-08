@@ -1,41 +1,28 @@
-from __future__ import annotations
-
-import datetime as dt
 import enum
-import secrets
-import uuid
 
-from sqlalchemy import Date, Enum, ForeignKey, Numeric, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
-from app.db.base import Base, TimestampCreatedMixin, UUIDPkMixin
-
-
-class ContractStatus(str, enum.Enum):
-    draft = "draft"
-    signed = "signed"
-    active = "active"
-    terminated = "terminated"
-    expired = "expired"
+Base = declarative_base()
 
 
-def _tracking_code() -> str:
-    return secrets.token_hex(6)
+class ContractStatus(enum.Enum):
+    ACTIVE = "active"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
 
 
-class Contract(UUIDPkMixin, TimestampCreatedMixin, Base):
+class Contract(Base):
     __tablename__ = "contracts"
+    id = Column(Integer, primary_key=True, index=True)
+    type = Column(Enum("Rent", "Sale", "Mortgage", name="contract_types"))
+    status = Column(Enum(ContractStatus))
+    signature = Column(String)
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    user = relationship("User", back_populates="contracts")
 
-    property_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("properties.id", ondelete="RESTRICT"), index=True)
-    owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
-    tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
-
-    contract_type: Mapped[str] = mapped_column(String(64))
-    deposit_amount: Mapped[float] = mapped_column(Numeric(14, 2))
-    rent_amount: Mapped[float] = mapped_column(Numeric(14, 2))
-
-    start_date: Mapped[dt.date] = mapped_column(Date)
-    end_date: Mapped[dt.date] = mapped_column(Date)
-
-    status: Mapped[ContractStatus] = mapped_column(Enum(ContractStatus), default=ContractStatus.draft, index=True)
-    tracking_code: Mapped[str] = mapped_column(String(32), unique=True, index=True, default=_tracking_code)
+    def __repr__(self) -> str:
+        return f"<Contract(id={self.id}, type={self.type}, status={self.status})>"

@@ -2,12 +2,13 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
+const uiCoreRoot = path.resolve(__dirname, '../packages/amline-ui-core/src')
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  // بدون .env، به جای پروداکشن به mock/بک‌اند لوکال وصل شو تا خطای شبکه کمتر شود.
   const proxyTarget =
     env.VITE_DEV_PROXY_TARGET ||
-    'http://127.0.0.1:8080'
+    'http://localhost:8080'
 
   const bypassHtmlRequest = (req: { headers?: Record<string, string | undefined>; url?: string }) => {
     const accept = req.headers?.accept ?? ''
@@ -20,54 +21,22 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
+        '@amline/ui-core': uiCoreRoot,
       },
     },
     server: {
       port: 3002,
+      host: true,
+      // فرانت فقط canonical را صدا می‌زند (`/api/v1/...` via `apiV1()`). مسیرهای قدیمی ریشه حذف شدند.
       proxy: {
-        '/contracts': {
+        '/api/v1': {
           target: proxyTarget,
           changeOrigin: true,
           secure: false,
           bypass: bypassHtmlRequest,
         },
-        '/admin': {
-          target: proxyTarget,
-          changeOrigin: true,
-          secure: false,
-          bypass: bypassHtmlRequest,
-        },
-        '/users': {
-          target: proxyTarget,
-          changeOrigin: true,
-          secure: false,
-          bypass: bypassHtmlRequest,
-        },
-        '/files': {
-          target: proxyTarget,
-          changeOrigin: true,
-          secure: false,
-          bypass: bypassHtmlRequest,
-        },
+        // هدایت تمام‌صفحه به درگاه (مثلاً CommissionStep)
         '/financials': {
-          target: proxyTarget,
-          changeOrigin: true,
-          secure: false,
-          bypass: bypassHtmlRequest,
-        },
-        '/provinces': {
-          target: proxyTarget,
-          changeOrigin: true,
-          secure: false,
-          bypass: bypassHtmlRequest,
-        },
-        '/auth': {
-          target: proxyTarget,
-          changeOrigin: true,
-          secure: false,
-          bypass: bypassHtmlRequest,
-        },
-        '/api': {
           target: proxyTarget,
           changeOrigin: true,
           secure: false,

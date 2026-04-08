@@ -4,10 +4,8 @@ import { toast } from 'sonner'
 import { loadLead, updateLeadRecord } from '../../features/crm/crmService'
 import { logAudit } from '../../lib/auditLog'
 import { ActivityTimeline } from '../../features/crm/components/ActivityTimeline'
-import { LeadTasksPanel } from '../../features/crm/components/LeadTasksPanel'
-import { LeadForm } from '../../features/crm/components/LeadForm'
+import { LeadForm, type LeadFormValues } from '../../features/crm/components/LeadForm'
 import type { Lead } from '../../features/crm/types'
-import { formatShamsiDate } from '../../lib/persianDateTime'
 
 const NEED_TYPE_LABELS: Record<string, string> = {
   RENT: 'اجاره', BUY: 'خرید', SELL: 'فروش',
@@ -62,11 +60,17 @@ export default function LeadDetailPage() {
     )
   }
 
-  const handleUpdate = (
-    values: Omit<Lead, 'id' | 'status' | 'created_at' | 'updated_at' | 'contract_id'>
-  ) => {
+  const handleUpdate = (values: LeadFormValues) => {
     void (async () => {
-      const updated = await updateLeadRecord(lead.id, values)
+      const updated = await updateLeadRecord(lead.id, {
+        full_name: values.full_name,
+        mobile: values.mobile,
+        need_type: values.need_type,
+        notes: values.notes,
+        assigned_to: values.assigned_to,
+        province_id: values.province_id || null,
+        city_id: values.city_id || null,
+      })
       if (updated) setLead(updated)
       void logAudit('crm.lead.update', 'lead', { lead_id: lead.id })
       toast.success('اطلاعات Lead به‌روز شد')
@@ -120,6 +124,12 @@ export default function LeadDetailPage() {
                   <dd className="font-mono text-sm">{lead.mobile}</dd>
                 </div>
                 <div className="flex justify-between">
+                  <dt className="text-sm text-gray-500">استان / شهر</dt>
+                  <dd className="text-sm">
+                    {[lead.province_name_fa, lead.city_name_fa].filter(Boolean).join('، ') || '—'}
+                  </dd>
+                </div>
+                <div className="flex justify-between">
                   <dt className="text-sm text-gray-500">نوع نیاز</dt>
                   <dd className="text-sm">{NEED_TYPE_LABELS[lead.need_type] ?? lead.need_type}</dd>
                 </div>
@@ -129,7 +139,7 @@ export default function LeadDetailPage() {
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-sm text-gray-500">تاریخ ایجاد</dt>
-                  <dd className="text-sm">{formatShamsiDate(lead.created_at)}</dd>
+                  <dd className="text-sm">{new Date(lead.created_at).toLocaleDateString('fa-IR')}</dd>
                 </div>
                 {lead.notes && (
                   <div>
@@ -142,9 +152,8 @@ export default function LeadDetailPage() {
           )}
         </div>
 
-        <div className="space-y-6">
+        <div>
           <ActivityTimeline leadId={lead.id} />
-          <LeadTasksPanel leadId={lead.id} />
         </div>
       </div>
     </div>

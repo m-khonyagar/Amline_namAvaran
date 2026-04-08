@@ -161,6 +161,7 @@ export default function LoginPage() {
         {devBypass ? (
           <button
             type="button"
+            data-testid="e2e-dev-login"
             onClick={() => {
               devLogin()
               toast.success('ورود آزمایشی انجام شد.')

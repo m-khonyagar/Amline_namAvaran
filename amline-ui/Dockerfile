@@ -7,6 +7,7 @@ RUN npm install
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY packages/amline-ui-core /app/packages/amline-ui-core
+COPY admin-ui /app/admin-ui
 WORKDIR /app/amline-ui
 COPY --from=deps /app/amline-ui/node_modules ./node_modules
 COPY amline-ui/ ./

@@ -1,5 +1,7 @@
 # Amline — پلتفرم هوشمند قرارداد ملکی
 
+> **SSOT بک‌اند:** مسیر استاندارد توسعه و پروداکشن **`backend/backend`** (FastAPI + PostgreSQL) است؛ قرارداد **`/api/v1/*`** و مسیرهای legacy روی همان اپ. **`dev-mock-api`** فقط جایگزین سبک وقتی بک‌اند کامل در دسترس نیست. راهنمای یکپارچگی فرانت: [`docs/FRONTEND_API_INTEGRATION.md`](docs/FRONTEND_API_INTEGRATION.md) — فهرست ماشین‌خوان مسیرها: [`docs/generated/frontend-http-inventory.json`](docs/generated/frontend-http-inventory.json).
+
 ## ساختار پروژه
 
 | پروژه | تکنولوژی | پورت | وضعیت |
@@ -7,7 +9,7 @@
 | `admin-ui/` | React + Vite | 3002 | ✅ کامل |
 | `amline-ui/` | Next.js 14 (App Router) | 3000 | ✅ کامل |
 | `site/` | Next.js 15 (Static Export) | 3001 | ✅ کامل |
-| `dev-mock-api/` | FastAPI | 8080 | ✅ کامل |
+| `dev-mock-api/` | FastAPI | 8080 | ⚠️ مکمل (بدون DB) |
 | `pdf-generator/` | FastAPI | 8001 | ✅ موجود |
 | `seo-dashboard/` | — | 3003 | ✅ موجود |
 | `consultant-ui/` | React + Vite | 3004 | ✅ موجود |
@@ -42,7 +44,9 @@ npm install
 npm run dev
 ```
 
-## شروع سریع — توسعه بدون backend (mock)
+## شروع سریع — توسعه بدون backend کامل (mock)
+
+> فقط برای UI ساده یا وقتی Postgres/Redis ندارید. برای CRM پایگاه‌داده، پرداخت، لیستینگ v1 و … از بخش «با backend واقعی» استفاده کنید.
 
 ```powershell
 # ۱. اجرای mock API (پورت 8080)
@@ -126,8 +130,8 @@ site (3001)          amline-ui (3000)       admin-ui (3002)
   │                       │                      │
   └───────────────────────┴──────────────────────┘
                            │
-              dev-mock-api (8080) ← توسعه
-              backend/backend    ← production
+              backend/backend (8080) ← توسعهٔ استاندارد + production
+              dev-mock-api (8080)     ← اختیاری (بدون DB)
                            │
               postgres / redis / minio
 ```
@@ -178,12 +182,18 @@ site (3001)          amline-ui (3000)       admin-ui (3002)
 # unit tests (admin-ui)
 cd admin-ui && npm test
 
-# e2e (نیاز به mock API روی 8080)
+# e2e admin-ui (طبق playwright.config خود پروژه)
 cd admin-ui && npx playwright test
 
-# e2e (amline-ui)
+# e2e amline-ui — بک‌اند واقعی با run_e2e_server روی 8080 (نه dev-mock-api)
 cd amline-ui && npx playwright test
 ```
+
+---
+
+## Sweep AI (توسعهٔ خودکار)
+
+پیکربندی روی **`main`**: `sweep.yaml` + `.sweep.yaml`؛ Issue با عنوان **`Sweep: ...`** و برچسب **`sweep`**. لینک قدیمی **`github.com/apps/sweep-ai`** دیگر ۴۰۴ است؛ برای بات GitHub باید **Sweep خودمیزبان** طبق [`docs/SWEEP_RUNBOOK.md`](docs/SWEEP_RUNBOOK.md) — قالب Issue: **Sweep SSOT task**.
 
 ---
 

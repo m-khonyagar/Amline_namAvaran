@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { apiV1 } from '@/lib/apiPaths';
 import { apiClient } from '../api/contractApi';
 import { formatShamsiDate } from '../../../lib/persianDateTime';
 
@@ -41,7 +42,7 @@ export function AddendumList({ contractId }: AddendumListProps) {
   useEffect(() => {
     setIsLoading(true);
     apiClient
-      .get<Addendum[]>(`/contracts/${contractId}/addendum`)
+      .get<Addendum[]>(apiV1(`contracts/${contractId}/addendum`))
       .then((res) => setAddendums(res.data))
       .catch(() => setError('خطا در دریافت لیست متمم‌ها'))
       .finally(() => setIsLoading(false));
