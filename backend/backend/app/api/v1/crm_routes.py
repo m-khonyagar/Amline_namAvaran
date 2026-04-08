@@ -6,6 +6,7 @@ from app.api.deps import get_current_user
 from app.core.errors import AmlineError
 from app.models.user import User
 from app.repositories.memory.state import get_store
+from app.schemas.crm import CrmTaskCreateBody, CrmTaskPatchBody
 from app.schemas.v1.payloads import CrmActivityBody, CrmLeadCreateBody, CrmLeadPatchBody
 
 router = APIRouter(tags=["crm"])
@@ -111,6 +112,99 @@ def crm_lead_delete(lead_id: str) -> Response:
     s.crm_leads.pop(idx)
     s.crm_activities.pop(lead_id, None)
     s.audit_event(s.mock_user["id"], "crm.lead.delete", "lead", {"lead_id": lead_id})
+    return Response(status_code=204)
+
+
+def _crm_lead_row(lead_id: str) -> dict | None:
+    return next((l for l in get_store().crm_leads if l["id"] == lead_id), None)
+
+
+@router.get("/admin/crm/leads/{lead_id}/tasks")
+def crm_tasks_list(lead_id: str) -> list:
+    if not _crm_lead_row(lead_id):
+        raise AmlineError(
+            "RESOURCE_NOT_FOUND",
+            "لید یافت نشد.",
+            status_code=404,
+            details={"entity": "lead", "lead_id": lead_id},
+        )
+    s = get_store()
+    return list(s.crm_tasks_by_lead.get(lead_id, []))
+
+
+@router.post("/admin/crm/leads/{lead_id}/tasks", status_code=201)
+def crm_task_create(lead_id: str, body: CrmTaskCreateBody) -> dict:
+    if not _crm_lead_row(lead_id):
+        raise AmlineError(
+            "RESOURCE_NOT_FOUND",
+            "لید یافت نشد.",
+            status_code=404,
+            details={"entity": "lead", "lead_id": lead_id},
+        )
+    s = get_store()
+    now = datetime.now(timezone.utc).isoformat()
+    tid = f"task-{s.crm_task_seq:04d}"
+    s.crm_task_seq += 1
+    row = {
+        "id": tid,
+        "lead_id": lead_id,
+        "title": body.title,
+        "due_date": body.due_date,
+        "done": False,
+        "created_at": now,
+    }
+    s.crm_tasks_by_lead.setdefault(lead_id, []).append(row)
+    return row
+
+
+@router.patch("/admin/crm/leads/{lead_id}/tasks/{task_id}")
+def crm_task_patch(lead_id: str, task_id: str, body: CrmTaskPatchBody) -> dict:
+    if not _crm_lead_row(lead_id):
+        raise AmlineError(
+            "RESOURCE_NOT_FOUND",
+            "لید یافت نشد.",
+            status_code=404,
+            details={"entity": "lead", "lead_id": lead_id},
+        )
+    s = get_store()
+    bucket = s.crm_tasks_by_lead.get(lead_id, [])
+    row = next((t for t in bucket if t["id"] == task_id), None)
+    if not row:
+        raise AmlineError(
+            "RESOURCE_NOT_FOUND",
+            "وظیفه یافت نشد.",
+            status_code=404,
+            details={"entity": "task", "task_id": task_id},
+        )
+    if body.title is not None:
+        row["title"] = body.title
+    if body.due_date is not None:
+        row["due_date"] = body.due_date
+    if body.done is not None:
+        row["done"] = body.done
+    return row
+
+
+@router.delete("/admin/crm/leads/{lead_id}/tasks/{task_id}", status_code=204)
+def crm_task_delete(lead_id: str, task_id: str) -> Response:
+    if not _crm_lead_row(lead_id):
+        raise AmlineError(
+            "RESOURCE_NOT_FOUND",
+            "لید یافت نشد.",
+            status_code=404,
+            details={"entity": "lead", "lead_id": lead_id},
+        )
+    s = get_store()
+    bucket = s.crm_tasks_by_lead.get(lead_id, [])
+    idx = next((i for i, t in enumerate(bucket) if t["id"] == task_id), None)
+    if idx is None:
+        raise AmlineError(
+            "RESOURCE_NOT_FOUND",
+            "وظیفه یافت نشد.",
+            status_code=404,
+            details={"entity": "task", "task_id": task_id},
+        )
+    bucket.pop(idx)
     return Response(status_code=204)
 
 

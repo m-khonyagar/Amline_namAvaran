@@ -69,6 +69,8 @@ class MemoryStore:
     id_counter: int = 1
     crm_leads: List[Dict[str, Any]] = field(default_factory=list)
     crm_activities: Dict[str, List[Dict[str, Any]]] = field(default_factory=dict)
+    crm_tasks_by_lead: Dict[str, List[Dict[str, Any]]] = field(default_factory=dict)
+    crm_task_seq: int = 1
     crm_seq: int = 4
     notification_reads: Dict[str, Set[str]] = field(default_factory=dict)
 
