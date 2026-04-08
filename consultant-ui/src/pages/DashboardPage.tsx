@@ -78,7 +78,7 @@ export default function DashboardPage() {
         <div className="rounded-[var(--amline-radius-lg)] border border-amber-200 bg-[var(--amline-warning-muted)] p-5 dark:border-amber-900/50 dark:bg-amber-950/30">
           <h2 className="amline-title mb-3 text-amber-950 dark:text-amber-100">اقدام بعدی پیشنهادی</h2>
           <ul className="space-y-4">
-            {data.next_steps.map((s) => (
+            {data.next_steps.map((s: { title: string; description: string }) => (
               <li key={s.title}>
                 <p className="text-sm font-semibold text-amber-950 dark:text-amber-50">{s.title}</p>
                 <p className="mt-1 text-sm leading-relaxed text-amber-900/90 dark:text-amber-100/90">{s.description}</p>

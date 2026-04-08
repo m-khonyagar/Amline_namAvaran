@@ -35,6 +35,9 @@ lib/
 # استثنا: کد منبع TypeScript پنل ادمین (rule سراسری lib/ مربوط به پایتون است)
 !admin-ui/src/lib/
 !admin-ui/src/lib/**
+# استثنا: کد منبع TypeScript پنل مشاور
+!consultant-ui/src/lib/
+!consultant-ui/src/lib/**
 lib64/
 parts/
 sdist/

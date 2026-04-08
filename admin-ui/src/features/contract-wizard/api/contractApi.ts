@@ -135,9 +135,8 @@ export const contractApi = {
     const form = new FormData();
     form.append('file', file);
     form.append('file_type', fileType);
-    return apiClient.post<FileResponse>('/files/upload', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    // Let the browser/axios set multipart boundary automatically.
+    return apiClient.post<FileResponse>('/files/upload', form);
   },
 };
 
