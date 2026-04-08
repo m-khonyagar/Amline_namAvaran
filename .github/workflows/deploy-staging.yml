@@ -1,5 +1,5 @@
 # دیپلوی استیجینگ: پنل ادمین (Vite) + سایت مارکتینگ (Next static export)
-# بک‌اند استیجینگ: https://amline-backend-staging.darkube.app (ر. API_DOCS.md)
+# بک‌اند پیش‌فرض برای بیلد ادمین: https://api.amline.ir (ر. API_DOCS.md؛ Darkube با STAGING_API_URL)
 #
 # GitHub → Settings → Secrets and variables:
 #   Variable: STAGING_DEPLOY_HOST (الزامی برای SCP)
@@ -44,7 +44,7 @@ jobs:
         id: conf
         run: |
           API="${{ vars.STAGING_API_URL }}"
-          if [ -z "$API" ]; then API="https://amline-backend-staging.darkube.app"; fi
+          if [ -z "$API" ]; then API="https://api.amline.ir"; fi
           echo "api_url=$API" >> "$GITHUB_OUTPUT"
 
       - name: Install & build (Turbo — root workspace)

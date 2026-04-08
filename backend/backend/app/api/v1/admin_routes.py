@@ -137,7 +137,9 @@ def admin_metrics_summary() -> dict:
     )
     terminal = {"LOST", "CONTRACTED"}
     active_leads = sum(
-        1 for lead in s.crm_leads if str(lead.get("status") or "") not in terminal
+        1
+        for lead in s.crm_leads
+        if str(lead.get("status") or "") not in terminal
     )
     return {
         "contracts_total": len(s.contracts),
@@ -156,9 +158,7 @@ def admin_metrics_operations(request: Request) -> dict:
 
 
 def _admin_user_id(request: Request) -> str:
-    return (
-        request.headers.get("X-User-Id") or ""
-    ).strip() or get_store().mock_user.get("id", "mock-001")
+    return (request.headers.get("X-User-Id") or "").strip() or get_store().mock_user.get("id", "mock-001")
 
 
 @router.get("/admin/notifications")

@@ -13,7 +13,7 @@ const vazirmatn = Vazirmatn({
 
 export const metadata: Metadata = {
   title: 'اَملاین — پنل کاربر',
-  description: 'مشاهده و انعقاد قرارداد',
+  description: 'قرارداد، نیازمندی، بازار و کیف پول',
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {

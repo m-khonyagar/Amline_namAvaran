@@ -5,6 +5,7 @@ import { OtpForm } from '../OtpForm';
 import { StepErrorBanner } from '../StepErrorBanner';
 import { ensureMappedError } from '../../../../lib/errorMapper';
 import { useMappedStepError } from '../../hooks/useMappedStepError';
+import { DEV_FIXED_TEST_OTP, isAdminDevBypassEnabled } from '../../../../lib/devLocalAuth';
 
 type SigningPhase = 'idle' | 'otp_sent' | 'waiting_other_party';
 
@@ -16,6 +17,7 @@ interface PartySignState {
 }
 
 export function SigningStep({ contractId, onComplete, signingParties = [] }: StepProps) {
+  const devQuickOtp = isAdminDevBypassEnabled() ? DEV_FIXED_TEST_OTP : undefined;
   const [partyStates, setPartyStates] = useState<Record<string, PartySignState>>({});
   const [activePartyId, setActivePartyId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -138,6 +140,7 @@ export function SigningStep({ contractId, onComplete, signingParties = [] }: Ste
             onResend={() => handleRequestSign(activeParty.id, activeParty.mobile)}
             isLoading={isLoading}
             error={otpError}
+            devQuickOtp={devQuickOtp}
           />
         </div>
       )}

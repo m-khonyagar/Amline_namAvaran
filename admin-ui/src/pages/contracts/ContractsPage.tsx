@@ -106,7 +106,7 @@ export default function ContractsPage() {
   return (
     <div dir="rtl" className="p-6 text-[var(--amline-fg)]">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[var(--amline-fg)]">قراردادها</h1>
+        <h1 className="text-2xl font-bold text-gray-900">قراردادها</h1>
         {hasPermission('contracts:write') ? (
           <button
             type="button"

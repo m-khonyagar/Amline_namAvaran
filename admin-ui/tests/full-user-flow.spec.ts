@@ -31,7 +31,7 @@ test('فلو ۱: ورود به سیستم و مشاهده داشبورد', async
 
   // بررسی فرم login
   await expect(page.getByPlaceholder(/0912/)).toBeVisible();
-  await expect(page.getByRole('button', { name: /ارسال کد/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'ارسال کد تأیید' })).toBeVisible();
   await screenshot(page, '01-login-page');
 
   // ورود آزمایشی
@@ -116,7 +116,8 @@ test('فلو ۳: Contract Wizard — شروع قرارداد رهن و اجار�
   // MSW پاسخ می‌دهد — باید به مرحله اطلاعات مالک برسیم
   await wizardStartBtn.click();
   await expect(page.getByRole('heading', { name: /اطلاعات مالک/ })).toBeVisible({ timeout: 15000 });
-  await expect(page.getByRole('button', { name: 'شخص حقیقی' })).toBeVisible();
+  // LandlordStep از WfLabeledRadio استفاده می‌کند که <label> است نه <button>
+  await expect(page.getByText('شخص حقیقی هستم')).toBeVisible();
   await screenshot(page, '10-wizard-after-start');
 });
 
@@ -165,11 +166,11 @@ test('فلو ۵: صفحه قراردادها و navigation', async ({ page }) =>
 
   await page.locator('nav a span:text-is("قراردادها")').click();
   await expect(page).toHaveURL(`${BASE}/contracts`);
-  await expect(page.getByRole('button', { name: /قرارداد جدید/i })).toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole('button', { name: '+ قرارداد جدید' })).toBeVisible({ timeout: 10000 });
   await screenshot(page, '12-contracts-list');
 
-  // کلیک روی «قرارداد جدید» باید به wizard هدایت کند
-  await page.getByRole('button', { name: /قرارداد جدید/i }).click();
+  // دکمهٔ اصلی لیست: «+ قرارداد جدید» (جدا از «شروع قرارداد جدید» در بنر)
+  await page.getByRole('button', { name: '+ قرارداد جدید' }).click();
   await expect(page).toHaveURL(`${BASE}/contracts/wizard`);
   await screenshot(page, '13-contracts-to-wizard');
 });

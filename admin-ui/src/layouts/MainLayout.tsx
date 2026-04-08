@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { LogOut, Menu, Search, X } from 'lucide-react';
-import { getAdminNavSectionsResolved } from '../config/adminNav';
+import { ADMIN_NAV_SECTIONS } from '../config/adminNav';
 import { AdminCommandMenu } from '../components/AdminCommandMenu';
-import { AmlineLogo } from '../components/AmlineLogo';
 import { useAuth } from '../hooks/useAuth';
 import { NotificationsBell } from '../components/NotificationsBell';
 import { ThemeToggle } from '../components/ThemeToggle';
@@ -11,20 +10,23 @@ import { cn } from '../lib/cn';
 
 function BrandMark({ compact }: { compact?: boolean }) {
   return (
-    <Link
-      to="/dashboard"
-      className={cn(
-        'group flex min-w-0 items-center gap-2 rounded-amline-md outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[var(--amline-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--amline-surface)] dark:focus-visible:ring-offset-slate-900',
-        compact ? 'gap-1.5' : 'gap-3'
-      )}
-    >
-      <AmlineLogo height={compact ? 32 : 42} className="min-w-0" />
-      {!compact && (
-        <span className="hidden min-w-0 text-right sm:block">
-          <span className="amline-caption block truncate text-[var(--amline-fg-muted)]">پنل مدیریت</span>
-        </span>
-      )}
-    </Link>
+    <div className={cn('flex items-center gap-3', compact && 'gap-2')}>
+      <div
+        className={cn(
+          'flex shrink-0 items-center justify-center rounded-amline-md bg-gradient-to-br from-[var(--amline-primary)] to-[var(--amline-accent)] font-extrabold text-white shadow-[var(--amline-shadow-sm)]',
+          compact ? 'h-9 w-9 text-sm' : 'h-11 w-11 text-base'
+        )}
+        aria-hidden
+      >
+        ا
+      </div>
+      <div className="min-w-0 text-right">
+        <p className={cn('font-extrabold tracking-tight text-[var(--amline-primary)]', compact ? 'text-sm' : 'text-lg')}>
+          اَملاین
+        </p>
+        <p className="amline-caption truncate">پنل مدیریت</p>
+      </div>
+    </div>
   );
 }
 
@@ -45,7 +47,7 @@ export default function MainLayout() {
     return () => document.removeEventListener('keydown', onKey);
   }, []);
 
-  const sections = getAdminNavSectionsResolved().map((section) => ({
+  const sections = ADMIN_NAV_SECTIONS.map((section) => ({
     ...section,
     items: section.items.filter((item) => !item.permission || hasPermission(item.permission)),
   })).filter((s) => s.items.length > 0);

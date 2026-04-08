@@ -18,6 +18,7 @@ export default {
       },
       colors: {
         primary: amlineThemeTokens.colors.primary,
+        brand: amlineThemeTokens.colors.brand,
         secondary: {
           DEFAULT: '#64748b',
           dark: '#475569',

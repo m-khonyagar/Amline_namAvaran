@@ -5,7 +5,14 @@ import { useRouter } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
 import { toast } from 'sonner'
 import { ensureMappedError } from '../../lib/errorMapper'
-import { devLogin, isDevBypassEnabled, loginWithOtp, sendOtp } from '../../lib/auth'
+import {
+  DEV_FIXED_TEST_MOBILE,
+  DEV_FIXED_TEST_OTP,
+  devLogin,
+  isDevBypassEnabled,
+  loginWithOtp,
+  sendOtp,
+} from '../../lib/auth'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -53,17 +60,47 @@ export default function LoginPage() {
     }
   }
 
+  async function onDevTrialSendOtp() {
+    try {
+      setLoading(true)
+      setMobile(DEV_FIXED_TEST_MOBILE)
+      await sendOtp(DEV_FIXED_TEST_MOBILE)
+      setStep('otp')
+      setOtp('')
+      toast.success('کد برای شماره تست ارسال شد؛ در mock با ۱۱۱۱۱ تأیید کنید.')
+    } catch (error: unknown) {
+      const m = ensureMappedError(error)
+      toast.error(m.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function onDevTrialVerifyOtp() {
+    try {
+      setLoading(true)
+      await loginWithOtp(DEV_FIXED_TEST_MOBILE, DEV_FIXED_TEST_OTP)
+      toast.success('ورود آزمایشی با OTP انجام شد.')
+      router.replace('/contracts')
+    } catch (error: unknown) {
+      const m = ensureMappedError(error)
+      toast.error(m.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <main className="mx-auto max-w-md px-4 py-8 sm:px-6 sm:py-12">
-      <div className="rounded-amline border border-[var(--amline-border)] bg-[var(--amline-surface)] p-5 shadow-amline dark:border-slate-700 dark:bg-[var(--amline-surface-elevated)]">
+      <div className="card p-5 dark:border-slate-700 dark:bg-[var(--amline-surface-elevated)]">
         <h1 className="amline-display text-[var(--amline-primary)]">ورود به اَملاین</h1>
-        <p className="mt-2 text-sm leading-relaxed text-[var(--amline-fg-muted)]">
+        <p className="amline-body mt-2">
           برای مدیریت قراردادها ابتدا با شماره موبایل وارد شوید.
         </p>
 
         {step === 'mobile' ? (
           <form onSubmit={onSendOtp} className="mt-6 space-y-4" noValidate>
-            <label className="block text-sm font-medium text-[var(--amline-fg)]" htmlFor="mobile">
+            <label className="label block" htmlFor="mobile">
               شماره موبایل
             </label>
             <input
@@ -71,22 +108,28 @@ export default function LoginPage() {
               type="tel"
               inputMode="numeric"
               dir="ltr"
-              className="w-full rounded-amline border border-[var(--amline-border)] bg-transparent px-3 py-2 text-sm outline-none ring-0 transition focus:border-[var(--amline-primary)] dark:border-slate-700"
+              className="input dark:border-slate-700 dark:bg-slate-950/30"
               placeholder="0912xxxxxxx"
               value={mobile}
               onChange={(e) => setMobile(e.target.value)}
             />
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-amline bg-[var(--amline-primary)] px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-            >
+            <button type="submit" disabled={loading} className="btn btn-primary w-full min-h-[48px] font-semibold">
               {loading ? 'در حال ارسال...' : 'ارسال کد تأیید'}
             </button>
+            {devBypass ? (
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => void onDevTrialSendOtp()}
+                className="btn btn-outline w-full border-amber-400 text-amber-900 dark:border-amber-600 dark:text-amber-200"
+              >
+                ارسال کد آزمایشی (۰۹۱۰۰۰۰۰۰۰۰۰)
+              </button>
+            ) : null}
           </form>
         ) : (
           <form onSubmit={onLogin} className="mt-6 space-y-4" noValidate>
-            <label className="block text-sm font-medium text-[var(--amline-fg)]" htmlFor="otp">
+            <label className="label block" htmlFor="otp">
               کد تأیید
             </label>
             <input
@@ -94,18 +137,24 @@ export default function LoginPage() {
               type="text"
               inputMode="numeric"
               dir="ltr"
-              className="w-full rounded-amline border border-[var(--amline-border)] bg-transparent px-3 py-2 text-sm outline-none ring-0 transition focus:border-[var(--amline-primary)] dark:border-slate-700"
+              className="input dark:border-slate-700 dark:bg-slate-950/30"
               placeholder="کد ۴ تا ۶ رقمی"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
             />
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-amline bg-[var(--amline-primary)] px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-            >
+            <button type="submit" disabled={loading} className="btn btn-primary w-full min-h-[48px] font-semibold">
               {loading ? 'در حال ورود...' : 'ورود'}
             </button>
+            {devBypass ? (
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => void onDevTrialVerifyOtp()}
+                className="btn btn-outline w-full border-amber-400 text-amber-900 dark:border-amber-600 dark:text-amber-200"
+              >
+                تأیید آزمایشی توسعه ({DEV_FIXED_TEST_OTP})
+              </button>
+            ) : null}
           </form>
         )}
 
@@ -118,13 +167,13 @@ export default function LoginPage() {
               toast.success('ورود آزمایشی انجام شد.')
               router.replace('/contracts')
             }}
-            className="mt-3 w-full rounded-amline border border-[var(--amline-border)] px-4 py-2 text-sm font-medium text-[var(--amline-fg-muted)] transition hover:bg-[var(--amline-surface-muted)] dark:border-slate-700"
+            className="btn btn-outline mt-3 w-full dark:border-slate-700"
           >
-            ورود آزمایشی توسعه
+            ورود آزمایشی توسعه (بدون OTP)
           </button>
         ) : null}
 
-        <div className="mt-5 text-xs text-[var(--amline-fg-subtle)]">
+        <div className="amline-caption mt-5">
           <Link href="/" className="text-[var(--amline-primary)] hover:underline">
             بازگشت به خانه
           </Link>

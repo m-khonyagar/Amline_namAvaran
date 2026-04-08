@@ -14,8 +14,8 @@ export function ThemedToaster() {
         classNames: {
           toast:
             resolved === 'dark'
-              ? 'bg-slate-900 text-slate-100 border border-slate-700'
-              : 'bg-white text-slate-900 border border-slate-200',
+              ? 'bg-[var(--amline-surface-elevated)] text-[var(--amline-fg)] border border-[var(--amline-border)]'
+              : 'bg-[var(--amline-surface)] text-[var(--amline-fg)] border border-[var(--amline-border)] shadow-[var(--amline-shadow-sm)]',
         },
       }}
     />

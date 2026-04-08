@@ -25,7 +25,7 @@ const MAX_FILES = 5;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
 
-export function PlaceInfoStep({ contractId, onComplete }: StepProps) {
+export function PlaceInfoStep({ contractId, contractType, onComplete }: StepProps) {
   const { error: serverError, details, hint, setFromError, clear } = useMappedStepError();
   const [uploadedFileIds, setUploadedFileIds] = useState<number[]>([]);
   const [uploadedFileNames, setUploadedFileNames] = useState<string[]>([]);
@@ -141,7 +141,9 @@ export function PlaceInfoStep({ contractId, onComplete }: StepProps) {
 
   return (
     <div dir="rtl" className="space-y-4">
-      <h2 className="text-lg font-bold text-gray-800">اطلاعات ملک</h2>
+      <h2 className="text-lg font-bold text-gray-800">
+        {contractType === 'PROPERTY_RENT' ? 'اطلاعات ملک اجاره‌ای' : 'اطلاعات ملک'}
+      </h2>
       <StepErrorBanner message={serverError} details={details} hint={hint} onDismiss={() => clear()} />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
@@ -347,7 +349,11 @@ export function PlaceInfoStep({ contractId, onComplete }: StepProps) {
           disabled={isSubmitting || isUploading}
           className="w-full bg-primary text-white rounded-lg py-2.5 font-medium disabled:opacity-50"
         >
-          {isSubmitting ? 'در حال ثبت...' : 'ثبت اطلاعات ملک و ادامه'}
+          {isSubmitting
+            ? 'در حال ثبت...'
+            : contractType === 'PROPERTY_RENT'
+              ? 'ثبت اطلاعات ملک اجاره‌ای و ادامه'
+              : 'ثبت اطلاعات ملک و ادامه'}
         </button>
       </form>
     </div>

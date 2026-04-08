@@ -1,5 +1,5 @@
 name: Sweep SSOT task
-description: Task for Sweep AI — Amline SSOT v2.0 (use label `sweep` + title prefix `Sweep:`).
+description: SSOT v2.0 task (label `sweep` + title prefix `Sweep:`) — use Copilot agent or Cursor per runbook.
 title: "Sweep: "
 labels:
   - sweep
@@ -7,8 +7,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        **Sweep AI** will implement this issue. Title must start with `Sweep:` (already set).  
-        After submit, add label **`sweep`** if the form did not apply it.
+        **Automation:** `sweep.yaml` on `main` defines rules for agents. The legacy Sweep **GitHub App** is deprecated — use **GitHub Copilot coding agent** or **Cursor** (see `docs/SWEEP_RUNBOOK.md`).  
+        Title must start with `Sweep:` (pre-filled). Label **`sweep`** should be applied (this template adds it).
 
   - type: textarea
     id: objective
@@ -38,7 +38,7 @@ body:
     id: acceptance
     attributes:
       label: Acceptance Criteria
-      description: Checklist Sweep must satisfy (tests, CI, API shape).
+      description: Checklist (tests, CI, API shape).
     validations:
       required: true
 

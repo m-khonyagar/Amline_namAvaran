@@ -6,15 +6,22 @@
   "description": "Admin UI for Amline Platform - اَملاین",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/assert-safe-production-env.mjs",
+    "dev:e2e": "vite --mode e2e",
     "dev:local": "vite --port 3005 --strictPort",
     "build": "tsc && vite build",
+    "verify": "npx tsc --noEmit && vitest run",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 500",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:a11y": "playwright test accessibility-axe.spec.ts",
+    "test:e2e:staging": "playwright test staging-admin-smoke.spec.ts --config=playwright.staging.config.ts",
+    "test:e2e:staging:all": "playwright test tests/staging-admin-smoke.spec.ts tests/staging-full-routes.spec.ts --config=playwright.staging.config.ts"
   },
   "dependencies": {
+    "@sentry/react": "^8.55.1",
     "@tanstack/react-query": "^5.51.1",
     "axios": "^1.7.2",
     "axios-cookiejar-support": "^5.0.3",
@@ -23,6 +30,7 @@
     "date-fns": "^3.6.0",
     "framer-motion": "^11.2.12",
     "jalaali-js": "^1.2.8",
+    "jalali-react-datepicker": "^1.2.1",
     "lucide-react": "^0.408.0",
     "maplibre-gl": "^5.22.0",
     "posthog-js": "^1.364.7",
@@ -35,15 +43,18 @@
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
     "tough-cookie": "^4.1.4",
+    "xlsx": "^0.18.5",
     "zod": "^3.23.8"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "4.60.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
     "@hookform/resolvers": "^3.9.0",
     "@playwright/test": "^1.58.2",
     "@tanstack/react-query-devtools": "^5.96.2",
+    "@types/jalaali-js": "^1.2.0",
     "@types/node": "^20.14.11",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",

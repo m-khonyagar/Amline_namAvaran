@@ -12,7 +12,12 @@
 | `dev-mock-api/` | FastAPI | 8080 | ⚠️ مکمل (بدون DB) |
 | `pdf-generator/` | FastAPI | 8001 | ✅ موجود |
 | `seo-dashboard/` | — | 3003 | ✅ موجود |
+| `consultant-ui/` | React + Vite | 3004 | ✅ موجود |
 | `backend/backend/` | FastAPI + PostgreSQL | 8080 | ✅ آماده |
+
+## عامل خودکار (Sweep)
+
+قوانین برای ایشوهای برچسب `sweep` و عنوان `Sweep:` در [`sweep.yaml`](sweep.yaml) و [`docs/SWEEP_RUNBOOK.md`](docs/SWEEP_RUNBOOK.md). اپ قدیمی GitHub Sweep برای باز کردن خودکار PR از Issue منسوخ است؛ برای اجرای واقعی از **GitHub Copilot coding agent** یا **Cursor** استفاده کنید.
 
 > **توجه:** `amline-ui` از **App Router** استفاده می‌کند (نه Pages Router).
 
@@ -57,14 +62,36 @@ npm run dev
 cd amline-ui
 npm install
 npm run dev
+
+# ۴. consultant-ui (پورت 3004) — اختیاری؛ نیاز به dev-mock-api با endpointهای /consultant/*
+cd consultant-ui
+npm install
+npm run dev
+# ورود نمونه با موبایل 09121112233 (در mock از قبل ثبت شده)
+```
+
+**هاب یکپارچهٔ محلی (بدون کد؛ لینک به همهٔ پنل‌ها):** فایل `local-dev-hub/index.html` را باز کنید، یا از ریشهٔ ریپو:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\start-platform-local-hub.ps1
+```
+
+برای باز کردن هم‌زمان چند پنجرهٔ dev (mock از قبل یا همین اسکریپت):
+
+```powershell
+.\scripts\start-platform-local-hub.ps1 -WithUserUi -WithAdminUi -WithConsultantUi
 ```
 
 ### متغیرهای محیطی
 
+جزئیات پورت‌ها، تضاد 8080، و پروفایل MSW در مقابل proxy: **[docs/LOCAL_DEV.md](docs/LOCAL_DEV.md)**.
+
+نقشهٔ راه آماده‌سازی برای کاربر واقعی (backend، امنیت، CI، چک‌لیست پروداکشن): **[docs/PLATFORM_GO_LIVE_ROADMAP.md](docs/PLATFORM_GO_LIVE_ROADMAP.md)**.
+
 `admin-ui/.env.local` (پیش‌فرض آماده است):
 ```env
-VITE_USE_MSW=true          # MSW برای mock در مرورگر
-VITE_ENABLE_DEV_BYPASS=false  # ورود آزمایشی — فقط برای dev و صریحاً true
+VITE_USE_MSW=true          # MSW برای mock در مرورگر؛ برای proxy به mock/backend مقدار false
+VITE_ENABLE_DEV_BYPASS=true  # ورود آزمایشی در dev؛ در سناریوی نزدیک production مقدار false
 VITE_DEV_PROXY_TARGET=http://127.0.0.1:8080
 VITE_API_URL=
 VITE_USE_CRM_API=false
@@ -74,6 +101,13 @@ VITE_USE_CRM_API=false
 ```env
 NEXT_PUBLIC_DEV_PROXY_TARGET=http://localhost:8080
 NEXT_PUBLIC_ENABLE_DEV_BYPASS=false
+```
+
+`consultant-ui/.env.local` (برای اتصال به dev-mock-api به‌جای MSW):
+```env
+VITE_USE_MSW=false
+VITE_DEV_PROXY_TARGET=http://127.0.0.1:8080
+VITE_API_URL=
 ```
 
 ---
@@ -165,4 +199,4 @@ cd amline-ui && npx playwright test
 
 ## مجوز
 
-© ۱۴۰۳ اَملاین — تمامی حقوق محفوظ است
+این مخزن تحت **MIT License** منتشر شده است. جزئیات را در فایل [LICENSE](LICENSE) ببینید.

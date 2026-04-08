@@ -1,20 +1,18 @@
-# دیپلوی production — فقط دستی. برای اتصال واقعی، مراحل نمونهٔ زیر را فعال کنید.
-#
-# GitHub → Environments → production (reviewers + secrets)
-# Secrets پیشنهادی: PRODUCTION_SSH_KEY، PRODUCTION_HOST، PRODUCTION_USER
-
-name: Deploy production (manual)
+name: Deploy Production
 
 on:
   workflow_dispatch:
-    inputs:
-      notes:
-        description: 'یادداشت کوتاه برای لاگ دیپلوی (اختیاری)'
-        required: false
-        default: ''
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - 'seo-dashboard/**'
 
 jobs:
   deploy:
+    # Skip when production SSH secrets are not configured (avoids failing every push to main).
+    if: ${{ secrets.DEPLOY_SSH_KEY != '' && secrets.DEPLOY_HOST != '' && secrets.DEPLOY_USER != '' }}
     runs-on: ubuntu-latest
     environment: production
 
@@ -22,19 +20,66 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: راهنما
+      - name: Setup SSH
         run: |
-          echo "Staging: از workflow «Deploy staging» استفاده کنید."
-          if [ -n "${{ inputs.notes }}" ]; then echo "Notes: ${{ inputs.notes }}"; fi
-          echo "::notice::برای SSH می‌توانید appleboy/ssh-action یا rsync با کلید از secrets اضافه کنید."
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          if [ -n "${{ secrets.DEPLOY_HOST }}" ]; then
+            ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+          else
+            echo "::warning::DEPLOY_HOST secret is not set — skipping ssh-keyscan"
+            exit 1
+          fi
 
-      # نمونه (غیرفعال) — `if: false` را بردارید و secrets را در GitHub تنظیم کنید:
-      # - name: Deploy over SSH
-      #   if: false
-      #   uses: appleboy/ssh-action@v1.0.3
-      #   with:
-      #     host: ${{ secrets.PRODUCTION_HOST }}
-      #     username: ${{ secrets.PRODUCTION_USER }}
-      #     key: ${{ secrets.PRODUCTION_SSH_KEY }}
-      #     script: |
-      #       cd /var/www/amline && git pull && docker compose up -d --build
+      - name: Copy files to server
+        run: |
+          rsync -az --delete \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='.next' \
+            --exclude='__pycache__' \
+            --exclude='.venv' \
+            --exclude='*.pyc' \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            ./ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/amline/app/
+
+      - name: Deploy on server
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} 'bash -s' << 'REMOTE'
+            set -e
+            cd /opt/amline/app
+
+            # اطمینان از وجود .env
+            if [ ! -f .env ]; then
+              echo "ERROR: .env file not found on server. Create it first."
+              exit 1
+            fi
+
+            echo "==> Pulling latest images and rebuilding..."
+            docker compose pull --ignore-pull-failures || true
+            docker compose build --no-cache backend admin-ui amline-ui consultant-ui
+
+            echo "==> Running migrations..."
+            docker compose run --rm db-init
+
+            echo "==> Starting all services..."
+            docker compose up -d --remove-orphans
+
+            echo "==> Waiting for backend health..."
+            for i in $(seq 1 30); do
+              if curl -sf http://localhost:8080/health > /dev/null 2>&1; then
+                echo "Backend is healthy."
+                break
+              fi
+              echo "Waiting... ($i/30)"
+              sleep 3
+            done
+
+            echo "==> Cleanup old images..."
+            docker image prune -f
+
+            echo "==> Deploy complete."
+            docker compose ps
+          REMOTE

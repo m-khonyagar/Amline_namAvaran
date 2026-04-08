@@ -110,7 +110,9 @@ def contracts_patch_terms(contract_id: str, body: ContractTermsPatchBody) -> dic
 
 
 @router.post("/contracts/{contract_id}/commissions", status_code=201)
-def contracts_add_commission(contract_id: str, body: CommissionCreateBody) -> dict:
+def contracts_add_commission(
+    contract_id: str, body: CommissionCreateBody
+) -> dict:
     return _flow.add_commission(contract_id, body)
 
 

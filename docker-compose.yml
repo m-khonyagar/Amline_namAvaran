@@ -167,14 +167,14 @@ services:
 
   amline-ui:
     build:
-      context: ./amline-ui
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: amline-ui/Dockerfile
     container_name: amline-ui
     environment:
-      - NEXT_PUBLIC_API_BASE_URL=http://backend
-      - NEXT_PUBLIC_API_URL=http://backend
+      - NEXT_PUBLIC_API_BASE_URL=http://backend:8000
+      - NEXT_PUBLIC_ENABLE_DEV_BYPASS=false
     ports:
-      - "3000:80"
+      - "3000:3000"
     depends_on:
       - backend
     networks:

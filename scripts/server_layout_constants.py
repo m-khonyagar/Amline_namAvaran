@@ -38,3 +38,23 @@ LEGACY_UNITS = (
     "amline-staging-site.service",
     "amline-staging-admin.service",
 )
+
+# پشت Caddy: فقط loopback (خارج با HTTPS روی ۴۴۳)
+INTERNAL_MARKETING_PORT = "10080"
+INTERNAL_ADMIN_PORT = "10081"
+LISTEN_HOST_LOOPBACK = "127.0.0.1"
+
+PATH_CADDYFILE = f"{PATH_REGISTRY_DIR}/Caddyfile"
+UNIT_CADDY_APPS = "caddy-apps.service"
+
+# دامنهٔ پیش‌فرض — با env CADDY_MARKETING_HOST / CADDY_ADMIN_HOST قابل override
+DEFAULT_CADDY_MARKETING_HOST = "staging.amline.ir"
+DEFAULT_CADDY_ADMIN_HOST = "admin.staging.amline.ir"
+
+CADDY_RELEASE = "2.8.4"
+
+# پروکسی Caddy: API production (مسیرهای legacy؛ روی VPS با IP زیر و SNI زده می‌شود اگر DNS خراب باشد).
+# Darkube یا دامنهٔ دیگر: STAGING_API_URL=...  |  غیرفعال کردن dial به IP: STAGING_API_DISABLE_CONNECT_IP=1
+DEFAULT_STAGING_API_URL = "https://api.amline.ir"
+# Current A record for api.amline.ir — update if DNS changes (see STAGING_API_CONNECT_IP).
+API_AMLINE_IR_TLS_DIAL_IPV4 = "212.80.24.56"

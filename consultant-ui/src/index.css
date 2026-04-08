@@ -1,0 +1,65 @@
+@import '../../packages/amline-ui-core/amline-tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.amline-display {
+  @apply text-2xl font-bold tracking-tight text-[var(--amline-fg)] md:text-3xl;
+}
+.amline-title {
+  @apply text-lg font-semibold text-[var(--amline-fg)] md:text-xl;
+}
+.amline-body {
+  @apply text-sm leading-relaxed text-[var(--amline-fg-muted)] md:text-base;
+}
+.amline-caption {
+  @apply text-xs text-[var(--amline-fg-subtle)];
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--amline-surface-muted);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--amline-border-strong);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--amline-fg-subtle);
+}
+.dark ::-webkit-scrollbar-track {
+  background: var(--amline-surface);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  font-family: 'Vazirmatn', 'Vazir', 'Tahoma', system-ui, sans-serif;
+  background: var(--amline-bg);
+  color: var(--amline-fg);
+  min-height: 100%;
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-text-size-adjust: 100%;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+[dir='rtl'] {
+  text-align: right;
+}

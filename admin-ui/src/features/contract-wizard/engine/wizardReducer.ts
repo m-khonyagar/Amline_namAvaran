@@ -35,6 +35,23 @@ export function wizardReducer(state: WizardState, action: WizardAction): WizardS
         error: null,
       };
 
+    case 'RESUME_CONTRACT': {
+      const idx = STEP_ORDER.indexOf(action.payload.nextStep);
+      const completedSteps =
+        idx > 1 ? (STEP_ORDER.slice(1, idx) as PRContractStep[]) : [];
+      return {
+        ...state,
+        contractId: action.payload.contractId,
+        contractType: action.payload.contractType,
+        isScribeMode: action.payload.isScribeMode,
+        currentStep: action.payload.nextStep,
+        contractStatus: action.payload.status,
+        completedSteps,
+        isLoading: false,
+        error: null,
+      };
+    }
+
     case 'APPLY_NEXT_STEP':
       return {
         ...state,
@@ -42,6 +59,15 @@ export function wizardReducer(state: WizardState, action: WizardAction): WizardS
           ? state.completedSteps
           : [...state.completedSteps, state.currentStep],
         currentStep: action.payload.nextStep, // ← از API
+        isLoading: false,
+        error: null,
+      };
+
+    case 'COMMISSION_PAID_CONTINUE':
+      return {
+        ...state,
+        contractStatus: action.payload.status,
+        currentStep: action.payload.nextStep,
         isLoading: false,
         error: null,
       };
