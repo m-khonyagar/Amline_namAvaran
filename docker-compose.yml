@@ -85,11 +85,9 @@ services:
       dockerfile: Dockerfile
       args:
         AMLINE_PYTHON_BASE: ${AMLINE_PYTHON_BASE:-python:3.12-slim-bookworm}
-        AMLINE_PIP_INDEX_URL: ${AMLINE_PIP_INDEX_URL:-}
+        AMLINE_OFFLINE_PIP: ${AMLINE_OFFLINE_PIP:-0}
       extra_hosts:
         - "mirror.arvancloud.ir:185.143.233.235"
-        - "pypi.tuna.tsinghua.edu.cn:101.6.15.130"
-        - "files.pythonhosted.org:151.101.192.223"
     container_name: amline-backend
     environment:
       - AMLINE_ENV=staging
@@ -134,11 +132,9 @@ services:
       dockerfile: Dockerfile
       args:
         AMLINE_PYTHON_BASE: ${AMLINE_PYTHON_BASE:-python:3.12-slim-bookworm}
-        AMLINE_PIP_INDEX_URL: ${AMLINE_PIP_INDEX_URL:-}
+        AMLINE_OFFLINE_PIP: ${AMLINE_OFFLINE_PIP:-0}
       extra_hosts:
         - "mirror.arvancloud.ir:185.143.233.235"
-        - "pypi.tuna.tsinghua.edu.cn:101.6.15.130"
-        - "files.pythonhosted.org:151.101.192.223"
     container_name: amline-pdf-generator
     environment:
       - APP_ENV=staging
@@ -240,11 +236,9 @@ services:
       dockerfile: Dockerfile
       args:
         AMLINE_PYTHON_BASE: ${AMLINE_PYTHON_BASE:-python:3.12-slim-bookworm}
-        AMLINE_PIP_INDEX_URL: ${AMLINE_PIP_INDEX_URL:-}
+        AMLINE_OFFLINE_PIP: ${AMLINE_OFFLINE_PIP:-0}
       extra_hosts:
         - "mirror.arvancloud.ir:185.143.233.235"
-        - "pypi.tuna.tsinghua.edu.cn:101.6.15.130"
-        - "files.pythonhosted.org:151.101.192.223"
     container_name: amline-db-init
     environment:
       - AMLINE_DATABASE_URL=postgresql+psycopg://${POSTGRES_USER:-amline}:${POSTGRES_PASSWORD:-amline_secret}@postgres:5432/${POSTGRES_DB:-amline}

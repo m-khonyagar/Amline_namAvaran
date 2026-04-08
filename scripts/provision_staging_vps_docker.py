@@ -6,6 +6,9 @@ Provision staging VPS: apt (IPv4 + Arvan mirror), Docker, repo at /opt/amline/ap
 If GitHub is blocked from the server (common on some networks), the monorepo is
 uploaded with `git archive` from this machine (no secrets in the tarball).
 
+Python wheels are downloaded on the VPS with `pip download` (host network),
+then Docker builds use `pip install --no-index` (no PyPI inside the build container).
+
 Env (required): DEPLOY_HOST, DEPLOY_PASSWORD
 Optional: DEPLOY_USER (default root), AMLINE_REPO_ROOT (default: monorepo root)
 """
@@ -40,6 +43,8 @@ $HOSTS_TAG
 140.82.121.10 codeload.github.com
 104.18.43.178 auth.docker.io
 44.217.169.79 registry-1.docker.io
+101.6.15.130 pypi.tuna.tsinghua.edu.cn
+151.101.192.223 files.pythonhosted.org
 HOSTS_EOF
 fi
 if ! grep -qF 'docker.arvancloud.ir' /etc/hosts 2>/dev/null; then
@@ -102,6 +107,21 @@ else
   exit 1
 fi
 
+echo "=== pip download on server (wheels for offline Docker pip) ==="
+apt-get install -y python3-pip python3-venv
+python3 -m pip install -q -U pip setuptools wheel
+mkdir -p backend/backend/docker-build-wheelhouse pdf-generator/docker-build-wheelhouse
+find backend/backend/docker-build-wheelhouse -mindepth 1 -delete 2>/dev/null || true
+find pdf-generator/docker-build-wheelhouse -mindepth 1 -delete 2>/dev/null || true
+python3 -m pip download \
+  --index-url https://pypi.tuna.tsinghua.edu.cn/simple \
+  --trusted-host pypi.tuna.tsinghua.edu.cn \
+  --trusted-host files.pythonhosted.org \
+  -r backend/backend/requirements.txt \
+  -r pdf-generator/requirements.txt \
+  -d backend/backend/docker-build-wheelhouse
+cp -a backend/backend/docker-build-wheelhouse/. pdf-generator/docker-build-wheelhouse/
+
 echo "=== .env ==="
 if [ ! -f .env ]; then
   J="$(openssl rand -hex 32)"
@@ -121,14 +141,14 @@ MINIO_SECRET_KEY=${MK}
 AMLINE_OTP_MAGIC_ENABLED=1
 KAVENEGAR_API_KEY=
 AMLINE_PYTHON_BASE=docker.arvancloud.ir/library/python:3.12-slim-bookworm
-AMLINE_PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
+AMLINE_OFFLINE_PIP=1
 ENVEOF
   chmod 600 .env
   echo "Created .env"
 else
   grep -q '^AMLINE_OTP_MAGIC_ENABLED=' .env || printf '\nAMLINE_OTP_MAGIC_ENABLED=1\n' >> .env
   grep -q '^AMLINE_PYTHON_BASE=' .env || printf '\nAMLINE_PYTHON_BASE=docker.arvancloud.ir/library/python:3.12-slim-bookworm\n' >> .env
-  grep -q '^AMLINE_PIP_INDEX_URL=' .env || printf '\nAMLINE_PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple\n' >> .env
+  grep -q '^AMLINE_OFFLINE_PIP=' .env || printf '\nAMLINE_OFFLINE_PIP=1\n' >> .env
   echo "Kept existing .env"
 fi
 

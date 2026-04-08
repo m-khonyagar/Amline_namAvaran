@@ -16,7 +16,6 @@ Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 EOF
 RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/99mirror-stale-ok
 
-# Install system dependencies for WeasyPrint
 RUN apt-get update && apt-get install -y \
     libpango-1.0-0 \
     libpangocairo-1.0-0 \
@@ -29,26 +28,19 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-
-ARG AMLINE_PIP_INDEX_URL=
-RUN if [ -n "$AMLINE_PIP_INDEX_URL" ]; then \
-      THOST=$(printf '%s' "$AMLINE_PIP_INDEX_URL" | sed -e 's|^https*://||' -e 's|/.*||'); \
-      pip install --index-url "$AMLINE_PIP_INDEX_URL" --trusted-host "$THOST" \
-        --trusted-host files.pythonhosted.org \
-        --no-cache-dir -r requirements.txt; \
+COPY docker-build-wheelhouse/ /wheelhouse/
+ARG AMLINE_OFFLINE_PIP=0
+RUN if [ "$AMLINE_OFFLINE_PIP" = "1" ]; then \
+      pip install --no-index --find-links=/wheelhouse --no-cache-dir -r requirements.txt; \
     else \
       pip install --no-cache-dir -r requirements.txt; \
     fi
 
-# Copy source code
 COPY src/ ./src/
 
-# Expose port
 EXPOSE 8000
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Run the application
 CMD ["python", "-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -17,6 +17,12 @@ build/
 .eslintcache
 .turbo/
 
+# Staging Docker offline wheels (only .gitkeep is tracked)
+backend/backend/docker-build-wheelhouse/*
+!backend/backend/docker-build-wheelhouse/.gitkeep
+pdf-generator/docker-build-wheelhouse/*
+!pdf-generator/docker-build-wheelhouse/.gitkeep
+
 # Python
 .hypothesis/
 __pycache__/

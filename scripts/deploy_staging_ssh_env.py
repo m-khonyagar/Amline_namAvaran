@@ -6,6 +6,7 @@ Required environment variables (no secrets in repo):
   DEPLOY_HOST       e.g. 212.80.24.109
   DEPLOY_USER       e.g. root
   DEPLOY_PASSWORD   SSH password (use SSH keys in production)
+  DEPLOY_SSH_KEY    path to private key (if set, used instead of password)
 
 Optional:
   ADMIN_REMOTE  default from server_layout_constants ( /opt/apps/amline/staging/admin-ui )
@@ -38,12 +39,13 @@ def main() -> None:
     host = os.environ.get("DEPLOY_HOST", "").strip()
     user = os.environ.get("DEPLOY_USER", "root").strip()
     password = os.environ.get("DEPLOY_PASSWORD", "")
+    key_path = os.environ.get("DEPLOY_SSH_KEY", "").strip()
     admin_remote = os.environ.get("ADMIN_REMOTE", PATH_AMLINE_STAGING_ADMIN_UI).strip()
     site_remote = os.environ.get("SITE_REMOTE", PATH_AMLINE_STAGING_MARKETING).strip()
     skip_site = os.environ.get("SKIP_SITE", "").strip() in ("1", "true", "yes")
 
-    if not host or not password:
-        print("Set DEPLOY_HOST and DEPLOY_PASSWORD", file=sys.stderr)
+    if not host or (not password and not (key_path and os.path.isfile(key_path))):
+        print("Set DEPLOY_HOST and (DEPLOY_PASSWORD or DEPLOY_SSH_KEY)", file=sys.stderr)
         sys.exit(2)
 
     admin_dist = repo / "admin-ui" / "dist"
@@ -67,14 +69,18 @@ def main() -> None:
 
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(
-            hostname=host,
-            username=user,
-            password=password,
-            timeout=60,
-            allow_agent=False,
-            look_for_keys=False,
-        )
+        connect_kw: dict = {
+            "hostname": host,
+            "username": user,
+            "timeout": 60,
+            "allow_agent": False,
+            "look_for_keys": False,
+        }
+        if key_path and os.path.isfile(key_path):
+            connect_kw["key_filename"] = key_path
+        else:
+            connect_kw["password"] = password
+        client.connect(**connect_kw)
         try:
             sftp = client.open_sftp()
             sftp.put(str(admin_tar), "/tmp/admin-ui-staging.tar.gz")
