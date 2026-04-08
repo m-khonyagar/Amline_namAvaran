@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import type { LeadActivity } from '../types'
 import { loadActivities, addLeadActivityRecord } from '../crmService'
 import { useAuth } from '../../../hooks/useAuth'
+import { formatShamsiDate } from '../../../lib/persianDateTime'
 
 interface ActivityTimelineProps {
   leadId: string
@@ -114,7 +115,7 @@ export function ActivityTimeline({ leadId }: ActivityTimelineProps) {
                     {TYPE_LABELS[activity.type] ?? activity.type} — {activity.created_by}
                   </span>
                   <span className="text-xs text-gray-400">
-                    {new Date(activity.created_at).toLocaleDateString('fa-IR')}
+                    {formatShamsiDate(activity.created_at)}
                   </span>
                 </div>
                 <p className="text-sm text-gray-800">{activity.content}</p>

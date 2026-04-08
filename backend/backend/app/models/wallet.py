@@ -6,7 +6,7 @@ import enum
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import BigInteger, DateTime
+from sqlalchemy import BigInteger, DateTime, Numeric
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy import ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -83,3 +83,15 @@ class WalletLedgerEntry(Base):
     account: Mapped["WalletAccount"] = relationship(
         "WalletAccount", back_populates="entries"
     )
+
+
+class Wallet(Base):
+    """Simple per-user wallet from ``wallets`` (alembic 0001_init); used by auth bootstrap."""
+
+    __tablename__ = "wallets"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), unique=True, index=True
+    )
+    balance: Mapped[float] = mapped_column(Numeric(14, 2), nullable=False, server_default="0")

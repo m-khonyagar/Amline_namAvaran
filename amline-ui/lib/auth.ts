@@ -2,6 +2,8 @@ import { fetchJson } from './fetchJson'
 
 const ACCESS = 'access_token'
 const REFRESH = 'refresh_token'
+export const DEV_FIXED_TEST_MOBILE = '09100000000'
+export const DEV_FIXED_TEST_OTP = '11111'
 
 function setCookie(name: string, value: string, days: number) {
   if (typeof document === 'undefined') return

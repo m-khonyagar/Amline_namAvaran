@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { apiV1 } from '@/lib/apiPaths';
+import { apiV1 } from '../../../lib/apiPaths';
 import { apiClient } from '../api/contractApi';
+import { formatShamsiDate } from '../../../lib/persianDateTime';
 
 interface Addendum {
   id: string;
@@ -27,7 +28,7 @@ const signStatusClass: Record<Addendum['sign_status'], string> = {
 
 function formatDate(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString('fa-IR');
+    return formatShamsiDate(iso);
   } catch {
     return iso;
   }

@@ -30,9 +30,7 @@ async def _post_json(url: str, payload: dict[str, Any]) -> None:
         async with httpx.AsyncClient(timeout=15.0) as client:
             r = await client.post(url, json=payload)
             if r.status_code >= 400:
-                log.warning(
-                    "messaging bot send failed %s %s", r.status_code, r.text[:200]
-                )
+                log.warning("messaging bot send failed %s %s", r.status_code, r.text[:200])
     except Exception as e:
         log.warning("messaging bot send error: %s", e)
 
@@ -61,11 +59,7 @@ async def send_bale_message(chat_id: int, text: str) -> None:
 
 async def send_eitaa_message(chat_id: str, text: str) -> None:
     app_token = (os.getenv("AMLINE_EITAA_APP_TOKEN") or "").strip()
-    base = (
-        (os.getenv("AMLINE_EITAA_API_BASE") or "https://eitaayar.ir/api")
-        .strip()
-        .rstrip("/")
-    )
+    base = (os.getenv("AMLINE_EITAA_API_BASE") or "https://eitaayar.ir/api").strip().rstrip("/")
     if not app_token:
         log.debug("AMLINE_EITAA_APP_TOKEN not set; skip send")
         return
@@ -73,9 +67,7 @@ async def send_eitaa_message(chat_id: str, text: str) -> None:
     await _post_json(url, {"chat_id": chat_id, "text": text})
 
 
-def extract_telegram_like_update(
-    body: dict[str, Any],
-) -> tuple[Optional[int], Optional[str]]:
+def extract_telegram_like_update(body: dict[str, Any]) -> tuple[Optional[int], Optional[str]]:
     msg = body.get("message") or body.get("edited_message")
     if not isinstance(msg, dict):
         return None, None
@@ -143,7 +135,6 @@ async def handle_bale_update(body: dict[str, Any]) -> None:
 async def handle_eitaa_update(body: dict[str, Any]) -> None:
     cid, txt = extract_eitaa_flat(body)
     if cid:
-
         async def reply(t: str) -> None:
             await send_eitaa_message(cid, t)
 

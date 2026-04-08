@@ -23,6 +23,12 @@ uvicorn main:app --host 127.0.0.1 --port 8080 --reload
 
 سپس `http://127.0.0.1:8080/health` باید `{"status":"ok"}` برگرداند.
 
+## ورود پنل ادمین و کاربر (`admin-ui` / `amline-ui` روی mock)
+
+- **موبایل:** `09100000000`
+- **کد OTP:** `11111`  
+پاسخ `POST /admin/otp/send` برای همین شماره فیلد **`dev_code`** را هم برابر `11111` می‌دهد. هر ترکیب دیگری برای `/admin/login` رد می‌شود.
+
 ## نقشهٔ endpointهای سازمانی (قرارداد با admin-ui)
 
 | متد | مسیر | توضیح |
@@ -45,6 +51,19 @@ uvicorn main:app --host 127.0.0.1 --port 8080 --reload
 | GET | `/admin/crm/leads/{id}/activities` | فعالیت‌های لید |
 | POST | `/admin/crm/leads/{id}/activities` | ثبت فعالیت جدید |
 
+## پنل مشاور (`consultant-ui`)
+
+هم‌راستا با MSW در `admin-ui`؛ برای ورود نمونه موبایل **`09121112233`** را بزنید (کاربر `cons-demo-001` از قبل در حافظهٔ mock ثبت شده است).
+
+| متد | مسیر | توضیح |
+|-----|------|--------|
+| POST | `/consultant/auth/login` | بدنه: `{ "mobile": "09..." }` → `access_token`, `user` |
+| POST | `/consultant/auth/register` | ثبت‌نام + ایجاد پروندهٔ `SUBMITTED` |
+| GET | `/consultant/me` | هدر `Authorization: Bearer mock-consultant-{id}` |
+| GET | `/consultant/application` | پروندهٔ نظام یا `null` |
+| GET | `/consultant/dashboard/summary` | پروفایل، مزایا، گام‌های بعدی |
+| GET | `/consultant/leads` | `{ items, total }` |
+
 ## اتصال فرانت‌اند
 
 **admin-ui** (بدون MSW):
@@ -54,6 +73,10 @@ uvicorn main:app --host 127.0.0.1 --port 8080 --reload
 **amline-ui**:
 
 - در `.env.local`: `NEXT_PUBLIC_DEV_PROXY_TARGET=http://127.0.0.1:8080`
+
+**consultant-ui**:
+
+- در `.env.local`: `VITE_USE_MSW=false` و `VITE_DEV_PROXY_TARGET=http://127.0.0.1:8080` تا به‌جای MSW از **همین** mock استفاده شود.
 
 ## تست E2E (amline-ui + Playwright)
 
@@ -66,6 +89,16 @@ cd amline-ui
 npm install
 npm run test:e2e
 ```
+
+## تست خودکار (pytest)
+
+```powershell
+cd dev-mock-api
+pip install -r requirements-dev.txt
+python -m pytest tests/test_smoke.py -v
+```
+
+مسیرهای توسعه‌یافتهٔ ادمین (`mock_extended.py`) و `state.py` (ذخیرهٔ مشترک workspace/کاربر) با این تست‌ها smoke می‌شوند.
 
 ## محدودیت
 

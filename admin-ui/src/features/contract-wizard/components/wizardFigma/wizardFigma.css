@@ -1,0 +1,34 @@
+/* ویزارد قرارداد — نگاشت به Design System (متغیرهای سراسری amline-tokens.css) */
+.wizard-figma {
+  --wf-title: var(--amline-fg);
+  --wf-caption: var(--amline-fg-subtle);
+  --wf-placeholder: #b6b6bd;
+  --wf-disable-2: #b6b6bd;
+  --wf-border: var(--amline-border);
+  --wf-surface: var(--amline-surface);
+  --wf-light-surface: var(--amline-surface-muted);
+  --wf-paragraph-2: var(--amline-fg-muted);
+  --wf-field-radius: 13px;
+  --wf-card-radius: 16px;
+  --wf-page-tint: var(--amline-surface-muted);
+  --wf-status-wait-pay: #f90;
+  --wf-primary-teal: var(--amline-primary);
+  --wf-tag-commission-bg: #aedcdc;
+  --wf-radio-selected: var(--amline-primary);
+}
+
+.wizard-figma .wf-body-s {
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.wizard-figma .wf-body-m {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.wizard-figma .wf-subtitle-m {
+  font-size: 14px;
+  line-height: 1.6;
+  font-weight: 500;
+}

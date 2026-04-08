@@ -1,4 +1,4 @@
-# Validates Sweep config; Sweep execution = GitHub App + sweep.yaml on default branch.
+# Validates Sweep config. Hosted Sweep GitHub App is deprecated; this keeps SSOT rules merge-safe.
 
 name: Sweep AI
 
@@ -12,8 +12,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+  pull-requests: read
   issues: read
 
 concurrency:

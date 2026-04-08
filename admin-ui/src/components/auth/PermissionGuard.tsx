@@ -16,9 +16,6 @@ function isDevViewAllPages(): boolean {
 
 export function PermissionGuard({ permission, children }: PermissionGuardProps) {
   const { hasPermission } = useAuth();
-  if (isDevViewAllPages()) {
-    return <>{children}</>;
-  }
   if (!hasPermission(permission)) return <AccessDenied permission={permission} />;
   return <>{children}</>;
 }

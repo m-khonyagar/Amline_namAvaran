@@ -1,6 +1,7 @@
 """Dev mock API for local frontend testing (no production use)."""
 from __future__ import annotations
 
+import os
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
@@ -9,6 +10,44 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 app = FastAPI(title="Amline Dev Mock API", version="0.1.0")
+
+_MAGIC_MOBILE_RAW = (os.getenv("AMLINE_OTP_MAGIC_MOBILE") or "09107709601").strip()
+_MAGIC_CODE = (os.getenv("AMLINE_OTP_MAGIC_CODE") or "11111").strip()
+
+
+def _magic_feature_on() -> bool:
+    """Dev mock: magic OTP on by default; set AMLINE_OTP_MAGIC_ENABLED=0 to disable."""
+    raw = os.getenv("AMLINE_OTP_MAGIC_ENABLED")
+    if raw is None or not str(raw).strip():
+        return True
+    return str(raw).strip().lower() not in ("0", "false", "no", "off")
+
+
+def _norm_mobile(phone: str) -> str:
+    d = "".join(c for c in (phone or "") if c.isdigit())
+    if d.startswith("98") and len(d) >= 12:
+        d = "0" + d[2:]
+    if len(d) == 10 and d.startswith("9"):
+        d = "0" + d
+    return d
+
+
+def _magic_norm() -> str:
+    return _norm_mobile(_MAGIC_MOBILE_RAW)
+
+
+def _is_magic_mobile(phone: str) -> bool:
+    if not _magic_feature_on():
+        return False
+    return _norm_mobile(phone) == _magic_norm()
+
+
+def _magic_otp_ok(phone: str, otp: str) -> bool:
+    return _is_magic_mobile(phone) and (otp or "").strip() == _MAGIC_CODE
+
+
+def _otp_debug_for_mobile(mobile: Optional[str]) -> str:
+    return _MAGIC_CODE if mobile and _is_magic_mobile(mobile) else "424242"
 
 app.add_middleware(
     CORSMiddleware,
@@ -209,6 +248,8 @@ class LoginBody(BaseModel):
 
 @app.post("/admin/login")
 def admin_login(_body: LoginBody) -> Dict[str, Any]:
+    if _is_magic_mobile(_body.mobile) and not _magic_otp_ok(_body.mobile, _body.otp):
+        raise HTTPException(status_code=400, detail="invalid_or_expired_code")
     u = _user_with_permissions()
     _audit_event(u["id"], "auth.login", "session", {"mobile": _body.mobile})
     sid = f"sess-{int(datetime.now(timezone.utc).timestamp() * 1000)}"
@@ -462,7 +503,7 @@ def sign_request(
         "challenge_id": "mock-challenge",
         "expires_in_seconds": 300,
         "masked_phone": "0912***0000",
-        "debug_code": "424242",
+        "debug_code": _otp_debug_for_mobile(body.mobile),
     }
 
 
@@ -477,7 +518,7 @@ def sign(
         "challenge_id": "mock-challenge",
         "expires_in_seconds": 300,
         "masked_phone": "0912***0000",
-        "debug_code": "424242",
+        "debug_code": _otp_debug_for_mobile(body.mobile),
     }
 
 
@@ -526,7 +567,7 @@ def witness_send_otp(
         "challenge_id": "mock-witness",
         "expires_in_seconds": 300,
         "masked_phone": (body.mobile or "")[:4] + "***" if body.mobile else "***",
-        "debug_code": "131313",
+        "debug_code": _MAGIC_CODE if _is_magic_mobile(body.mobile) else "131313",
     }
 
 
@@ -535,6 +576,8 @@ def witness_verify(
     contract_id: str,
     body: WitnessVerifyMock = Body(default_factory=WitnessVerifyMock),
 ) -> Dict[str, Any]:
+    if _is_magic_mobile(body.mobile) and not _magic_otp_ok(body.mobile, body.otp):
+        raise HTTPException(status_code=400, detail="invalid_or_expired_code")
     c = _get(contract_id)
     nxt = body.next_step or "FINISH"
     c["step"] = nxt

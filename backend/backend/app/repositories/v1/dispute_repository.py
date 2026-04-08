@@ -52,9 +52,9 @@ class DisputeRepository:
         )
         rows = list(self.db.scalars(stmt).all())
         cnt = self.db.scalar(
-            select(func.count())
-            .select_from(Dispute)
-            .where(Dispute.contract_id == contract_id)
+            select(func.count()).select_from(Dispute).where(
+                Dispute.contract_id == contract_id
+            )
         )
         return rows, int(cnt or 0)
 

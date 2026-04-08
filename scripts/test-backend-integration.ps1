@@ -42,18 +42,13 @@ Write-Host "Target: $Base`n"
 # Health
 Test-Endpoint GET "/health" -Label "GET /health"
 
-# OTP send
-$mobile = "09120000000"
-$otpResp = Test-Endpoint POST "/admin/otp/send" @{ mobile = $mobile } -Label "POST /admin/otp/send" -ExpectStatus 200
-$devCode = $otpResp?.dev_code
-
-if (-not $devCode) {
-    Write-Host "  ⚠ No dev_code returned — set AMLINE_ENV=dev for local testing" -ForegroundColor Yellow
-    $devCode = "123456"
-}
+# OTP send + ورود با کانون تست: موبایل 09100000000 و کد 11111 (هم backend dev/staging هم mock)
+$mobile = "09100000000"
+Test-Endpoint POST "/admin/otp/send" @{ mobile = $mobile } -Label "POST /admin/otp/send" -ExpectStatus 200
+$otpFixed = "11111"
 
 # Login
-$loginResp = Test-Endpoint POST "/admin/login" @{ mobile = $mobile; otp = $devCode } -Label "POST /admin/login" -ExpectStatus 200
+$loginResp = Test-Endpoint POST "/admin/login" @{ mobile = $mobile; otp = $otpFixed } -Label "POST /admin/login" -ExpectStatus 200
 $token = $loginResp?.access_token
 
 if (-not $token) {

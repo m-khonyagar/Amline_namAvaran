@@ -100,6 +100,8 @@ services:
       - AMLINE_S3_BUCKET=amline-docs
       - AMLINE_BOOTSTRAP_ADMIN_MOBILE=${BOOTSTRAP_ADMIN_MOBILE:-09120000000}
       - AMLINE_METRICS_ENABLED=${AMLINE_METRICS_ENABLED:-1}
+      # Staging stack: demo OTP on by default; set AMLINE_OTP_MAGIC_ENABLED=0 in .env to disable
+      - AMLINE_OTP_MAGIC_ENABLED=${AMLINE_OTP_MAGIC_ENABLED:-1}
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-}
     ports:
       - "8080:8000"
@@ -167,14 +169,14 @@ services:
 
   amline-ui:
     build:
-      context: ./amline-ui
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: amline-ui/Dockerfile
     container_name: amline-ui
     environment:
-      - NEXT_PUBLIC_API_BASE_URL=http://backend
-      - NEXT_PUBLIC_API_URL=http://backend
+      - NEXT_PUBLIC_API_BASE_URL=http://backend:8000
+      - NEXT_PUBLIC_ENABLE_DEV_BYPASS=false
     ports:
-      - "3000:80"
+      - "3000:3000"
     depends_on:
       - backend
     networks:

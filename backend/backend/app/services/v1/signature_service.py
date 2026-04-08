@@ -12,7 +12,6 @@ class SignatureMethod(str, Enum):
     ADMIN_OTP = "ADMIN_OTP"
     AUTO = "AUTO"
 
-
 from app.repositories.memory.state import get_store
 from app.services.v1.otp_service import get_otp_service, mask_phone, normalize_mobile_ir
 
@@ -334,8 +333,9 @@ class SignatureService:
 
     def _admin_assist_mobile(self) -> str:
         store = get_store()
-        return os.getenv("AMLINE_ADMIN_ASSIST_MOBILE", "").strip() or str(
-            store.mock_user.get("mobile") or "09120000000"
+        return (
+            os.getenv("AMLINE_ADMIN_ASSIST_MOBILE", "").strip()
+            or str(store.mock_user.get("mobile") or "09120000000")
         )
 
     def request_admin_assist_sign(

@@ -8,17 +8,9 @@ from app.core.errors import register_exception_handlers, register_request_id_mid
 from app.core.i18n_middleware import register_i18n
 from app.core.ops import register_ops
 from app.core.otel_setup import register_opentelemetry
-from app.core.rate_limit import register_rate_limit
 from app.core.request_logging import register_request_logging
-from app.core.security_bootstrap import log_security_warnings
 
 app = FastAPI(title="Amline API", version="1.0.0", docs_url="/docs", redoc_url="/redoc")
-
-
-@app.on_event("startup")
-async def _security_startup() -> None:
-    log_security_warnings()
-
 
 _cors = os.getenv("AMLINE_CORS_ORIGINS", "").strip()
 _allow_origins = (
@@ -48,7 +40,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-register_rate_limit(app)
 register_request_id_middleware(app)
 register_i18n(app)
 register_request_logging(app)

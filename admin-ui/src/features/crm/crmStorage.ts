@@ -1,7 +1,8 @@
-import type { Lead, LeadActivity, LeadStatus } from './types'
+import type { Lead, LeadActivity, LeadStatus, LeadTask } from './types'
 
 const LEADS_KEY = 'amline_crm_leads'
 const ACTIVITIES_KEY = 'amline_crm_activities'
+const TASKS_KEY = 'amline_crm_tasks'
 
 function generateId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36)
@@ -66,6 +67,21 @@ export function updateLeadStatus(id: string, status: LeadStatus): Lead | null {
   return updateLead(id, { status })
 }
 
+/** به‌روزرسانی دسته‌ای وضعیت (یک بار نوشتن localStorage) */
+export function bulkUpdateLeadStatus(ids: string[], status: LeadStatus): number {
+  const idSet = new Set(ids)
+  const leads = getLeads()
+  let n = 0
+  const now = new Date().toISOString()
+  const next = leads.map((l) => {
+    if (!idSet.has(l.id)) return l
+    n += 1
+    return { ...l, status, updated_at: now }
+  })
+  if (n > 0) localStorage.setItem(LEADS_KEY, JSON.stringify(next))
+  return n
+}
+
 // ---- Activities ----
 
 export function getActivities(leadId?: string): LeadActivity[] {
@@ -93,4 +109,45 @@ export function addActivity(data: Omit<LeadActivity, 'id' | 'created_at'>): Lead
 export function deleteActivity(id: string): void {
   const all = getActivities().filter((a) => a.id !== id)
   localStorage.setItem(ACTIVITIES_KEY, JSON.stringify(all))
+}
+
+// ---- Tasks ----
+
+export function getTasks(leadId?: string): LeadTask[] {
+  try {
+    const raw = localStorage.getItem(TASKS_KEY)
+    const all: LeadTask[] = raw ? (JSON.parse(raw) as LeadTask[]) : []
+    return leadId ? all.filter((t) => t.lead_id === leadId) : all
+  } catch {
+    return []
+  }
+}
+
+export function addTask(data: Omit<LeadTask, 'id' | 'created_at'>): LeadTask {
+  const all = getTasks()
+  const task: LeadTask = {
+    ...data,
+    id: generateId(),
+    created_at: new Date().toISOString(),
+  }
+  all.push(task)
+  localStorage.setItem(TASKS_KEY, JSON.stringify(all))
+  return task
+}
+
+export function updateTask(id: string, updates: Partial<Omit<LeadTask, 'id' | 'lead_id' | 'created_at'>>): LeadTask | null {
+  const all = getTasks()
+  const idx = all.findIndex((t) => t.id === id)
+  if (idx < 0) return null
+  all[idx] = { ...all[idx], ...updates }
+  localStorage.setItem(TASKS_KEY, JSON.stringify(all))
+  return all[idx]
+}
+
+export function deleteTask(id: string): boolean {
+  const all = getTasks()
+  const next = all.filter((t) => t.id !== id)
+  if (next.length === all.length) return false
+  localStorage.setItem(TASKS_KEY, JSON.stringify(next))
+  return true
 }

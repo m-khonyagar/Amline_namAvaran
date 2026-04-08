@@ -1,13 +1,6 @@
 """ORM models — import side effects register tables on Base.metadata (Alembic)."""
 
 from app.models.audit_log import AuditLogEntry
-from app.models.contract_commission import (
-    CommissionPaidBy,
-    CommissionPaymentMethod,
-    CommissionRecordStatus,
-    ContractCommission,
-    ContractCommissionType,
-)
 from app.models.contract_flow import (
     ContractFlowParty,
     ContractFlowPartyRole,
@@ -20,6 +13,13 @@ from app.models.contract_flow import (
     RentingInfo,
     Signing,
     Witness,
+)
+from app.models.contract_commission import (
+    CommissionPaidBy,
+    CommissionPaymentMethod,
+    CommissionRecordStatus,
+    ContractCommission,
+    ContractCommissionType,
 )
 from app.models.crm import CrmActivity, CrmActivityType, CrmLead, CrmLeadSource
 from app.models.dispute import (

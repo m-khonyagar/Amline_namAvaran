@@ -13,6 +13,7 @@ import type {
   AddDatingDto,
   AddHomeInfoDto,
   AddMortgageDto,
+  AddSalePriceDto,
   AddRentDto,
   AddWithnessDto,
   ContractResponse,
@@ -27,6 +28,8 @@ import type {
   UpdateStatus,
   VerifySignOtpDto,
   VerifyWitnessOtpDto,
+  CommissionPayDto,
+  CommissionPayResponse,
 } from '../types/api';
 
 /** پاسخ GET /api/v1/contracts/list (صفحه‌بندی) */
@@ -68,6 +71,9 @@ export const contractApi = {
   addMortgage: (id: string, dto: AddMortgageDto) =>
     apiClient.post(apiV1(`contracts/${id}/mortgage`), dto),
 
+  addSalePrice: (id: string, dto: AddSalePriceDto) =>
+    apiClient.post(`/contracts/${id}/sale-price`, dto),
+
   addRenting: (id: string, dto: AddRentDto) =>
     apiClient.post(apiV1(`contracts/${id}/renting`), dto),
 
@@ -95,6 +101,9 @@ export const contractApi = {
   getList: (params?: { page?: number; limit?: number }) =>
     apiClient.get<ContractsListApiResponse>(apiV1('contracts/list'), { params }),
 
+  payCommission: (id: string, dto: CommissionPayDto) =>
+    apiClient.post<CommissionPayResponse>(`/contracts/${id}/commission/pay`, dto),
+
   resolveInfo: (type: string, text: string) =>
     apiClient.get<ResolveInfoResponse>(
       `${apiV1('contracts/resolve-info')}?type=${type}&text=${encodeURIComponent(text)}`
@@ -104,9 +113,8 @@ export const contractApi = {
     const form = new FormData();
     form.append('file', file);
     form.append('file_type', fileType);
-    return apiClient.post<FileResponse>(apiV1('files/upload'), form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    // Let the browser/axios set multipart boundary automatically.
+    return apiClient.post<FileResponse>('/files/upload', form);
   },
 };
 

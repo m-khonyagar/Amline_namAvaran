@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, BackgroundTasks, Request
+from datetime import date as date_cls
+
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 
 from app.core.n8n_outbound import n8n_dispatch
 from app.integrations.temporal_workflows import (
@@ -110,7 +112,9 @@ def contracts_patch_terms(contract_id: str, body: ContractTermsPatchBody) -> dic
 
 
 @router.post("/contracts/{contract_id}/commissions", status_code=201)
-def contracts_add_commission(contract_id: str, body: CommissionCreateBody) -> dict:
+def contracts_add_commission(
+    contract_id: str, body: CommissionCreateBody
+) -> dict:
     return _flow.add_commission(contract_id, body)
 
 
@@ -195,6 +199,17 @@ def home_info(contract_id: str, body: SectionPatchBody) -> dict:
 
 @router.post("/contracts/{contract_id}/dating", status_code=201)
 def dating(contract_id: str, body: SectionPatchBody) -> dict:
+    extra = body.model_extra or {}
+    sd = extra.get("start_date")
+    ed = extra.get("end_date")
+    if sd is not None and ed is not None:
+        try:
+            s = date_cls.fromisoformat(str(sd))
+            e = date_cls.fromisoformat(str(ed))
+        except ValueError as err:
+            raise HTTPException(status_code=422, detail="invalid_dates") from err
+        if e < s:
+            raise HTTPException(status_code=422, detail="end_before_start")
     return _flow.set_dating(contract_id, body)
 
 

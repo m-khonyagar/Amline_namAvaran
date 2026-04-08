@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { apiV1 } from '@/lib/apiPaths';
+import { apiV1 } from '../../../../lib/apiPaths';
 import { apiClient } from '../../api/contractApi';
 import type { StepProps } from '../../types/wizard';
 import { StepErrorBanner } from '../StepErrorBanner';

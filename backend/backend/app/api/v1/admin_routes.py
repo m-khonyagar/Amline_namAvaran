@@ -3,7 +3,9 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request, Response
 
+from app.api.deps import get_current_user
 from app.core.errors import AmlineError
+from app.models.user import User
 from app.core.rbac_deps import require_permission
 from app.repositories.memory.state import get_store
 from app.schemas.v1.payloads import (
@@ -96,6 +98,17 @@ def admin_auth_heartbeat() -> dict:
     return {"ok": "true"}
 
 
+@router.get("/admin/auth/me")
+def admin_auth_me(user: User = Depends(get_current_user)) -> dict:
+    return {
+        "id": str(user.id),
+        "mobile": user.mobile,
+        "full_name": user.name,
+        "name": user.name,
+        "role": user.role.value,
+    }
+
+
 @router.get("/admin/staff/activity")
 def admin_staff_activity(
     from_date: Optional[str] = None,
@@ -137,7 +150,9 @@ def admin_metrics_summary() -> dict:
     )
     terminal = {"LOST", "CONTRACTED"}
     active_leads = sum(
-        1 for lead in s.crm_leads if str(lead.get("status") or "") not in terminal
+        1
+        for lead in s.crm_leads
+        if str(lead.get("status") or "") not in terminal
     )
     return {
         "contracts_total": len(s.contracts),
@@ -156,9 +171,7 @@ def admin_metrics_operations(request: Request) -> dict:
 
 
 def _admin_user_id(request: Request) -> str:
-    return (
-        request.headers.get("X-User-Id") or ""
-    ).strip() or get_store().mock_user.get("id", "mock-001")
+    return (request.headers.get("X-User-Id") or "").strip() or get_store().mock_user.get("id", "mock-001")
 
 
 @router.get("/admin/notifications")

@@ -22,9 +22,7 @@ def _verify_telegram_secret(x_token: str | None) -> None:
 @router.post("/webhooks/telegram")
 async def webhook_telegram(
     request: Request,
-    x_telegram_bot_api_secret_token: str | None = Header(
-        default=None, alias="X-Telegram-Bot-Api-Secret-Token"
-    ),
+    x_telegram_bot_api_secret_token: str | None = Header(default=None, alias="X-Telegram-Bot-Api-Secret-Token"),
 ) -> dict:
     _verify_telegram_secret(x_telegram_bot_api_secret_token)
     body = await request.json()
@@ -50,11 +48,7 @@ async def webhook_bale(request: Request) -> dict:
 async def webhook_eitaa(request: Request) -> dict:
     secret = (os.getenv("AMLINE_EITAA_WEBHOOK_SECRET") or "").strip()
     if secret:
-        got = (
-            request.headers.get("X-Eitaa-Webhook-Secret")
-            or request.headers.get("Authorization")
-            or ""
-        ).strip()
+        got = (request.headers.get("X-Eitaa-Webhook-Secret") or request.headers.get("Authorization") or "").strip()
         if got.replace("Bearer ", "") != secret:
             raise HTTPException(status_code=403, detail="invalid webhook secret")
     body = await request.json()

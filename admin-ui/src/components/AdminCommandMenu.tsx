@@ -2,7 +2,7 @@ import { Command } from 'cmdk';
 import { Search } from 'lucide-react';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAdminNavSectionsResolved } from '../config/adminNav';
+import { ADMIN_NAV_SECTIONS } from '../config/adminNav';
 import { useAuth } from '../hooks/useAuth';
 import { cn } from '../lib/cn';
 
@@ -50,7 +50,7 @@ export function AdminCommandMenu({ open, onOpenChange }: Props) {
         <Command.Empty className="py-8 text-center text-sm text-[var(--amline-fg-muted)]">
           نتیجه‌ای یافت نشد.
         </Command.Empty>
-        {getAdminNavSectionsResolved().map((section) => {
+        {ADMIN_NAV_SECTIONS.map((section) => {
           const items = section.items.filter((i) => !i.permission || hasPermission(i.permission));
           if (!items.length) return null;
           return (

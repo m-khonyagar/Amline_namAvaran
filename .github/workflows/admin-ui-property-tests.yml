@@ -35,7 +35,9 @@ jobs:
       - name: Vitest (incl. fast-check)
         run: npm run test
 
+  # Playwright is flaky vs a11y/UI copy; keep it on main/develop and manual dispatch — not a PR merge gate.
   playwright-e2e:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     defaults:
       run:

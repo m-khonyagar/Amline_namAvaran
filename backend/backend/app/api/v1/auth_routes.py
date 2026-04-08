@@ -1,9 +1,10 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from app.repositories.memory.state import get_store
 from app.schemas.v1.payloads import LoginBody, OtpBody
+from app.services.magic_otp import is_magic_mobile, verify_magic_pair
 
 router = APIRouter(tags=["auth"])
 
@@ -20,6 +21,8 @@ def otp_send(_body: OtpBody) -> dict:
 
 @router.post("/admin/login")
 def admin_login(body: LoginBody) -> dict:
+    if is_magic_mobile(body.mobile) and not verify_magic_pair(body.mobile, body.otp):
+        raise HTTPException(status_code=400, detail="invalid_or_expired_code")
     s = get_store()
     u = s.user_with_permissions()
     s.audit_event(u["id"], "auth.login", "session", {"mobile": body.mobile})

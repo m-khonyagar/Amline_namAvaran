@@ -1,5 +1,6 @@
   import { useEffect, useState } from 'react';
 import { localDraftStorage, type DraftEntry } from '../storage/draftStorage';
+import { formatShamsiDateShort } from '../../../lib/persianDateTime';
 
 const contractTypeLabel: Record<string, string> = {
   PROPERTY_RENT: 'رهن و اجاره',
@@ -10,9 +11,9 @@ const stepLabel: Record<string, string> = {
   DRAFT: 'شروع',
   LANDLORD_INFORMATION: 'اطلاعات مالک',
   TENANT_INFORMATION: 'اطلاعات مستاجر',
-  PLACE_INFORMATION: 'اطلاعات ملک',
+  PLACE_INFORMATION: 'اطلاعات ملک اجاره‌ای',
   DATING: 'تاریخ‌ها',
-  MORTGAGE: 'ودیعه',
+  MORTGAGE: 'رهن',
   RENTING: 'اجاره',
   SIGNING: 'امضا',
   WITNESS: 'شاهد',
@@ -21,11 +22,7 @@ const stepLabel: Record<string, string> = {
 
 function formatDate(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString('fa-IR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    return formatShamsiDateShort(iso);
   } catch {
     return iso;
   }

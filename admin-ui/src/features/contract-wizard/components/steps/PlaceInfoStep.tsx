@@ -22,10 +22,10 @@ interface PlaceInfoFormData {
 }
 
 const MAX_FILES = 5;
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
 
-export function PlaceInfoStep({ contractId, onComplete }: StepProps) {
+export function PlaceInfoStep({ contractId, contractType, onComplete }: StepProps) {
   const { error: serverError, details, hint, setFromError, clear } = useMappedStepError();
   const [uploadedFileIds, setUploadedFileIds] = useState<number[]>([]);
   const [uploadedFileNames, setUploadedFileNames] = useState<string[]>([]);
@@ -82,7 +82,7 @@ export function PlaceInfoStep({ contractId, onComplete }: StepProps) {
         return;
       }
       if (file.size > MAX_FILE_SIZE) {
-        setFileError('حجم هر فایل نباید بیشتر از ۵ مگابایت باشد');
+        setFileError('حجم هر فایل نباید بیشتر از ۱۰ مگابایت باشد');
         return;
       }
     }
@@ -141,7 +141,9 @@ export function PlaceInfoStep({ contractId, onComplete }: StepProps) {
 
   return (
     <div dir="rtl" className="space-y-4">
-      <h2 className="text-lg font-bold text-gray-800">اطلاعات ملک</h2>
+      <h2 className="text-lg font-bold text-gray-800">
+        {contractType === 'PROPERTY_RENT' ? 'اطلاعات ملک اجاره‌ای' : 'اطلاعات ملک'}
+      </h2>
       <StepErrorBanner message={serverError} details={details} hint={hint} onDismiss={() => clear()} />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
@@ -306,10 +308,11 @@ export function PlaceInfoStep({ contractId, onComplete }: StepProps) {
 
         {/* آپلود تصاویر سند */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            تصاویر سند (حداکثر ۵ فایل، JPG/PNG/PDF، حداکثر ۵ مگابایت)
+          <label htmlFor="deed-image-upload" className="block text-sm font-medium text-gray-700 mb-1">
+            تصاویر سند (حداکثر ۵ فایل، JPG/PNG/PDF، حداکثر ۱۰ مگابایت)
           </label>
           <input
+            id="deed-image-upload"
             ref={fileInputRef}
             type="file"
             accept=".jpg,.jpeg,.png,.pdf"
@@ -347,7 +350,11 @@ export function PlaceInfoStep({ contractId, onComplete }: StepProps) {
           disabled={isSubmitting || isUploading}
           className="w-full bg-primary text-white rounded-lg py-2.5 font-medium disabled:opacity-50"
         >
-          {isSubmitting ? 'در حال ثبت...' : 'ثبت اطلاعات ملک و ادامه'}
+          {isSubmitting
+            ? 'در حال ثبت...'
+            : contractType === 'PROPERTY_RENT'
+              ? 'ثبت اطلاعات ملک اجاره‌ای و ادامه'
+              : 'ثبت اطلاعات ملک و ادامه'}
         </button>
       </form>
     </div>

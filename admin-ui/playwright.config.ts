@@ -6,11 +6,11 @@ const baseURL = `http://${devServerHost}:${devServerPort}`;
 
 export default defineConfig({
   testDir: './tests',
+  testIgnore: ['**/staging*.spec.ts'],
   timeout: 90_000,
   retries: process.env.CI ? 1 : 0,
   forbidOnly: !!process.env.CI,
-  // یک سرور Vite dev را چند worker همزمان خفه می‌کند → goto در beforeEach تایم‌اوت
-  workers: 2,
+  workers: 1,
   use: {
     baseURL,
     headless: true,
@@ -22,7 +22,8 @@ export default defineConfig({
     viewport: { width: 1440, height: 900 },
   },
   webServer: {
-    command: `npm run dev -- --host ${devServerHost} --port ${devServerPort}`,
+    // متغیرهای محیطی فرایند فرزند از `.env.local` در Vite بالاترند؛ برای E2E حتماً MSW/بای‌پس را اینجا ثابت کن.
+    command: `npm run dev:e2e -- --host ${devServerHost} --port ${devServerPort}`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
@@ -30,10 +31,10 @@ export default defineConfig({
     stderr: 'pipe',
     env: {
       ...process.env,
-      // بدون .env.local در CI: MSW + ورود آزمایشی برای تست‌های e2e/full-user-flow
-      VITE_USE_MSW: process.env.VITE_USE_MSW ?? 'true',
-      VITE_ENABLE_DEV_BYPASS: process.env.VITE_ENABLE_DEV_BYPASS ?? 'true',
-      // اگر .env.local لوکال به پورت خالی اشاره کند، Playwright همچنان پایدار بماند
+      VITE_USE_MSW: 'true',
+      VITE_ENABLE_DEV_BYPASS: 'true',
+      VITE_API_URL: '',
+      VITE_USE_CRM_API: 'true',
       VITE_DEV_PROXY_TARGET: process.env.VITE_DEV_PROXY_TARGET ?? 'https://api.amline.ir',
     },
   },

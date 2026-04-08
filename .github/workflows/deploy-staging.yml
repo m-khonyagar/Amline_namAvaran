@@ -1,5 +1,5 @@
 # دیپلوی استیجینگ: پنل ادمین (Vite) + سایت مارکتینگ (Next static export)
-# بک‌اند استیجینگ: https://amline-backend-staging.darkube.app (ر. API_DOCS.md)
+# بک‌اند پیش‌فرض برای بیلد ادمین: https://api.amline.ir (ر. API_DOCS.md؛ Darkube با STAGING_API_URL)
 #
 # GitHub → Settings → Secrets and variables:
 #   Variable: STAGING_DEPLOY_HOST (الزامی برای SCP)
@@ -33,36 +33,43 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js (monorepo root)
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
+          cache: npm
+          cache-dependency-path: |
+            admin-ui/package-lock.json
+            site/package-lock.json
 
       - name: Compute staging API URL
         id: conf
         run: |
           API="${{ vars.STAGING_API_URL }}"
-          if [ -z "$API" ]; then API="https://amline-backend-staging.darkube.app"; fi
+          if [ -z "$API" ]; then API="https://api.amline.ir"; fi
           echo "api_url=$API" >> "$GITHUB_OUTPUT"
 
-      - name: Install & build (Turbo — root workspace)
+      - name: Build admin-ui
         env:
           VITE_API_URL: ${{ steps.conf.outputs.api_url }}
           VITE_USE_MSW: 'false'
           VITE_ENABLE_DEV_BYPASS: 'false'
           VITE_USE_CRM_API: 'true'
+        run: |
+          cd admin-ui
+          npm ci
+          npm run build
+
+      - name: Build site
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.skip_site) }}
+        env:
           NEXT_PUBLIC_AMLINE_APP_URL: ${{ vars.STAGING_APP_URL != '' && vars.STAGING_APP_URL || 'https://app.amline.ir' }}
           NEXT_PUBLIC_SITE_URL: ${{ vars.STAGING_MARKETING_URL != '' && vars.STAGING_MARKETING_URL || 'https://amline.ir' }}
           NEXT_PUBLIC_CONTACT_EMAIL: ${{ vars.STAGING_CONTACT_EMAIL != '' && vars.STAGING_CONTACT_EMAIL || 'info@amline.ir' }}
         run: |
+          cd site
           npm ci
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.skip_site }}" = "true" ]; then
-            npx turbo run build --filter=amline-admin-ui
-          else
-            npm run build
-          fi
+          npm run build
 
       - name: Pack artifacts
         run: |

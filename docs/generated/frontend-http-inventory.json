@@ -2,31 +2,19 @@
   "entries": [
     {
       "file": "amline-ui/next.config.js",
-      "line": 39,
+      "line": 25,
       "path": "/admin/:path*",
       "surface": "legacy_mount"
     },
     {
       "file": "admin-ui/src/config/adminNav.ts",
-      "line": 160,
-      "path": "/admin/activity",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 50,
+      "line": 159,
       "path": "/admin/activity",
       "surface": "legacy_mount"
     },
     {
       "file": "admin-ui/src/config/adminNav.ts",
-      "line": 153,
-      "path": "/admin/audit",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 49,
+      "line": 152,
       "path": "/admin/audit",
       "surface": "legacy_mount"
     },
@@ -56,32 +44,14 @@
     },
     {
       "file": "admin-ui/src/config/adminNav.ts",
-      "line": 146,
-      "path": "/admin/roles",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 48,
+      "line": 145,
       "path": "/admin/roles",
       "surface": "legacy_mount"
     },
     {
       "file": "admin-ui/src/config/adminNav.ts",
-      "line": 89,
+      "line": 88,
       "path": "/ads",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 33,
-      "path": "/ads",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubExternal.ts",
-      "line": 33,
-      "path": "/agencies",
       "surface": "other_slash"
     },
     {
@@ -98,7 +68,7 @@
     },
     {
       "file": "amline-ui/next.config.js",
-      "line": 35,
+      "line": 21,
       "path": "/api/:path*",
       "surface": "legacy_api_prefix"
     },
@@ -122,7 +92,7 @@
     },
     {
       "file": "admin-ui/src/mocks/handlers.ts",
-      "line": 11,
+      "line": 6,
       "path": "/api/v1",
       "surface": "canonical_v1"
     },
@@ -140,7 +110,7 @@
     },
     {
       "file": "amline-ui/next.config.js",
-      "line": 34,
+      "line": 20,
       "path": "/api/v1/:path*",
       "surface": "canonical_v1"
     },
@@ -182,31 +152,19 @@
     },
     {
       "file": "admin-ui/src/mocks/handlers.ts",
-      "line": 130,
+      "line": 125,
       "path": "/api/v1/crm/*",
       "surface": "canonical_v1"
     },
     {
       "file": "amline-ui/next.config.js",
-      "line": 38,
+      "line": 24,
       "path": "/auth/:path*",
       "surface": "legacy_mount"
     },
     {
       "file": "admin-ui/src/config/adminNav.ts",
-      "line": 114,
-      "path": "/billing",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubExternal.ts",
-      "line": 48,
-      "path": "/billing",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 44,
+      "line": 113,
       "path": "/billing",
       "surface": "other_slash"
     },
@@ -214,12 +172,6 @@
       "file": "amline-ui/app/page.tsx",
       "line": 40,
       "path": "/billing",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubExternal.ts",
-      "line": 34,
-      "path": "/blog",
       "surface": "other_slash"
     },
     {
@@ -271,50 +223,26 @@
       "surface": "other_slash"
     },
     {
-      "file": "admin-ui/src/components/AmlineLogo.tsx",
-      "line": 3,
-      "path": "/brand/amline-logo.png",
-      "surface": "other_slash"
-    },
-    {
       "file": "admin-ui/src/config/adminNav.ts",
-      "line": 50,
+      "line": 49,
       "path": "/contracts",
       "surface": "legacy_mount"
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 147,
-      "path": "/contracts",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubExternal.ts",
-      "line": 46,
-      "path": "/contracts",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 26,
+      "line": 149,
       "path": "/contracts",
       "surface": "legacy_mount"
     },
     {
       "file": "admin-ui/src/pages/contracts/ContractDetailPage.tsx",
-      "line": 128,
+      "line": 122,
       "path": "/contracts",
       "surface": "legacy_mount"
     },
     {
       "file": "admin-ui/src/pages/contracts/PRContractsPage.tsx",
       "line": 79,
-      "path": "/contracts",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/pages/dev/LocalTestHubPage.tsx",
-      "line": 64,
       "path": "/contracts",
       "surface": "legacy_mount"
     },
@@ -350,13 +278,13 @@
     },
     {
       "file": "admin-ui/src/pages/contracts/ContractsPage.tsx",
-      "line": 203,
+      "line": 198,
       "path": "/contracts/${c.id}",
       "surface": "legacy_mount"
     },
     {
       "file": "admin-ui/src/pages/users/UserDetailPage.tsx",
-      "line": 214,
+      "line": 198,
       "path": "/contracts/${c.id}",
       "surface": "legacy_mount"
     },
@@ -380,25 +308,13 @@
     },
     {
       "file": "amline-ui/next.config.js",
-      "line": 36,
+      "line": 22,
       "path": "/contracts/:path*",
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 30,
-      "path": "/contracts/contract-001",
-      "surface": "legacy_mount"
-    },
-    {
       "file": "admin-ui/src/config/adminNav.ts",
-      "line": 70,
-      "path": "/contracts/legal-queue",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 29,
+      "line": 69,
       "path": "/contracts/legal-queue",
       "surface": "legacy_mount"
     },
@@ -422,31 +338,13 @@
     },
     {
       "file": "admin-ui/src/config/adminNav.ts",
-      "line": 57,
-      "path": "/contracts/pr-contracts",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 27,
+      "line": 56,
       "path": "/contracts/pr-contracts",
       "surface": "legacy_mount"
     },
     {
       "file": "admin-ui/src/config/adminNav.ts",
-      "line": 63,
-      "path": "/contracts/wizard",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubExternal.ts",
-      "line": 47,
-      "path": "/contracts/wizard",
-      "surface": "legacy_mount"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 28,
+      "line": 62,
       "path": "/contracts/wizard",
       "surface": "legacy_mount"
     },
@@ -475,12 +373,6 @@
       "surface": "legacy_mount"
     },
     {
-      "file": "admin-ui/src/pages/dev/LocalTestHubPage.tsx",
-      "line": 60,
-      "path": "/contracts/wizard",
-      "surface": "legacy_mount"
-    },
-    {
       "file": "amline-ui/app/contracts/page.tsx",
       "line": 67,
       "path": "/contracts/wizard",
@@ -500,13 +392,7 @@
     },
     {
       "file": "admin-ui/src/config/adminNav.ts",
-      "line": 82,
-      "path": "/crm",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 31,
+      "line": 81,
       "path": "/crm",
       "surface": "other_slash"
     },
@@ -535,12 +421,6 @@
       "surface": "other_slash"
     },
     {
-      "file": "admin-ui/src/pages/dev/LocalTestHubPage.tsx",
-      "line": 56,
-      "path": "/crm",
-      "surface": "other_slash"
-    },
-    {
       "file": "admin-ui/src/pages/crm/LeadDetailPage.tsx",
       "line": 78,
       "path": "/crm/${id}",
@@ -553,20 +433,14 @@
       "surface": "other_slash"
     },
     {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 32,
-      "path": "/crm/crm-seed-1",
-      "surface": "other_slash"
-    },
-    {
       "file": "admin-ui/src/App.tsx",
-      "line": 112,
+      "line": 83,
       "path": "/dashboard",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/App.tsx",
-      "line": 238,
+      "line": 205,
       "path": "/dashboard",
       "surface": "other_slash"
     },
@@ -578,67 +452,31 @@
     },
     {
       "file": "admin-ui/src/config/adminNav.ts",
-      "line": 39,
+      "line": 38,
       "path": "/dashboard",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 15,
-      "path": "/dashboard",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 147,
-      "path": "/dashboard",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 25,
+      "line": 149,
       "path": "/dashboard",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/pages/auth/LoginPage.tsx",
-      "line": 36,
+      "line": 35,
       "path": "/dashboard",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/pages/auth/LoginPage.tsx",
-      "line": 71,
+      "line": 70,
       "path": "/dashboard",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/App.tsx",
-      "line": 78,
-      "path": "/dev/preview/user-wizard",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 20,
-      "path": "/dev/preview/user-wizard",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/App.tsx",
-      "line": 88,
-      "path": "/dev/test-hub",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/config/adminNav.ts",
-      "line": 181,
-      "path": "/dev/test-hub",
       "surface": "other_slash"
     },
     {
       "file": "amline-ui/next.config.js",
-      "line": 37,
+      "line": 23,
       "path": "/files/:path*",
       "surface": "legacy_mount"
     },
@@ -650,7 +488,7 @@
     },
     {
       "file": "amline-ui/next.config.js",
-      "line": 40,
+      "line": 26,
       "path": "/financials/:path*",
       "surface": "legacy_mount"
     },
@@ -662,61 +500,31 @@
     },
     {
       "file": "admin-ui/src/config/adminNav.ts",
-      "line": 139,
-      "path": "/integrations",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 47,
+      "line": 138,
       "path": "/integrations",
       "surface": "other_slash"
     },
     {
       "file": "amline-ui/next.config.js",
-      "line": 41,
+      "line": 27,
       "path": "/listings/:path*",
       "surface": "legacy_mount"
     },
     {
       "file": "admin-ui/src/App.tsx",
-      "line": 44,
+      "line": 43,
       "path": "/login",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/App.tsx",
-      "line": 74,
-      "path": "/login",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/auth/AuthProvider.tsx",
-      "line": 100,
-      "path": "/login",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/auth/AuthProvider.tsx",
-      "line": 101,
+      "line": 73,
       "path": "/login",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/layouts/MainLayout.tsx",
-      "line": 55,
-      "path": "/login",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubExternal.ts",
-      "line": 45,
-      "path": "/login",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 17,
+      "line": 57,
       "path": "/login",
       "surface": "other_slash"
     },
@@ -769,12 +577,6 @@
       "surface": "other_slash"
     },
     {
-      "file": "admin-ui/src/lib/localTestHubExternal.ts",
-      "line": 35,
-      "path": "/miniapp",
-      "surface": "other_slash"
-    },
-    {
       "file": "site/components/SiteFooter.tsx",
       "line": 54,
       "path": "/miniapp",
@@ -800,13 +602,7 @@
     },
     {
       "file": "admin-ui/src/config/adminNav.ts",
-      "line": 121,
-      "path": "/notifications",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 45,
+      "line": 120,
       "path": "/notifications",
       "surface": "other_slash"
     },
@@ -818,13 +614,7 @@
     },
     {
       "file": "admin-ui/src/config/adminNav.ts",
-      "line": 108,
-      "path": "/payments",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 39,
+      "line": 107,
       "path": "/payments",
       "surface": "other_slash"
     },
@@ -836,25 +626,13 @@
     },
     {
       "file": "admin-ui/src/config/adminNav.ts",
-      "line": 133,
-      "path": "/settings",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 46,
+      "line": 132,
       "path": "/settings",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/config/adminNav.ts",
-      "line": 96,
-      "path": "/users",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 34,
+      "line": 95,
       "path": "/users",
       "surface": "other_slash"
     },
@@ -866,31 +644,19 @@
     },
     {
       "file": "admin-ui/src/pages/users/UserDetailPage.tsx",
-      "line": 111,
+      "line": 108,
       "path": "/users",
       "surface": "other_slash"
     },
     {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 35,
-      "path": "/users/${LOCAL_TEST_HUB_SAMPLE_USER_ID}",
-      "surface": "other_slash"
-    },
-    {
       "file": "admin-ui/src/pages/users/UsersPage.tsx",
-      "line": 144,
+      "line": 142,
       "path": "/users/${u.id}",
       "surface": "other_slash"
     },
     {
       "file": "admin-ui/src/config/adminNav.ts",
-      "line": 102,
-      "path": "/wallets",
-      "surface": "other_slash"
-    },
-    {
-      "file": "admin-ui/src/lib/localTestHubRoutes.ts",
-      "line": 36,
+      "line": 101,
       "path": "/wallets",
       "surface": "other_slash"
     },
@@ -901,7 +667,7 @@
       "surface": "other_slash"
     }
   ],
-  "entry_count": 150,
+  "entry_count": 111,
   "generator": "scripts/inventory_frontend_http_calls.py",
   "repo_root_hint": "Amline_namAvaran",
   "scan_roots": [
@@ -911,6 +677,6 @@
     "site/components",
     "packages/amline-ui-core/src"
   ],
-  "sha256_prefix": "d6807a1658a26c24",
+  "sha256_prefix": "260a777fa215823f",
   "version": 1
 }

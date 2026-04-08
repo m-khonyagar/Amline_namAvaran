@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { apiV1 } from '@/lib/apiPaths';
+import { apiV1 } from '../../../lib/apiPaths';
 import { apiClient } from '../api/contractApi';
 
 interface RevokeContractButtonProps {

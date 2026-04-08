@@ -44,9 +44,8 @@ test.describe('کاربر نهایی — قرارداد (mock API)', () => {
     await expect(page.getByText('خرید و فروش')).toBeVisible();
 
     await page.getByRole('button', { name: 'شروع قرارداد', exact: true }).click();
-    await expect(page.getByRole('heading', { name: /اطلاعات مالک/ })).toBeVisible({
-      timeout: 25_000,
-    });
-    await expect(page.getByRole('button', { name: 'شخص حقیقی' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /اطلاعات مالک/ })).toBeVisible({ timeout: 25_000 });
+    // LandlordStep از WfLabeledRadio (label) استفاده می‌کند، نه button
+    await expect(page.getByText('شخص حقیقی هستم')).toBeVisible();
   });
 });

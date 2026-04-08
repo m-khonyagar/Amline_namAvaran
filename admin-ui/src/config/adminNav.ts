@@ -4,7 +4,6 @@ import {
   BarChart3,
   ClipboardList,
   FileText,
-  FlaskConical,
   Home,
   Inbox,
   LayoutDashboard,
@@ -166,24 +165,3 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
     ],
   },
 ];
-
-/** بخش توسعه فقط در Vite DEV (در build production حذف می‌شود). */
-export function getAdminNavSectionsResolved(): AdminNavSection[] {
-  if (!import.meta.env.DEV) {
-    return ADMIN_NAV_SECTIONS;
-  }
-  return [
-    ...ADMIN_NAV_SECTIONS,
-    {
-      title: 'توسعه لوکال',
-      items: [
-        {
-          to: '/dev/test-hub',
-          label: 'همهٔ صفحات (تست)',
-          icon: FlaskConical,
-          keywords: ['dev', 'lab', 'routes', 'مسیر', 'test'],
-        },
-      ],
-    },
-  ];
-}

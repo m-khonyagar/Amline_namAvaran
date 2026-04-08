@@ -2,16 +2,20 @@
 
 from __future__ import annotations
 
+import asyncio
 import contextlib
+import json
 import logging
 import os
+import sqlite3
 import sys
 from collections.abc import AsyncIterator
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -28,6 +32,54 @@ from runtime import merge_runtime_env, resolve_config_path, run_session, setup_l
 
 log = logging.getLogger(__name__)
 _bearer = HTTPBearer(auto_error=False)
+_stream_executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="sa_stream")
+_POLL_INTERVAL_SECONDS = 0.35  # how often to check the DB for new pipeline events
+
+
+def _max_event_id(db_path: Path) -> int:
+    """Return current max row-id in task_events (0 if DB absent)."""
+    if not db_path.is_file():
+        return 0
+    try:
+        with sqlite3.connect(str(db_path)) as conn:
+            row = conn.execute("SELECT COALESCE(MAX(id), 0) FROM task_events").fetchone()
+            return int(row[0]) if row else 0
+    except Exception:
+        return 0
+
+
+def _fetch_events_after(db_path: Path, since_id: int) -> list[dict]:
+    """Fetch all task_events rows with id > since_id, in insert order."""
+    if not db_path.is_file():
+        return []
+    try:
+        with sqlite3.connect(str(db_path)) as conn:
+            rows = conn.execute(
+                "SELECT id, task_id, agent, action, status, payload_json, created_at "
+                "FROM task_events WHERE id > ? ORDER BY id ASC",
+                (since_id,),
+            ).fetchall()
+        result: list[dict] = []
+        for row in rows:
+            try:
+                payload = json.loads(row[5]) if row[5] else {}
+            except Exception:
+                payload = {}
+            result.append(
+                {
+                    "id": row[0],
+                    "task_id": row[1],
+                    "agent": row[2],
+                    "action": row[3],
+                    "status": row[4],
+                    "output": payload.get("output", {}),
+                    "error": payload.get("error"),
+                    "created_at": row[6],
+                }
+            )
+        return result
+    except Exception:
+        return []
 
 
 class RunBody(BaseModel):
@@ -52,7 +104,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logs_dir = ROOT / paths.get("logs_dir", "logs")
     setup_logging(logs_dir, cfg.get("logging", {}).get("level", "INFO"), force=True)
     log.info("Super-Agent API starting (config=%s)", cfg_path)
-    yield
+    try:
+        yield
+    finally:
+        _stream_executor.shutdown(wait=False)
+        log.info("Super-Agent API shut down")
 
 
 app = FastAPI(title="Super-Agent", version="2.1", lifespan=lifespan)
@@ -134,3 +190,73 @@ def task_trace(
     db_path = ROOT / rel
     events = TaskStore.read_trace(db_path, task_id)
     return {"task_id": task_id, "events": events, "count": len(events)}
+
+
+@app.post("/v1/run/stream")
+async def run_stream(
+    body: RunBody,
+    creds: HTTPAuthorizationCredentials | None = Depends(_bearer),
+) -> StreamingResponse:
+    """Stream pipeline events as Server-Sent Events while the agent runs."""
+    _check_auth(creds)
+
+    cfg_path = resolve_config_path()
+    cfg = merge_runtime_env(load_config(cfg_path))
+    rel = (cfg.get("paths") or {}).get("memory_db", "memory/tasks.db")
+    db_path = ROOT / rel
+
+    # Snapshot current max id so we only tail events from this run
+    since_id = _max_event_id(db_path)
+
+    loop = asyncio.get_running_loop()
+    future: asyncio.Future = loop.run_in_executor(
+        _stream_executor,
+        lambda: run_session(
+            goal=body.goal,
+            skip_brain=body.skip_brain,
+            workflow_mode=body.workflow_mode,
+        ),
+    )
+
+    async def generate() -> AsyncIterator[str]:
+        last_id = since_id
+        try:
+            while True:
+                for ev in _fetch_events_after(db_path, last_id):
+                    last_id = ev["id"]
+                    yield f"data: {json.dumps(ev, ensure_ascii=False)}\n\n"
+
+                if future.done():
+                    # Drain any events written between last poll and completion
+                    for ev in _fetch_events_after(db_path, last_id):
+                        last_id = ev["id"]
+                        yield f"data: {json.dumps(ev, ensure_ascii=False)}\n\n"
+                    try:
+                        result = future.result()
+                        done_payload = {
+                            "task_id": result.get("task_id", ""),
+                            "llm": result.get("llm"),
+                            "workflow_mode": result.get("workflow_mode"),
+                        }
+                    except Exception as exc:
+                        yield (
+                            f"event: error\n"
+                            f"data: {json.dumps({'error': str(exc)}, ensure_ascii=False)}\n\n"
+                        )
+                        return
+                    yield f"event: done\ndata: {json.dumps(done_payload, ensure_ascii=False)}\n\n"
+                    return
+
+                await asyncio.sleep(_POLL_INTERVAL_SECONDS)
+        except asyncio.CancelledError:
+            pass
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+        },
+    )

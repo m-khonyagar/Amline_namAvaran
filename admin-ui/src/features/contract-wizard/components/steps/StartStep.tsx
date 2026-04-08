@@ -91,19 +91,18 @@ export function StartStep({ platform, previewMode, onStart, onPreviewBootstrap }
 
       <StepErrorBanner message={error} details={details} hint={hint} onDismiss={() => clear()} />
 
+      {/* انتخاب نوع قرارداد — Master Spec v2 */}
       <div>
-        <p className="mb-3 text-sm font-semibold text-[var(--amline-fg)]">نوع قرارداد</p>
+        <p className="text-sm font-medium text-gray-700 mb-3">نوع قرارداد</p>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {(
-            [
-              { value: 'PROPERTY_RENT' as const, label: 'رهن و اجاره', icon: '🏠' },
-              { value: 'BUYING_AND_SELLING' as const, label: 'خرید و فروش', icon: '🤝' },
-              { value: 'EXCHANGE' as const, label: 'معاوضه', icon: '🔁' },
-              { value: 'CONSTRUCTION' as const, label: 'مشارکت در ساخت', icon: '🏗️' },
-              { value: 'PRE_SALE' as const, label: 'پیش‌فروش', icon: '🏢' },
-              { value: 'LEASE_TO_OWN' as const, label: 'اجاره به شرط تملیک', icon: '📜' },
-            ] as const
-          ).map((opt) => (
+          {([
+            { value: 'PROPERTY_RENT' as const, label: 'رهن و اجاره', icon: '🏠' },
+            { value: 'BUYING_AND_SELLING' as const, label: 'خرید و فروش', icon: '🤝' },
+            { value: 'EXCHANGE' as const, label: 'معاوضه', icon: '🔁' },
+            { value: 'CONSTRUCTION' as const, label: 'مشارکت در ساخت', icon: '🏗️' },
+            { value: 'PRE_SALE' as const, label: 'پیش‌فروش', icon: '🏢' },
+            { value: 'LEASE_TO_OWN' as const, label: 'اجاره به شرط تملیک', icon: '📜' },
+          ] as const).map((opt) => (
             <button
               key={opt.value}
               type="button"
@@ -116,43 +115,39 @@ export function StartStep({ platform, previewMode, onStart, onPreviewBootstrap }
                   : 'border-[var(--amline-border)] bg-[var(--amline-surface)] text-[var(--amline-fg-muted)] hover:border-[var(--amline-fg-subtle)]/50',
               ].join(' ')}
             >
-              <span className="text-2xl" aria-hidden>
-                {opt.icon}
-              </span>
-              <span className="text-sm font-medium leading-snug">{opt.label}</span>
+              <span className="text-2xl">{opt.icon}</span>
+              <span className="text-sm font-medium text-center leading-snug">{opt.label}</span>
             </button>
           ))}
         </div>
-        <p className="mt-2 text-xs text-[var(--amline-fg-subtle)]">
-          انواع جدید فعلاً از مسیر خرید/فروش عبور می‌کنند؛ جزئیات نوع را در API با PATCH /terms ثبت کنید.
+        <p className="mt-2 text-xs text-gray-500">
+          انواع جدید در ویزارد فعلاً از مسیر خرید/فروش عبور می‌کنند؛ شرایط اختصاصی را در API با PATCH /terms ثبت کنید.
         </p>
       </div>
 
       <div>
         <p className="mb-3 text-sm font-semibold text-[var(--amline-fg)]">نقش شما در شروع</p>
         <div className="grid grid-cols-2 gap-3">
-          {(
-            [
-              {
-                value: 'LANDLORD' as const,
-                label:
-                  contractType === 'PROPERTY_RENT'
-                    ? 'موجر / مالک'
-                    : contractType === 'BUYING_AND_SELLING'
-                      ? 'فروشنده'
-                      : 'طرف اول',
-              },
-              {
-                value: 'TENANT' as const,
-                label:
-                  contractType === 'PROPERTY_RENT'
-                    ? 'مستأجر'
-                    : contractType === 'BUYING_AND_SELLING'
-                      ? 'خریدار'
-                      : 'طرف دوم',
-              },
-            ] as const
-          ).map((opt) => (
+          {([
+            {
+              value: 'LANDLORD' as const,
+              label:
+                contractType === 'PROPERTY_RENT'
+                  ? 'موجر / مالک'
+                  : contractType === 'BUYING_AND_SELLING'
+                    ? 'فروشنده'
+                    : 'طرف اول',
+            },
+            {
+              value: 'TENANT' as const,
+              label:
+                contractType === 'PROPERTY_RENT'
+                  ? 'مستأجر'
+                  : contractType === 'BUYING_AND_SELLING'
+                    ? 'خریدار'
+                    : 'طرف دوم',
+            },
+          ]).map((opt) => (
             <button
               key={opt.value}
               type="button"

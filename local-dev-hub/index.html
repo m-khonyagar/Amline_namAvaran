@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>املاین — هاب یکپارچهٔ پلتفرم (محلی)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1419;
+      --card: #1a2332;
+      --border: #2d3a4d;
+      --text: #e8edf4;
+      --muted: #8b9cb3;
+      --accent: #0d9488;
+      --accent2: #3b82f6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Vazirmatn", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.65;
+    }
+    header {
+      padding: 1.5rem clamp(1rem, 4vw, 2rem);
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #151c28 0%, var(--bg) 100%);
+    }
+    h1 { margin: 0 0 0.35rem; font-size: 1.45rem; font-weight: 700; }
+    header p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+    .badge {
+      display: inline-block;
+      margin-top: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(13, 148, 136, 0.2);
+      color: #5eead4;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .hero {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 1.25rem clamp(1rem, 4vw, 2rem) 0;
+    }
+    .hero h2 { margin: 0 0 0.5rem; font-size: 1.1rem; color: #94a3b8; font-weight: 600; }
+    .values {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .values article {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      font-size: 0.88rem;
+      color: #cbd5e1;
+    }
+    .values strong { color: var(--text); display: block; margin-bottom: 0.35rem; font-size: 0.92rem; }
+    .personas {
+      max-width: 1600px;
+      margin: 1.25rem auto 0;
+      padding: 0 clamp(1rem, 4vw, 2rem);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 0.75rem;
+    }
+    .personas .p {
+      background: rgba(59, 130, 246, 0.08);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      border-radius: 12px;
+      padding: 1rem;
+      font-size: 0.88rem;
+    }
+    .personas .p h3 { margin: 0 0 0.5rem; font-size: 0.98rem; color: #93c5fd; }
+    .personas ul { margin: 0; padding-right: 1.1rem; color: var(--muted); }
+    .actions {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .actions button {
+      font-family: inherit;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+    }
+    .actions button.primary {
+      background: linear-gradient(135deg, var(--accent), #0f766e);
+      border-color: transparent;
+      font-weight: 600;
+    }
+    .actions a.btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      border: 1px solid var(--border);
+      color: var(--accent2);
+      text-decoration: none;
+    }
+    .actions a.btn:hover { background: var(--card); }
+    .actions button:hover { filter: brightness(1.08); }
+    main {
+      padding: 1rem clamp(0.5rem, 2vw, 1.5rem) 3rem;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1rem;
+    }
+    section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 380px;
+    }
+    .sec-head {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .sec-head strong { font-size: 0.95rem; }
+    .sec-head span { font-size: 0.8rem; color: var(--muted); }
+    .sec-head a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .sec-head a:hover { text-decoration: underline; }
+    .frame-wrap {
+      flex: 1;
+      background: #0a0e14;
+      position: relative;
+      min-height: 320px;
+    }
+    .frame-wrap iframe {
+      width: 100%;
+      height: 100%;
+      min-height: 320px;
+      border: 0;
+      display: block;
+    }
+    .frame-fallback {
+      display: none;
+      padding: 1rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    .frame-wrap.blocked .frame-fallback { display: block; }
+    .frame-wrap.blocked iframe { display: none; }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+    .note {
+      max-width: 1600px;
+      margin: 0 auto 1rem;
+      padding: 0 clamp(1rem, 4vw, 2rem);
+      font-size: 0.82rem;
+      color: #94a3b8;
+    }
+    code { background: #0a0e14; padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.85em; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>هاب یکپارچهٔ پلتفرم اَملاین — توسعهٔ محلی</h1>
+    <p>همان چیدمان <a href="https://github.com/m-khonyagar/Amline_namAvaran" target="_blank" rel="noopener noreferrer" style="color:#5eead4;">ریپازیتوری GitHub</a>؛ بدون کدنویسی، از این صفحه به همهٔ پنل‌ها و سرویس‌ها لینک بگیرید.</p>
+    <span class="badge">قرارداد هوشمند · چند پنل · mock یا بک‌اند روی 8080</span>
+    <div class="actions">
+      <button type="button" class="primary" id="openAll">باز کردن همهٔ لینک‌ها در تب جدید</button>
+      <button type="button" id="reloadFrames">تازه‌سازی پیش‌نماها</button>
+      <a class="btn" href="http://127.0.0.1:8080/health" target="_blank" rel="noopener">بررسی Health API ↗</a>
+    </div>
+  </header>
+
+  <div class="hero">
+    <h2>ارزش و فیچرهای پلتفرم (خلاصهٔ فنی–کسب‌وکار)</h2>
+    <div class="values">
+      <article><strong>انعقاد و مدیریت قرارداد</strong>ویزارد چندمرحله‌ای، امضای OTP، شاهد، PDF؛ همسو با <code>dev-mock-api</code> و بک‌اند FastAPI.</article>
+      <article><strong>چند وجهی (ادمین / کاربر / مشاور)</strong>سه رابط جدا با مجوزهای متفاوت؛ یک قرارداد و API مشترک.</article>
+      <article><strong>CRM و لید</strong>کانبان، فعالیت‌ها، اتصال به ماژول‌های ادمین طبق مسیرهای <code>/admin/crm</code>.</article>
+      <article><strong>مالی و کیف پول</strong>مسیرهای مالی و ابزارهای Hamgit در پنل ادمین (بخش‌های توسعه‌یافته).</article>
+      <article><strong>حاکمیت و امنیت</strong>نقش‌ها، ممیزی، گزارش فعالیت؛ آمادهٔ اتصال به production پس از پیکربندی.</article>
+      <article><strong>سایت و سئو</strong>سایت استاتیک و داشبورد سئو برای کانال بازاریابی جدا از اپ اصلی.</article>
+    </div>
+  </div>
+
+  <div class="personas">
+    <div class="p">
+      <h3>پنل ادمین</h3>
+      <ul>
+        <li>داشبورد KPI، قراردادها، ویزارد، کاربران، CRM، کیف پول، نقش‌ها، ممیزی</li>
+        <li>ورود آزمایشی در dev با تنظیم env (ر. <code>docs/LOCAL_DEV.md</code>)</li>
+      </ul>
+    </div>
+    <div class="p">
+      <h3>پنل کاربر نهایی (amline-ui)</h3>
+      <ul>
+        <li>قراردادها، نیازمندی، بازار، کیف پول؛ مسیر استاندارد OTP</li>
+      </ul>
+    </div>
+    <div class="p">
+      <h3>پنل مشاور (consultant-ui)</h3>
+      <ul>
+        <li>ورود مشاور؛ اتصال به <code>/consultant/*</code> روی mock یا بک‌اند</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="note">
+    برای بالا آوردن API و باز خودکار این صفحه در ویندوز:
+    <code>powershell -ExecutionPolicy Bypass -File .\scripts\start-platform-local-hub.ps1 -WithUserUi -WithAdminUi -WithConsultantUi</code>
+    — فقط هاب + mock: همان اسکریپت را بدون سوییچ اجرا کنید؛ سپس دستی <code>npm run dev</code> در هر پوشه.
+  </p>
+
+  <main>
+    <div class="grid" id="apps"></div>
+  </main>
+  <footer>
+    API :8080 · amline-ui :3000 · site :3001 · admin-ui :3002 · seo-dashboard :3003 · consultant-ui :3004
+    — اگر iframe خالی بود، دکمهٔ «باز در تب جدید» را بزنید (X-Frame-Options / Cookie).
+  </footer>
+  <script>
+    const APPS = [
+      { name: "API — سلامت", port: 8080, path: "/health", desc: "FastAPI mock یا backend" },
+      { name: "کاربر — ورود / خانه", port: 3000, path: "/login", desc: "Next.js — پنل نهایی" },
+      { name: "کاربر — قراردادها", port: 3000, path: "/contracts", desc: "پس از ورود" },
+      { name: "سایت بازاریابی", port: 3001, path: "/", desc: "Next.js static" },
+      { name: "ادمین — ورود", port: 3002, path: "/login", desc: "Vite — مدیریت" },
+      { name: "ادمین — داشبورد", port: 3002, path: "/dashboard", desc: "KPI" },
+      { name: "ادمین — ویزارد قرارداد", port: 3002, path: "/contracts/wizard", desc: "انعقاد (نیاز به احراز)" },
+      { name: "سئو داشبورد", port: 3003, path: "/", desc: "تحلیل سئو" },
+      { name: "مشاور — ورود", port: 3004, path: "/login", desc: "پنل مشاور" },
+    ];
+    const base = (p, path) => `http://127.0.0.1:${p}${path}`;
+    const grid = document.getElementById("apps");
+    APPS.forEach((app) => {
+      const url = base(app.port, app.path);
+      const sec = document.createElement("section");
+      sec.innerHTML = `
+        <div class="sec-head">
+          <div>
+            <strong>${app.name}</strong>
+            <span>${app.desc} — پورت ${app.port}</span>
+          </div>
+          <a href="${url}" target="_blank" rel="noopener">باز در تب جدید ↗</a>
+        </div>
+        <div class="frame-wrap" data-url="${url}">
+          <iframe src="${url}" title="${app.name}" loading="lazy" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+          <div class="frame-fallback">این اپ اجازهٔ نمایش داخل قاب را نمی‌دهد. از لینک «باز در تب جدید» استفاده کنید.</div>
+        </div>
+      `;
+      grid.appendChild(sec);
+      const wrap = sec.querySelector(".frame-wrap");
+      const iframe = sec.querySelector("iframe");
+      iframe.addEventListener("load", () => {
+        try {
+          if (!iframe.contentWindow || !iframe.contentWindow.document) return;
+        } catch (e) {
+          wrap.classList.add("blocked");
+        }
+      });
+      iframe.addEventListener("error", () => wrap.classList.add("blocked"));
+    });
+    document.getElementById("openAll").addEventListener("click", () => {
+      APPS.forEach((app) => window.open(base(app.port, app.path), "_blank"));
+    });
+    document.getElementById("reloadFrames").addEventListener("click", () => {
+      document.querySelectorAll("iframe").forEach((f) => { f.src = f.src; });
+    });
+  </script>
+</body>
+</html>

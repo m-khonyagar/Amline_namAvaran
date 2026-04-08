@@ -1,0 +1,106 @@
+name: Deploy staging (full-stack)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: 'Branch to deploy on staging server'
+        required: false
+        default: 'staging'
+  push:
+    branches: [staging]
+    paths:
+      - 'backend/**'
+      - 'admin-ui/**'
+      - 'amline-ui/**'
+      - 'consultant-ui/**'
+      - 'site/**'
+      - 'channel-gateway/**'
+      - 'pdf-generator/**'
+      - 'docker-compose.yml'
+      - 'deploy.sh'
+      - '.github/workflows/deploy-staging-fullstack.yml'
+
+concurrency:
+  group: deploy-staging-fullstack-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: ${{ vars.STAGING_DEPLOY_HOST != '' }}
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Resolve deploy settings
+        id: cfg
+        run: |
+          DEPLOY_HOST="${{ vars.STAGING_DEPLOY_HOST }}"
+          DEPLOY_USER="${{ vars.STAGING_DEPLOY_USER }}"
+          STACK_DIR="${{ vars.STAGING_STACK_DIR }}"
+          TARGET_BRANCH="${{ inputs.target_branch }}"
+          if [ -z "$DEPLOY_USER" ]; then DEPLOY_USER="root"; fi
+          if [ -z "$STACK_DIR" ]; then STACK_DIR="/opt/amline/app"; fi
+          if [ -z "$TARGET_BRANCH" ]; then TARGET_BRANCH="staging"; fi
+          echo "deploy_host=$DEPLOY_HOST" >> "$GITHUB_OUTPUT"
+          echo "deploy_user=$DEPLOY_USER" >> "$GITHUB_OUTPUT"
+          echo "stack_dir=$STACK_DIR" >> "$GITHUB_OUTPUT"
+          echo "target_branch=$TARGET_BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Setup SSH
+        env:
+          STAGING_KEY: ${{ secrets.STAGING_DEPLOY_SSH_KEY }}
+          FALLBACK_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          KEY_CONTENT="${STAGING_KEY:-}"
+          if [ -z "$KEY_CONTENT" ]; then KEY_CONTENT="${FALLBACK_KEY:-}"; fi
+          if [ -z "$KEY_CONTENT" ]; then
+            echo "Set secret STAGING_DEPLOY_SSH_KEY or DEPLOY_SSH_KEY"
+            exit 1
+          fi
+          printf '%s\n' "$KEY_CONTENT" > ~/.ssh/staging_key
+          chmod 600 ~/.ssh/staging_key
+          ssh-keyscan -H "${{ steps.cfg.outputs.deploy_host }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Deploy full stack over SSH
+        run: |
+          ssh -i ~/.ssh/staging_key -o StrictHostKeyChecking=no \
+            "${{ steps.cfg.outputs.deploy_user }}@${{ steps.cfg.outputs.deploy_host }}" \
+            bash -s -- "${{ steps.cfg.outputs.stack_dir }}" "${{ steps.cfg.outputs.target_branch }}" << 'EOS'
+          set -euo pipefail
+          STACK_DIR="$1"
+          TARGET_BRANCH="$2"
+
+          cd "$STACK_DIR"
+
+          if [ ! -f ".env" ]; then
+            echo "ERROR: .env file not found in ${STACK_DIR}"
+            exit 1
+          fi
+
+          # Idempotent: staging demo OTP (backend magic_otp); skip if ops already set the key
+          if ! grep -q '^AMLINE_OTP_MAGIC_ENABLED=' .env; then
+            printf '\n# Staging: demo mobile OTP bypass (see AMLINE_OTP_MAGIC_* in backend)\nAMLINE_OTP_MAGIC_ENABLED=1\n' >> .env
+          fi
+
+          git fetch origin
+          git checkout "$TARGET_BRANCH"
+          git pull --ff-only origin "$TARGET_BRANCH"
+
+          docker compose pull --ignore-pull-failures || true
+          docker compose build --no-cache backend admin-ui amline-ui consultant-ui site channel-gateway pdf-generator
+
+          docker compose run --rm db-init
+          docker compose up -d --remove-orphans
+
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8080/health > /dev/null 2>&1; then
+              echo "Backend is healthy."
+              break
+            fi
+            echo "Waiting backend health... ($i/30)"
+            sleep 3
+          done
+
+          docker compose ps
+          EOS

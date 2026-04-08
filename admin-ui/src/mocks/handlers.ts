@@ -1,11 +1,6 @@
 // @ts-nocheck — MSW resolver generics clash with shared dual-route handlers; runtime behavior is validated via dev MSW.
 import { http, HttpResponse } from 'msw';
 import type { HttpHandler } from 'msw';
-import {
-  seedRichMswDemoIfNeeded,
-  type MswDirectoryUser,
-  type MswListingSeed,
-} from './mswSeedRichDemo';
 
 /** هر هندلر را هم برای مسیر قدیمی star-slash و هم برای canonical با پیشوند api/v1 ثبت می‌کند. */
 const MSW_V1 = '/api/v1';
@@ -130,6 +125,35 @@ const mswNotifications: Array<{
 /** MSW CRM — همان منبع برای `/api/v1/crm/*` و متریک‌های داشبورد */
 const crmMockLeads: Record<string, unknown>[] = [];
 const crmMockActivities: Record<string, Record<string, unknown>[]> = {};
+
+function seedCrmMockLeadsIfEmpty() {
+  if (crmMockLeads.length > 0) return;
+  const now = new Date().toISOString();
+  const row = (overrides: Record<string, unknown>) => ({
+    source: 'WEB',
+    full_name: 'سرنخ',
+    mobile: '09120000000',
+    need_type: 'RENT',
+    notes: '',
+    assigned_to: null,
+    contract_id: null,
+    listing_id: null,
+    requirement_id: null,
+    province_id: null,
+    city_id: null,
+    province_name_fa: null,
+    city_name_fa: null,
+    sla_due_at: null,
+    created_at: now,
+    updated_at: now,
+    ...overrides,
+  });
+  crmMockLeads.push(
+    row({ id: 'crm-seed-1', full_name: 'علی احمدی', status: 'NEW' }),
+    row({ id: 'crm-seed-2', full_name: 'مریم کریمی', status: 'CONTACTED' }),
+    row({ id: 'crm-seed-3', full_name: 'رضا محمدی', status: 'QUALIFIED' })
+  );
+}
 
 function crmOpenLeadCount(): number {
   seedCrmMockLeadsIfEmpty();
@@ -293,6 +317,25 @@ type MswAddendumRow = {
 };
 const addendumsByContractId = new Map<string, MswAddendumRow[]>();
 
+interface MswLegalReviewRow {
+  id: string;
+  contract_id: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  comment: string | null;
+  reviewer_id: string | null;
+  created_at: string;
+  decided_at: string | null;
+}
+const mswLegalReviews: MswLegalReviewRow[] = [];
+
+type MswAddendumRow = {
+  id: string;
+  subject: string;
+  created_at: string;
+  sign_status: 'PENDING' | 'PARTIALLY_SIGNED' | 'FULLY_SIGNED';
+};
+const addendumsByContractId = new Map<string, MswAddendumRow[]>();
+
 function adminEnterpriseHandlers() {
   return [
     ...dualGet('*/admin/roles', () => HttpResponse.json([...mswRoles])),
@@ -365,22 +408,15 @@ function adminEnterpriseHandlers() {
       const items = mswSessions.slice(skip, skip + limit);
       return HttpResponse.json({ total: mswSessions.length, items, skip, limit });
     }),
-    ...dualGet('*/admin/metrics/summary', () => {
-      ensureMswRichDemo();
-      const today = new Date().toISOString().slice(0, 10);
-      let contractsToday = 0;
-      for (const c of contracts.values()) {
-        const d = (c.created_at ?? '').slice(0, 10);
-        if (d === today) contractsToday += 1;
-      }
-      return HttpResponse.json({
+    ...dualGet('*/admin/metrics/summary', () =>
+      HttpResponse.json({
         contracts_total: contracts.size,
-        users_total: mswDirectoryUsers.length,
+        users_total: 1,
         active_leads: crmOpenLeadCount(),
-        contracts_today: contractsToday,
+        contracts_today: 0,
         audit_events_total: mswAuditLogs.length,
-      });
-    }),
+      })
+    ),
     ...dualGet('*/admin/metrics/operations', () => {
       const unread = mswNotifications.filter((x) => !mswNotificationReads.has(x.id)).length;
       const cutoff = Date.now() - 24 * 60 * 60 * 1000;
@@ -573,26 +609,13 @@ function setStep(c: MockContract, step: string) {
 }
 
 function handleContractList({ request }: { request: Request }) {
-  ensureMswRichDemo();
   const u = new URL(request.url);
   const page = Math.max(1, parseInt(u.searchParams.get('page') ?? '1', 10) || 1);
   const limit = Math.min(100, Math.max(1, parseInt(u.searchParams.get('limit') ?? '20', 10) || 20));
-  const status = u.searchParams.get('status') ?? '';
-  const type = u.searchParams.get('type') ?? '';
-  const userId = u.searchParams.get('user_id') ?? '';
-  let rows = Array.from(contracts.values()).map(contractJson);
-  if (status) rows = rows.filter((x) => x.status === status);
-  if (type) rows = rows.filter((x) => x.type === type);
-  if (userId) {
-    rows = rows.filter((x) => {
-      const raw = contracts.get(x.id);
-      return raw?.user_id === userId;
-    });
-  }
-  rows.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+  const all = Array.from(contracts.values()).map(contractJson);
   const start = (page - 1) * limit;
-  const items = rows.slice(start, start + limit);
-  return HttpResponse.json({ items, total: rows.length, page, limit });
+  const items = all.slice(start, start + limit);
+  return HttpResponse.json({ items, total: all.length, page, limit });
 }
 
 export const handlers = [
@@ -889,53 +912,16 @@ export const handlers = [
 
   ...dualPost('*/files/upload', () => HttpResponse.json({ id: 'file-001', url: null }, { status: 201 })),
 
-  ...dualGet('*/admin/users', ({ request }) => {
-    ensureMswRichDemo();
-    const u = new URL(request.url);
-    const page = Math.max(1, parseInt(u.searchParams.get('page') ?? '1', 10) || 1);
-    const limit = Math.min(100, Math.max(1, parseInt(u.searchParams.get('limit') ?? '20', 10) || 20));
-    const search = (u.searchParams.get('search') ?? '').trim().toLowerCase();
-    const role = u.searchParams.get('role') ?? '';
-    let rows = [...mswDirectoryUsers];
-    if (search) {
-      rows = rows.filter(
-        (r) =>
-          r.mobile.replace(/\D/g, '').includes(search.replace(/\D/g, '')) ||
-          (r.full_name && r.full_name.toLowerCase().includes(search))
-      );
-    }
-    if (role) rows = rows.filter((r) => r.role === role);
-    const total = rows.length;
-    const start = (page - 1) * limit;
-    const slice = rows.slice(start, start + limit);
-    const items = slice.map((r) => ({
-      id: r.id,
-      mobile: r.mobile,
-      full_name: r.full_name,
-      role: r.role,
-      created_at: r.created_at,
-      last_login: r.last_login,
-      is_active: r.is_active,
-    }));
-    return HttpResponse.json({ items, total, page, limit });
-  }),
+  ...dualGet('*/admin/users', () =>
+    HttpResponse.json({
+      total_count: 1,
+      start_index: 0,
+      end_index: 1,
+      data: [mockUser],
+    })
+  ),
 
-  ...dualGet('*/admin/users/:id', ({ params }) => {
-    ensureMswRichDemo();
-    const row = mswDirectoryUsers.find((x) => x.id === params.id);
-    if (!row) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
-    return HttpResponse.json({
-      id: row.id,
-      mobile: row.mobile,
-      full_name: row.full_name,
-      national_id: row.national_id ?? undefined,
-      email: row.email ?? undefined,
-      role: row.role,
-      wallet_balance: row.wallet_balance ?? 0,
-      created_at: row.created_at,
-      profile: {},
-    });
-  }),
+  ...dualGet('*/admin/users/:id', () => HttpResponse.json(mockUser)),
 
   // ---- CRM in-memory (وقتی VITE_USE_CRM_API=true + MSW) ----
   ...crmLeadHandlers(),

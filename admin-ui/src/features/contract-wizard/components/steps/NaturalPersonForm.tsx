@@ -1,8 +1,17 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { naturalPersonSchema, type NaturalPersonFormData } from '../../schemas/partySchema';
 import { resolveService } from '../../services/resolveService';
+import {
+  WfSectionDivider,
+  WfLabeledRadio,
+  WfFieldBlock,
+  WfInput,
+  WfSelect,
+  WfShebaRow,
+  WfInfoIcon,
+} from '../wizardFigma/Primitives';
 
 interface NaturalPersonFormProps {
   defaultValues?: Partial<NaturalPersonFormData>;
@@ -11,163 +20,265 @@ interface NaturalPersonFormProps {
   submitLabel?: string;
 }
 
+function parseBirthParts(s?: string): { y: string; m: string; d: string } {
+  if (!s) return { y: '', m: '', d: '' };
+  const m = /^(\d{4})\/(\d{2})\/(\d{2})$/.exec(s.trim());
+  if (!m) return { y: '', m: '', d: '' };
+  return { y: m[1], m: String(Number(m[2])), d: String(Number(m[3])) };
+}
+
+const J_YEARS = Array.from({ length: 1410 - 1310 + 1 }, (_, i) => String(1310 + i)).reverse();
+const MONTHS = Array.from({ length: 12 }, (_, i) => String(i + 1));
+const DAYS = Array.from({ length: 31 }, (_, i) => String(i + 1));
+
 export function NaturalPersonForm({
   defaultValues,
   onSubmit,
   isLoading,
   submitLabel = 'ثبت اطلاعات',
 }: NaturalPersonFormProps) {
+  const [acctKind, setAcctKind] = useState<'sheba' | 'card'>('sheba');
+  const initialBd = useMemo(() => parseBirthParts(defaultValues?.birth_date), [defaultValues?.birth_date]);
+  const [bdY, setBdY] = useState(initialBd.y);
+  const [bdM, setBdM] = useState(initialBd.m);
+  const [bdD, setBdD] = useState(initialBd.d);
+
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     setError,
     clearErrors,
     formState: { errors },
   } = useForm<NaturalPersonFormData>({
     resolver: zodResolver(naturalPersonSchema),
-    defaultValues,
+    defaultValues: {
+      is_forigen_citizen: false,
+      family_members_count: null,
+      home_electricy_bill: '',
+      ...defaultValues,
+    },
   });
 
   const nationalCode = watch('national_code');
   const bankAccount = watch('bank_account');
 
-  // Resolve کد ملی
+  useEffect(() => {
+    if (bdY && bdM && bdD) {
+      const composed = `${bdY}/${bdM.padStart(2, '0')}/${bdD.padStart(2, '0')}`;
+      setValue('birth_date', composed, { shouldValidate: true });
+    }
+  }, [bdY, bdM, bdD, setValue]);
+
   useEffect(() => {
     if (!nationalCode || nationalCode.length !== 10) return;
     resolveService('ORGANIZATION_CODE', nationalCode, (res, err) => {
-      if (err) {
-        setError('national_code', { message: err });
-      } else if (res?.result) {
-        clearErrors('national_code');
-      }
+      if (err) setError('national_code', { message: err });
+      else if (res?.result) clearErrors('national_code');
     });
   }, [nationalCode, setError, clearErrors]);
 
-  // Resolve شبا
   useEffect(() => {
     if (!bankAccount || !/^IR\d{24}$/.test(bankAccount)) return;
     resolveService('BANK_IBAN', bankAccount, (res, err) => {
-      if (err) {
-        setError('bank_account', { message: err });
-      } else if (res?.result) {
-        clearErrors('bank_account');
-      }
+      if (err) setError('bank_account', { message: err });
+      else if (res?.result) clearErrors('bank_account');
     });
   }, [bankAccount, setError, clearErrors]);
 
   return (
-    <form dir="rtl" onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-      {/* کد ملی */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">کد ملی *</label>
-        <input
-          {...register('national_code')}
-          type="text"
-          inputMode="numeric"
-          maxLength={10}
-          placeholder="۱۰ رقم"
-          className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary ${errors.national_code ? 'border-red-500' : 'border-gray-300'}`}
-        />
-        {errors.national_code && (
-          <p className="mt-1 text-xs text-red-600" role="alert">{errors.national_code.message}</p>
-        )}
-      </div>
+    <form
+      dir="rtl"
+      onSubmit={handleSubmit(onSubmit)}
+      className="wizard-figma space-y-4"
+      noValidate
+    >
+      <input type="hidden" {...register('birth_date')} />
 
-      {/* شماره موبایل */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">شماره موبایل *</label>
-        <input
-          {...register('mobile')}
-          type="tel"
-          inputMode="numeric"
-          maxLength={11}
-          placeholder="09xxxxxxxxx"
-          className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary ${errors.mobile ? 'border-red-500' : 'border-gray-300'}`}
-        />
-        {errors.mobile && (
-          <p className="mt-1 text-xs text-red-600" role="alert">{errors.mobile.message}</p>
-        )}
-      </div>
+      <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-8">
+          <WfFieldBlock
+            label="کدملی"
+            labelFor="np-national"
+            hint="کدملی و شماره موبایل باید متعلق به یک نفر باشد"
+            hintIcon={<WfInfoIcon />}
+            error={errors.national_code?.message}
+          >
+            <WfInput
+              id="np-national"
+              {...register('national_code')}
+              inputMode="numeric"
+              maxLength={10}
+              placeholder="کدملی خود را وارد کنید"
+              error={!!errors.national_code}
+            />
+          </WfFieldBlock>
 
-      {/* تاریخ تولد */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">تاریخ تولد *</label>
-        <input
-          {...register('birth_date')}
-          type="text"
-          inputMode="numeric"
-          maxLength={10}
-          placeholder="1370/01/01"
-          className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary ${errors.birth_date ? 'border-red-500' : 'border-gray-300'}`}
-        />
-        {errors.birth_date && (
-          <p className="mt-1 text-xs text-red-600" role="alert">{errors.birth_date.message}</p>
-        )}
-      </div>
+          <WfFieldBlock
+            label="شماره موبایل"
+            labelFor="np-mobile"
+            error={errors.mobile?.message}
+          >
+            <WfInput
+              id="np-mobile"
+              {...register('mobile')}
+              type="tel"
+              inputMode="numeric"
+              maxLength={11}
+              placeholder="شماره موبایل خود را وارد کنید"
+              error={!!errors.mobile}
+            />
+          </WfFieldBlock>
 
-      {/* شماره شبا */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">شماره شبا *</label>
-        <input
-          {...register('bank_account')}
-          type="text"
-          maxLength={26}
-          placeholder="IR + 24 رقم"
-          className={`w-full border rounded-lg px-3 py-2 font-mono focus:outline-none focus:ring-2 focus:ring-primary ${errors.bank_account ? 'border-red-500' : 'border-gray-300'}`}
-        />
-        {errors.bank_account && (
-          <p className="mt-1 text-xs text-red-600" role="alert">{errors.bank_account.message}</p>
-        )}
-      </div>
+          <div className="flex w-full max-w-[327px] flex-col gap-2">
+            <span className="block w-full text-right wf-subtitle-m text-[var(--wf-title)]">تاریخ تولد</span>
+            <div className="flex flex-row-reverse gap-1">
+              <WfSelect
+                className="min-w-0 flex-1"
+                value={bdD}
+                onChange={(e) => setBdD(e.target.value)}
+                aria-label="روز تولد"
+              >
+                <option value="">روز</option>
+                {DAYS.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </WfSelect>
+              <WfSelect
+                className="min-w-0 flex-1"
+                value={bdM}
+                onChange={(e) => setBdM(e.target.value)}
+                aria-label="ماه تولد"
+              >
+                <option value="">ماه</option>
+                {MONTHS.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
+              </WfSelect>
+              <WfSelect
+                className="min-w-0 flex-1"
+                value={bdY}
+                onChange={(e) => setBdY(e.target.value)}
+                aria-label="سال تولد"
+              >
+                <option value="">سال</option>
+                {J_YEARS.map((y) => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))}
+              </WfSelect>
+            </div>
+            {errors.birth_date?.message ? (
+              <p className="text-xs text-red-600" role="alert">
+                {errors.birth_date.message}
+              </p>
+            ) : null}
+          </div>
+        </div>
 
-      {/* کد پستی */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">کد پستی *</label>
-        <input
-          {...register('postal_code')}
-          type="text"
-          inputMode="numeric"
-          maxLength={10}
-          placeholder="۱۰ رقم"
-          className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary ${errors.postal_code ? 'border-red-500' : 'border-gray-300'}`}
-        />
-        {errors.postal_code && (
-          <p className="mt-1 text-xs text-red-600" role="alert">{errors.postal_code.message}</p>
-        )}
-      </div>
+        <WfSectionDivider label="اطلاعات حساب" />
 
-      {/* تعداد اعضای خانواده */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">تعداد اعضای خانواده</label>
-        <input
-          {...register('family_members_count', { valueAsNumber: true })}
-          type="number"
-          min={0}
-          placeholder="0"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-        />
-      </div>
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-row-reverse flex-wrap items-center justify-end gap-6">
+            <WfLabeledRadio
+              label="شماره شبا"
+              name="np_acct"
+              value="sheba"
+              id="np-acct-sheba"
+              checked={acctKind === 'sheba'}
+              onChange={() => setAcctKind('sheba')}
+            />
+            <WfLabeledRadio
+              label="شماره کارت"
+              name="np_acct"
+              value="card"
+              id="np-acct-card"
+              checked={acctKind === 'card'}
+              onChange={() => setAcctKind('card')}
+            />
+          </div>
 
-      {/* تبعه خارجی */}
-      <div className="flex items-center gap-2">
-        <input
-          {...register('is_forigen_citizen')}
-          id="is_forigen_citizen"
-          type="checkbox"
-          className="w-4 h-4 rounded border-gray-300 text-primary"
-        />
-        <label htmlFor="is_forigen_citizen" className="text-sm text-gray-700">
-          تبعه خارجی
-        </label>
+          {acctKind === 'sheba' ? (
+            <WfFieldBlock label="شماره شبا" error={errors.bank_account?.message}>
+              <WfShebaRow
+                id="np-bank"
+                value={watch('bank_account') ?? ''}
+                onChange={(v) => setValue('bank_account', v, { shouldValidate: true })}
+                placeholder="شماره شبای ۲۴ رقمی را وارد کنید"
+                error={!!errors.bank_account}
+              />
+            </WfFieldBlock>
+          ) : (
+            <p className="rounded-[var(--wf-field-radius)] border border-amber-200 bg-amber-50 p-3 wf-body-s text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
+              ثبت نهایی قرارداد فعلاً فقط با شماره شبا انجام می‌شود. لطفاً گزینهٔ «شماره شبا» را انتخاب کنید.
+            </p>
+          )}
+        </div>
+
+        <WfSectionDivider label="اطلاعات محل سکونت" />
+
+        <div className="flex flex-col gap-8">
+          <WfFieldBlock label="کدپستی محل سکونت" labelFor="np-postal" error={errors.postal_code?.message}>
+            <WfInput
+              id="np-postal"
+              {...register('postal_code')}
+              inputMode="numeric"
+              maxLength={10}
+              placeholder="کدپستی را وارد کنید"
+              error={!!errors.postal_code}
+            />
+          </WfFieldBlock>
+
+          <WfFieldBlock
+            label="شناسه قبض برق محل سکونت"
+            labelFor="np-bill"
+            error={errors.home_electricy_bill?.message}
+          >
+            <WfInput
+              id="np-bill"
+              {...register('home_electricy_bill')}
+              inputMode="numeric"
+              placeholder="شناسه قبض برق را وارد کنید"
+              error={!!errors.home_electricy_bill}
+            />
+          </WfFieldBlock>
+        </div>
+
+        <div className="flex flex-col gap-3 border-t border-[var(--wf-border)] pt-4">
+          <WfFieldBlock label="تعداد اعضای خانواده (اختیاری)">
+            <WfInput
+              {...register('family_members_count', {
+                setValueAs: (v) =>
+                  v === '' || v == null || Number.isNaN(Number(v)) ? null : Number(v),
+              })}
+              type="number"
+              min={0}
+              placeholder="۰"
+            />
+          </WfFieldBlock>
+          <label className="flex cursor-pointer items-center gap-2 wf-body-s text-[var(--wf-title)]">
+            <input
+              {...register('is_forigen_citizen')}
+              type="checkbox"
+              className="size-4 rounded border-[var(--wf-border)] text-[var(--amline-accent)]"
+            />
+            تبعه خارجی
+          </label>
+        </div>
       </div>
 
       <button
         type="submit"
-        disabled={isLoading}
-        className="w-full bg-primary text-white rounded-lg py-2.5 font-medium disabled:opacity-50 mt-2"
+        disabled={isLoading || acctKind !== 'sheba'}
+        className="w-full rounded-[var(--wf-field-radius)] bg-primary py-2.5 font-medium text-white disabled:opacity-50"
       >
-        {isLoading ? 'در حال ثبت...' : submitLabel}
+        {isLoading ? 'در حال ثبت…' : submitLabel}
       </button>
     </form>
   );

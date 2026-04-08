@@ -19,7 +19,10 @@ logger = logging.getLogger(__name__)
 
 class PDFGeneratorService:
     """سرویس تولید PDF"""
-    
+
+    # Bump when bundled default HTML changes so volumes with old built-in file get replaced.
+    PR_BUILTIN_TEMPLATE_REVISION = 2
+
     def __init__(self):
         """initialize PDF Generator Service"""
         # Template directory
@@ -37,7 +40,41 @@ class PDFGeneratorService:
         self._register_filters()
         
         logger.info(f"PDF Generator initialized with templates dir: {self.templates_dir}")
-    
+
+    def _clear_jinja_template_cache(self) -> None:
+        cache = getattr(self.env, "cache", None)
+        if cache is not None and hasattr(cache, "clear"):
+            try:
+                cache.clear()
+            except Exception:
+                pass
+
+    def _ensure_pr_contract_template(self) -> None:
+        """Create missing default template; refresh built-in file when revision lags (safe if HTML has our marker)."""
+        import re
+
+        template_path = self.templates_dir / "pr_contract" / "index.html"
+        if not template_path.exists():
+            self._create_default_pr_contract_template()
+            self._clear_jinja_template_cache()
+            return
+        try:
+            head = template_path.read_text(encoding="utf-8")[:400]
+        except OSError:
+            return
+        m = re.match(r"^\s*<!--\s*amline-default-template\s+revision=(\d+)\s*-->", head)
+        if not m:
+            return
+        file_rev = int(m.group(1))
+        force = os.environ.get("AMLINE_PDF_FORCE_DEFAULT_TEMPLATE", os.environ.get("PDF_FORCE_DEFAULT_TEMPLATE", "")).lower() in (
+            "1",
+            "true",
+            "yes",
+        )
+        if force or file_rev < self.PR_BUILTIN_TEMPLATE_REVISION:
+            self._create_default_pr_contract_template()
+            self._clear_jinja_template_cache()
+
     def _register_filters(self):
         """Register custom Jinja2 filters for Persian support"""
         
@@ -175,20 +212,20 @@ class PDFGeneratorService:
             tuple: (pdf_bytes, file_name)
         """
         try:
-            # Get or create template
             template_name = "pr_contract/index.html"
-            template_path = self.templates_dir / template_name
-            
-            if not template_path.exists():
-                # Create default template
-                self._create_default_pr_contract_template()
-            
+            self._ensure_pr_contract_template()
+
             # Load template
             template = self.env.get_template(template_name)
             
             # Prepare context data
+            raw = (
+                contract_data.model_dump()
+                if hasattr(contract_data, "model_dump")
+                else (contract_data.dict() if hasattr(contract_data, "dict") else contract_data)
+            )
             context = {
-                'contract': contract_data.dict() if hasattr(contract_data, 'dict') else contract_data,
+                'contract': raw,
                 'generated_date': datetime.now(),
                 'generated_date_jalali': self._to_jalali(datetime.now().year, datetime.now().month, datetime.now().day),
             }
@@ -200,7 +237,8 @@ class PDFGeneratorService:
             pdf_bytes = await self._html_to_pdf(html_content)
             
             # Generate file name
-            file_name = f"pr_contract_{contract_data.contract_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+            cid = raw.get("contract_id", "unknown") if isinstance(raw, dict) else getattr(contract_data, "contract_id", "unknown")
+            file_name = f"pr_contract_{cid}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
             
             logger.info(f"PR Contract PDF generated: {file_name}")
             
@@ -309,7 +347,9 @@ class PDFGeneratorService:
     
     def _create_default_pr_contract_template(self):
         """ایجاد قالب پیش‌فرض قرارداد پیش‌قرارداد"""
-        template_content = """<!DOCTYPE html>
+        rev = self.PR_BUILTIN_TEMPLATE_REVISION
+        marker = f"<!-- amline-default-template revision={rev} -->\n"
+        template_content = marker + """<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -444,13 +484,13 @@ class PDFGeneratorService:
 <body>
     <div class="header">
         <div class="logo">اَملاین</div>
-        <div class="contract-title">قرارداد پیش‌قرارداد اجاره</div>
+        <div class="contract-title">{% if contract.contract_kind == 'BUYING_AND_SELLING' %}قرارداد خرید و فروش ملک{% else %}قرارداد پیش‌قرارداد اجاره{% endif %}</div>
         <div>شماره قرارداد: {{ contract.contract_id }}</div>
         <div>تاریخ تنظیم: {{ contract.start_date | format_date_jalali }}</div>
     </div>
     
     <div class="section">
-        <div class="section-title">مشخصات موجر (，房東)</div>
+        <div class="section-title">{% if contract.contract_kind == 'BUYING_AND_SELLING' %}مشخصات فروشنده{% else %}مشخصات موجر{% endif %}</div>
         <div class="info-grid">
             <div class="info-item">
                 <span class="info-label">نام و نام خانوادگی:</span>
@@ -474,7 +514,7 @@ class PDFGeneratorService:
     </div>
     
     <div class="section">
-        <div class="section-title">مشخصات مستأجر (房客)</div>
+        <div class="section-title">{% if contract.contract_kind == 'BUYING_AND_SELLING' %}مشخصات خریدار{% else %}مشخصات مستأجر{% endif %}</div>
         <div class="info-grid">
             <div class="info-item">
                 <span class="info-label">نام و نام خانوادگی:</span>
@@ -545,28 +585,37 @@ class PDFGeneratorService:
         </div>
     </div>
     
+    {% if contract.contract_kind == 'BUYING_AND_SELLING' %}
     <div class="financial-box">
-        <div class="section-title">شرایط مالی (財務條款)</div>
-        
+        <div class="section-title">شرایط مالی — خرید و فروش</div>
+        <div class="financial-item">
+            <span>قیمت توافقی فروش:</span>
+            <span class="amount">{{ contract.sale_total_price | format_number }} تومان</span>
+        </div>
+        <div style="margin-top: 10px; font-size: 11pt;">
+            <strong>به حروف:</strong> {{ contract.sale_total_price | to_persian_word }} تومان
+        </div>
+    </div>
+    {% else %}
+    <div class="financial-box">
+        <div class="section-title">شرایط مالی — رهن و اجاره</div>
         <div class="financial-item">
             <span>اجاره ماهانه:</span>
             <span class="amount">{{ contract.monthly_rent | format_number }} تومان</span>
         </div>
-        
         <div class="financial-item">
             <span>ودیعه (رضایت):</span>
             <span class="amount">{{ contract.deposit | format_number }} تومان</span>
         </div>
-        
         <div class="financial-item">
             <span>جمع کل:</span>
             <span class="amount">{{ (contract.monthly_rent + contract.deposit) | format_number }} تومان</span>
         </div>
-        
         <div style="margin-top: 10px; font-size: 11pt;">
             <strong>به حروف:</strong> {{ (contract.monthly_rent + contract.deposit) | to_persian_word }} تومان
         </div>
     </div>
+    {% endif %}
     
     {% if contract.payments %}
     <div class="section">
@@ -608,13 +657,13 @@ class PDFGeneratorService:
     
     <div class="signatures">
         <div class="signature-box">
-            <div>امضای موجر</div>
+            <div>{% if contract.contract_kind == 'BUYING_AND_SELLING' %}امضای فروشنده{% else %}امضای موجر{% endif %}</div>
             <div class="signature-line">
                 نام و نام خانوادگی: {{ contract.landlord.full_name }}
             </div>
         </div>
         <div class="signature-box">
-            <div>امضای مستأجر</div>
+            <div>{% if contract.contract_kind == 'BUYING_AND_SELLING' %}امضای خریدار{% else %}امضای مستأجر{% endif %}</div>
             <div class="signature-line">
                 نام و نام خانوادگی: {{ contract.tenant.full_name }}
             </div>

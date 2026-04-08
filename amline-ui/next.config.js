@@ -1,5 +1,4 @@
-const path = require('path')
-const webpack = require('webpack')
+const path = require('path');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -7,6 +6,20 @@ const nextConfig = {
   output: 'standalone',
   experimental: {
     externalDir: true,
+  },
+  /**
+   * When Next.js compiles admin-ui code via externalDir relative imports,
+   * webpack resolves node_modules relative to the source file's location in
+   * admin-ui/.  In CI only amline-ui/node_modules is installed (npm ci runs
+   * only in amline-ui/).  Adding the amline-ui node_modules directory as an
+   * absolute fallback lets webpack find shared packages (axios, clsx, …).
+   */
+  webpack(config) {
+    config.resolve.modules = [
+      path.resolve(__dirname, 'node_modules'),
+      ...config.resolve.modules,
+    ];
+    return config;
   },
   eslint: {
     ignoreDuringBuilds: true,
@@ -26,10 +39,12 @@ const nextConfig = {
     return config
   },
   async rewrites() {
+    // In Docker/production, backend is reachable at http://backend:8000
+    // In local dev, use NEXT_PUBLIC_DEV_PROXY_TARGET or NEXT_PUBLIC_API_BASE_URL
     const base =
-      process.env.NEXT_PUBLIC_DEV_PROXY_TARGET ||
       process.env.NEXT_PUBLIC_API_BASE_URL ||
-      'http://localhost:8080'
+      process.env.NEXT_PUBLIC_DEV_PROXY_TARGET ||
+      'http://backend:8000'
     return [
       { source: '/api/v1/:path*', destination: `${base}/api/v1/:path*` },
       { source: '/api/:path*', destination: `${base}/:path*` },
@@ -38,7 +53,9 @@ const nextConfig = {
       { source: '/auth/:path*', destination: `${base}/auth/:path*` },
       { source: '/admin/:path*', destination: `${base}/admin/:path*` },
       { source: '/financials/:path*', destination: `${base}/financials/:path*` },
-      { source: '/listings/:path*', destination: `${base}/listings/:path*` },
+      { source: '/consultant/:path*', destination: `${base}/consultant/:path*` },
+      { source: '/requirements/:path*', destination: `${base}/requirements/:path*` },
+      { source: '/market/:path*', destination: `${base}/market/:path*` },
     ]
   },
 }
