@@ -323,6 +323,37 @@ def _build_wheel_tarball(repo_root: Path) -> tuple[Path, Path]:
         ],
         check=True,
     )
+    # uvicorn[standard] omits uvloop/watchfiles/websockets when resolving on Windows;
+    # Linux Docker still needs them.
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pip",
+            "download",
+            "--disable-pip-version-check",
+            "--no-input",
+            "uvloop",
+            "watchfiles",
+            "websockets",
+            "-d",
+            str(wh),
+            "--find-links",
+            str(wh),
+            "--platform",
+            "manylinux2014_x86_64",
+            "--platform",
+            "manylinux_2_17_x86_64",
+            "--python-version",
+            "312",
+            "--implementation",
+            "cp",
+            "--abi",
+            "cp312",
+            "--only-binary=:all:",
+        ],
+        check=True,
+    )
     tar_out = tmp / "amline-wheels.tar.gz"
     subprocess.run(
         ["tar", "-czf", str(tar_out), "-C", str(wh), "."],
