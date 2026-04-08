@@ -121,12 +121,14 @@ MINIO_SECRET_KEY=${MK}
 AMLINE_OTP_MAGIC_ENABLED=1
 KAVENEGAR_API_KEY=
 AMLINE_PYTHON_BASE=docker.arvancloud.ir/library/python:3.12-slim-bookworm
+AMLINE_USE_ARVAN_PYPI=1
 ENVEOF
   chmod 600 .env
   echo "Created .env"
 else
   grep -q '^AMLINE_OTP_MAGIC_ENABLED=' .env || printf '\nAMLINE_OTP_MAGIC_ENABLED=1\n' >> .env
   grep -q '^AMLINE_PYTHON_BASE=' .env || printf '\nAMLINE_PYTHON_BASE=docker.arvancloud.ir/library/python:3.12-slim-bookworm\n' >> .env
+  grep -q '^AMLINE_USE_ARVAN_PYPI=' .env || printf '\nAMLINE_USE_ARVAN_PYPI=1\n' >> .env
   echo "Kept existing .env"
 fi
 

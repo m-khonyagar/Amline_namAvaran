@@ -30,7 +30,13 @@ RUN apt-get update && apt-get install -y \
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+ARG AMLINE_USE_ARVAN_PYPI=0
+RUN if [ "$AMLINE_USE_ARVAN_PYPI" = "1" ]; then \
+      pip install --index-url https://mirror.arvancloud.ir/pypi/web/simple \
+        --trusted-host mirror.arvancloud.ir --no-cache-dir -r requirements.txt; \
+    else \
+      pip install --no-cache-dir -r requirements.txt; \
+    fi
 
 # Copy source code
 COPY src/ ./src/

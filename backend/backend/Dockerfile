@@ -13,7 +13,13 @@ EOF
 RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/99mirror-stale-ok
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+ARG AMLINE_USE_ARVAN_PYPI=0
+RUN if [ "$AMLINE_USE_ARVAN_PYPI" = "1" ]; then \
+      pip install --index-url https://mirror.arvancloud.ir/pypi/web/simple \
+        --trusted-host mirror.arvancloud.ir --no-cache-dir -r requirements.txt; \
+    else \
+      pip install --no-cache-dir -r requirements.txt; \
+    fi
 COPY . .
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
