@@ -11,6 +11,18 @@ from app.schemas.v1.payloads import CrmActivityBody, CrmLeadCreateBody, CrmLeadP
 router = APIRouter(tags=["crm"])
 
 
+@router.get("/admin/crm/stats")
+def crm_stats() -> dict:
+    """Aggregate CRM counters for admin dashboard (in-memory store, dev/tests)."""
+    s = get_store()
+    active = sum(
+        1
+        for lead in s.crm_leads
+        if lead.get("status") not in ("LOST", "CONTRACTED")
+    )
+    return {"active_leads": active}
+
+
 def _activity_out(act: dict) -> dict:
     return {
         "id": act["id"],
