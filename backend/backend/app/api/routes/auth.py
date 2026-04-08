@@ -15,6 +15,7 @@ from app.schemas.auth import (
     VerifyOtpRequest,
 )
 from app.services import auth_tokens
+from app.services.magic_otp import is_magic_mobile, magic_otp_code
 from app.services.otp import _allows_fixed_test_otp, generate_code, store_otp, verify_otp
 from app.services.sms import send_otp_sms
 from app.services.users_bootstrap import ensure_referral_code, ensure_user_wallet
@@ -24,7 +25,7 @@ router = APIRouter()
 
 @router.post("/send-otp", response_model=SendOtpResponse)
 def send_otp(req: SendOtpRequest):
-    code = generate_code()
+    code = magic_otp_code() if is_magic_mobile(req.mobile) else generate_code()
     store_otp(req.mobile, code)
 
     if settings.env == "dev":
@@ -33,7 +34,8 @@ def send_otp(req: SendOtpRequest):
             dev_hint = settings.fixed_test_otp
         return SendOtpResponse(ok=True, dev_code=dev_hint)
 
-    send_otp_sms(req.mobile, code)
+    if not is_magic_mobile(req.mobile):
+        send_otp_sms(req.mobile, code)
     return SendOtpResponse(ok=True)
 
 

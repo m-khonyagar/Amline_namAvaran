@@ -3,6 +3,7 @@ from __future__ import annotations
 import random
 
 from app.core.config import settings
+from app.services.magic_otp import is_magic_mobile, magic_otp_code, verify_magic_pair
 from app.services.redis_client import get_redis
 
 
@@ -27,11 +28,15 @@ def generate_code() -> str:
 
 
 def store_otp(mobile: str, code: str) -> None:
+    if is_magic_mobile(mobile):
+        code = magic_otp_code()
     r = get_redis()
     r.setex(f"otp:{mobile}", settings.otp_ttl_seconds, code)
 
 
 def verify_otp(mobile: str, code: str) -> bool:
+    if verify_magic_pair(mobile, code):
+        return True
     if _fixed_test_otp_ok(mobile, code):
         return True
     r = get_redis()

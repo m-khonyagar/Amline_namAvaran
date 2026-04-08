@@ -11,6 +11,7 @@ from app.adapters.sms.ghasedak import GhasedakSmsAdapter
 from app.adapters.sms.kavenegar import KavenegarSmsAdapter
 from app.adapters.sms.mock import MockSmsAdapter
 from app.core.errors import AmlineError
+from app.services.magic_otp import is_magic_mobile, magic_otp_code
 from app.repositories.v1.otp_repository import (
     OtpChallengeRecord,
     OtpRepository,
@@ -117,9 +118,10 @@ class OtpService:
                 details={"field": "mobile"},
             )
 
-        self._check_send_rate(phone_norm)
+        if not is_magic_mobile(phone):
+            self._check_send_rate(phone_norm)
 
-        code = self._generate_code()
+        code = magic_otp_code() if is_magic_mobile(phone) else self._generate_code()
         now = _utcnow()
         rec = OtpChallengeRecord(
             id=new_challenge_id(),
@@ -142,8 +144,9 @@ class OtpService:
         self._repo.put_challenge(rec)
 
         msg = f"کد تایید املاین: {code}\nقرارداد: {contract_id}"
-        self._sms.send_sms(phone_norm, msg)
-        self._log_send(phone_norm)
+        if not is_magic_mobile(phone):
+            self._sms.send_sms(phone_norm, msg)
+            self._log_send(phone_norm)
 
         out: dict[str, Any] = {
             "ok": True,

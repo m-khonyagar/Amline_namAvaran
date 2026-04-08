@@ -34,6 +34,26 @@ def test_sign_request_and_verify(client: TestClient) -> None:
     assert r3.json() == {"ok": True}
 
 
+def test_magic_mobile_contract_otp(client: TestClient) -> None:
+    magic = os.getenv("AMLINE_OTP_MAGIC_MOBILE", "09107709601")
+    code = os.getenv("AMLINE_OTP_MAGIC_CODE", "11111")
+    r = client.post("/api/v1/contracts/start", json={"party_type": "LANDLORD"})
+    assert r.status_code == 201
+    cid = r.json()["id"]
+    r2 = client.post(
+        f"/api/v1/contracts/{cid}/sign/request",
+        json={"party_id": None, "mobile": magic},
+    )
+    assert r2.status_code == 201
+    assert r2.json().get("debug_code") == code
+    r3 = client.post(
+        f"/api/v1/contracts/{cid}/sign/verify",
+        json={"otp": code, "mobile": magic, "salt": "t"},
+    )
+    assert r3.status_code == 200
+    assert r3.json() == {"ok": True}
+
+
 def test_witness_send_and_verify(client: TestClient) -> None:
     r = client.post("/api/v1/contracts/start", json={"party_type": "LANDLORD"})
     cid = r.json()["id"]
