@@ -165,6 +165,9 @@ docker compose pull postgres redis minio
 # Long builds: log to file so a dropped SSH client does not cancel docker build
 docker compose build backend pdf-generator db-init minio-init 2>&1 | tee /tmp/amline-compose-build.log
 
+echo "=== compose down (drop volumes: Postgres ignores POSTGRES_PASSWORD if data dir exists) ==="
+docker compose down --remove-orphans -v 2>/dev/null || true
+
 echo "=== up infra ==="
 docker compose up -d postgres redis minio
 for i in $(seq 1 90); do
