@@ -112,6 +112,12 @@ qa-amline-tests/playwright-report/
 # Scratch / temporary backend checkout (not part of monorepo source)
 _temp_backend/
 
+# Local SQLite / backend runtime data (never version)
+backend/backend/data/
+
+# One-off cleanup logs
+CLEANUP-RUN.log
+
 # Deploy artifacts
 node-linux.tar.xz
 paramiko_debug.log
