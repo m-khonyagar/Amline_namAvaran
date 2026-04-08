@@ -13,6 +13,10 @@
 | `consultant-ui/` | React + Vite | 3004 | ✅ موجود |
 | `backend/backend/` | FastAPI + PostgreSQL | 8080 | ✅ آماده |
 
+## عامل خودکار (Sweep)
+
+قوانین برای ایشوهای برچسب `sweep` و عنوان `Sweep:` در [`sweep.yaml`](sweep.yaml) و [`docs/SWEEP_RUNBOOK.md`](docs/SWEEP_RUNBOOK.md). اپ قدیمی GitHub Sweep برای باز کردن خودکار PR از Issue منسوخ است؛ برای اجرای واقعی از **GitHub Copilot coding agent** یا **Cursor** استفاده کنید.
+
 > **توجه:** `amline-ui` از **App Router** استفاده می‌کند (نه Pages Router).
 
 ---
