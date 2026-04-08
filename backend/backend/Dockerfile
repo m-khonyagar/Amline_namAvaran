@@ -13,10 +13,11 @@ EOF
 RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/99mirror-stale-ok
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
-ARG AMLINE_USE_ARVAN_PYPI=0
-RUN if [ "$AMLINE_USE_ARVAN_PYPI" = "1" ]; then \
-      pip install --index-url https://mirror.arvancloud.ir/pypi/web/simple \
-        --trusted-host mirror.arvancloud.ir --no-cache-dir -r requirements.txt; \
+ARG AMLINE_PIP_INDEX_URL=
+RUN if [ -n "$AMLINE_PIP_INDEX_URL" ]; then \
+      THOST=$(printf '%s' "$AMLINE_PIP_INDEX_URL" | sed -e 's|^https*://||' -e 's|/.*||'); \
+      pip install --index-url "$AMLINE_PIP_INDEX_URL" --trusted-host "$THOST" \
+        --no-cache-dir -r requirements.txt; \
     else \
       pip install --no-cache-dir -r requirements.txt; \
     fi

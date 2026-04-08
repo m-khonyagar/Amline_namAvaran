@@ -85,7 +85,7 @@ services:
       dockerfile: Dockerfile
       args:
         AMLINE_PYTHON_BASE: ${AMLINE_PYTHON_BASE:-python:3.12-slim-bookworm}
-        AMLINE_USE_ARVAN_PYPI: ${AMLINE_USE_ARVAN_PYPI:-0}
+        AMLINE_PIP_INDEX_URL: ${AMLINE_PIP_INDEX_URL:-}
       extra_hosts:
         - "mirror.arvancloud.ir:185.143.233.235"
     container_name: amline-backend
@@ -132,7 +132,7 @@ services:
       dockerfile: Dockerfile
       args:
         AMLINE_PYTHON_BASE: ${AMLINE_PYTHON_BASE:-python:3.12-slim-bookworm}
-        AMLINE_USE_ARVAN_PYPI: ${AMLINE_USE_ARVAN_PYPI:-0}
+        AMLINE_PIP_INDEX_URL: ${AMLINE_PIP_INDEX_URL:-}
       extra_hosts:
         - "mirror.arvancloud.ir:185.143.233.235"
     container_name: amline-pdf-generator
@@ -236,7 +236,7 @@ services:
       dockerfile: Dockerfile
       args:
         AMLINE_PYTHON_BASE: ${AMLINE_PYTHON_BASE:-python:3.12-slim-bookworm}
-        AMLINE_USE_ARVAN_PYPI: ${AMLINE_USE_ARVAN_PYPI:-0}
+        AMLINE_PIP_INDEX_URL: ${AMLINE_PIP_INDEX_URL:-}
       extra_hosts:
         - "mirror.arvancloud.ir:185.143.233.235"
     container_name: amline-db-init
