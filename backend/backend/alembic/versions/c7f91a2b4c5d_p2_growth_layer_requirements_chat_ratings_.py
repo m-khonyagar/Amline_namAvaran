@@ -91,9 +91,11 @@ def upgrade() -> None:
     op.create_index(op.f("ix_ratings_target_type"), "ratings", ["target_type"], unique=False)
     op.create_index(op.f("ix_ratings_target_id"), "ratings", ["target_id"], unique=False)
     op.create_index(op.f("ix_ratings_rater_id"), "ratings", ["rater_id"], unique=False)
-    op.create_unique_constraint(
-        "uq_ratings_target_rater", "ratings", ["target_type", "target_id", "rater_id"]
-    )
+    # SQLite: use batch mode for ADD CONSTRAINT (Alembic migrates via SQLite in CI).
+    with op.batch_alter_table("ratings") as batch_op:
+        batch_op.create_unique_constraint(
+            "uq_ratings_target_rater", ["target_type", "target_id", "rater_id"]
+        )
 
     op.create_table(
         "analytics_events",
@@ -122,7 +124,8 @@ def downgrade() -> None:
     op.drop_index(op.f("ix_analytics_events_event_name"), table_name="analytics_events")
     op.drop_table("analytics_events")
 
-    op.drop_constraint("uq_ratings_target_rater", "ratings", type_="unique")
+    with op.batch_alter_table("ratings") as batch_op:
+        batch_op.drop_constraint("uq_ratings_target_rater", type_="unique")
     op.drop_index(op.f("ix_ratings_rater_id"), table_name="ratings")
     op.drop_index(op.f("ix_ratings_target_id"), table_name="ratings")
     op.drop_index(op.f("ix_ratings_target_type"), table_name="ratings")
