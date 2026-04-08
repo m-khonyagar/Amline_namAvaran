@@ -78,6 +78,11 @@ jobs:
             exit 1
           fi
 
+          # Idempotent: staging demo OTP (backend magic_otp); skip if ops already set the key
+          if ! grep -q '^AMLINE_OTP_MAGIC_ENABLED=' .env; then
+            printf '\n# Staging: demo mobile OTP bypass (see AMLINE_OTP_MAGIC_* in backend)\nAMLINE_OTP_MAGIC_ENABLED=1\n' >> .env
+          fi
+
           git fetch origin
           git checkout "$TARGET_BRANCH"
           git pull --ff-only origin "$TARGET_BRANCH"

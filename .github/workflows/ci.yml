@@ -75,6 +75,7 @@ jobs:
           AMLINE_REDIS_URL: redis://localhost:6379/0
           AMLINE_JWT_SECRET: ci-test-secret-key-32-chars-minimum
           AMLINE_S3_ENDPOINT_URL: ""
+          AMLINE_OTP_MAGIC_ENABLED: "1"
         # Hypothesis PBT file targets DB wizard validation; v1 memory flow differs — run in focused job later if needed.
         run: python -m pytest tests/ -v --tb=short -x --ignore=tests/test_contract_wizard_properties.py
 
