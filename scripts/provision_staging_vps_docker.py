@@ -112,8 +112,7 @@ apt-get install -y python3-pip python3-venv python3-full
 cat > /tmp/amline-pip.conf <<'AMLPIPEOF'
 [global]
 index-url = https://pypi.tuna.tsinghua.edu.cn/simple
-trusted-host = pypi.tuna.tsinghua.edu.cn
-trusted-host = files.pythonhosted.org
+trusted-host = pypi.tuna.tsinghua.edu.cn files.pythonhosted.org
 AMLPIPEOF
 export PIP_CONFIG_FILE=/tmp/amline-pip.conf
 python3 -m venv /tmp/amline-pip-venv
