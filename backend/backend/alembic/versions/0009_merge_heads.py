@@ -16,7 +16,7 @@ from alembic import op
 revision = "0009_merge_heads"
 down_revision = (
     "0008_fix_consultant_user_id_type",
-    "0008_market_requirements_promo_codes",
+    "0008_market_promo",
 )
 branch_labels = None
 depends_on = None
