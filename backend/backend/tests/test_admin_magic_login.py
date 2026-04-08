@@ -1,4 +1,4 @@
-"""v1 mock admin auth: magic mobile must use configured OTP code."""
+"""Admin auth: magic mobile must use configured OTP; others need valid OTP from /admin/otp/send."""
 from __future__ import annotations
 
 import os
@@ -26,6 +26,11 @@ def test_admin_magic_mobile_requires_correct_otp(client: TestClient) -> None:
     assert ok.json().get("access_token")
 
 
-def test_admin_non_magic_still_accepts_any_otp(client: TestClient) -> None:
-    r = client.post("/api/v1/admin/login", json={"mobile": "09121111111", "otp": "any"})
+def test_admin_non_magic_login_after_otp_send(client: TestClient) -> None:
+    mobile = "09121111111"
+    r0 = client.post("/api/v1/admin/otp/send", json={"mobile": mobile})
+    assert r0.status_code == 200
+    code = r0.json().get("dev_code") or ""
+    assert len(code) == 6
+    r = client.post("/api/v1/admin/login", json={"mobile": mobile, "otp": code})
     assert r.status_code == 200
