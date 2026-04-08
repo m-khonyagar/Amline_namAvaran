@@ -25,8 +25,6 @@ RUN apt-get update && apt-get install -y \
     shared-mime-info \
     fonts-liberation \
     fontconfig \
-    libpq-dev \
-    libpq5 \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
