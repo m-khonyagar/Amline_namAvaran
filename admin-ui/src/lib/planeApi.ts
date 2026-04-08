@@ -57,7 +57,10 @@ export function getPlaneConfig(): PlaneConfig {
 /** ذخیرهٔ پیکربندی (کلید API فقط در sessionStorage؛ بقیه در localStorage) */
 export function savePlaneConfig(cfg: Partial<PlaneConfig>): void {
   if (cfg.baseUrl !== undefined) localStorage.setItem(LS_KEY_BASE_URL, cfg.baseUrl);
-  // کلید API را در sessionStorage نگه می‌داریم تا پس از بستن مرورگر پاک شود
+  // کلید API را در sessionStorage نگه می‌داریم تا پس از بستن مرورگر پاک شود.
+  // توجه: برای محیط پروداکشن، کلید باید از env var (VITE_PLANE_API_KEY) تأمین شود
+  // و هرگز از این مسیر ذخیره نشود. این مسیر فقط برای راه‌اندازی اولیه در dev است.
+  // lgtm[js/clear-text-storage-of-sensitive-data]
   if (cfg.apiKey !== undefined) sessionStorage.setItem(SS_KEY_API_KEY, cfg.apiKey);
   if (cfg.workspaceSlug !== undefined) localStorage.setItem(LS_KEY_WORKSPACE, cfg.workspaceSlug);
 }

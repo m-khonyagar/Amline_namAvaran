@@ -23,7 +23,12 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+          if [ -n "${{ secrets.DEPLOY_HOST }}" ]; then
+            ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+          else
+            echo "::warning::DEPLOY_HOST secret is not set — skipping ssh-keyscan"
+            exit 1
+          fi
 
       - name: Copy files to server
         run: |
