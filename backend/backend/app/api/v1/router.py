@@ -9,6 +9,7 @@ from app.api.routes import (
     contracts as legacy_contracts_v2,
     properties as legacy_properties,
     users as legacy_users,
+    wallet as legacy_wallet,
 )
 from app.api.v1 import (
     admin_routes,
@@ -52,6 +53,7 @@ platform_router.include_router(legacy_properties.router, prefix="/properties")
 platform_router.include_router(legacy_contracts_v2.router, prefix="/contracts-v2")
 platform_router.include_router(legacy_arbitrations.router, prefix="/arbitrations")
 platform_router.include_router(legacy_arbitration_summary.router, prefix="/arbitrations")
+platform_router.include_router(legacy_wallet.router, prefix="/wallet")
 platform_router.include_router(contracts_routes.router)
 platform_router.include_router(dispute_routes.router)
 platform_router.include_router(misc_routes.router)
