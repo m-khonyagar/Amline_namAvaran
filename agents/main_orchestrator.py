@@ -1,15 +1,19 @@
 """Main Orchestrator — coordinates all agents via a LangGraph StateGraph workflow.
 
 Pipeline (automatic):
-  PLAN → CODE → TEST+REVIEW (parallel) → EXECUTE → PR
+  PLAN → CODE → REVIEW → TEST → EXECUTE → PR
 
-Conditional edge: if REVIEW rejects the code and retries remain, route back to CODE.
+REVIEW always runs before TEST so pytest sees a stable post-review workspace (no parallel writes).
+
+Conditional edges:
+  - After PLAN: if planning failed (no plan), halt → END.
+  - After TEST+REVIEW: if review rejects and retries remain, route back to CODE.
+
 Human approval is required for: MERGE & DEPLOY
 """
 
 from __future__ import annotations
 
-import concurrent.futures
 import logging
 import time
 from dataclasses import dataclass, field
@@ -43,15 +47,15 @@ class WorkflowState(TypedDict):
     body: str
     workspace_path: str
     # Agent result objects (stored directly; LangGraph doesn't serialise them)
-    plan: Optional[Any]           # Plan | None
-    code_result: Optional[Any]    # CodeResult | None
-    files_written: list           # list[str]
-    test_result: Optional[Any]    # TestResult | None
+    plan: Optional[Any]  # Plan | None
+    code_result: Optional[Any]  # CodeResult | None
+    files_written: list  # list[str]
+    test_result: Optional[Any]  # TestResult | None
     review_result: Optional[Any]  # ReviewResult | None
-    exec_result: Optional[Any]    # ExecutionResult | None
-    pr_result: Optional[Any]      # PRResult | None
-    errors: list                  # list[str]
-    audit_log: list               # list[dict]
+    exec_result: Optional[Any]  # ExecutionResult | None
+    pr_result: Optional[Any]  # PRResult | None
+    errors: list  # list[str]
+    audit_log: list  # list[dict]
     review_retries: int
 
 
@@ -152,11 +156,15 @@ class MainOrchestrator:
         graph.add_node("test_and_review", self._test_and_review_node)
         graph.add_node("execution", self._execute_node)
         graph.add_node("pull_request", self._pr_node)
+        graph.add_node("halt", self._halt_node)
 
         graph.set_entry_point("planning")
-        graph.add_edge("planning", "coding")
+        graph.add_conditional_edges(
+            "planning",
+            self._route_after_planning,
+            {"coding": "coding", "halt": "halt"},
+        )
         graph.add_edge("coding", "test_and_review")
-        # Conditional: retry CODE when review rejects and retries remain
         graph.add_conditional_edges(
             "test_and_review",
             self._route_after_review,
@@ -164,10 +172,17 @@ class MainOrchestrator:
         )
         graph.add_edge("execution", "pull_request")
         graph.add_edge("pull_request", END)
+        graph.add_edge("halt", END)
 
         return graph.compile()
 
-    # ── Routing condition ─────────────────────────────────────────────────────
+    # ── Routing conditions ────────────────────────────────────────────────────
+
+    def _route_after_planning(self, state: WorkflowState) -> str:
+        if state.get("plan") is None:
+            log.info("Orchestrator: no plan — halting pipeline.")
+            return "halt"
+        return "coding"
 
     def _route_after_review(self, state: WorkflowState) -> str:
         review = state["review_result"]
@@ -185,6 +200,9 @@ class MainOrchestrator:
         return "execution"
 
     # ── Node implementations ──────────────────────────────────────────────────
+
+    def _halt_node(self, state: WorkflowState) -> dict:
+        return {}
 
     def _plan_node(self, state: WorkflowState) -> dict:
         errors = list(state["errors"])
@@ -230,7 +248,7 @@ class MainOrchestrator:
         }
 
     def _test_and_review_node(self, state: WorkflowState) -> dict:
-        """Run TEST and REVIEW in parallel (or sequentially if parallel=False)."""
+        """Run REVIEW then TEST sequentially (stable workspace for pytest)."""
         plan = state["plan"]
         workspace = Path(state["workspace_path"])
         files = state["files_written"]
@@ -239,48 +257,35 @@ class MainOrchestrator:
         test_result = None
         review_result = None
 
-        if self.config.parallel:
-            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as ex:
-                future_test = ex.submit(self.tester.test, plan, workspace, files)
-                future_review = ex.submit(self.reviewer.review, plan, workspace, files)
-                try:
-                    test_result = future_test.result()
-                    log.info("Orchestrator: ✅ TEST (parallel)")
-                    audit.append({"stage": "TEST", "ts": time.time(), **test_result.to_dict()})
-                except Exception as exc:  # noqa: BLE001
-                    msg = f"TEST failed: {exc}"
-                    errors.append(msg)
-                    log.error("Orchestrator: ❌ %s", msg)
-                    audit.append({"stage": "TEST", "ts": time.time(), "error": msg})
-                try:
-                    review_result = future_review.result()
-                    log.info("Orchestrator: ✅ REVIEW (parallel)")
-                    audit.append({"stage": "REVIEW", "ts": time.time(), **review_result.to_dict()})
-                except Exception as exc:  # noqa: BLE001
-                    msg = f"REVIEW failed: {exc}"
-                    errors.append(msg)
-                    log.error("Orchestrator: ❌ %s", msg)
-                    audit.append({"stage": "REVIEW", "ts": time.time(), "error": msg})
-        else:
-            # Sequential fallback
-            try:
-                test_result = self.tester.test(plan, workspace, files)
-                log.info("Orchestrator: ✅ TEST")
-                audit.append({"stage": "TEST", "ts": time.time(), **test_result.to_dict()})
-            except Exception as exc:  # noqa: BLE001
-                msg = f"TEST failed: {exc}"
-                errors.append(msg)
-                log.error("Orchestrator: ❌ %s", msg)
-            try:
-                review_result = self.reviewer.review(plan, workspace, files)
-                log.info("Orchestrator: ✅ REVIEW")
-                audit.append({"stage": "REVIEW", "ts": time.time(), **review_result.to_dict()})
-            except Exception as exc:  # noqa: BLE001
-                msg = f"REVIEW failed: {exc}"
-                errors.append(msg)
-                log.error("Orchestrator: ❌ %s", msg)
+        if plan is None:
+            return {
+                "test_result": None,
+                "review_result": None,
+                "review_retries": state["review_retries"],
+                "errors": errors,
+                "audit_log": audit,
+            }
 
-        # Increment retry counter when review rejects the code
+        try:
+            review_result = self.reviewer.review(plan, workspace, files)
+            log.info("Orchestrator: ✅ REVIEW")
+            audit.append({"stage": "REVIEW", "ts": time.time(), **review_result.to_dict()})
+        except Exception as exc:  # noqa: BLE001
+            msg = f"REVIEW failed: {exc}"
+            errors.append(msg)
+            log.error("Orchestrator: ❌ %s", msg)
+            audit.append({"stage": "REVIEW", "ts": time.time(), "error": msg})
+
+        try:
+            test_result = self.tester.test(plan, workspace, files)
+            log.info("Orchestrator: ✅ TEST")
+            audit.append({"stage": "TEST", "ts": time.time(), **test_result.to_dict()})
+        except Exception as exc:  # noqa: BLE001
+            msg = f"TEST failed: {exc}"
+            errors.append(msg)
+            log.error("Orchestrator: ❌ %s", msg)
+            audit.append({"stage": "TEST", "ts": time.time(), "error": msg})
+
         new_retries = state["review_retries"]
         if review_result is not None and not review_result.approved:
             new_retries += 1
