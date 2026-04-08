@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
+from app.api.id_params import uuid_from_param
 from app.core.ids import parse_uuid
 from app.db.session import get_db
 from app.models.contract import Contract, ContractStatus
@@ -88,10 +89,7 @@ def list_contracts(user: User = Depends(get_current_user), db: Session = Depends
 
 @router.get("/{contract_id}", response_model=ContractOut)
 def get_contract(contract_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    try:
-        cid = parse_uuid(contract_id)
-    except ValueError:
-        raise HTTPException(status_code=422, detail="invalid_contract_id")
+    cid = uuid_from_param(contract_id, detail="invalid_contract_id")
 
     c = db.get(Contract, cid)
     if not c:
@@ -108,10 +106,7 @@ def sign_contract(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    try:
-        cid = parse_uuid(contract_id)
-    except ValueError:
-        raise HTTPException(status_code=422, detail="invalid_contract_id")
+    cid = uuid_from_param(contract_id, detail="invalid_contract_id")
 
     c = db.get(Contract, cid)
     if not c:
@@ -151,10 +146,7 @@ def invite_stub(contract_id: str, _: User = Depends(get_current_user)):
 
 @router.post("/{contract_id}/terminate")
 def terminate_contract(contract_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    try:
-        cid = parse_uuid(contract_id)
-    except ValueError:
-        raise HTTPException(status_code=422, detail="invalid_contract_id")
+    cid = uuid_from_param(contract_id, detail="invalid_contract_id")
 
     c = db.get(Contract, cid)
     if not c:
