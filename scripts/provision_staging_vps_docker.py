@@ -31,6 +31,9 @@ STACK="/opt/amline/app"
 MIRROR="http://mirror.arvancloud.ir/ubuntu"
 HOSTS_TAG="# amline-staging-fixed-hosts (managed by provision_staging_vps_docker.py)"
 
+# Fix CRLF corruption in hosts from older Windows-sourced provision runs
+sed -i 's/\r$//' /etc/hosts 2>/dev/null || true
+
 echo "=== /etc/hosts fallbacks (when DNS is broken) ==="
 if ! grep -qF "$HOSTS_TAG" /etc/hosts 2>/dev/null; then
   cat >> /etc/hosts <<HOSTS_EOF
@@ -97,6 +100,8 @@ export DEBIAN_FRONTEND=noninteractive
 STACK="/opt/amline/app"
 cd "$STACK"
 
+sed -i 's/\r$//' /etc/hosts 2>/dev/null || true
+
 echo "=== extract uploaded tree (if present) ==="
 if [ -f /tmp/amline-repo-src.tar.gz ]; then
   tar -xzf /tmp/amline-repo-src.tar.gz -C "$STACK"
@@ -109,21 +114,16 @@ fi
 
 echo "=== pip download on server (wheels for offline Docker pip) ==="
 apt-get install -y python3-pip python3-venv python3-full
-cat > /tmp/amline-pip.conf <<'AMLPIPEOF'
-[global]
-index-url = https://pypi.tuna.tsinghua.edu.cn/simple
-trusted-host = pypi.tuna.tsinghua.edu.cn files.pythonhosted.org
-AMLPIPEOF
-export PIP_CONFIG_FILE=/tmp/amline-pip.conf
 python3 -m venv /tmp/amline-pip-venv
-/tmp/amline-pip-venv/bin/python -m pip install -q -U pip setuptools wheel
+VPIP="/tmp/amline-pip-venv/bin/python -m pip"
+IDX="https://pypi.tuna.tsinghua.edu.cn/simple"
+TH1="pypi.tuna.tsinghua.edu.cn"
+TH2="files.pythonhosted.org"
+$VPIP install -q -U pip setuptools wheel --index-url "$IDX" --trusted-host "$TH1" --trusted-host "$TH2"
 mkdir -p backend/backend/docker-build-wheelhouse pdf-generator/docker-build-wheelhouse
 find backend/backend/docker-build-wheelhouse -mindepth 1 -delete 2>/dev/null || true
 find pdf-generator/docker-build-wheelhouse -mindepth 1 -delete 2>/dev/null || true
-/tmp/amline-pip-venv/bin/python -m pip download \
-  -r backend/backend/requirements.txt \
-  -r pdf-generator/requirements.txt \
-  -d backend/backend/docker-build-wheelhouse
+$VPIP download --index-url "$IDX" --trusted-host "$TH1" --trusted-host "$TH2" -r backend/backend/requirements.txt -r pdf-generator/requirements.txt -d backend/backend/docker-build-wheelhouse
 cp -a backend/backend/docker-build-wheelhouse/. pdf-generator/docker-build-wheelhouse/
 
 echo "=== .env ==="
