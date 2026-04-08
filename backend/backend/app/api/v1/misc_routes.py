@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Query
@@ -62,4 +63,6 @@ def wallets(user_id: str = "mock-001", db: Session = Depends(get_db)) -> dict:
 
 @router.post("/files/upload", status_code=201)
 def files_upload() -> dict:
-    return {"id": "file-001", "url": None}
+    # OpenAPI / wizard tests expect numeric file ids (see tests/test_contract_wizard_properties.py).
+    file_id = uuid.uuid4().int % (2**31 - 1) or 1
+    return {"id": file_id, "url": None}

@@ -75,7 +75,7 @@ jobs:
           AMLINE_REDIS_URL: redis://localhost:6379/0
           AMLINE_JWT_SECRET: ci-test-secret-key-32-chars-minimum
           AMLINE_S3_ENDPOINT_URL: ""
-        run: python -m pytest tests/ -v --tb=short -x -k "not arbitration"
+        run: python -m pytest tests/ -v --tb=short -x
 
   # ── Amline user UI (Playwright + dev-mock-api) ────────────────
   amline-ui-e2e:
