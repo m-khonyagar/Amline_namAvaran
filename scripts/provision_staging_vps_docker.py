@@ -114,16 +114,19 @@ fi
 
 echo "=== pip download on server (wheels for offline Docker pip) ==="
 apt-get install -y python3-pip python3-venv python3-full
+# Pin PyPI mirror + file host (refresh lines so stale CRLF entries cannot break resolution)
+sed -i '/pypi\.tuna\.tsinghua\.edu\.cn/d' /etc/hosts
+sed -i '/files\.pythonhosted\.org/d' /etc/hosts
+echo '101.6.15.130 pypi.tuna.tsinghua.edu.cn' >> /etc/hosts
+echo '151.101.192.223 files.pythonhosted.org' >> /etc/hosts
 python3 -m venv /tmp/amline-pip-venv
 VPIP="/tmp/amline-pip-venv/bin/python -m pip"
 IDX="https://pypi.tuna.tsinghua.edu.cn/simple"
-TH1="pypi.tuna.tsinghua.edu.cn"
-TH2="files.pythonhosted.org"
-$VPIP install -q -U pip setuptools wheel --index-url "$IDX" --trusted-host "$TH1" --trusted-host "$TH2"
+$VPIP install -q -U pip setuptools wheel --index-url "$IDX" --trusted-host pypi.tuna.tsinghua.edu.cn --trusted-host files.pythonhosted.org
 mkdir -p backend/backend/docker-build-wheelhouse pdf-generator/docker-build-wheelhouse
 find backend/backend/docker-build-wheelhouse -mindepth 1 -delete 2>/dev/null || true
 find pdf-generator/docker-build-wheelhouse -mindepth 1 -delete 2>/dev/null || true
-$VPIP download --index-url "$IDX" --trusted-host "$TH1" --trusted-host "$TH2" -r backend/backend/requirements.txt -r pdf-generator/requirements.txt -d backend/backend/docker-build-wheelhouse
+$VPIP download --index-url "$IDX" --trusted-host pypi.tuna.tsinghua.edu.cn --trusted-host files.pythonhosted.org -r backend/backend/requirements.txt -r pdf-generator/requirements.txt -d backend/backend/docker-build-wheelhouse
 cp -a backend/backend/docker-build-wheelhouse/. pdf-generator/docker-build-wheelhouse/
 
 echo "=== .env ==="
