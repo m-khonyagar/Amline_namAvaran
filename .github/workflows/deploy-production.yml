@@ -11,8 +11,6 @@ on:
 
 jobs:
   deploy:
-    # Skip when production SSH secrets are not configured (avoids failing every push to main).
-    if: ${{ secrets.DEPLOY_SSH_KEY != '' && secrets.DEPLOY_HOST != '' && secrets.DEPLOY_USER != '' }}
     runs-on: ubuntu-latest
     environment: production
 
