@@ -197,10 +197,125 @@ interface MockContract {
   status: string;
   step: string;
   parties: Record<string, unknown[]>;
+  created_at?: string;
+  user_id?: string;
 }
 
 const contracts = new Map<string, MockContract>();
-let idCounter = 1;
+
+interface MswLegalReviewRow {
+  id: string;
+  contract_id: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  comment: string | null;
+  reviewer_id: string | null;
+  created_at: string;
+  decided_at: string | null;
+}
+const mswLegalReviews: MswLegalReviewRow[] = [];
+
+/** کاربران دایرکتوری، آگهی‌های نمونه؛ seed با قراردادها و CRM در ensureMswRichDemo */
+const mswDirectoryUsers: MswDirectoryUser[] = [];
+const mswListingRows: MswListingSeed[] = [];
+const idCounterRef = { current: 1 };
+
+const mswPaymentIntents: Array<{
+  id: string;
+  user_id: string;
+  amount_cents: number;
+  currency: string;
+  idempotency_key: string;
+  status: 'PENDING' | 'COMPLETED' | 'FAILED';
+  psp_reference?: string | null;
+  psp_provider?: string | null;
+  psp_checkout_token?: string | null;
+  last_verify_error?: string | null;
+  verify_attempt_count: number;
+  callback_payload?: string | null;
+  created_at: string;
+  updated_at: string;
+}> = [];
+
+function seedPaymentIntentsDemo() {
+  if (mswPaymentIntents.length > 0 || mswDirectoryUsers.length === 0) return;
+  const t = new Date().toISOString();
+  const t2 = new Date(Date.now() - 86400000).toISOString();
+  mswPaymentIntents.push(
+    {
+      id: 'pi-demo-1',
+      user_id: 'user-002',
+      amount_cents: 150_000_000,
+      currency: 'IRR',
+      idempotency_key: 'idem-mock-1',
+      status: 'PENDING',
+      psp_reference: null,
+      psp_provider: 'zibal',
+      psp_checkout_token: null,
+      last_verify_error: null,
+      verify_attempt_count: 0,
+      callback_payload: null,
+      created_at: t,
+      updated_at: t,
+    },
+    {
+      id: 'pi-demo-2',
+      user_id: 'realtor-003',
+      amount_cents: 80_000_000,
+      currency: 'IRR',
+      idempotency_key: 'idem-mock-2',
+      status: 'COMPLETED',
+      psp_reference: 'PSP-REF-9921',
+      psp_provider: 'mellat',
+      psp_checkout_token: null,
+      last_verify_error: null,
+      verify_attempt_count: 1,
+      callback_payload: '{"ok":true}',
+      created_at: t2,
+      updated_at: t2,
+    },
+    {
+      id: 'pi-demo-3',
+      user_id: 'user-004',
+      amount_cents: 10_000_000,
+      currency: 'IRR',
+      idempotency_key: 'idem-mock-3',
+      status: 'FAILED',
+      psp_reference: null,
+      psp_provider: 'zibal',
+      psp_checkout_token: null,
+      last_verify_error: 'عدم تأیید بانک',
+      verify_attempt_count: 3,
+      callback_payload: null,
+      created_at: t2,
+      updated_at: t,
+    }
+  );
+}
+
+function ensureMswRichDemo() {
+  seedRichMswDemoIfNeeded({
+    directoryUsers: mswDirectoryUsers,
+    contracts,
+    idCounterRef,
+    crmLeads: crmMockLeads,
+    notifications: mswNotifications,
+    legalReviews: mswLegalReviews,
+    listingRows: mswListingRows,
+  });
+  seedPaymentIntentsDemo();
+}
+
+function seedCrmMockLeadsIfEmpty() {
+  ensureMswRichDemo();
+}
+
+type MswAddendumRow = {
+  id: string;
+  subject: string;
+  created_at: string;
+  sign_status: 'PENDING' | 'PARTIALLY_SIGNED' | 'FULLY_SIGNED';
+};
+const addendumsByContractId = new Map<string, MswAddendumRow[]>();
 
 interface MswLegalReviewRow {
   id: string;
@@ -434,7 +549,7 @@ function crmLeadHandlers() {
 }
 
 function nextId(): string {
-  return `contract-${String(idCounter++).padStart(3, '0')}`;
+  return `contract-${String(idCounterRef.current++).padStart(3, '0')}`;
 }
 
 function contractJson(c: MockContract) {
@@ -447,11 +562,45 @@ function contractJson(c: MockContract) {
     is_owner: true,
     key: 'mock-key',
     password: null,
-    created_at: new Date().toISOString(),
+    created_at: c.created_at ?? new Date().toISOString(),
   };
 }
 
+/** شناسهٔ `local-preview__<TYPE>__<ts>` — ویزارد dev بدون POST /contracts/start */
+const MSW_PREVIEW_TYPES = [
+  'PROPERTY_RENT',
+  'BUYING_AND_SELLING',
+  'EXCHANGE',
+  'CONSTRUCTION',
+  'PRE_SALE',
+  'LEASE_TO_OWN',
+] as const;
+
+function parsePreviewContractType(contractId: string): string | null {
+  if (!contractId.startsWith('local-preview__')) return null;
+  const inner = contractId.slice('local-preview__'.length);
+  for (const t of MSW_PREVIEW_TYPES) {
+    if (inner.startsWith(`${t}__`)) return t;
+  }
+  return null;
+}
+
 function getContract(contractId: string): MockContract | null {
+  const previewType = parsePreviewContractType(contractId);
+  if (previewType) {
+    let c = contracts.get(contractId);
+    if (!c) {
+      c = {
+        id: contractId,
+        type: previewType,
+        status: 'DRAFT',
+        step: 'LANDLORD_INFORMATION',
+        parties: {},
+      };
+      contracts.set(contractId, c);
+    }
+    return c;
+  }
   return contracts.get(contractId) ?? null;
 }
 
@@ -508,6 +657,8 @@ export const handlers = [
       status: 'DRAFT',
       step: 'LANDLORD_INFORMATION',
       parties: {},
+      created_at: new Date().toISOString(),
+      user_id: mockUser.id,
     };
     contracts.set(id, c);
     return HttpResponse.json(contractJson(c), { status: 201 });
@@ -777,6 +928,114 @@ export const handlers = [
 
   http.get('*/provinces/cities', () => HttpResponse.json([])),
   http.get('*/provinces', () => HttpResponse.json([])),
+
+  ...dualGet('*/listings', ({ request }) => {
+    ensureMswRichDemo();
+    const u = new URL(request.url);
+    const skip = Math.max(0, parseInt(u.searchParams.get('skip') ?? '0', 10) || 0);
+    const limit = Math.min(500, Math.max(1, parseInt(u.searchParams.get('limit') ?? '200', 10) || 200));
+    const items = mswListingRows.slice(skip, skip + limit);
+    return HttpResponse.json({ items, total: mswListingRows.length });
+  }),
+
+  ...dualGet('*/search/listings', ({ request }) => {
+    ensureMswRichDemo();
+    const u = new URL(request.url);
+    const q = (u.searchParams.get('q') ?? '').trim().toLowerCase();
+    const limit = Math.min(100, Math.max(1, parseInt(u.searchParams.get('limit') ?? '50', 10) || 50));
+    let items = [...mswListingRows];
+    if (q) {
+      items = items.filter(
+        (x) =>
+          x.title.toLowerCase().includes(q) ||
+          x.location_summary.toLowerCase().includes(q) ||
+          x.deal_type.toLowerCase().includes(q)
+      );
+    }
+    const total = items.length;
+    items = items.slice(0, limit);
+    return HttpResponse.json({ items, total, facets: {} });
+  }),
+
+  ...dualGet('*/wallets/:userId/balance', ({ params }) => {
+    ensureMswRichDemo();
+    const uid = params.userId as string;
+    const row = mswDirectoryUsers.find((x) => x.id === uid);
+    const cents = row?.wallet_balance ?? 0;
+    return HttpResponse.json({ user_id: uid, balance_cents: cents, currency: 'IRR' });
+  }),
+
+  ...dualGet('*/payments/intents', ({ request }) => {
+    ensureMswRichDemo();
+    const u = new URL(request.url);
+    const status = u.searchParams.get('status') ?? '';
+    const userId = u.searchParams.get('user_id') ?? '';
+    let items = [...mswPaymentIntents];
+    if (status) items = items.filter((x) => x.status === status);
+    if (userId) items = items.filter((x) => x.user_id === userId);
+    return HttpResponse.json({ items, total: items.length });
+  }),
+
+  ...dualGet('*/payments/intents/:id', ({ params }) => {
+    ensureMswRichDemo();
+    const row = mswPaymentIntents.find((x) => x.id === params.id);
+    if (!row) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
+    return HttpResponse.json(row);
+  }),
+
+  ...dualPost('*/payments/intents/:id/verify-retry', ({ params }) => {
+    ensureMswRichDemo();
+    const row = mswPaymentIntents.find((x) => x.id === params.id);
+    if (!row) return HttpResponse.json({ detail: 'not_found' }, { status: 404 });
+    row.verify_attempt_count += 1;
+    row.status = 'COMPLETED';
+    row.updated_at = new Date().toISOString();
+    row.last_verify_error = null;
+    row.psp_reference = row.psp_reference ?? `RETRY-${Date.now()}`;
+    return HttpResponse.json(row);
+  }),
+
+  ...dualGet('*/billing/plans', () =>
+    HttpResponse.json([
+      {
+        id: 'plan-basic',
+        code: 'BASIC',
+        name_fa: 'پایه',
+        price_cents: 0,
+        cycle: 'monthly',
+      },
+      {
+        id: 'plan-pro',
+        code: 'PRO',
+        name_fa: 'حرفه‌ای',
+        price_cents: 99_000_000,
+        cycle: 'monthly',
+      },
+    ])
+  ),
+
+  ...dualGet('*/billing/me', () =>
+    HttpResponse.json({
+      id: 'sub-demo-1',
+      user_id: mockUser.id,
+      plan_id: 'plan-pro',
+      status: 'ACTIVE',
+      current_period_end: new Date(Date.now() + 20 * 86400000).toISOString(),
+    })
+  ),
+
+  ...dualGet('*/billing/invoice/latest', () =>
+    HttpResponse.json({
+      subscription_id: 'sub-demo-1',
+      status: 'OPEN',
+      lines: [
+        { description: 'اشتراک اَملاین — طرح حرفه‌ای', amount_cents: 99_000_000 },
+        { description: 'مالیات بر ارزش افزوده', amount_cents: 9_900_000 },
+      ],
+      total_cents: 108_900_000,
+      period_end: new Date(Date.now() + 20 * 86400000).toISOString(),
+    })
+  ),
 
   http.get('*/financials/wallets', () =>
     HttpResponse.json({

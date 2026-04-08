@@ -1,17 +1,7 @@
 import type { PRContractStep, WizardAction, WizardState } from '../types/wizard';
+import { STEP_ORDER } from '../registry/stepRegistry';
 
-export const STEP_ORDER: PRContractStep[] = [
-  'DRAFT',
-  'LANDLORD_INFORMATION',
-  'TENANT_INFORMATION',
-  'PLACE_INFORMATION',
-  'DATING',
-  'MORTGAGE',
-  'RENTING',
-  'SIGNING',
-  'WITNESS',
-  'FINISH',
-];
+export { STEP_ORDER };
 
 export const initialWizardState: WizardState = {
   contractId: null,
@@ -109,6 +99,41 @@ export function wizardReducer(state: WizardState, action: WizardAction): WizardS
       return {
         ...initialWizardState,
         platform: state.platform,
+      };
+
+    case 'PREVIEW_JUMP_TO_STEP': {
+      const nextStep = action.payload.nextStep;
+      if (nextStep === 'DRAFT') {
+        return {
+          ...initialWizardState,
+          platform: state.platform,
+        };
+      }
+      const idx = STEP_ORDER.indexOf(nextStep);
+      if (idx <= 0) return state;
+      const previousSteps = STEP_ORDER.slice(1, idx) as PRContractStep[];
+      return {
+        ...state,
+        currentStep: nextStep,
+        completedSteps: previousSteps,
+        editableSteps: STEP_ORDER.filter((s) => s !== 'DRAFT'),
+        isLoading: false,
+        error: null,
+      };
+    }
+
+    case 'PREVIEW_BOOTSTRAP':
+      return {
+        ...state,
+        contractId: action.payload.contractId,
+        contractType: action.payload.contractType,
+        isScribeMode: action.payload.isScribeMode,
+        currentStep: action.payload.nextStep,
+        contractStatus: 'DRAFT',
+        completedSteps: [],
+        editableSteps: STEP_ORDER.filter((s) => s !== 'DRAFT'),
+        isLoading: false,
+        error: null,
       };
 
     default:

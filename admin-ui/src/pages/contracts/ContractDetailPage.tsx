@@ -40,11 +40,15 @@ const PARTY_TYPE_LABELS: Record<string, string> = {
 
 function StatusBadge({ status }: { status: ContractStatus }) {
   const colorClass =
-    status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
-    status === 'PENDING_ADMIN_APPROVAL' ? 'bg-yellow-100 text-yellow-700' :
-    status === 'ADMIN_REJECTED' || status === 'REVOKED' ? 'bg-red-100 text-red-700' :
-    status === 'COMPLETED' ? 'bg-blue-100 text-blue-700' :
-    'bg-gray-100 text-gray-600'
+    status === 'ACTIVE'
+      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-200'
+      : status === 'PENDING_ADMIN_APPROVAL'
+        ? 'bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200'
+        : status === 'ADMIN_REJECTED' || status === 'REVOKED'
+          ? 'bg-red-100 text-red-800 dark:bg-red-950/50 dark:text-red-200'
+          : status === 'COMPLETED'
+            ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-200'
+            : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
   return (
     <span className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${colorClass}`}>
       {STATUS_LABELS[status] ?? status}
@@ -108,7 +112,9 @@ export default function ContractDetailPage() {
   if (isError || !contract) {
     return (
       <div dir="rtl" className="p-6">
-        <div className="rounded-lg bg-red-50 p-4 text-red-700">خطا در دریافت اطلاعات قرارداد</div>
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">
+          خطا در دریافت اطلاعات قرارداد
+        </div>
       </div>
     )
   }
@@ -116,45 +122,47 @@ export default function ContractDetailPage() {
   const allParties = (Object.values(contract.parties).flat() as Party[])
 
   return (
-    <div dir="rtl" className="p-6">
+    <div dir="rtl" className="p-6 text-[var(--amline-fg)]">
       <div className="mb-6 flex items-center gap-4">
         <button
           onClick={() => navigate('/contracts')}
-          className="text-sm text-gray-500 hover:text-gray-700"
+          className="text-sm text-[var(--amline-fg-muted)] hover:text-[var(--amline-fg)]"
         >
           ← بازگشت
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">جزئیات قرارداد</h1>
+        <h1 className="text-2xl font-bold text-[var(--amline-fg)]">جزئیات قرارداد</h1>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main Info */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold text-gray-800">اطلاعات کلی</h2>
+          <div className="rounded-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] p-6 shadow-sm dark:border-slate-600">
+            <h2 className="mb-4 text-lg font-semibold text-[var(--amline-fg)]">اطلاعات کلی</h2>
             <dl className="grid grid-cols-2 gap-4">
               <div>
-                <dt className="text-sm text-gray-500">شناسه قرارداد</dt>
-                <dd className="mt-1 font-mono text-sm">{contract.id}</dd>
+                <dt className="text-sm text-[var(--amline-fg-muted)]">شناسه قرارداد</dt>
+                <dd className="mt-1 font-mono text-sm text-[var(--amline-fg)]">{contract.id}</dd>
               </div>
               <div>
-                <dt className="text-sm text-gray-500">نوع قرارداد</dt>
-                <dd className="mt-1 font-medium">{TYPE_LABELS[contract.type] ?? contract.type}</dd>
+                <dt className="text-sm text-[var(--amline-fg-muted)]">نوع قرارداد</dt>
+                <dd className="mt-1 font-medium text-[var(--amline-fg)]">
+                  {TYPE_LABELS[contract.type] ?? contract.type}
+                </dd>
               </div>
               <div>
-                <dt className="text-sm text-gray-500">وضعیت</dt>
+                <dt className="text-sm text-[var(--amline-fg-muted)]">وضعیت</dt>
                 <dd className="mt-1"><StatusBadge status={contract.status} /></dd>
               </div>
               <div>
-                <dt className="text-sm text-gray-500">تاریخ ایجاد</dt>
-                <dd className="mt-1 text-sm">
+                <dt className="text-sm text-[var(--amline-fg-muted)]">تاریخ ایجاد</dt>
+                <dd className="mt-1 text-sm text-[var(--amline-fg)]">
                   {new Date(contract.created_at).toLocaleDateString('fa-IR')}
                 </dd>
               </div>
               {contract.step && (
                 <div>
-                  <dt className="text-sm text-gray-500">مرحله جاری</dt>
-                  <dd className="mt-1 text-sm">{contract.step}</dd>
+                  <dt className="text-sm text-[var(--amline-fg-muted)]">مرحله جاری</dt>
+                  <dd className="mt-1 text-sm text-[var(--amline-fg)]">{contract.step}</dd>
                 </div>
               )}
             </dl>
@@ -162,18 +170,21 @@ export default function ContractDetailPage() {
 
           {/* Parties */}
           {allParties.length > 0 && (
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-semibold text-gray-800">طرفین قرارداد</h2>
+            <div className="rounded-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] p-6 shadow-sm dark:border-slate-600">
+              <h2 className="mb-4 text-lg font-semibold text-[var(--amline-fg)]">طرفین قرارداد</h2>
               <div className="space-y-3">
                 {allParties.map((party) => (
-                  <div key={party.id} className="flex items-center justify-between rounded-lg bg-gray-50 p-3">
+                  <div
+                    key={party.id}
+                    className="flex items-center justify-between rounded-lg bg-[var(--amline-surface-muted)] p-3 dark:bg-slate-800/60"
+                  >
                     <div>
-                      <span className="text-sm font-medium">
+                      <span className="text-sm font-medium text-[var(--amline-fg)]">
                         {PARTY_TYPE_LABELS[party.party_type] ?? party.party_type}
                       </span>
-                      <span className="mr-2 text-xs text-gray-500">({party.person_type})</span>
+                      <span className="mr-2 text-xs text-[var(--amline-fg-muted)]">({party.person_type})</span>
                     </div>
-                    <div className="text-xs text-gray-400">شناسه: {party.id}</div>
+                    <div className="text-xs text-[var(--amline-fg-subtle)]">شناسه: {party.id}</div>
                   </div>
                 ))}
               </div>
@@ -181,20 +192,20 @@ export default function ContractDetailPage() {
           )}
 
           {/* Addendum */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="rounded-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] p-6 shadow-sm dark:border-slate-600">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-800">متمم‌های قرارداد</h2>
+              <h2 className="text-lg font-semibold text-[var(--amline-fg)]">متمم‌های قرارداد</h2>
               <button
                 type="button"
                 onClick={() => setShowAddendumForm((s) => !s)}
-                className="rounded-lg border border-primary px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/5"
+                className="rounded-lg border border-[var(--amline-primary)] px-3 py-1.5 text-sm font-medium text-[var(--amline-primary)] hover:bg-[var(--amline-primary-muted)] dark:hover:bg-blue-950/40"
               >
                 {showAddendumForm ? 'بستن فرم' : 'ثبت متمم جدید'}
               </button>
             </div>
 
             {showAddendumForm && (
-              <div className="mb-5 rounded-lg border border-gray-100 bg-gray-50 p-4">
+              <div className="mb-5 rounded-lg border border-[var(--amline-border)] bg-[var(--amline-surface-muted)] p-4 dark:border-slate-600 dark:bg-slate-800/40">
                 <AddendumForm
                   contractId={contract.id}
                   onSuccess={() => {
@@ -212,8 +223,8 @@ export default function ContractDetailPage() {
 
         {/* Actions */}
         <div className="space-y-4">
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold text-gray-800">عملیات</h2>
+          <div className="rounded-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] p-6 shadow-sm dark:border-slate-600">
+            <h2 className="mb-4 text-lg font-semibold text-[var(--amline-fg)]">عملیات</h2>
             <div className="space-y-3">
               {contract.status === 'PENDING_ADMIN_APPROVAL' && (
                 <>
@@ -247,19 +258,29 @@ export default function ContractDetailPage() {
                 </button>
               )}
               {contract.status !== 'PENDING_ADMIN_APPROVAL' && contract.status !== 'ACTIVE' && (
-                <p className="text-sm text-gray-400 text-center">عملیاتی در دسترس نیست</p>
+                <p className="text-center text-sm text-[var(--amline-fg-subtle)]">عملیاتی در دسترس نیست</p>
               )}
             </div>
           </div>
 
           {/* Signature Status */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold text-gray-800">وضعیت امضا</h2>
+          <div className="rounded-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] p-6 shadow-sm dark:border-slate-600">
+            <h2 className="mb-4 text-lg font-semibold text-[var(--amline-fg)]">وضعیت امضا</h2>
             <div className="space-y-2">
               {(['ONE_PARTY_SIGNED', 'FULLY_SIGNED', 'LANDLORDS_FULLY_SIGNED', 'TENANTS_FULLY_SIGNED'] as ContractStatus[]).map((s) => (
                 <div key={s} className="flex items-center gap-2 text-sm">
-                  <span className={`h-2 w-2 rounded-full ${contract.status === s ? 'bg-green-500' : 'bg-gray-200'}`} />
-                  <span className={contract.status === s ? 'font-medium text-gray-800' : 'text-gray-400'}>
+                  <span
+                    className={`h-2 w-2 rounded-full ${
+                      contract.status === s ? 'bg-emerald-500' : 'bg-[var(--amline-border)] dark:bg-slate-600'
+                    }`}
+                  />
+                  <span
+                    className={
+                      contract.status === s
+                        ? 'font-medium text-[var(--amline-fg)]'
+                        : 'text-[var(--amline-fg-subtle)]'
+                    }
+                  >
                     {STATUS_LABELS[s]}
                   </span>
                 </div>

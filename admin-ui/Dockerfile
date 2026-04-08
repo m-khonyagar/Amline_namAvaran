@@ -1,21 +1,22 @@
-# Admin UI Dockerfile
-# اَملاین - Amline Platform
+# Admin UI — build از ریشهٔ مونوریپو (npm workspaces)
+# اجرا از ریشهٔ مخزن:
+#   docker build -f admin-ui/Dockerfile .
 
-# Build stage
-FROM node:20-alpine AS builder
+FROM node:20-bookworm-slim AS builder
 
-WORKDIR /app
+WORKDIR /repo
 
-# Copy package files
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json turbo.json ./
+COPY packages/amline-ui-core/package.json ./packages/amline-ui-core/
+COPY admin-ui/package.json ./admin-ui/
 
-# Install dependencies
 RUN npm ci
 
-# Copy source code
-COPY . .
+COPY packages/amline-ui-core ./packages/amline-ui-core
+COPY admin-ui ./admin-ui
 
-# Vite: متغیرها فقط در زمان build (برای staging مقدار بدهید)
+WORKDIR /repo/admin-ui
+
 ARG VITE_API_URL=
 ARG VITE_USE_MSW=false
 ARG VITE_ENABLE_DEV_BYPASS=false
@@ -28,21 +29,14 @@ ENV VITE_API_URL=$VITE_API_URL \
 # Vite bundle only (full `tsc` includes tests/mocks that are not build artifacts)
 RUN node scripts/assert-safe-production-env.mjs && npx vite build
 
-# Production stage
 FROM nginx:alpine
 
-# Copy custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY admin-ui/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /repo/admin-ui/dist /usr/share/nginx/html
 
-# Copy built files from builder
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Expose port
 EXPOSE 80
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost/health || exit 1
 
-# Start nginx
 CMD ["nginx", "-g", "daemon off;"]

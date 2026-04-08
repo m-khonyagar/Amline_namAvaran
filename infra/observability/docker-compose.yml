@@ -1,0 +1,38 @@
+# Dev / staging observability stack — not for production as-is
+services:
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: amline-prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: amline-grafana
+    ports:
+      - "3030:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_DEFAULT_THEME: dark
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+
+  # Optional: receive OTLP from backend (set OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318)
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.114.0
+    container_name: amline-otel-collector
+    profiles:
+      - otel
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol/config.yaml:ro
+    ports:
+      - "4318:4318"

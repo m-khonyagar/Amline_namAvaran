@@ -1,6 +1,12 @@
 # اَملاین - API Documentation
 # Agent Windsurf Amline - API Documentation
 
+## Observability & ops
+
+- متریک Prometheus: `GET /metrics` (با `AMLINE_METRICS_ENABLED=1`).
+- راه‌اندازی محلی Grafana/Prometheus: [`infra/observability/README.md`](infra/observability/README.md).
+- محدودیت نرخ سراسری (SlowAPI): با `AMLINE_RATE_LIMIT_ENABLED=1` (پیش‌فرض)، `AMLINE_RATE_LIMIT_DEFAULT` مثلاً `300/minute`، و اختیاری `REDIS_URL` برای حالت چند نمونه.
+
 ## Base URL
 ```
 Production: https://api.amline.ir

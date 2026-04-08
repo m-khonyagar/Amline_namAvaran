@@ -18,6 +18,8 @@ export default defineConfig({
     video: 'off',
     actionTimeout: 15_000,
     navigationTimeout: 30_000,
+    // بالای breakpoint lg تا سایدبار دسکتاپ (lg:static / lg:translate-x-0) پایدار باشد
+    viewport: { width: 1440, height: 900 },
   },
   webServer: {
     // متغیرهای محیطی فرایند فرزند از `.env.local` در Vite بالاترند؛ برای E2E حتماً MSW/بای‌پس را اینجا ثابت کن.

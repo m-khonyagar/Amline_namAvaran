@@ -102,7 +102,19 @@ export type WizardAction =
         isScribeMode: boolean;
       };
     }
-  | { type: 'RESET_WIZARD' };
+  | { type: 'RESET_WIZARD' }
+  /** فقط dev + VITE_WIZARD_PREVIEW_MODE: پرش به مرحله بدون وابستگی به تکمیل API */
+  | { type: 'PREVIEW_JUMP_TO_STEP'; payload: { nextStep: PRContractStep } }
+  /** شروع با شناسهٔ mock محلی (MSW) بدون فراخوانی POST /contracts/start */
+  | {
+      type: 'PREVIEW_BOOTSTRAP';
+      payload: {
+        contractId: string;
+        nextStep: PRContractStep;
+        contractType: ContractType;
+        isScribeMode: boolean;
+      };
+    };
 
 export interface StepProps {
   contractId: string;

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isValidJalaliDateString } from '../../../lib/jalaliDate';
 
 const paymentStageSchema = z
   .object({
@@ -20,16 +21,20 @@ const paymentStageSchema = z
     }
   });
 
-export const datingSchema = z
-  .object({
-    start_date: z.string().min(1, 'تاریخ شروع الزامی است'),
-    end_date: z.string().min(1, 'تاریخ پایان الزامی است'),
-    delivery_date: z.string().min(1, 'تاریخ تحویل الزامی است'),
-  })
-  .refine((d) => new Date(d.end_date) > new Date(d.start_date), {
-    message: 'تاریخ پایان باید بعد از تاریخ شروع باشد',
-    path: ['end_date'],
-  });
+const jalaliDateField = (label: string) =>
+  z
+    .string()
+    .min(1, `${label} را وارد کنید`)
+    .refine(isValidJalaliDateString, {
+      message: 'تاریخ شمسی معتبر نیست — از انتخابگر یا فرمت چهاررقمی سال و دو رقم ماه/روز استفاده کنید (مثال: ۱۴۰۳/۰۶/۱۵)',
+    });
+
+/** بدون محدودیت ترتیب نسبی بین فیلدها؛ فقط اعتبار هر تاریخ شمسی */
+export const datingSchema = z.object({
+  start_date: jalaliDateField('تاریخ شروع'),
+  end_date: jalaliDateField('تاریخ پایان'),
+  delivery_date: jalaliDateField('تاریخ تحویل'),
+});
 
 export const mortgageSchema = z.object({
   total_amount: z.number().positive('مبلغ رهن باید بزرگ‌تر از صفر باشد'),

@@ -7,7 +7,15 @@ import type { PartyType } from '../../types/api';
 
 interface StartStepProps {
   platform: 'admin' | 'user';
+  /** فقط dev + env: دکمهٔ پیش‌نمایش بدون API */
+  previewMode?: boolean;
   onStart: (params: {
+    contractId: string;
+    nextStep: PRContractStep;
+    contractType: ContractType;
+    isScribeMode: boolean;
+  }) => void;
+  onPreviewBootstrap?: (params: {
     contractId: string;
     nextStep: PRContractStep;
     contractType: ContractType;
@@ -15,7 +23,7 @@ interface StartStepProps {
   }) => void;
 }
 
-export function StartStep({ onStart }: StartStepProps) {
+export function StartStep({ platform, previewMode, onStart, onPreviewBootstrap }: StartStepProps) {
   const [contractType, setContractType] = useState<ContractType>('PROPERTY_RENT');
   const [partyType, setPartyType] = useState<PartyType>('LANDLORD');
   const [isScribeMode, setIsScribeMode] = useState(false);
@@ -44,12 +52,42 @@ export function StartStep({ onStart }: StartStepProps) {
     }
   }
 
+  function handlePreviewBootstrap() {
+    if (!onPreviewBootstrap) return;
+    const contractId = `local-preview__${contractType}__${Date.now()}`;
+    onPreviewBootstrap({
+      contractId,
+      nextStep: 'LANDLORD_INFORMATION',
+      contractType,
+      isScribeMode,
+    });
+  }
+
+  const cardBtn =
+    'rounded-[var(--amline-radius-lg)] border-2 transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--amline-accent)]';
+
   return (
-    <div dir="rtl" className="space-y-6 max-w-md mx-auto py-8">
+    <div dir="rtl" className="mx-auto max-w-lg space-y-8 py-2">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">انعقاد قرارداد جدید</h1>
-        <p className="text-sm text-gray-500">نوع قرارداد و حالت ثبت را انتخاب کنید</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-[var(--amline-fg-subtle)]">
+          {platform === 'admin' ? 'پنل مدیریت' : 'قرارداد'}
+        </p>
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-[var(--amline-fg)] sm:text-3xl">
+          انعقاد قرارداد جدید
+        </h1>
+        <p className="mt-2 text-sm text-[var(--amline-fg-muted)]">
+          نوع قرارداد، نقش و حالت ثبت را انتخاب کنید
+        </p>
       </div>
+
+      {previewMode && (
+        <div className="rounded-[var(--amline-radius-lg)] border border-amber-200/80 bg-amber-50/90 px-4 py-3 text-sm text-amber-950 dark:border-amber-500/30 dark:bg-amber-950/40 dark:text-amber-100">
+          <span className="font-semibold">حالت پیش‌نمایش ویزارد</span>
+          <span className="mt-1 block text-xs opacity-90">
+            می‌توانید بدون تکمیل فرم بین مراحل جابه‌جا شوید یا با «پیش‌نمایش UI» بدون درخواست سرور وارد ویزارد شوید (نیاز به MSW در dev).
+          </span>
+        </div>
+      )}
 
       <StepErrorBanner message={error} details={details} hint={hint} onDismiss={() => clear()} />
 
@@ -70,10 +108,11 @@ export function StartStep({ onStart }: StartStepProps) {
               type="button"
               onClick={() => setContractType(opt.value)}
               className={[
-                'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all',
+                cardBtn,
+                'flex flex-col items-center gap-2 p-4 text-center',
                 contractType === opt.value
-                  ? 'border-primary bg-primary/5 text-primary'
-                  : 'border-gray-200 text-gray-600 hover:border-gray-300',
+                  ? 'border-[var(--amline-accent)] bg-[var(--amline-accent)]/8 text-[var(--amline-accent)] shadow-sm'
+                  : 'border-[var(--amline-border)] bg-[var(--amline-surface)] text-[var(--amline-fg-muted)] hover:border-[var(--amline-fg-subtle)]/50',
               ].join(' ')}
             >
               <span className="text-2xl">{opt.icon}</span>
@@ -86,9 +125,8 @@ export function StartStep({ onStart }: StartStepProps) {
         </p>
       </div>
 
-      {/* نقش شروع‌کننده قرارداد */}
       <div>
-        <p className="text-sm font-medium text-gray-700 mb-3">نقش شما در شروع قرارداد</p>
+        <p className="mb-3 text-sm font-semibold text-[var(--amline-fg)]">نقش شما در شروع</p>
         <div className="grid grid-cols-2 gap-3">
           {([
             {
@@ -115,10 +153,11 @@ export function StartStep({ onStart }: StartStepProps) {
               type="button"
               onClick={() => setPartyType(opt.value)}
               className={[
-                'rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all',
+                cardBtn,
+                'px-4 py-3 text-sm font-medium',
                 partyType === opt.value
-                  ? 'border-primary bg-primary/5 text-primary'
-                  : 'border-gray-200 text-gray-600 hover:border-gray-300',
+                  ? 'border-[var(--amline-accent)] bg-[var(--amline-accent)]/8 text-[var(--amline-accent)]'
+                  : 'border-[var(--amline-border)] text-[var(--amline-fg-muted)] hover:border-[var(--amline-fg-subtle)]/50',
               ].join(' ')}
             >
               {opt.label}
@@ -127,41 +166,57 @@ export function StartStep({ onStart }: StartStepProps) {
         </div>
       </div>
 
-      {/* انتخاب حالت کاتب */}
       <div>
-        <p className="text-sm font-medium text-gray-700 mb-3">حالت ثبت</p>
+        <p className="mb-3 text-sm font-semibold text-[var(--amline-fg)]">حالت ثبت</p>
         <div className="grid grid-cols-2 gap-3">
-          {[
-            { value: false, label: 'برای خودم', desc: 'من طرف قرارداد هستم', icon: '👤' },
-            { value: true, label: 'برای دیگران', desc: 'کاتب قرارداد هستم', icon: '✍️' },
-          ].map((opt) => (
+          {(
+            [
+              { value: false, label: 'برای خودم', desc: 'من طرف قرارداد هستم', icon: '👤' },
+              { value: true, label: 'برای دیگران', desc: 'کاتب قرارداد هستم', icon: '✍️' },
+            ] as const
+          ).map((opt) => (
             <button
               key={String(opt.value)}
               type="button"
               onClick={() => setIsScribeMode(opt.value)}
               className={[
-                'flex flex-col items-start gap-1 p-4 rounded-xl border-2 transition-all text-right',
+                cardBtn,
+                'flex flex-col items-start gap-1 p-4 text-right',
                 isScribeMode === opt.value
-                  ? 'border-primary bg-primary/5'
-                  : 'border-gray-200 hover:border-gray-300',
+                  ? 'border-[var(--amline-accent)] bg-[var(--amline-accent)]/8'
+                  : 'border-[var(--amline-border)] hover:border-[var(--amline-fg-subtle)]/50',
               ].join(' ')}
             >
-              <span className="text-xl">{opt.icon}</span>
-              <span className="text-sm font-medium text-gray-800">{opt.label}</span>
-              <span className="text-xs text-gray-500">{opt.desc}</span>
+              <span className="text-xl" aria-hidden>
+                {opt.icon}
+              </span>
+              <span className="text-sm font-semibold text-[var(--amline-fg)]">{opt.label}</span>
+              <span className="text-xs text-[var(--amline-fg-muted)]">{opt.desc}</span>
             </button>
           ))}
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={handleStart}
-        disabled={isLoading}
-        className="w-full bg-primary text-white rounded-xl py-3 font-bold text-base disabled:opacity-50"
-      >
-        {isLoading ? 'در حال شروع...' : 'شروع قرارداد'}
-      </button>
+      <div className="space-y-3">
+        <button
+          type="button"
+          onClick={handleStart}
+          disabled={isLoading}
+          className="w-full rounded-[var(--amline-radius-lg)] bg-[var(--amline-accent)] py-3.5 text-base font-bold text-white shadow-md transition hover:opacity-95 disabled:opacity-50"
+        >
+          {isLoading ? 'در حال شروع...' : 'شروع قرارداد (ثبت در سرور)'}
+        </button>
+        {previewMode && onPreviewBootstrap && (
+          <button
+            type="button"
+            onClick={handlePreviewBootstrap}
+            disabled={isLoading}
+            className="w-full rounded-[var(--amline-radius-lg)] border border-[var(--amline-border)] bg-[var(--amline-surface)] py-3 text-sm font-semibold text-[var(--amline-fg)] transition hover:bg-[var(--amline-surface-muted)] disabled:opacity-50 dark:border-slate-600"
+          >
+            پیش‌نمایش UI — بدون ثبت در سرور
+          </button>
+        )}
+      </div>
     </div>
   );
 }

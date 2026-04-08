@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { setCookie } from '../../lib/cookies';
 import { CookieNames } from '../../lib/cookies';
 import { ThemeToggle } from '../../components/ThemeToggle';
+import { AmlineLogo } from '../../components/AmlineLogo';
 import { Button } from '../../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
 import { Input } from '../../ui/input';

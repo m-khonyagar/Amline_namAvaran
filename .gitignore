@@ -15,6 +15,7 @@ build/
 # Cache
 .cache/
 .eslintcache
+.turbo/
 
 # Python
 __pycache__/
@@ -46,6 +47,9 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# Local SQLite dev DB (backend)
+backend/backend/*.db
 
 # Virtual environments
 venv/

@@ -104,7 +104,7 @@ export default function ContractsPage() {
   const totalPages = Math.ceil(total / 20)
 
   return (
-    <div dir="rtl" className="p-6">
+    <div dir="rtl" className="p-6 text-[var(--amline-fg)]">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">قراردادها</h1>
         {hasPermission('contracts:write') ? (
@@ -123,7 +123,7 @@ export default function ContractsPage() {
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] px-3 py-2 text-sm text-[var(--amline-fg)] dark:border-slate-600"
         >
           <option value="">همه وضعیت‌ها</option>
           {Object.entries(STATUS_LABELS).map(([val, label]) => (
@@ -133,7 +133,7 @@ export default function ContractsPage() {
         <select
           value={typeFilter}
           onChange={(e) => { setTypeFilter(e.target.value); setPage(1) }}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] px-3 py-2 text-sm text-[var(--amline-fg)] dark:border-slate-600"
         >
           <option value="">همه انواع</option>
           {Object.entries(TYPE_LABELS).map(([val, label]) => (
@@ -149,14 +149,16 @@ export default function ContractsPage() {
       )}
 
       {isError && (
-        <div className="rounded-lg bg-red-50 p-4 text-red-700">خطا در دریافت قراردادها</div>
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">
+          خطا در دریافت قراردادها
+        </div>
       )}
 
       {!isLoading && !isError && (
         <>
-          <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] shadow-sm dark:border-slate-600">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-gray-600">
+              <thead className="bg-[var(--amline-surface-muted)] text-[var(--amline-fg-muted)]">
                 <tr>
                   <th className="px-4 py-3 text-right font-medium">شناسه</th>
                   <th className="px-4 py-3 text-right font-medium">نوع</th>
@@ -165,38 +167,41 @@ export default function ContractsPage() {
                   <th className="px-4 py-3 text-right font-medium">عملیات</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-[var(--amline-border)] dark:divide-slate-600">
                 {contracts.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="py-8 text-center text-gray-400">
+                    <td colSpan={5} className="py-8 text-center text-[var(--amline-fg-subtle)]">
                       قراردادی یافت نشد
                     </td>
                   </tr>
                 )}
                 {contracts.map((c) => (
-                  <tr key={c.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-mono text-xs text-gray-500">
+                  <tr key={c.id} className="hover:bg-[var(--amline-surface-muted)]/80 dark:hover:bg-slate-800/60">
+                    <td className="px-4 py-3 font-mono text-xs text-[var(--amline-fg-muted)]">
                       {c.id.slice(0, 8)}...
                     </td>
-                    <td className="px-4 py-3">{TYPE_LABELS[c.type] ?? c.type}</td>
+                    <td className="px-4 py-3 text-[var(--amline-fg)]">{TYPE_LABELS[c.type] ?? c.type}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                        c.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
-                        c.status === 'PENDING_ADMIN_APPROVAL' ? 'bg-yellow-100 text-yellow-700' :
-                        c.status === 'ADMIN_REJECTED' || c.status === 'REVOKED' ? 'bg-red-100 text-red-700' :
-                        'bg-gray-100 text-gray-600'
+                        c.status === 'ACTIVE'
+                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-200'
+                          : c.status === 'PENDING_ADMIN_APPROVAL'
+                            ? 'bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200'
+                            : c.status === 'ADMIN_REJECTED' || c.status === 'REVOKED'
+                              ? 'bg-red-100 text-red-800 dark:bg-red-950/50 dark:text-red-200'
+                              : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
                       }`}>
                         {STATUS_LABELS[c.status] ?? c.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-500">
+                    <td className="px-4 py-3 text-[var(--amline-fg-muted)]">
                       {new Date(c.created_at).toLocaleDateString('fa-IR')}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => navigate(`/contracts/${c.id}`)}
-                          className="rounded px-3 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50"
+                          className="rounded px-3 py-1 text-xs font-medium text-[var(--amline-primary)] hover:bg-[var(--amline-primary-muted)] dark:hover:bg-blue-950/50"
                         >
                           مشاهده
                         </button>
@@ -231,17 +236,17 @@ export default function ContractsPage() {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="rounded px-3 py-1 text-sm disabled:opacity-40"
+                className="rounded px-3 py-1 text-sm text-[var(--amline-fg)] disabled:opacity-40"
               >
                 قبلی
               </button>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-[var(--amline-fg-muted)]">
                 صفحه {page} از {totalPages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="rounded px-3 py-1 text-sm disabled:opacity-40"
+                className="rounded px-3 py-1 text-sm text-[var(--amline-fg)] disabled:opacity-40"
               >
                 بعدی
               </button>

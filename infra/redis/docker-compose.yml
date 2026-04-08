@@ -1,0 +1,13 @@
+# Redis برای rate limit بک‌اند (REDIS_URL=redis://localhost:6379/0) — dev/staging
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: amline-redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data: {}

@@ -63,10 +63,10 @@ export default function UsersPage() {
   const totalPages = Math.ceil(total / 20)
 
   return (
-    <div dir="rtl" className="p-6">
+    <div dir="rtl" className="p-6 text-[var(--amline-fg)]">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">کاربران</h1>
-        <span className="text-sm text-gray-500">{total} کاربر</span>
+        <h1 className="text-2xl font-bold text-[var(--amline-fg)]">کاربران</h1>
+        <span className="text-sm text-[var(--amline-fg-muted)]">{total} کاربر</span>
       </div>
 
       {/* Filters */}
@@ -76,12 +76,12 @@ export default function UsersPage() {
           placeholder="جستجو در نام یا موبایل..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 rounded-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] px-3 py-2 text-sm text-[var(--amline-fg)] placeholder:text-[var(--amline-fg-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--amline-ring)] dark:border-slate-600"
         />
         <select
           value={roleFilter}
           onChange={(e) => { setRoleFilter(e.target.value); setPage(1) }}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] px-3 py-2 text-sm text-[var(--amline-fg)] dark:border-slate-600"
         >
           <option value="">همه نقش‌ها</option>
           {Object.entries(ROLE_LABELS).map(([val, label]) => (
@@ -97,14 +97,16 @@ export default function UsersPage() {
       )}
 
       {isError && (
-        <div className="rounded-lg bg-red-50 p-4 text-red-700">خطا در دریافت کاربران</div>
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">
+          خطا در دریافت کاربران
+        </div>
       )}
 
       {!isLoading && !isError && (
         <>
-          <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-lg border border-[var(--amline-border)] bg-[var(--amline-surface)] shadow-sm dark:border-slate-600">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-gray-600">
+              <thead className="bg-[var(--amline-surface-muted)] text-[var(--amline-fg-muted)]">
                 <tr>
                   <th className="px-4 py-3 text-right font-medium">نام</th>
                   <th className="px-4 py-3 text-right font-medium">موبایل</th>
@@ -113,26 +115,26 @@ export default function UsersPage() {
                   <th className="px-4 py-3 text-right font-medium">عملیات</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-[var(--amline-border)] dark:divide-slate-600">
                 {users.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="py-8 text-center text-gray-400">
+                    <td colSpan={5} className="py-8 text-center text-[var(--amline-fg-subtle)]">
                       کاربری یافت نشد
                     </td>
                   </tr>
                 )}
                 {users.map((u) => (
-                  <tr key={u.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium text-gray-900">
+                  <tr key={u.id} className="hover:bg-[var(--amline-surface-muted)]/80 dark:hover:bg-slate-800/60">
+                    <td className="px-4 py-3 font-medium text-[var(--amline-fg)]">
                       {u.full_name ?? '—'}
                     </td>
-                    <td className="px-4 py-3 font-mono text-gray-600">{u.mobile}</td>
+                    <td className="px-4 py-3 font-mono text-[var(--amline-fg-muted)]">{u.mobile}</td>
                     <td className="px-4 py-3">
-                      <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                      <span className="rounded-full bg-[var(--amline-primary-muted)] px-2 py-0.5 text-xs font-medium text-[var(--amline-primary)] dark:text-blue-300">
                         {ROLE_LABELS[u.role] ?? u.role}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-500">
+                    <td className="px-4 py-3 text-[var(--amline-fg-muted)]">
                       {u.last_login
                         ? new Date(u.last_login).toLocaleDateString('fa-IR')
                         : '—'}
@@ -140,7 +142,7 @@ export default function UsersPage() {
                     <td className="px-4 py-3">
                       <button
                         onClick={() => navigate(`/users/${u.id}`)}
-                        className="rounded px-3 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50"
+                        className="rounded px-3 py-1 text-xs font-medium text-[var(--amline-primary)] hover:bg-[var(--amline-primary-muted)] dark:hover:bg-blue-950/50"
                       >
                         مشاهده
                       </button>
@@ -156,17 +158,17 @@ export default function UsersPage() {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="rounded px-3 py-1 text-sm disabled:opacity-40"
+                className="rounded px-3 py-1 text-sm text-[var(--amline-fg)] disabled:opacity-40"
               >
                 قبلی
               </button>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-[var(--amline-fg-muted)]">
                 صفحه {page} از {totalPages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="rounded px-3 py-1 text-sm disabled:opacity-40"
+                className="rounded px-3 py-1 text-sm text-[var(--amline-fg)] disabled:opacity-40"
               >
                 بعدی
               </button>

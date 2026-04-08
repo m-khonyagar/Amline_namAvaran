@@ -1,0 +1,12 @@
+# Pinned runtime deps (mirrors pyproject.toml) — Docker/CI use pip; local may use Poetry.
+fastapi>=0.115.0,<0.116
+uvicorn[standard]>=0.32.0,<0.33
+weasyprint>=62.3,<63
+jinja2>=3.1.4,<4
+python-multipart>=0.0.12,<0.0.13
+minio>=7.2.1,<8
+pydantic>=2.9.0,<3
+pydantic-settings>=2.5.0,<3
+loguru>=0.7.2,<0.8
+httpx>=0.27.0,<0.28
+num2words>=0.5.14,<0.6

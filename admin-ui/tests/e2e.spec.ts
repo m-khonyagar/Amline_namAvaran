@@ -1,16 +1,17 @@
 import { test, expect, type Page } from '@playwright/test';
+import { gotoAmline, WIZARD_SUBMIT_SERVER_LABEL } from './e2e-helpers';
 import { clearAmlineBrowserStorage } from './storage-helpers';
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3002';
 
 test.beforeEach(async ({ page }) => {
-  await page.goto(`${BASE}/login`);
+  await gotoAmline(page, `${BASE}/login`);
   await clearAmlineBrowserStorage(page);
 });
 
 // ---- Helper: ورود آزمایشی ----
 async function devLogin(page: Page) {
-  await page.goto(`${BASE}/login`);
+  await gotoAmline(page, `${BASE}/login`);
   // صبر برای نمایش دکمه ورود آزمایشی
   const devBtn = page.getByRole('button', { name: /ورود آزمایشی/i });
   await expect(devBtn).toBeVisible({ timeout: 20000 });
@@ -22,7 +23,7 @@ async function devLogin(page: Page) {
 // ۱. صفحه Login
 // ================================================================
 test('صفحه login نمایش داده می‌شود', async ({ page }) => {
-  await page.goto(`${BASE}/login`);
+  await gotoAmline(page, `${BASE}/login`);
   await expect(page.getByRole('button', { name: /ورود آزمایشی/i })).toBeVisible({ timeout: 20000 });
   await expect(page.getByPlaceholder(/0912/)).toBeVisible();
 });
@@ -42,7 +43,7 @@ test('ورود آزمایشی و نمایش داشبورد', async ({ page }) =>
 // ================================================================
 test('CRM: صفحه KanbanBoard نمایش داده می‌شود', async ({ page }) => {
   await devLogin(page);
-  await page.goto(`${BASE}/crm`);
+  await gotoAmline(page, `${BASE}/crm`);
   // heading ستون «جدید» در Kanban
   await expect(page.getByRole('heading', { name: 'جدید' })).toBeVisible({ timeout: 15000 });
   await expect(page.getByRole('heading', { name: 'تماس گرفته' })).toBeVisible();
@@ -76,11 +77,13 @@ test('CRM: افزودن Lead جدید', async ({ page }) => {
 // ================================================================
 test('Contract Wizard: صفحه شروع نمایش داده می‌شود', async ({ page }) => {
   await devLogin(page);
-  await page.goto(`${BASE}/contracts/wizard`);
-  await expect(page.getByText('رهن و اجاره')).toBeVisible({ timeout: 15000 });
-  await expect(page.getByText('خرید و فروش')).toBeVisible();
-  await expect(page.getByText('برای خودم')).toBeVisible();
-  await expect(page.getByText('برای دیگران')).toBeVisible();
+  await gotoAmline(page, `${BASE}/contracts/wizard`);
+  await expect(page.getByRole('heading', { name: /انعقاد قرارداد جدید/ })).toBeVisible({ timeout: 20000 });
+  const rentBtn = page.getByRole('button', { name: /رهن و اجاره/ });
+  await expect(rentBtn).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole('button', { name: /خرید و فروش/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /برای خودم/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /برای دیگران/ })).toBeVisible();
 });
 
 // ================================================================
@@ -88,12 +91,15 @@ test('Contract Wizard: صفحه شروع نمایش داده می‌شود', asy
 // ================================================================
 test('Contract Wizard: انتخاب رهن و اجاره', async ({ page }) => {
   await devLogin(page);
-  await page.goto(`${BASE}/contracts/wizard`);
-  await expect(page.getByText('رهن و اجاره')).toBeVisible({ timeout: 15000 });
-  await page.getByText('رهن و اجاره').click();
-  await page.getByText('برای دیگران').click();
-  const startBtn = page.getByRole('button', { name: 'شروع قرارداد', exact: true });
-  await expect(startBtn).toBeVisible({ timeout: 5000 });
+  await gotoAmline(page, `${BASE}/contracts/wizard`);
+  await expect(page.getByRole('heading', { name: /انعقاد قرارداد جدید/ })).toBeVisible({ timeout: 20000 });
+  await expect(page.getByRole('button', { name: /رهن و اجاره/ })).toBeVisible({
+    timeout: 15000,
+  });
+  await page.getByRole('button', { name: /رهن و اجاره/ }).click();
+  await page.getByRole('button', { name: /برای دیگران/ }).click();
+  const startBtn = page.getByRole('button', { name: WIZARD_SUBMIT_SERVER_LABEL });
+  await expect(startBtn).toBeVisible({ timeout: 15000 });
 });
 
 // ================================================================
@@ -101,7 +107,7 @@ test('Contract Wizard: انتخاب رهن و اجاره', async ({ page }) => {
 // ================================================================
 test('صفحه قراردادها نمایش داده می‌شود', async ({ page }) => {
   await devLogin(page);
-  await page.goto(`${BASE}/contracts`);
+  await gotoAmline(page, `${BASE}/contracts`);
   await expect(page.getByRole('button', { name: /قرارداد جدید/i })).toBeVisible({ timeout: 15000 });
 });
 
@@ -110,7 +116,7 @@ test('صفحه قراردادها نمایش داده می‌شود', async ({ p
 // ================================================================
 test('صفحه کاربران نمایش داده می‌شود', async ({ page }) => {
   await devLogin(page);
-  await page.goto(`${BASE}/users`);
+  await gotoAmline(page, `${BASE}/users`);
   // صفحه باید load بشه
   await page.waitForTimeout(3000);
   await expect(page.locator('body')).not.toBeEmpty();
@@ -121,9 +127,9 @@ test('صفحه کاربران نمایش داده می‌شود', async ({ page 
 // ================================================================
 test('داشبورد: navigation بین صفحات', async ({ page }) => {
   await devLogin(page);
-  await page.goto(`${BASE}/crm`);
+  await gotoAmline(page, `${BASE}/crm`);
   await expect(page).toHaveURL(`${BASE}/crm`);
-  await page.goto(`${BASE}/dashboard`);
+  await gotoAmline(page, `${BASE}/dashboard`);
   await expect(page).toHaveURL(`${BASE}/dashboard`);
 });
 

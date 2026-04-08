@@ -27,6 +27,17 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  webpack(config) {
+    if (process.env.NEXT_PUBLIC_EMBED_ADMIN_WIZARD === '0') {
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(
+          /contracts[\\/]wizard[\\/]WizardEmbed\.tsx$/,
+          path.join(__dirname, 'app/contracts/wizard/WizardStub.tsx')
+        )
+      )
+    }
+    return config
+  },
   async rewrites() {
     // In Docker/production, backend is reachable at http://backend:8000
     // In local dev, use NEXT_PUBLIC_DEV_PROXY_TARGET or NEXT_PUBLIC_API_BASE_URL
@@ -35,6 +46,7 @@ const nextConfig = {
       process.env.NEXT_PUBLIC_DEV_PROXY_TARGET ||
       'http://backend:8000'
     return [
+      { source: '/api/v1/:path*', destination: `${base}/api/v1/:path*` },
       { source: '/api/:path*', destination: `${base}/:path*` },
       { source: '/contracts/:path*', destination: `${base}/contracts/:path*` },
       { source: '/files/:path*', destination: `${base}/files/:path*` },

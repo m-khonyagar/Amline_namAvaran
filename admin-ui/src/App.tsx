@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, Link } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import MainLayout from './layouts/MainLayout'
 import LoginPage from './pages/auth/LoginPage'
@@ -71,6 +71,48 @@ function AppRoutes() {
       <ThemedToaster />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+
+        {import.meta.env.DEV ? (
+          <Route
+            path="/dev/test-hub"
+            element={
+              <div
+                dir="rtl"
+                className="min-h-screen bg-[var(--amline-bg)] px-4 py-8 text-[var(--amline-fg)] sm:px-8"
+              >
+                <LocalTestHubPage />
+              </div>
+            }
+          />
+        ) : null}
+
+        {import.meta.env.DEV ? (
+          <Route
+            path="/dev/preview/user-wizard"
+            element={
+              <ProtectedRoute>
+                <div dir="rtl" className="min-h-screen bg-[var(--amline-bg)] text-[var(--amline-fg)]">
+                  <header className="sticky top-0 z-10 border-b border-[var(--amline-border)] bg-[var(--amline-surface)]/95 px-4 py-3 backdrop-blur dark:border-slate-700 dark:bg-slate-900/95">
+                    <div className="container-amline flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-sm font-medium text-[var(--amline-fg-muted)]">
+                        پیش‌نمایش: ویزارد با نقش کاربر عادی (بدون سایدبار ادمین)
+                      </p>
+                      <Link
+                        to="/dev/test-hub"
+                        className="text-sm font-semibold text-[var(--amline-primary)] hover:underline"
+                      >
+                        ← هاب تست لوکال
+                      </Link>
+                    </div>
+                  </header>
+                  <div className="container-amline py-6">
+                    <ContractWizardPage platform="user" />
+                  </div>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+        ) : null}
 
         <Route
           path="/"
@@ -200,6 +242,7 @@ function AppRoutes() {
               </PermissionGuard>
             } />
           </Route>
+
         </Route>
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

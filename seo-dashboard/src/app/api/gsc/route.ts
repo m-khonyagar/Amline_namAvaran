@@ -7,9 +7,19 @@ const GSC_DATA_PATH = process.env.GSC_DATA_PATH || DEFAULT_PATH
 
 export async function GET() {
   try {
-    const filePath = path.isAbsolute(GSC_DATA_PATH) ? GSC_DATA_PATH : path.resolve(process.cwd(), GSC_DATA_PATH)
-    if (!fs.existsSync(filePath)) {
-      return NextResponse.json({ error: 'GSC data not found. Run gsc_export_all.py first.' }, { status: 404 })
+    let filePath: string | null = null
+    for (const p of FALLBACK_PATHS) {
+      const abs = path.isAbsolute(p) ? p : path.resolve(process.cwd(), p)
+      if (fs.existsSync(abs)) {
+        filePath = abs
+        break
+      }
+    }
+    if (!filePath) {
+      return NextResponse.json(
+        { error: 'GSC data not found. Place gsc_full_export.json in data/gsc/ or set GSC_DATA_PATH.' },
+        { status: 404 }
+      )
     }
     const raw = fs.readFileSync(filePath, 'utf-8')
     const data = JSON.parse(raw)
