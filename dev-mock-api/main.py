@@ -15,6 +15,14 @@ _MAGIC_MOBILE_RAW = (os.getenv("AMLINE_OTP_MAGIC_MOBILE") or "09107709601").stri
 _MAGIC_CODE = (os.getenv("AMLINE_OTP_MAGIC_CODE") or "11111").strip()
 
 
+def _magic_feature_on() -> bool:
+    """Dev mock: magic OTP on by default; set AMLINE_OTP_MAGIC_ENABLED=0 to disable."""
+    raw = os.getenv("AMLINE_OTP_MAGIC_ENABLED")
+    if raw is None or not str(raw).strip():
+        return True
+    return str(raw).strip().lower() not in ("0", "false", "no", "off")
+
+
 def _norm_mobile(phone: str) -> str:
     d = "".join(c for c in (phone or "") if c.isdigit())
     if d.startswith("98") and len(d) >= 12:
@@ -29,6 +37,8 @@ def _magic_norm() -> str:
 
 
 def _is_magic_mobile(phone: str) -> bool:
+    if not _magic_feature_on():
+        return False
     return _norm_mobile(phone) == _magic_norm()
 
 
