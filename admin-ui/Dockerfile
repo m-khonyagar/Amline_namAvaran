@@ -25,8 +25,8 @@ ENV VITE_API_URL=$VITE_API_URL \
     VITE_ENABLE_DEV_BYPASS=$VITE_ENABLE_DEV_BYPASS \
     VITE_USE_CRM_API=$VITE_USE_CRM_API
 
-# Build the application
-RUN npm run build
+# Vite bundle only (full `tsc` includes tests/mocks that are not build artifacts)
+RUN node scripts/assert-safe-production-env.mjs && npx vite build
 
 # Production stage
 FROM nginx:alpine

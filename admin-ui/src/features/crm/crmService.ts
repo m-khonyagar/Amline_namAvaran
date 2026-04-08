@@ -1,4 +1,4 @@
-import type { Lead, LeadActivity, LeadStatus, LeadTask, CrmStats } from './types'
+import type { CrmStats, Lead, LeadActivity, LeadStatus, LeadTask } from './types'
 import * as local from './crmStorage'
 import * as remote from './crmApi'
 
@@ -84,53 +84,98 @@ export async function addLeadActivityRecord(
   return Promise.resolve(local.addActivity(data))
 }
 
-export async function loadTasks(leadId: string): Promise<LeadTask[]> {
-  return Promise.resolve(local.getTasks(leadId))
+const TASKS_STORAGE_KEY = 'amline_crm_tasks_v1'
+
+function readTaskMap(): Record<string, LeadTask[]> {
+  if (typeof localStorage === 'undefined') return {}
+  try {
+    const raw = localStorage.getItem(TASKS_STORAGE_KEY)
+    if (!raw) return {}
+    const parsed = JSON.parse(raw) as unknown
+    return parsed && typeof parsed === 'object' ? (parsed as Record<string, LeadTask[]>) : {}
+  } catch {
+    return {}
+  }
 }
 
-export async function createTask(
-  leadId: string,
-  payload: Omit<LeadTask, 'id' | 'created_at'>
-): Promise<LeadTask> {
-  return Promise.resolve(
-    local.addTask({
-      ...payload,
-      lead_id: leadId,
-    })
-  )
+function writeTaskMap(m: Record<string, LeadTask[]>) {
+  if (typeof localStorage === 'undefined') return
+  localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(m))
 }
 
-export async function updateTask(
-  _leadId: string,
-  taskId: string,
-  updates: Partial<Omit<LeadTask, 'id' | 'lead_id' | 'created_at'>>
-): Promise<LeadTask> {
-  const next = local.updateTask(taskId, updates)
-  if (!next) throw new Error('task_not_found')
-  return next
+function newTaskId(): string {
+  const c = globalThis.crypto
+  if (c && typeof c.randomUUID === 'function') return c.randomUUID()
+  return `t_${Date.now()}_${Math.random().toString(16).slice(2)}`
 }
 
-export async function deleteTask(_leadId: string, taskId: string): Promise<void> {
-  const ok = local.deleteTask(taskId)
-  if (!ok) throw new Error('task_not_found')
-}
-
+/** آمار CRM از روی لیست لیدها (بدون endpoint جداگانه) */
 export async function loadStats(): Promise<CrmStats> {
   const leads = await loadLeads()
   const total = leads.length
   const contracted = leads.filter((l) => l.status === 'CONTRACTED').length
   const lost = leads.filter((l) => l.status === 'LOST').length
   const active = leads.filter((l) => l.status !== 'LOST' && l.status !== 'CONTRACTED').length
-  const thisMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
-  const leadsThisMonth = leads.filter((l) => l.created_at >= thisMonthStart).length
+  const now = new Date()
+  const leads_this_month = leads.filter((l) => {
+    const d = new Date(l.created_at)
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+  }).length
+  const conversion_rate = total > 0 ? Math.round((contracted / total) * 100) : 0
   return {
     active_leads: active,
     contracted_leads: contracted,
     total_leads: total,
-    conversion_rate: total > 0 ? Math.round((contracted / total) * 100) : 0,
-    leads_this_month: leadsThisMonth,
+    conversion_rate,
+    leads_this_month,
     lost_leads: lost,
   }
+}
+
+/** وظایف لید — فعلاً فقط سمت کلاینت (localStorage) تا API تسک آماده شود */
+export async function loadTasks(leadId: string): Promise<LeadTask[]> {
+  const all = readTaskMap()
+  return all[leadId] ?? []
+}
+
+export async function createTask(
+  leadId: string,
+  data: Omit<LeadTask, 'id' | 'created_at'>
+): Promise<LeadTask> {
+  const all = readTaskMap()
+  const list = all[leadId] ?? []
+  const task: LeadTask = {
+    ...data,
+    id: newTaskId(),
+    created_at: new Date().toISOString(),
+  }
+  all[leadId] = [...list, task]
+  writeTaskMap(all)
+  return task
+}
+
+export async function updateTask(
+  leadId: string,
+  taskId: string,
+  patch: Partial<Pick<LeadTask, 'done' | 'title' | 'due_date'>>
+): Promise<LeadTask> {
+  const all = readTaskMap()
+  const list = all[leadId] ?? []
+  const idx = list.findIndex((t) => t.id === taskId)
+  if (idx < 0) throw new Error('task_not_found')
+  const updated = { ...list[idx], ...patch }
+  const next = [...list]
+  next[idx] = updated
+  all[leadId] = next
+  writeTaskMap(all)
+  return updated
+}
+
+export async function deleteTask(leadId: string, taskId: string): Promise<void> {
+  const all = readTaskMap()
+  const list = all[leadId] ?? []
+  all[leadId] = list.filter((t) => t.id !== taskId)
+  writeTaskMap(all)
 }
 
 export async function migrateLocalStorageToApi(): Promise<void> {

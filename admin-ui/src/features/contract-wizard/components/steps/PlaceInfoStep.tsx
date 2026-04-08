@@ -22,7 +22,7 @@ interface PlaceInfoFormData {
 }
 
 const MAX_FILES = 5;
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
 
 export function PlaceInfoStep({ contractId, contractType, onComplete }: StepProps) {
@@ -82,7 +82,7 @@ export function PlaceInfoStep({ contractId, contractType, onComplete }: StepProp
         return;
       }
       if (file.size > MAX_FILE_SIZE) {
-        setFileError('حجم هر فایل نباید بیشتر از ۵ مگابایت باشد');
+        setFileError('حجم هر فایل نباید بیشتر از ۱۰ مگابایت باشد');
         return;
       }
     }
@@ -308,10 +308,11 @@ export function PlaceInfoStep({ contractId, contractType, onComplete }: StepProp
 
         {/* آپلود تصاویر سند */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            تصاویر سند (حداکثر ۵ فایل، JPG/PNG/PDF، حداکثر ۵ مگابایت)
+          <label htmlFor="deed-image-upload" className="block text-sm font-medium text-gray-700 mb-1">
+            تصاویر سند (حداکثر ۵ فایل، JPG/PNG/PDF، حداکثر ۱۰ مگابایت)
           </label>
           <input
+            id="deed-image-upload"
             ref={fileInputRef}
             type="file"
             accept=".jpg,.jpeg,.png,.pdf"
