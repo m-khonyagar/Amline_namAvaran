@@ -18,6 +18,8 @@ interface ChequeImageFieldProps {
   disabled?: boolean;
 }
 
+const MAX_CHEQUE_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 /** بارگذاری تصویر چک و نگهداری شناسه فایل برای مراحل پرداخت چکی */
 export function ChequeImageField({ value, onChange, errorMessage, disabled }: ChequeImageFieldProps) {
   const [uploading, setUploading] = useState(false);
@@ -27,6 +29,11 @@ export function ChequeImageField({ value, onChange, errorMessage, disabled }: Ch
     const file = e.target.files?.[0];
     setLocalError(null);
     if (!file) {
+      onChange(null);
+      return;
+    }
+    if (file.size > MAX_CHEQUE_FILE_SIZE) {
+      setLocalError('حجم تصویر چک نباید بیشتر از ۱۰ مگابایت باشد');
       onChange(null);
       return;
     }
@@ -51,8 +58,9 @@ export function ChequeImageField({ value, onChange, errorMessage, disabled }: Ch
 
   return (
     <div className="space-y-1">
-      <label className="block text-xs text-gray-600 mb-1">تصویر چک *</label>
+      <label htmlFor="cheque-image-upload" className="block text-xs text-gray-600 mb-1">تصویر چک *</label>
       <input
+        id="cheque-image-upload"
         type="file"
         accept="image/*"
         disabled={disabled || uploading}

@@ -3,14 +3,14 @@ import { apiClient } from '../../lib/api'
 import { formatShamsiDateTime } from '../../lib/persianDateTime'
 import { TableSkeleton } from '../../components/patterns/TableSkeleton'
 import { EmptyState } from '../../components/patterns/EmptyState'
-import type { AdminNotificationItem } from '../../components/NotificationsBell'
+import type { AdminNotification } from '../../features/notifications/types'
 
 export default function NotificationsInboxPage() {
   const qc = useQueryClient()
   const { data, isLoading } = useQuery({
     queryKey: ['admin-notifications'],
     queryFn: async () => {
-      const res = await apiClient.get<{ items: AdminNotificationItem[]; total?: number }>('/admin/notifications')
+      const res = await apiClient.get<{ items: AdminNotification[]; total?: number }>('/admin/notifications')
       return res.data
     },
   })
