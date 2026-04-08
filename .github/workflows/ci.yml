@@ -116,25 +116,26 @@ jobs:
       matrix:
         include:
           - service: backend
-            docker_context: ./backend/backend
-            dockerfile: backend/backend/Dockerfile
+            context: ./backend/backend
           - service: admin-ui
-            docker_context: .
-            dockerfile: admin-ui/Dockerfile
+            context: ./admin-ui
           - service: amline-ui
-            docker_context: .
-            dockerfile: amline-ui/Dockerfile
+            context: ./amline-ui
           - service: consultant-ui
-            docker_context: .
-            dockerfile: consultant-ui/Dockerfile
+            context: ./consultant-ui
+          - service: site
+            context: ./site
+          - service: channel-gateway
+            context: ./channel-gateway
+          - service: pdf-generator
+            context: ./pdf-generator
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
       - name: Build ${{ matrix.service }}
         uses: docker/build-push-action@v5
         with:
-          context: ${{ matrix.docker_context }}
-          file: ${{ matrix.dockerfile }}
+          context: ${{ matrix.context }}
           push: false
           tags: amline/${{ matrix.service }}:${{ github.sha }}
           cache-from: type=gha
