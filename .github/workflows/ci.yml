@@ -68,7 +68,7 @@ jobs:
           AMLINE_DATABASE_URL: postgresql+psycopg://test:test@localhost:5432/test
           AMLINE_REDIS_URL: redis://localhost:6379/0
           AMLINE_JWT_SECRET: ci-test-secret-key-32-chars-minimum
-        run: alembic upgrade heads
+        run: alembic upgrade 0009_merge_heads
       - name: Run tests
         env:
           AMLINE_DATABASE_URL: postgresql+psycopg://test:test@localhost:5432/test
