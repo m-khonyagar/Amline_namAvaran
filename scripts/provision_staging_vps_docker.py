@@ -120,15 +120,17 @@ MINIO_ACCESS_KEY=amline
 MINIO_SECRET_KEY=${MK}
 AMLINE_OTP_MAGIC_ENABLED=1
 KAVENEGAR_API_KEY=
+AMLINE_PYTHON_BASE=docker.arvancloud.ir/library/python:3.12-slim-bookworm
 ENVEOF
   chmod 600 .env
   echo "Created .env"
 else
   grep -q '^AMLINE_OTP_MAGIC_ENABLED=' .env || printf '\nAMLINE_OTP_MAGIC_ENABLED=1\n' >> .env
+  grep -q '^AMLINE_PYTHON_BASE=' .env || printf '\nAMLINE_PYTHON_BASE=docker.arvancloud.ir/library/python:3.12-slim-bookworm\n' >> .env
   echo "Kept existing .env"
 fi
 
-echo "=== Docker Hub mirror (Arvan) ==="
+echo "=== Docker daemon: Arvan mirror for Hub pulls (postgres/redis/minio) ==="
 mkdir -p /etc/docker
 printf '%s\n' '{' '  "registry-mirrors": ["https://docker.arvancloud.ir"]' '}' > /etc/docker/daemon.json
 systemctl restart docker

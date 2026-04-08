@@ -1,4 +1,5 @@
-FROM python:3.12-slim-bookworm
+ARG AMLINE_PYTHON_BASE=python:3.12-slim-bookworm
+FROM ${AMLINE_PYTHON_BASE}
 WORKDIR /app
 # Use Arvan mirror when building from networks where deb.debian.org is slow or blocked (e.g. some IR VPS).
 RUN set -eux; \

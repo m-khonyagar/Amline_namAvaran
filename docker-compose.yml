@@ -83,6 +83,8 @@ services:
     build:
       context: ./backend/backend
       dockerfile: Dockerfile
+      args:
+        AMLINE_PYTHON_BASE: ${AMLINE_PYTHON_BASE:-python:3.12-slim-bookworm}
     container_name: amline-backend
     environment:
       - AMLINE_ENV=staging
@@ -125,6 +127,8 @@ services:
     build:
       context: ./pdf-generator
       dockerfile: Dockerfile
+      args:
+        AMLINE_PYTHON_BASE: ${AMLINE_PYTHON_BASE:-python:3.12-slim-bookworm}
     container_name: amline-pdf-generator
     environment:
       - APP_ENV=staging
@@ -224,6 +228,8 @@ services:
     build:
       context: ./backend/backend
       dockerfile: Dockerfile
+      args:
+        AMLINE_PYTHON_BASE: ${AMLINE_PYTHON_BASE:-python:3.12-slim-bookworm}
     container_name: amline-db-init
     environment:
       - AMLINE_DATABASE_URL=postgresql+psycopg://${POSTGRES_USER:-amline}:${POSTGRES_PASSWORD:-amline_secret}@postgres:5432/${POSTGRES_DB:-amline}

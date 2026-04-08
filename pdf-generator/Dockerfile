@@ -1,7 +1,8 @@
 # PDF Generator Service Dockerfile
 # اَملاین - Amline Platform
 
-FROM python:3.12-slim-bookworm
+ARG AMLINE_PYTHON_BASE=python:3.12-slim-bookworm
+FROM ${AMLINE_PYTHON_BASE}
 
 WORKDIR /app
 
