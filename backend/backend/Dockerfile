@@ -17,6 +17,7 @@ ARG AMLINE_PIP_INDEX_URL=
 RUN if [ -n "$AMLINE_PIP_INDEX_URL" ]; then \
       THOST=$(printf '%s' "$AMLINE_PIP_INDEX_URL" | sed -e 's|^https*://||' -e 's|/.*||'); \
       pip install --index-url "$AMLINE_PIP_INDEX_URL" --trusted-host "$THOST" \
+        --trusted-host files.pythonhosted.org \
         --no-cache-dir -r requirements.txt; \
     else \
       pip install --no-cache-dir -r requirements.txt; \
