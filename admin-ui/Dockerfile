@@ -1,38 +1,19 @@
-# Admin UI Dockerfile
-# اَملاین - Amline Platform
-
-# Build stage
+# Admin UI — build with repo root as context (needs packages/amline-ui-core for CSS imports).
 FROM node:20-alpine AS builder
 
 WORKDIR /app
+COPY packages/amline-ui-core /app/packages/amline-ui-core
 
-# Copy package files
-COPY package.json package-lock.json* ./
-
-# Install dependencies
+WORKDIR /app/admin-ui
+COPY admin-ui/package.json admin-ui/package-lock.json* ./
 RUN npm ci
-
-# Copy source code
-COPY . .
-
-# Build the application
+COPY admin-ui/ ./
 RUN npm run build
 
-# Production stage
 FROM nginx:alpine
-
-# Copy custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Copy built files from builder
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Expose port
+COPY admin-ui/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/admin-ui/dist /usr/share/nginx/html
 EXPOSE 80
-
-# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost/health || exit 1
-
-# Start nginx
 CMD ["nginx", "-g", "daemon off;"]
