@@ -63,7 +63,9 @@ class CrmLeadPatchBody(BaseModel):
 
 
 class CrmActivityBody(BaseModel):
-    lead_id: str
+    """lead_id optional when URL path already contains the lead (admin-ui / tests)."""
+
+    lead_id: Optional[str] = None
     type: str
     note: Optional[str] = ""
     user_id: Optional[str] = None
