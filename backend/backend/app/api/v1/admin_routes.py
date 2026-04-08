@@ -3,7 +3,9 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request, Response
 
+from app.api.deps import get_current_user
 from app.core.errors import AmlineError
+from app.models.user import User
 from app.core.rbac_deps import require_permission
 from app.repositories.memory.state import get_store
 from app.schemas.v1.payloads import (
@@ -94,6 +96,17 @@ def admin_audit_list(skip: int = 0, limit: int = 50) -> dict:
 @router.post("/admin/auth/heartbeat")
 def admin_auth_heartbeat() -> dict:
     return {"ok": "true"}
+
+
+@router.get("/admin/auth/me")
+def admin_auth_me(user: User = Depends(get_current_user)) -> dict:
+    return {
+        "id": str(user.id),
+        "mobile": user.mobile,
+        "full_name": user.name,
+        "name": user.name,
+        "role": user.role.value,
+    }
 
 
 @router.get("/admin/staff/activity")

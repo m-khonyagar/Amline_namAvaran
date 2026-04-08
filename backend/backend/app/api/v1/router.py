@@ -2,6 +2,15 @@
 
 from fastapi import APIRouter
 
+from app.api.routes import (
+    arbitrations as legacy_arbitrations,
+    arbitration_summary as legacy_arbitration_summary,
+    auth as legacy_auth_otp,
+    contracts as legacy_contracts_v2,
+    properties as legacy_properties,
+    users as legacy_users,
+    wallet as legacy_wallet,
+)
 from app.api.v1 import (
     admin_routes,
     auth_routes,
@@ -37,6 +46,14 @@ from app.api.v1 import (
 platform_router = APIRouter()
 platform_router.include_router(health_routes.router)
 platform_router.include_router(auth_routes.router)
+# DB-backed auth + domain routes (same as app.api.router legacy mount) for root /api/v1 parity tests
+platform_router.include_router(legacy_auth_otp.router, prefix="/auth")
+platform_router.include_router(legacy_users.router, prefix="/users")
+platform_router.include_router(legacy_properties.router, prefix="/properties")
+platform_router.include_router(legacy_contracts_v2.router, prefix="/contracts-v2")
+platform_router.include_router(legacy_arbitrations.router, prefix="/arbitrations")
+platform_router.include_router(legacy_arbitration_summary.router, prefix="/arbitrations")
+platform_router.include_router(legacy_wallet.router, prefix="/wallet")
 platform_router.include_router(contracts_routes.router)
 platform_router.include_router(dispute_routes.router)
 platform_router.include_router(misc_routes.router)

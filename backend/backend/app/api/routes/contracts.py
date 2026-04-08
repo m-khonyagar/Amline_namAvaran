@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import secrets
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -69,6 +71,7 @@ def create_contract(
         start_date=req.start_date,
         end_date=req.end_date,
         status=ContractStatus.draft,
+        tracking_code=secrets.token_hex(12)[:32],
     )
     db.add(c)
     db.commit()

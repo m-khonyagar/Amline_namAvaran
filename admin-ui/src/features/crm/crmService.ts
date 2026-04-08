@@ -3,6 +3,7 @@ import * as local from './crmStorage'
 import * as remote from './crmApi'
 
 function useRemote(): boolean {
+  if (import.meta.env.MODE === 'test') return true
   return import.meta.env.VITE_USE_CRM_API === 'true'
 }
 
@@ -24,6 +25,17 @@ export async function saveLeadStatus(
     return remote.remotePatchLead(id, { status })
   }
   return local.updateLeadStatus(id, status)
+}
+
+export async function bulkSaveLeadStatus(ids: string[], status: LeadStatus): Promise<number> {
+  if (ids.length === 0) return 0
+  if (useRemote()) {
+    const results = await Promise.allSettled(
+      ids.map((id) => remote.remotePatchLead(id, { status }))
+    )
+    return results.filter((r) => r.status === 'fulfilled').length
+  }
+  return local.bulkUpdateLeadStatus(ids, status)
 }
 
 export async function createLeadRecord(data: {
@@ -164,4 +176,29 @@ export async function deleteTask(leadId: string, taskId: string): Promise<void> 
   const list = all[leadId] ?? []
   all[leadId] = list.filter((t) => t.id !== taskId)
   writeTaskMap(all)
+}
+
+export async function migrateLocalStorageToApi(): Promise<void> {
+  if (typeof localStorage === 'undefined') return
+  const raw = localStorage.getItem('amline_crm_leads')
+  const rows = raw ? (JSON.parse(raw) as Array<Partial<Lead>>) : []
+
+  for (const row of rows) {
+    await remote.remoteCreateLead({
+      full_name: row.full_name ?? '',
+      mobile: row.mobile ?? '',
+      need_type: (row.need_type as Lead['need_type']) ?? 'RENT',
+      status: (row.status as LeadStatus) ?? 'NEW',
+      assigned_to: row.assigned_to ?? null,
+      notes: row.notes ?? '',
+      contract_id: row.contract_id ?? null,
+      province_id: row.province_id ?? null,
+      city_id: row.city_id ?? null,
+      province_name_fa: row.province_name_fa ?? null,
+      city_name_fa: row.city_name_fa ?? null,
+    })
+  }
+
+  localStorage.removeItem('amline_crm_leads')
+  localStorage.removeItem('amline_crm_activities')
 }

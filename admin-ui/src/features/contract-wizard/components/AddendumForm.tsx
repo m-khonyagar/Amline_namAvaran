@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { apiV1 } from '@/lib/apiPaths';
+import { apiV1 } from '../../../lib/apiPaths';
 import { apiClient } from '../api/contractApi';
 import { StepErrorBanner } from './StepErrorBanner';
 import { useMappedStepError } from '../hooks/useMappedStepError';

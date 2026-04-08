@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { apiClient } from '../../lib/api'
 import { apiV1 } from '../../lib/apiPaths'
-import type { ContractResponse } from '../../features/contract-wizard/types/api'
+import type { ContractResponse, Party } from '../../features/contract-wizard/types/api'
 import type { ContractStatus } from '../../features/contract-wizard/types/wizard'
 import { AddendumForm } from '../../features/contract-wizard/components/AddendumForm'
 import { AddendumList } from '../../features/contract-wizard/components/AddendumList'
@@ -37,8 +37,6 @@ const PARTY_TYPE_LABELS: Record<string, string> = {
   LANDLORD: 'موجر',
   TENANT: 'مستأجر',
 }
-
-type PartySummary = { id: string; party_type: string; person_type: string }
 
 function StatusBadge({ status }: { status: ContractStatus }) {
   const colorClass =
@@ -115,7 +113,7 @@ export default function ContractDetailPage() {
     )
   }
 
-  const allParties = Object.values(contract.parties).flat() as PartySummary[]
+  const allParties = (Object.values(contract.parties).flat() as Party[])
 
   return (
     <div dir="rtl" className="p-6">

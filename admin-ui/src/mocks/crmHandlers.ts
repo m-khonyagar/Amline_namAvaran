@@ -18,6 +18,8 @@ const crmLeads: Lead[] = [
     created_at: now.toISOString(),
     updated_at: now.toISOString(),
     contract_id: null,
+    province_id: null,
+    city_id: null,
   },
   {
     id: 'lead-002',
@@ -30,6 +32,8 @@ const crmLeads: Lead[] = [
     created_at: twoWeeksAgo.toISOString(),
     updated_at: twoWeeksAgo.toISOString(),
     contract_id: null,
+    province_id: null,
+    city_id: null,
   },
   {
     id: 'lead-003',
@@ -42,6 +46,8 @@ const crmLeads: Lead[] = [
     created_at: monthAgo.toISOString(),
     updated_at: monthAgo.toISOString(),
     contract_id: null,
+    province_id: null,
+    city_id: null,
   },
 ];
 
@@ -125,6 +131,8 @@ export const crmHandlers = [
       created_at: ts,
       updated_at: ts,
       contract_id: body.contract_id ?? null,
+      province_id: body.province_id ?? null,
+      city_id: body.city_id ?? null,
     };
     crmLeads.push(lead);
     crmActivities[lead.id] = [];

@@ -1,39 +1,46 @@
-from enum import Enum
+from __future__ import annotations
+
+import enum
+import uuid
+from datetime import datetime
+
+from sqlalchemy import DateTime, Enum as SAEnum, Integer, String, func
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.db.base import Base
 
 
-class UserRole(Enum):
-    USER = "USER"
-    CONSULTANT = "CONSULTANT"
-    EXPERT = "EXPERT"
-    ADMIN = "ADMIN"
+class UserRole(str, enum.Enum):
+    """Must match PostgreSQL enum ``userrole`` (see alembic 0001_init)."""
+
+    user = "User"
+    agent = "Agent"
+    admin = "Admin"
+    moderator = "Moderator"
 
 
-class UserStatus(Enum):
-    ACTIVE = "ACTIVE"
-    SUSPENDED = "SUSPENDED"
-    DELETED = "DELETED"
+class User(Base):
+    __tablename__ = "users"
 
-
-class User:
-    def __init__(
-        self,
-        phone_number,
-        email,
-        profile_picture,
-        national_id,
-        otp,
-        status=UserStatus.ACTIVE,
-        role=UserRole.USER,
-    ):
-        self.phone_number = phone_number
-        self.email = email
-        self.profile_picture = profile_picture
-        self.national_id = national_id
-        self.otp = otp
-        self.status = status
-        self.role = role
-        self.contracts = []  # Placeholder for contracts relationship
-        self.listings = []  # Placeholder for listings relationship
-
-    def __repr__(self):
-        return f"<User {self.phone_number}, {self.email}, {self.role}, {self.status}>\nContracts: {self.contracts}\nListings: {self.listings}"
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    mobile: Mapped[str] = mapped_column(String(32), unique=True, index=True)
+    national_code: Mapped[str | None] = mapped_column(String(16), nullable=True, index=True)
+    name: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    role: Mapped[UserRole] = mapped_column(
+        SAEnum(
+            UserRole,
+            name="userrole",
+            native_enum=False,
+            values_callable=lambda o: [e.value for e in o],
+            length=32,
+        ),
+        nullable=False,
+        server_default=UserRole.user.value,
+    )
+    tenant_score: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    referral_code: Mapped[str | None] = mapped_column(String(32), nullable=True, unique=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )

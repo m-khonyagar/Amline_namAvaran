@@ -43,6 +43,8 @@ describe('Property 7: saveLeadStatus calls remotePatchLead with { status }', () 
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             contract_id: null,
+            province_id: null,
+            city_id: null,
           })
 
           await saveLeadStatus(id, status as import('../types').LeadStatus)
@@ -81,6 +83,8 @@ describe('Property 8: bulkSaveLeadStatus returns count of successful updates', (
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             contract_id: null,
+            province_id: null,
+            city_id: null,
           })
 
           const result = await bulkSaveLeadStatus(ids, status as import('../types').LeadStatus)
@@ -115,6 +119,8 @@ describe('Property 12: migrateLocalStorageToApi migrates leads and clears localS
             notes: fc.constant(''),
             assigned_to: fc.constant(null),
             contract_id: fc.constant(null),
+            province_id: fc.constant(null),
+            city_id: fc.constant(null),
           }),
           { minLength: 1, maxLength: 5 }
         ),
@@ -143,6 +149,8 @@ describe('Property 12: migrateLocalStorageToApi migrates leads and clears localS
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             contract_id: null,
+            province_id: null,
+            city_id: null,
           })
 
           await migrateLocalStorageToApi()
