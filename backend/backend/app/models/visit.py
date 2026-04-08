@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import DateTime
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy import ForeignKey, String, Text
+from sqlalchemy import ForeignKey, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -46,7 +46,7 @@ class Visit(Base):
         index=True,
     )
     crm_lead_id: Mapped[str | None] = mapped_column(
-        String(36),
+        Uuid(as_uuid=False),
         ForeignKey("crm_leads.id", ondelete="SET NULL"),
         nullable=True,
         index=True,
