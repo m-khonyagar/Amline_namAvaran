@@ -127,32 +127,7 @@ const crmMockLeads: Record<string, unknown>[] = [];
 const crmMockActivities: Record<string, Record<string, unknown>[]> = {};
 
 function seedCrmMockLeadsIfEmpty() {
-  if (crmMockLeads.length > 0) return;
-  const now = new Date().toISOString();
-  const row = (overrides: Record<string, unknown>) => ({
-    source: 'WEB',
-    full_name: 'سرنخ',
-    mobile: '09120000000',
-    need_type: 'RENT',
-    notes: '',
-    assigned_to: null,
-    contract_id: null,
-    listing_id: null,
-    requirement_id: null,
-    province_id: null,
-    city_id: null,
-    province_name_fa: null,
-    city_name_fa: null,
-    sla_due_at: null,
-    created_at: now,
-    updated_at: now,
-    ...overrides,
-  });
-  crmMockLeads.push(
-    row({ id: 'crm-seed-1', full_name: 'علی احمدی', status: 'NEW' }),
-    row({ id: 'crm-seed-2', full_name: 'مریم کریمی', status: 'CONTACTED' }),
-    row({ id: 'crm-seed-3', full_name: 'رضا محمدی', status: 'QUALIFIED' })
-  );
+  ensureMswRichDemo();
 }
 
 function crmOpenLeadCount(): number {
@@ -304,29 +279,6 @@ function ensureMswRichDemo() {
   });
   seedPaymentIntentsDemo();
 }
-
-function seedCrmMockLeadsIfEmpty() {
-  ensureMswRichDemo();
-}
-
-type MswAddendumRow = {
-  id: string;
-  subject: string;
-  created_at: string;
-  sign_status: 'PENDING' | 'PARTIALLY_SIGNED' | 'FULLY_SIGNED';
-};
-const addendumsByContractId = new Map<string, MswAddendumRow[]>();
-
-interface MswLegalReviewRow {
-  id: string;
-  contract_id: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
-  comment: string | null;
-  reviewer_id: string | null;
-  created_at: string;
-  decided_at: string | null;
-}
-const mswLegalReviews: MswLegalReviewRow[] = [];
 
 type MswAddendumRow = {
   id: string;

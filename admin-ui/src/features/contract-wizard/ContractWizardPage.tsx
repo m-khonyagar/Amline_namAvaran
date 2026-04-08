@@ -15,10 +15,18 @@ import { signingPartiesStorage } from './storage/signingPartiesStorage';
 import { useContractStatusPolling } from './hooks/useContractStatusPolling';
 import { isMappedApiError } from '../../lib/errorMapper';
 import type { ContractStatus, ContractType, PRContractStep } from './types/wizard';
+import {
+  isAdminContractWizardFlexible,
+  isPreviewBootstrapContractId,
+  isWizardPreviewMode,
+} from './wizardPreviewMode';
+import { AdminWizardStepToolbar } from './components/AdminWizardStepToolbar';
 
 interface WizardInnerProps {
   platform: 'admin' | 'user';
   resumeContractId?: string | null;
+  wizardPreviewMode: boolean;
+  flexibleWizardNav: boolean;
 }
 
 const RESUME_UUID_RE =
@@ -46,7 +54,12 @@ function coerceContractType(t: unknown): ContractType {
   return 'PROPERTY_RENT';
 }
 
-function WizardInner({ platform, resumeContractId = null }: WizardInnerProps) {
+function WizardInner({
+  platform,
+  resumeContractId = null,
+  wizardPreviewMode,
+  flexibleWizardNav,
+}: WizardInnerProps) {
   const { state, dispatch } = useWizard();
   const idForResume = resumeContractId?.trim() ?? '';
   const resumeIdValid = RESUME_UUID_RE.test(idForResume);
@@ -397,7 +410,7 @@ function WizardInner({ platform, resumeContractId = null }: WizardInnerProps) {
             <AdminWizardStepToolbar
               contractType={state.contractType}
               currentStep={state.currentStep}
-              onJumpNext={(next) => handleStepNavigation(next)}
+              onJumpNext={(next: PRContractStep) => handleStepNavigation(next)}
             />
           ) : null}
           <StepComponent
@@ -440,10 +453,17 @@ export function ContractWizardPage({
   platform = 'user',
   resumeContractId = null,
 }: ContractWizardPageProps) {
+  const wizardPreviewMode = isWizardPreviewMode();
+  const flexibleWizardNav = isAdminContractWizardFlexible(platform);
   return (
     <WizardProvider platform={platform}>
       <WizardErrorBoundary>
-        <WizardInner platform={platform} resumeContractId={resumeContractId} />
+        <WizardInner
+          platform={platform}
+          resumeContractId={resumeContractId}
+          wizardPreviewMode={wizardPreviewMode}
+          flexibleWizardNav={flexibleWizardNav}
+        />
       </WizardErrorBoundary>
     </WizardProvider>
   );

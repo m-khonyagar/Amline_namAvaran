@@ -27,6 +27,7 @@ import { ContractWizardPage } from './features/contract-wizard/ContractWizardPag
 import type { ReactNode } from 'react'
 import { ThemeProvider } from './theme/ThemeProvider'
 import { useTheme } from './theme/useTheme'
+import LocalTestHubPage from './pages/dev/LocalTestHubPage'
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()

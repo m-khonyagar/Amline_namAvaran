@@ -2,7 +2,7 @@ import type { CrmStats, Lead, LeadActivity, LeadStatus, LeadTask } from './types
 import * as local from './crmStorage'
 import * as remote from './crmApi'
 
-function useRemote(): boolean {
+function isCrmRemoteApiEnabled(): boolean {
   if (import.meta.env.MODE === 'test') return true
   return import.meta.env.VITE_USE_CRM_API === 'true'
 }
@@ -29,7 +29,7 @@ export async function saveLeadStatus(
 
 export async function bulkSaveLeadStatus(ids: string[], status: LeadStatus): Promise<number> {
   if (ids.length === 0) return 0
-  if (useRemote()) {
+  if (isCrmRemoteApiEnabled()) {
     const results = await Promise.allSettled(
       ids.map((id) => remote.remotePatchLead(id, { status }))
     )
