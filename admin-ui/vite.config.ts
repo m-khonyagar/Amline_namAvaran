@@ -67,6 +67,12 @@ export default defineConfig(({ mode }) => {
           secure: false,
           bypass: bypassHtmlRequest,
         },
+        '/api': {
+          target: proxyTarget,
+          changeOrigin: true,
+          secure: false,
+          bypass: bypassHtmlRequest,
+        },
       },
     },
   }
