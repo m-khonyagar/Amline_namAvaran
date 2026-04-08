@@ -18,5 +18,5 @@ export async function fetchJson<T>(input: string, init?: RequestInit): Promise<T
   if (tok && !headers.has('Authorization')) {
     headers.set('Authorization', tok.startsWith('Bearer ') ? tok : `Bearer ${tok}`)
   }
-  return coreFetchJson<T>(input, { ...init, headers })
+  return coreFetchJson<T>(input, { ...init, headers, signal: init?.signal ?? undefined })
 }
