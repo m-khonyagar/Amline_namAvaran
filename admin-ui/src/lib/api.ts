@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { clearAuthCookies, notifySessionExpired } from '../auth/authSession';
 import { mapAxiosLikeError } from './errorMapper';
 import { CookieNames, getCookie } from './cookies';
 
@@ -57,5 +58,12 @@ apiClient.interceptors.request.use((config) => {
 
 apiClient.interceptors.response.use(
   (res) => res,
-  (err) => Promise.reject(mapAxiosLikeError(err))
+  (err) => {
+    const status = (err as { response?: { status?: number } })?.response?.status;
+    if (status === 401) {
+      clearAuthCookies();
+      notifySessionExpired();
+    }
+    return Promise.reject(mapAxiosLikeError(err));
+  }
 );

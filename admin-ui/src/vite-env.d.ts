@@ -3,6 +3,8 @@
 interface ImportMetaEnv {
   /** خالی = همان origin (مسیر نسبی)؛ برای dev با proxy معمولاً خالی بماند */
   readonly VITE_API_URL: string
+  /** اختیاری؛ مثلاً `/api/v1` وقتی Caddy یا API همهٔ مسیرها را زیر این پیشوند دارد */
+  readonly VITE_API_PREFIX: string
   /**
    * `false` = بدون MSW و فقط proxy به `VITE_DEV_PROXY_TARGET`
    * هر مقدار دیگر در DEV = MSW فعال (پیش‌فرض)
