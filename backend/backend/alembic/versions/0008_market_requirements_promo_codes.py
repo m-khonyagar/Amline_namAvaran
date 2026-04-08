@@ -1,6 +1,6 @@
 """market_requirements + promo_codes + seed demo rows for market feed
 
-Revision ID: 0008_market_requirements_promo_codes
+Revision ID: 0008_mkt_promo
 Revises: 0007_wizard_commission_paid
 Create Date: 2026-04-06
 """
@@ -13,7 +13,7 @@ import uuid
 import sqlalchemy as sa
 from alembic import op
 
-revision = "0008_market_requirements_promo_codes"
+revision = "0008_mkt_promo"
 down_revision = "0007_wizard_commission_paid"
 branch_labels = None
 depends_on = None
