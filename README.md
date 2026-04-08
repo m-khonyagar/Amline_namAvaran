@@ -185,4 +185,4 @@ cd amline-ui && npx playwright test
 
 ## مجوز
 
-© ۱۴۰۳ اَملاین — تمامی حقوق محفوظ است
+این مخزن تحت **MIT License** منتشر شده است. جزئیات را در فایل [LICENSE](LICENSE) ببینید.

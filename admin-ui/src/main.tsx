@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
 import { I18nProvider } from './contexts/I18nContext'
+import { AuthProvider } from './hooks/useAuth'
 import { initOptionalSentry } from './lib/optionalSentry'
 import App from './App'
 import './index.css'
@@ -35,7 +36,9 @@ enableMocking().then(() => {
       <QueryClientProvider client={queryClient}>
         <I18nProvider>
           <BrowserRouter>
-            <App />
+            <AuthProvider>
+              <App />
+            </AuthProvider>
           </BrowserRouter>
         </I18nProvider>
       </QueryClientProvider>

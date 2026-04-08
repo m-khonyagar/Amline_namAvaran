@@ -92,6 +92,9 @@ seo-dashboard/.env.local
 # Playwright / E2E (regenerated locally; do not version screenshots or traces)
 admin-ui/test-results/
 amline-ui/test-results/
+qa-amline-tests/test-results/
+playwright-report/
+*.trace.zip
 
 # QA Playwright HTML report output
 qa-amline-tests/playwright-report/
@@ -110,3 +113,8 @@ seo-dashboard-deploy.tar.gz
 
 # Offline VPN bundle (contains keys + vpn.auth; never commit)
 vpn-setup/offline-vpn-bundle/READY_TO_COPY/
+
+# Future artifact hygiene
+**/portable_runtime/
+اسناد فنی/*.zip
+اسناد فنی/*.rar
