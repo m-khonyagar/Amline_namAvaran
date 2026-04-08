@@ -28,7 +28,7 @@ export function CommissionStep({ contractId }: StepProps) {
     setIsLoading(true);
     apiClient
       .get<CommissionInvoice>(apiV1(`contracts/${contractId}/commission/invoice`))
-      .then((res) => setInvoice(res.data))
+      .then((res: { data: CommissionInvoice }) => setInvoice(res.data))
       .catch((err: unknown) => {
         const m = ensureMappedError(err);
         setError(m.message);

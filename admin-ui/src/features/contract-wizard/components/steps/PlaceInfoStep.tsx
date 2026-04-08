@@ -93,7 +93,7 @@ export function PlaceInfoStep({ contractId, contractType, onComplete }: StepProp
       const results = await Promise.all(
         files.map((f) => contractApi.uploadFile(f, 'DEED_IMAGE'))
       );
-      const ids = results.map((r) => Number(r.data.id));
+      const ids = results.map((r: { data: { id: string | number } }) => Number(r.data.id));
       setUploadedFileIds((prev) => [...prev, ...ids]);
       setUploadedFileNames((prev) => [...prev, ...files.map((f) => f.name)]);
     } catch (err: unknown) {
