@@ -46,6 +46,7 @@ class AgentConfig(BaseModel):
     llm: LLMProviderConfig = Field(default_factory=LLMProviderConfig)
     github: GitHubConfig = Field(default_factory=GitHubConfig)
     log_level: str = "INFO"
+    # Ignored by MainOrchestrator: REVIEW and TEST always run sequentially (stable workspace).
     parallel: bool = True
     workspace_dir: str = "/tmp/agent_workspace"
 

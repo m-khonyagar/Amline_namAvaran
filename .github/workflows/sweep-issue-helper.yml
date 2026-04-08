@@ -1,0 +1,60 @@
+# One-time hint on Sweep-tagged issues: legacy GitHub Sweep app is deprecated; use Copilot/Cursor/JetBrains.
+
+name: Sweep issue helper
+
+on:
+  issues:
+    types: [opened, labeled]
+
+permissions:
+  issues: write
+
+jobs:
+  post-hint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = "<!-- amline-sweep-helper-v1 -->";
+            const issue = context.payload.issue;
+            const action = context.payload.action;
+            const labelName = context.payload.label?.name;
+
+            const hasSweepLabel = issue.labels.some((l) => l.name === "sweep");
+            const titleOk = typeof issue.title === "string" && issue.title.startsWith("Sweep:");
+
+            let shouldRun = false;
+            if (action === "opened" && (hasSweepLabel || titleOk)) shouldRun = true;
+            if (action === "labeled" && labelName === "sweep") shouldRun = true;
+            if (!shouldRun) return;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              per_page: 100,
+            });
+            if (comments.some((c) => (c.body || "").includes(marker))) return;
+
+            const body = [
+              marker,
+              "### Sweep backlog — how to get a PR",
+              "",
+              "This repo keeps SSOT rules in root **`sweep.yaml`** / **`.sweep.yaml`** and documents the workflow in **`docs/SWEEP_RUNBOOK.md`**.",
+              "",
+              "**Important:** the legacy **Sweep GitHub App** that auto-opened PRs from Issues is **[deprecated](https://github.com/apps/sweep-ai-deprecated)**. Do not wait for that bot.",
+              "",
+              "**What works instead:**",
+              "- **GitHub Copilot coding agent** ([`copilot-swe-agent`](https://github.com/apps/copilot-swe-agent)) — start/assign it from the issue/PR UI so it implements the task.",
+              "- **Cursor (local)** — clone the repo, attach `sweep.yaml` + issue body as instructions.",
+              "- **JetBrains + Sweep plugin** — see [`sweepai/sweep`](https://github.com/sweepai/sweep).",
+              "",
+            ].join("\n");
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body,
+            });

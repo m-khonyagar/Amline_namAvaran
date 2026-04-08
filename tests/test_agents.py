@@ -262,3 +262,141 @@ def test_agent_state_record() -> None:
     state.record("PLAN", {"steps": ["a", "b"]})
     assert len(state.log) == 1
     assert state.log[0]["stage"] == "PLAN"
+
+
+# ── LangGraph StateGraph tests ────────────────────────────────────────────────
+
+def test_orchestrator_graph_compiles(tmp_path: Path) -> None:
+    """MainOrchestrator._graph is a compiled LangGraph StateGraph."""
+    from langgraph.graph.state import CompiledStateGraph
+
+    cfg = AgentConfig()
+    cfg.workspace_dir = str(tmp_path / "ws")
+
+    with patch("agents.llm_client.LLMClient.chat", return_value="{}"):
+        orch = MainOrchestrator(config=cfg)
+
+    assert isinstance(orch._graph, CompiledStateGraph)
+
+
+def test_orchestrator_graph_nodes(tmp_path: Path) -> None:
+    """The compiled graph contains all expected pipeline nodes."""
+    cfg = AgentConfig()
+    cfg.workspace_dir = str(tmp_path / "ws")
+
+    with patch("agents.llm_client.LLMClient.chat", return_value="{}"):
+        orch = MainOrchestrator(config=cfg)
+
+    nodes = set(orch._graph.get_graph().nodes.keys())
+    for expected in ("planning", "coding", "test_and_review", "execution", "pull_request", "halt"):
+        assert expected in nodes, f"Node '{expected}' missing from graph"
+
+
+def test_route_after_planning(tmp_path: Path) -> None:
+    from agents.main_orchestrator import WorkflowState
+
+    cfg = AgentConfig()
+    cfg.workspace_dir = str(tmp_path / "ws")
+    with patch("agents.llm_client.LLMClient.chat", return_value="{}"):
+        orch = MainOrchestrator(config=cfg)
+
+    state_no_plan: WorkflowState = {
+        "issue_number": 1,
+        "title": "",
+        "body": "",
+        "workspace_path": "/tmp",
+        "plan": None,
+        "code_result": None,
+        "files_written": [],
+        "test_result": None,
+        "review_result": None,
+        "exec_result": None,
+        "pr_result": None,
+        "errors": [],
+        "audit_log": [],
+        "review_retries": 0,
+    }
+    assert orch._route_after_planning(state_no_plan) == "halt"
+
+    mock_plan = MagicMock()
+    mock_plan.to_dict.return_value = {}
+    state_ok = {**state_no_plan, "plan": mock_plan}
+    assert orch._route_after_planning(state_ok) == "coding"
+
+
+def test_orchestrator_halts_when_planning_fails(tmp_path: Path) -> None:
+    cfg = AgentConfig()
+    cfg.workspace_dir = str(tmp_path / "ws")
+    orch = MainOrchestrator(config=cfg)
+    with patch.object(orch.planner, "plan", side_effect=RuntimeError("LLM down")):
+        report = orch.run(issue_number=77, title="x", body="y")
+
+    assert any("PLAN failed" in e for e in report["errors"])
+    assert report["plan"] is None
+    assert report["code"] is None
+    assert report["tests"] is None
+    assert report["review"] is None
+    assert report["execution"] is None
+    assert report["pr"] is None
+
+
+def test_orchestrator_parallel_mode(tmp_path: Path) -> None:
+    """cfg.parallel is legacy; graph always runs REVIEW then TEST sequentially."""
+    cfg = AgentConfig()
+    cfg.workspace_dir = str(tmp_path / "ws")
+    cfg.parallel = True
+
+    with patch("agents.llm_client.LLMClient.chat", return_value="{}"):
+        orch = MainOrchestrator(config=cfg)
+        report = orch.run(issue_number=50, title="Parallel test", body="")
+
+    assert report["issue"] == 50
+    for key in ("tests", "review"):
+        assert key in report
+
+
+def test_orchestrator_sequential_mode(tmp_path: Path) -> None:
+    """Full report shape unchanged when parallel flag is False (legacy)."""
+    cfg = AgentConfig()
+    cfg.workspace_dir = str(tmp_path / "ws")
+    cfg.parallel = False
+
+    with patch("agents.llm_client.LLMClient.chat", return_value="{}"):
+        orch = MainOrchestrator(config=cfg)
+        report = orch.run(issue_number=51, title="Sequential test", body="")
+
+    assert report["issue"] == 51
+    for key in ("issue", "title", "plan", "code", "tests", "review", "execution", "pr", "errors"):
+        assert key in report
+
+
+def test_orchestrator_review_retry_routing(tmp_path: Path) -> None:
+    """When REVIEW rejects code, the orchestrator retries coding up to the limit."""
+    from agents.main_orchestrator import WorkflowState, _MAX_REVIEW_RETRIES
+
+    cfg = AgentConfig()
+    cfg.workspace_dir = str(tmp_path / "ws")
+
+    with patch("agents.llm_client.LLMClient.chat", return_value="{}"):
+        orch = MainOrchestrator(config=cfg)
+
+    # Simulate a state where review rejected with retries remaining
+    from agents.review_agent import ReviewResult
+    mock_review = ReviewResult(approved=False, comments=["needs work"], summary="rejected")
+    state_retry: WorkflowState = {
+        "issue_number": 1, "title": "", "body": "", "workspace_path": "/tmp",
+        "plan": None, "code_result": None, "files_written": [],
+        "test_result": None, "review_result": mock_review,
+        "exec_result": None, "pr_result": None,
+        "errors": [], "audit_log": [], "review_retries": 1,
+    }
+    assert orch._route_after_review(state_retry) == "coding"
+
+    # Once retries reach the max, route to execution
+    state_done: WorkflowState = {**state_retry, "review_retries": _MAX_REVIEW_RETRIES}
+    assert orch._route_after_review(state_done) == "execution"
+
+    # Approved review always routes to execution
+    mock_approved = ReviewResult(approved=True, summary="looks good")
+    state_approved: WorkflowState = {**state_retry, "review_result": mock_approved}
+    assert orch._route_after_review(state_approved) == "execution"
