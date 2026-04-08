@@ -13,7 +13,7 @@ import uuid
 import sqlalchemy as sa
 from alembic import op
 
-revision = "0008_market_requirements_promo_codes"
+revision = "0008_market_promo"
 down_revision = "0007_wizard_commission_paid"
 branch_labels = None
 depends_on = None
