@@ -254,7 +254,8 @@ def upgrade() -> None:
             'visits',
             sa.Column('id', sa.String(length=36), nullable=False),
             sa.Column('listing_id', sa.String(length=36), nullable=True),
-            sa.Column('crm_lead_id', sa.String(length=36), nullable=True),
+            # crm_leads.id is UUID (0004_wizard_crm_roles); VARCHAR FK fails on PostgreSQL
+            sa.Column('crm_lead_id', sa.Uuid(), nullable=True),
             sa.Column('scheduled_at', sa.DateTime(timezone=True), nullable=True),
             sa.Column('completed_at', sa.DateTime(timezone=True), nullable=True),
             sa.Column('status', sa.Enum('REQUESTED', 'SCHEDULED', 'COMPLETED', 'NO_SHOW', 'CANCELLED', name='visitstatus', native_enum=False, length=32), nullable=False),
