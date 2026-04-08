@@ -10,6 +10,7 @@ RUN set -eux; \
       sed -i 's|https://security.debian.org/debian-security|http://mirror.arvancloud.ir/debian-security|g' "$f" || true; \
       sed -i 's|http://security.debian.org/debian-security|http://mirror.arvancloud.ir/debian-security|g' "$f" || true; \
     done
+RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/99mirror-stale-ok
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

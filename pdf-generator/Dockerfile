@@ -14,6 +14,7 @@ RUN set -eux; \
       sed -i 's|https://security.debian.org/debian-security|http://mirror.arvancloud.ir/debian-security|g' "$f" || true; \
       sed -i 's|http://security.debian.org/debian-security|http://mirror.arvancloud.ir/debian-security|g' "$f" || true; \
     done
+RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/99mirror-stale-ok
 
 # Install system dependencies for WeasyPrint
 RUN apt-get update && apt-get install -y \
