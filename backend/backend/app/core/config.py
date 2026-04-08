@@ -21,10 +21,19 @@ def _int(name: str, default: int) -> int:
         return default
 
 
+_jwt_secret_raw = (os.getenv("AMLINE_JWT_SECRET") or "").strip()
+
+
 @dataclass(frozen=True)
 class Settings:
     env: str = os.getenv("AMLINE_ENV", "dev")
     redis_url: str = os.getenv("AMLINE_REDIS_URL", "redis://localhost:6379/0")
+
+    jwt_secret: str = (
+        _jwt_secret_raw
+        if _jwt_secret_raw
+        else "dev-insecure-secret-minimum-32-characters-long!!"
+    )
 
     jwt_access_minutes: int = _int("AMLINE_JWT_ACCESS_MINUTES", 60)
     jwt_refresh_days: int = _int("AMLINE_JWT_REFRESH_DAYS", 30)
