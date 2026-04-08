@@ -20,7 +20,8 @@ from app.models.tenant_score_event import TenantScoreEvent  # noqa: F401
 from app.models.arbitration_message import ArbitrationMessage  # noqa: F401
 from app.models.arbitration_attachment import ArbitrationAttachment  # noqa: F401
 from app.models.contract_wizard import WizardContract  # noqa: F401
-from app.models.crm_lead import CrmLead, CrmActivity, CrmTask  # noqa: F401
+from app.models.crm import CrmActivity, CrmLead  # noqa: F401
+from app.models.crm_lead import CrmTask  # noqa: F401
 from app.models.role import Role  # noqa: F401
 from app.models.consultant_profile import ConsultantProfile  # noqa: F401
 from app.models.market_requirement import MarketRequirement, PromoCode  # noqa: F401

@@ -3,6 +3,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.routes import admin_panel
 from app.api.v1.router import platform_router
 from app.core.errors import register_exception_handlers, register_request_id_middleware
 from app.core.i18n_middleware import register_i18n
@@ -49,6 +50,10 @@ register_opentelemetry(app)
 
 # Canonical API (Master Spec v3): /api/v1/*
 app.include_router(platform_router, prefix="/api/v1")
+
+# DB-backed admin CRM (leads, tasks, activities, stats). Must be registered before the
+# root platform_router mount so `/admin/crm/*` hits SQLAlchemy, not the in-memory crm_routes.
+app.include_router(admin_panel.router, prefix="/admin", tags=["admin-panel"])
 
 # Legacy paths identical to dev-mock-api (frontend proxy unchanged until migration)
 app.include_router(platform_router, prefix="")

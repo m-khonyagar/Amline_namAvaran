@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user
 from app.db.session import get_db
 from app.models.consultant_profile import ConsultantProfile
-from app.models.crm_lead import CrmLead
+from app.models.crm import CrmLead
 from app.models.user import User, UserRole
 from app.services import auth_tokens
 from app.services.otp import generate_code, store_otp, verify_otp

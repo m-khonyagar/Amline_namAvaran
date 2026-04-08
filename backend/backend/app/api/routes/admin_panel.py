@@ -15,7 +15,8 @@ from app.api.deps import get_current_user
 from app.db.session import get_db
 from app.models.audit_log import AuditLog
 from app.models.contract_wizard import WizardContract
-from app.models.crm_lead import CrmActivity, CrmLead, CrmTask
+from app.models.crm import CrmActivity, CrmActivityType, CrmLead, CrmLeadSource
+from app.models.crm_lead import CrmTask
 from app.models.notification import Notification
 from app.models.role import Role
 from app.models.user import User, UserRole
@@ -436,6 +437,7 @@ class CrmActivityBody(BaseModel):
 
 
 def _lead_out(lead: CrmLead) -> Dict[str, Any]:
+    src = lead.source
     return {
         "id": str(lead.id),
         "full_name": lead.full_name,
@@ -445,6 +447,7 @@ def _lead_out(lead: CrmLead) -> Dict[str, Any]:
         "notes": lead.notes,
         "assigned_to": lead.assigned_to,
         "contract_id": lead.contract_id,
+        "source": src.value if hasattr(src, "value") else str(src),
         "created_at": lead.created_at.isoformat(),
         "updated_at": (lead.updated_at or lead.created_at).isoformat(),
     }
@@ -473,6 +476,7 @@ def crm_lead_create(
         notes=body.notes or "",
         assigned_to=body.assigned_to,
         contract_id=body.contract_id,
+        source=CrmLeadSource.MANUAL,
     )
     db.add(lead)
     log = AuditLog(user_id=str(user.id), action="crm.lead.create")
@@ -492,7 +496,7 @@ def crm_lead_get(
         lid = uuid.UUID(lead_id)
     except ValueError:
         raise HTTPException(status_code=422, detail="invalid_lead_id")
-    lead = db.get(CrmLead, lid)
+    lead = db.get(CrmLead, str(lid))
     if not lead:
         raise HTTPException(status_code=404, detail="not_found")
     return _lead_out(lead)
@@ -509,7 +513,7 @@ def crm_lead_patch(
         lid = uuid.UUID(lead_id)
     except ValueError:
         raise HTTPException(status_code=422, detail="invalid_lead_id")
-    lead = db.get(CrmLead, lid)
+    lead = db.get(CrmLead, str(lid))
     if not lead:
         raise HTTPException(status_code=404, detail="not_found")
     for field, val in body.model_dump(exclude_none=True).items():
@@ -538,7 +542,7 @@ def crm_activities_list(
         {
             "id": str(a.id),
             "lead_id": a.lead_id,
-            "type": a.type,
+            "type": a.type.value if hasattr(a.type, "value") else str(a.type),
             "note": a.note,
             "content": a.note,
             "user_id": a.user_id,
@@ -556,9 +560,13 @@ def crm_activity_create(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    try:
+        atype = CrmActivityType(body.type)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="invalid_activity_type") from exc
     act = CrmActivity(
         lead_id=lead_id,
-        type=body.type,
+        type=atype,
         note=body.note or "",
         user_id=body.user_id or str(user.id),
     )
@@ -568,7 +576,7 @@ def crm_activity_create(
     return {
         "id": str(act.id),
         "lead_id": act.lead_id,
-        "type": act.type,
+        "type": act.type.value,
         "note": act.note,
         "content": act.note,
         "user_id": act.user_id,
@@ -589,7 +597,7 @@ def crm_lead_delete(
         lid = uuid.UUID(lead_id)
     except ValueError:
         raise HTTPException(status_code=422, detail="invalid_lead_id")
-    lead = db.get(CrmLead, lid)
+    lead = db.get(CrmLead, str(lid))
     if not lead:
         raise HTTPException(status_code=404, detail="not_found")
     db.delete(lead)
