@@ -9,8 +9,8 @@ uploaded with `git archive` from this machine (no secrets in the tarball).
 Python wheels are downloaded on the VPS with `pip download` (host network),
 then Docker builds use `pip install --no-index` (no PyPI inside the build container).
 
-Env (required): DEPLOY_HOST, DEPLOY_PASSWORD
-Optional: DEPLOY_USER (default root), AMLINE_REPO_ROOT (default: monorepo root)
+Env (required): DEPLOY_HOST, and either DEPLOY_PASSWORD or DEPLOY_SSH_KEY (path to private key)
+Optional: DEPLOY_USER (default root), DEPLOY_SSH_KEY_PASSPHRASE, AMLINE_REPO_ROOT (default: monorepo root)
 """
 from __future__ import annotations
 
@@ -199,6 +199,23 @@ docker compose ps
 '''
 
 
+def _load_deploy_private_key(path: str) -> paramiko.PKey:
+    expanded = os.path.expanduser(path.strip())
+    if not expanded or not os.path.isfile(expanded):
+        raise FileNotFoundError(f"SSH private key not found: {path}")
+    pp = os.environ.get("DEPLOY_SSH_KEY_PASSPHRASE") or None
+    for key_cls in (
+        paramiko.Ed25519Key,
+        paramiko.RSAKey,
+        paramiko.ECDSAKey,
+    ):
+        try:
+            return key_cls.from_private_key_file(expanded, password=pp)
+        except paramiko.SSHException:
+            continue
+    raise paramiko.SSHException(f"Unsupported or invalid private key: {expanded}")
+
+
 def _run_remote(
     client: paramiko.SSHClient, script: str, timeout: int = 3600
 ) -> int:
@@ -256,11 +273,16 @@ def main() -> int:
     host = os.environ.get("DEPLOY_HOST", "").strip()
     user = os.environ.get("DEPLOY_USER", "root").strip()
     password = os.environ.get("DEPLOY_PASSWORD", "")
+    key_path = os.environ.get("DEPLOY_SSH_KEY", "").strip()
+    key_file = os.path.expanduser(key_path) if key_path else ""
     repo_root = Path(
         os.environ.get("AMLINE_REPO_ROOT", str(REPO_ROOT_DEFAULT))
     ).resolve()
-    if not host or not password:
-        print("Set DEPLOY_HOST and DEPLOY_PASSWORD", file=sys.stderr)
+    if not host or (not password and not (key_file and os.path.isfile(key_file))):
+        print(
+            "Set DEPLOY_HOST and (DEPLOY_PASSWORD or DEPLOY_SSH_KEY)",
+            file=sys.stderr,
+        )
         return 2
     if not (repo_root / "docker-compose.yml").is_file():
         print(f"Invalid AMLINE_REPO_ROOT: {repo_root}", file=sys.stderr)
@@ -268,14 +290,18 @@ def main() -> int:
 
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(
-        host,
-        username=user,
-        password=password,
-        timeout=120,
-        allow_agent=False,
-        look_for_keys=False,
-    )
+    connect_kw: dict = {
+        "hostname": host,
+        "username": user,
+        "timeout": 120,
+        "allow_agent": False,
+        "look_for_keys": False,
+    }
+    if key_file and os.path.isfile(key_file):
+        connect_kw["pkey"] = _load_deploy_private_key(key_path)
+    else:
+        connect_kw["password"] = password
+    client.connect(**connect_kw)
     transport = client.get_transport()
     if transport:
         transport.set_keepalive(30)
