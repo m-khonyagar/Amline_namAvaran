@@ -109,18 +109,19 @@ fi
 
 echo "=== pip download on server (wheels for offline Docker pip) ==="
 apt-get install -y python3-pip python3-venv python3-full
+cat > /tmp/amline-pip.conf <<'AMLPIPEOF'
+[global]
+index-url = https://pypi.tuna.tsinghua.edu.cn/simple
+trusted-host = pypi.tuna.tsinghua.edu.cn
+trusted-host = files.pythonhosted.org
+AMLPIPEOF
+export PIP_CONFIG_FILE=/tmp/amline-pip.conf
 python3 -m venv /tmp/amline-pip-venv
-/tmp/amline-pip-venv/bin/pip install -q -U pip setuptools wheel \
-  --index-url https://pypi.tuna.tsinghua.edu.cn/simple \
-  --trusted-host pypi.tuna.tsinghua.edu.cn \
-  --trusted-host files.pythonhosted.org
+/tmp/amline-pip-venv/bin/python -m pip install -q -U pip setuptools wheel
 mkdir -p backend/backend/docker-build-wheelhouse pdf-generator/docker-build-wheelhouse
 find backend/backend/docker-build-wheelhouse -mindepth 1 -delete 2>/dev/null || true
 find pdf-generator/docker-build-wheelhouse -mindepth 1 -delete 2>/dev/null || true
-/tmp/amline-pip-venv/bin/pip download \
-  --index-url https://pypi.tuna.tsinghua.edu.cn/simple \
-  --trusted-host pypi.tuna.tsinghua.edu.cn \
-  --trusted-host files.pythonhosted.org \
+/tmp/amline-pip-venv/bin/python -m pip download \
   -r backend/backend/requirements.txt \
   -r pdf-generator/requirements.txt \
   -d backend/backend/docker-build-wheelhouse
@@ -219,6 +220,8 @@ def _load_deploy_private_key(path: str) -> paramiko.PKey:
 def _run_remote(
     client: paramiko.SSHClient, script: str, timeout: int = 3600
 ) -> int:
+    # Windows CRLF breaks bash backslash-continuation in embedded REMOTE_* scripts
+    script = script.replace("\r\n", "\n")
     stdin, stdout, stderr = client.exec_command(script, timeout=timeout)
     for line in iter(stdout.readline, ""):
         if isinstance(line, bytes):
