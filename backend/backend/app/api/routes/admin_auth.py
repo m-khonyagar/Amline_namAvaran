@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.db.session import get_db
-from app.models.audit_log import AuditLog
+from app.models.audit_log import AuditLogEntry
 from app.models.user import User, UserRole
 from app.services import auth_tokens
 from app.services.magic_otp import is_magic_mobile, magic_otp_code
@@ -89,7 +89,9 @@ def admin_login(body: LoginBody, db: Session = Depends(get_db)):
     if settings.bootstrap_admin_mobile and body.mobile == settings.bootstrap_admin_mobile:
         user.role = UserRole.admin
 
-    log = AuditLog(user_id=str(user.id), action="auth.login")
+    log = AuditLogEntry(
+        user_id=str(user.id), action="auth.login", entity="session", metadata_json=None
+    )
     db.add(log)
     db.commit()
 

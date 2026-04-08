@@ -3,6 +3,7 @@
 from fastapi import APIRouter
 
 from app.api.routes import (
+    admin_auth as legacy_admin_auth,
     arbitrations as legacy_arbitrations,
     arbitration_summary as legacy_arbitration_summary,
     auth as legacy_auth_otp,
@@ -47,6 +48,8 @@ from app.api.v1 import (
 
 platform_router = APIRouter()
 platform_router.include_router(health_routes.router)
+# DB-backed /admin/login + /admin/otp/send (must precede auth_routes memory stubs)
+platform_router.include_router(legacy_admin_auth.router, prefix="/admin", tags=["admin-auth"])
 platform_router.include_router(auth_routes.router)
 # DB-backed auth + domain routes (same as app.api.router legacy mount) for root /api/v1 parity tests
 platform_router.include_router(legacy_auth_otp.router, prefix="/auth")
