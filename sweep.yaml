@@ -1,0 +1,102 @@
+# Sweep AI — Amline_namAvaran (canonical; GitHub App reads this path only)
+# Duplicate: `.sweep.yaml` — keep identical.
+
+gha_enabled: true
+branch: main
+draft: false
+
+description: >
+  Amline_namAvaran: FastAPI backend in backend/backend (/api/v1), admin-ui (Vite), amline-ui (Next),
+  site, dev-mock-api fallback. SSOT: Amline Complete Product Master Specification v2.0 (product) plus
+  in-repo docs/AMLINE_MASTER_SPEC.md, docs/ARCHITECTURE_CONTRACT_PLATFORM_PRODUCTION.md,
+  docs/FRONTEND_API_INTEGRATION.md. GitHub backlog for Sweep: Issues labeled `sweep` and/or title prefix
+  `Sweep:` — especially epic #19 and contract issues #9–#18. Each issue lists Objective, Scope, SSOT
+  Alignment, Acceptance Criteria. Implement end-to-end with tests, fix CI, structured commits, and
+  merge-ready PRs to main. Prefer multi-file changes when the issue spans API + UI + tests.
+
+repo_intelligence:
+  enable_dependency_graph: true
+  enable_cross_service_mapping: true
+  enable_contract_model_awareness: true
+  enable_frontend_backend_coupling_awareness: true
+  enable_temporal_workflow_awareness: true
+  enable_audit_immutability_rules: true
+
+product_spec_enforcement:
+  contract_types:
+    - RENT
+    - SALE
+    - EXCHANGE
+    - CONSTRUCTION
+    - PRE_SALE
+    - LEASE_TO_OWN
+  flows:
+    signatures: [S1, S2, S3, S4, S5]
+    payments: [P1, P2, P3, P4]
+    combined: [T1]
+  domain_services:
+    - Auth
+    - Listing
+    - CRM
+    - Visit
+    - Contract
+    - Payment
+    - Billing
+    - ML Pricing
+    - Temporal
+    - Matrix
+    - Audit
+  rules:
+    - Contract model must remain unified across all services.
+    - Party model must support natural/legal entities per SSOT.
+    - Signature flows S1–S5 and payment flows P1–P4 and T1 must align with SSOT §4.2–4.4.
+    - No service may violate domain boundaries; audit/ledger append-only semantics.
+
+agent_behavior:
+  multi_file_edits: true
+  multi_service_edits: true
+  refactor_across_modules: true
+  detect_architecture_violations: true
+  enforce_business_rules: true
+  auto_generate_tests: true
+  auto_update_docs: true
+  auto_fix_inconsistencies: true
+  prefer_backward_compatible_changes: true
+  commit_style: structured
+
+rules:
+  - "TRIGGER: Implement work requested in GitHub Issues that have label `sweep` OR title starting with `Sweep:` (case-sensitive prefix). Read the full issue body including Objective, Scope, SSOT Alignment, Acceptance Criteria, Notes."
+  - "BACKLOG: Cross-reference epic #19 and child issues #9–#18 for SSOT v2.0 execution order; do not duplicate closed work—check existing PRs and main first."
+  - "DELIVERABLES: Open a PR to `main` with production-quality code; add/update pytest and frontend tests where applicable; ensure CI passes or document blockers in the PR."
+  - "CONTRACTS: Support canonical kinds RENT, SALE, EXCHANGE, CONSTRUCTION, PRE_SALE, LEASE_TO_OWN and SSOT Party roles, terms, commission, external_refs when touching contract code."
+  - "API: Use /api/v1 patterns and ErrorResponse; no secrets in code; preserve RBAC and idempotent payment patterns."
+  - "If an issue is too large, split into follow-up `Sweep:` issues in the same PR description and still land the agreed slice."
+
+blocked_dirs:
+  - node_modules/
+  - .next/
+  - dist/
+  - build/
+  - coverage/
+  - .venv/
+  - venv/
+
+include_exts:
+  - ".py"
+  - ".md"
+  - ".txt"
+  - ".ts"
+  - ".tsx"
+  - ".js"
+  - ".jsx"
+  - ".mjs"
+  - ".yaml"
+  - ".yml"
+  - ".json"
+  - ".sql"
+
+docs:
+  master_spec: docs/AMLINE_MASTER_SPEC.md
+  frontend_api: docs/FRONTEND_API_INTEGRATION.md
+  architecture_contract: docs/ARCHITECTURE_CONTRACT_PLATFORM_PRODUCTION.md
+  sweep_runbook: docs/SWEEP_RUNBOOK.md
