@@ -5,6 +5,7 @@ import { consultantPlatformHandlers } from './consultantPlatformHandlers'; // se
 import { workspaceOrgHandlers } from './workspaceOrgHandlers';
 import { hamgitPortHandlers } from './hamgitPortHandlers';
 import { crmHandlers } from './crmHandlers';
+import { planeHandlers } from './planeHandlers';
 
 // ---- Mock user & shared fixtures ----
 const MSW_FULL_PERMS = [
@@ -29,6 +30,8 @@ const MSW_FULL_PERMS = [
   'consultants:write',
   'workspace:read',
   'workspace:write',
+  'plane:read',
+  'plane:write',
 ];
 
 const mockUser = {
@@ -918,4 +921,6 @@ export const handlers = [
   ...workspaceOrgHandlers(),
 
   ...hamgitPortHandlers(),
+
+  ...planeHandlers(),
 ];

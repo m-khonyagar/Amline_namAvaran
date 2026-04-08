@@ -47,4 +47,11 @@ export const APP_NAV_ITEMS: NavItemConfig[] = [
     permission: 'settings:read',
     featureFlag: 'HAMGIT_PORT',
   },
+  {
+    to: '/admin/plane',
+    label: 'تسک — Plane.so',
+    icon: '✈️',
+    permission: 'plane:read',
+    featureFlag: 'PLANE_INTEGRATION',
+  },
 ]

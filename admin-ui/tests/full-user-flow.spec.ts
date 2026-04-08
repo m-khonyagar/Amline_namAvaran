@@ -30,7 +30,7 @@ test('فلو ۱: ورود به سیستم و مشاهده داشبورد', async
 
   // بررسی فرم login
   await expect(page.getByPlaceholder(/0912/)).toBeVisible();
-  await expect(page.getByRole('button', { name: /ارسال کد/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'ارسال کد تأیید' })).toBeVisible();
   await screenshot(page, '01-login-page');
 
   // ورود آزمایشی
