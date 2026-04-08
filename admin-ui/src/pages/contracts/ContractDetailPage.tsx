@@ -38,6 +38,8 @@ const PARTY_TYPE_LABELS: Record<string, string> = {
   TENANT: 'مستأجر',
 }
 
+type PartySummary = { id: string; party_type: string; person_type: string }
+
 function StatusBadge({ status }: { status: ContractStatus }) {
   const colorClass =
     status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
@@ -113,7 +115,7 @@ export default function ContractDetailPage() {
     )
   }
 
-  const allParties = Object.values(contract.parties).flat()
+  const allParties = Object.values(contract.parties).flat() as PartySummary[]
 
   return (
     <div dir="rtl" className="p-6">
