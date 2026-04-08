@@ -7,7 +7,9 @@ from app.api.routes import (
     arbitration_summary as legacy_arbitration_summary,
     auth as legacy_auth_otp,
     contracts as legacy_contracts_v2,
+    payments as legacy_payments,
     properties as legacy_properties,
+    tenant_score as legacy_tenant_score,
     users as legacy_users,
     wallet as legacy_wallet,
 )
@@ -54,6 +56,8 @@ platform_router.include_router(legacy_contracts_v2.router, prefix="/contracts-v2
 platform_router.include_router(legacy_arbitrations.router, prefix="/arbitrations")
 platform_router.include_router(legacy_arbitration_summary.router, prefix="/arbitrations")
 platform_router.include_router(legacy_wallet.router, prefix="/wallet")
+platform_router.include_router(legacy_payments.router, prefix="/payments")
+platform_router.include_router(legacy_tenant_score.router, prefix="/tenant-score")
 platform_router.include_router(contracts_routes.router)
 platform_router.include_router(dispute_routes.router)
 platform_router.include_router(misc_routes.router)

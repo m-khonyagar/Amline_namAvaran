@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import time
 import uuid
 
@@ -43,16 +44,26 @@ def enqueue_notification(*, notification_id: uuid.UUID, attempt: int = 0, visibl
 
     visible_at_ms: if set, worker should not process until now_ms() >= visible_at_ms.
     """
-    r = get_redis()
-    ensure_group(r)
-    payload = {
-        "notification_id": str(notification_id),
-        "attempt": str(int(attempt)),
-    }
-    if visible_at_ms is not None:
-        payload["visible_at_ms"] = str(int(visible_at_ms))
-    msg_id = r.xadd(STREAM_KEY, payload)
-    return msg_id
+    if os.getenv("AMLINE_SKIP_NOTIFICATION_QUEUE", "").strip() in ("1", "true", "yes"):
+        return ""
+
+    try:
+        r = get_redis()
+        ensure_group(r)
+        payload = {
+            "notification_id": str(notification_id),
+            "attempt": str(int(attempt)),
+        }
+        if visible_at_ms is not None:
+            payload["visible_at_ms"] = str(int(visible_at_ms))
+        return r.xadd(STREAM_KEY, payload)
+    except redis.exceptions.ConnectionError:
+        return ""
+    except redis.exceptions.ResponseError as e:
+        err = str(e).lower()
+        if "unknown command" in err or "wrong number of arguments" in err:
+            return ""
+        raise
 
 
 def enqueue_dlq(*, notification_id: uuid.UUID, reason: str, attempt: int) -> str:
