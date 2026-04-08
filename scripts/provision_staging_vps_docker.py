@@ -108,12 +108,13 @@ else
 fi
 
 echo "=== pip download on server (wheels for offline Docker pip) ==="
-apt-get install -y python3-pip python3-venv
-python3 -m pip install -q -U pip setuptools wheel
+apt-get install -y python3-pip python3-venv python3-full
+python3 -m venv /tmp/amline-pip-venv
+/tmp/amline-pip-venv/bin/pip install -q -U pip setuptools wheel
 mkdir -p backend/backend/docker-build-wheelhouse pdf-generator/docker-build-wheelhouse
 find backend/backend/docker-build-wheelhouse -mindepth 1 -delete 2>/dev/null || true
 find pdf-generator/docker-build-wheelhouse -mindepth 1 -delete 2>/dev/null || true
-python3 -m pip download \
+/tmp/amline-pip-venv/bin/pip download \
   --index-url https://pypi.tuna.tsinghua.edu.cn/simple \
   --trusted-host pypi.tuna.tsinghua.edu.cn \
   --trusted-host files.pythonhosted.org \
