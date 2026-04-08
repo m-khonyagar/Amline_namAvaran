@@ -69,7 +69,7 @@ export default function LeadsPage() {
         />
       ) : (
         <ul className="space-y-3">
-          {items.map((l) => (
+          {items.map((l: Lead) => (
             <li
               key={l.id}
               className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--amline-radius-lg)] border border-[var(--amline-border)] bg-[var(--amline-surface)] p-4 shadow-[var(--amline-shadow-sm)] dark:border-slate-700"
