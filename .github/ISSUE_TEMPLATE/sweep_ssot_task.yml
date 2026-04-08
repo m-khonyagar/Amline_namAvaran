@@ -1,0 +1,51 @@
+name: Sweep SSOT task
+description: SSOT v2.0 task (label `sweep` + title prefix `Sweep:`) — use Copilot agent or Cursor per runbook.
+title: "Sweep: "
+labels:
+  - sweep
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Automation:** `sweep.yaml` on `main` defines rules for agents. The legacy Sweep **GitHub App** is deprecated — use **GitHub Copilot coding agent** or **Cursor** (see `docs/SWEEP_RUNBOOK.md`).  
+        Title must start with `Sweep:` (pre-filled). Label **`sweep`** should be applied (this template adds it).
+
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: What outcome is required?
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Backend, admin-ui, amline-ui, tests, docs — be specific.
+    validations:
+      required: true
+
+  - type: textarea
+    id: ssot
+    attributes:
+      label: SSOT Alignment
+      description: Section references (e.g. SSOT v2.0 §3.2 Party model) or link to in-repo docs.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: Checklist (tests, CI, API shape).
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Dependencies, related issues (#19 epic, #9–#18), feature flags.
+    validations:
+      required: false
