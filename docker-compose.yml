@@ -161,8 +161,8 @@ services:
   # ==================== Frontend Applications ====================
   admin-ui:
     build:
-      context: ./admin-ui
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: admin-ui/Dockerfile
       args:
         # برای استیجینگ عمومی: https://amline-backend-staging.darkube.app — برای لوکال خالی بگذارید تا nginx/paths نسبی
         VITE_API_URL: ${VITE_STAGING_API_URL:-}
@@ -194,11 +194,11 @@ services:
 
   site:
     build:
-      context: ./site
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: site/Dockerfile
     container_name: amline-site
     environment:
-      - NEXT_PUBLIC_API_BASE_URL=http://backend
+      - NEXT_PUBLIC_API_BASE_URL=http://backend:8000
     ports:
       - "3001:80"
     depends_on:
