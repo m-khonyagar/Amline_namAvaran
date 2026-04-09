@@ -4,6 +4,18 @@
 
 ## سریع‌ترین مسیر (Windows)
 
+### پنل ادمین + mock (برای تست سریع در مرورگر)
+
+از ریشهٔ ریپو (اگر روی `:8080` قبلاً mock ندارید، خودش یک پنجره باز می‌کند):
+
+```powershell
+npm run local:admin
+```
+
+سپس: **http://localhost:3002/login** — ورود آزمایشی از دکمهٔ «ورود آزمایشی» با `admin-ui/.env.development`؛ یا OTP جادویی mock با شمارهٔ پیش‌فرض و کد زیر.
+
+### پنل کاربر (Next) + mock
+
 از ریشهٔ ریپو:
 
 ```powershell
@@ -16,9 +28,9 @@ powershell -ExecutionPolicy Bypass -File .\scripts\dev-user-stack.ps1
 
 ### ورود یکدست (mock و backend dev/staging)
 
-- **موبایل:** `09100000000`
+- **موبایل (پیش‌فرض dev-mock-api):** `09107709601` (یا مقدار `AMLINE_OTP_MAGIC_MOBILE`)
 - **کد OTP:** `11111`  
-روی **dev-mock-api** فقط همین جفت پذیرفته می‌شود. روی **backend** واقعی این OTP برای همان شماره در `env` های `dev` و `staging` فعال است؛ در `production` فقط اگر `AMLINE_FIXED_TEST_OTP_ENABLED=true` بگذارید.
+روی **dev-mock-api** فقط همین جفت «جادویی» پذیرفته می‌شود (مگر `AMLINE_OTP_MAGIC_ENABLED=0`). روی **backend** واقعی این OTP برای همان شماره در `env` های `dev` و `staging` فعال است؛ در `production` فقط اگر `AMLINE_FIXED_TEST_OTP_ENABLED=true` بگذارید.
 
 ## دستی
 

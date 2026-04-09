@@ -29,6 +29,7 @@
 ```powershell
 npm ci
 # در صورت نبودن dist، دستورات dev خودکار @amline/ui-core را بیلد می‌کنند (ensure-ui-core)
+npm run local:admin     # پیشنهاد تست سریع: بالا آوردن mock :8080 (در صورت نیاز) + ادمین http://localhost:3002
 npm run dev:admin       # http://localhost:3002
 npm run dev:app         # http://localhost:3000
 npm run dev:consultant  # http://localhost:3004
