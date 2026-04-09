@@ -18,6 +18,7 @@ build/
 .turbo/
 
 # Python
+.hypothesis/
 __pycache__/
 *.py[cod]
 *$py.class

@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.repositories.v1.p1_repositories import GeoRepository
 
-router = APIRouter(tags=["reference-data", "files", "financials"])
+router = APIRouter(tags=["reference-data", "files"])
 
 
 @router.get("/provinces/cities")
@@ -44,22 +44,7 @@ def provinces(db: Session = Depends(get_db)) -> List[Dict[str, Any]]:
     ]
 
 
-@router.get("/financials/wallets")
-def wallets(user_id: str = "mock-001", db: Session = Depends(get_db)) -> dict:
-    from app.repositories.v1.p1_repositories import WalletRepository
-
-    repo = WalletRepository(db)
-    acct = repo.get_or_create_account(user_id)
-    bal = repo.balance_cents(acct.id)
-    db.commit()
-    return {
-        "id": acct.id,
-        "credit": bal,
-        "user_id": user_id,
-        "status": "ACTIVE",
-        "currency": acct.currency,
-    }
-
+# GET /financials/wallets is served by legacy financials router (platform_router).
 
 @router.post("/files/upload", status_code=201)
 def files_upload() -> dict:

@@ -7,7 +7,9 @@ from app.api.routes import (
     arbitrations as legacy_arbitrations,
     arbitration_summary as legacy_arbitration_summary,
     auth as legacy_auth_otp,
+    contract_wizard as legacy_contract_wizard,
     contracts as legacy_contracts_v2,
+    financials as legacy_financials,
     payments as legacy_payments,
     properties as legacy_properties,
     tenant_score as legacy_tenant_score,
@@ -61,6 +63,9 @@ platform_router.include_router(legacy_arbitration_summary.router, prefix="/arbit
 platform_router.include_router(legacy_wallet.router, prefix="/wallet")
 platform_router.include_router(legacy_payments.router, prefix="/payments")
 platform_router.include_router(legacy_tenant_score.router, prefix="/tenant-score")
+platform_router.include_router(legacy_financials.router, prefix="/financials")
+# WizardContract flows (DB); prefix avoids clashing with SSOT /contracts/* on contracts_routes
+platform_router.include_router(legacy_contract_wizard.router, prefix="/wizard", tags=["contract-wizard"])
 platform_router.include_router(contracts_routes.router)
 platform_router.include_router(dispute_routes.router)
 platform_router.include_router(misc_routes.router)

@@ -103,16 +103,16 @@ def test_wizard_commission_paid_from_wallet_when_balance_sufficient():
         r = client.post("/wallet/deposit", headers=h, json={"amount": 6_000_000})
         assert r.status_code == 200
         r = client.post(
-            "/contracts/start",
+            "/wizard/start",
             headers=h,
             json={"contract_type": "PROPERTY_RENT", "party_type": "LANDLORD"},
         )
         assert r.status_code == 201
         cid = r.json()["id"]
-        inv_before = client.get(f"/contracts/{cid}/commission/invoice", headers=h).json()
+        inv_before = client.get(f"/wizard/{cid}/commission/invoice", headers=h).json()
         expected_fee = float(inv_before.get("total_amount", 5_550_000))
         r = client.post(
-            f"/contracts/{cid}/commission/pay",
+            f"/wizard/{cid}/commission/pay",
             headers=h,
             json={"use_wallet_credit": True},
         )
@@ -122,7 +122,7 @@ def test_wizard_commission_paid_from_wallet_when_balance_sufficient():
         assert data.get("redirect_url") == "/"
         bal = float(client.get("/wallet/balance", headers=h).json()["balance"])
         assert bal == 6_000_000.0 - expected_fee
-        inv = client.get(f"/contracts/{cid}/commission/invoice", headers=h).json()
+        inv = client.get(f"/wizard/{cid}/commission/invoice", headers=h).json()
         assert inv.get("commission_paid") is True
 
 
@@ -140,7 +140,7 @@ def test_bank_mock_verify_marks_commission_paid():
         t = _auth(client, m)
         h = {"Authorization": f"Bearer {t['access_token']}"}
         r = client.post(
-            "/contracts/start",
+            "/wizard/start",
             headers=h,
             json={"contract_type": "PROPERTY_RENT", "party_type": "LANDLORD"},
         )
@@ -148,7 +148,7 @@ def test_bank_mock_verify_marks_commission_paid():
         cid = r.json()["id"]
         r = client.post("/financials/bank/mock-verify", headers=h, json={"contract_id": cid})
         assert r.status_code == 200
-        inv = client.get(f"/contracts/{cid}/commission/invoice", headers=h).json()
+        inv = client.get(f"/wizard/{cid}/commission/invoice", headers=h).json()
         assert inv.get("commission_paid") is True
         assert inv.get("commission_paid_at")
 
@@ -156,7 +156,7 @@ def test_bank_mock_verify_marks_commission_paid():
 def _wizard_to_signing(client: TestClient, headers: dict, contract_id: str) -> None:
     assert (
         client.post(
-            f"/contracts/{contract_id}/party/landlord/set",
+            f"/wizard/{contract_id}/party/landlord/set",
             json={"next_step": "TENANT_INFORMATION"},
             headers=headers,
         ).status_code
@@ -164,7 +164,7 @@ def _wizard_to_signing(client: TestClient, headers: dict, contract_id: str) -> N
     )
     assert (
         client.post(
-            f"/contracts/{contract_id}/party/tenant/set",
+            f"/wizard/{contract_id}/party/tenant/set",
             json={"next_step": "PLACE_INFORMATION"},
             headers=headers,
         ).status_code
@@ -172,7 +172,7 @@ def _wizard_to_signing(client: TestClient, headers: dict, contract_id: str) -> N
     )
     assert (
         client.post(
-            f"/contracts/{contract_id}/home-info",
+            f"/wizard/{contract_id}/home-info",
             json={
                 "postal_code": "1234567890",
                 "area_m2": 100.0,
@@ -187,7 +187,7 @@ def _wizard_to_signing(client: TestClient, headers: dict, contract_id: str) -> N
     )
     assert (
         client.post(
-            f"/contracts/{contract_id}/dating",
+            f"/wizard/{contract_id}/dating",
             json={
                 "start_date": "2025-01-01",
                 "end_date": "2027-01-01",
@@ -199,7 +199,7 @@ def _wizard_to_signing(client: TestClient, headers: dict, contract_id: str) -> N
     )
     assert (
         client.post(
-            f"/contracts/{contract_id}/mortgage",
+            f"/wizard/{contract_id}/mortgage",
             json={
                 "total_amount": 100,
                 "stages": [{"due_date": "2025-01-01", "payment_type": "CASH", "amount": 100}],
@@ -210,7 +210,7 @@ def _wizard_to_signing(client: TestClient, headers: dict, contract_id: str) -> N
     )
     assert (
         client.post(
-            f"/contracts/{contract_id}/renting",
+            f"/wizard/{contract_id}/renting",
             json={
                 "monthly_rent_amount": 1_000_000,
                 "rent_due_day_of_month": 1,
@@ -230,17 +230,17 @@ def test_status_pending_commission_when_at_signing_unpaid():
         t = _auth(client, m)
         h = {"Authorization": f"Bearer {t['access_token']}"}
         r = client.post(
-            "/contracts/start",
+            "/wizard/start",
             headers=h,
             json={"contract_type": "PROPERTY_RENT", "party_type": "LANDLORD"},
         )
         assert r.status_code == 201
         cid = r.json()["id"]
         _wizard_to_signing(client, h, cid)
-        st = client.get(f"/contracts/{cid}/status", headers=h).json()
+        st = client.get(f"/wizard/{cid}/status", headers=h).json()
         assert st.get("step") == "SIGNING"
         assert st.get("status") == "PENDING_COMMISSION"
-        r_sign = client.post(f"/contracts/{cid}/sign", headers=h)
+        r_sign = client.post(f"/wizard/{cid}/sign", headers=h)
         assert r_sign.status_code == 400
         assert r_sign.json().get("detail") == "commission_required"
 
@@ -253,20 +253,20 @@ def test_signing_allowed_after_commission_wallet_pay():
         r = client.post("/wallet/deposit", headers=h, json={"amount": 6_000_000})
         assert r.status_code == 200
         r = client.post(
-            "/contracts/start",
+            "/wizard/start",
             headers=h,
             json={"contract_type": "PROPERTY_RENT", "party_type": "LANDLORD"},
         )
         assert r.status_code == 201
         cid = r.json()["id"]
         _wizard_to_signing(client, h, cid)
-        assert client.get(f"/contracts/{cid}/status", headers=h).json().get("status") == "PENDING_COMMISSION"
+        assert client.get(f"/wizard/{cid}/status", headers=h).json().get("status") == "PENDING_COMMISSION"
         r = client.post(
-            f"/contracts/{cid}/commission/pay",
+            f"/wizard/{cid}/commission/pay",
             headers=h,
             json={"use_wallet_credit": True},
         )
         assert r.status_code == 200
-        assert client.get(f"/contracts/{cid}/status", headers=h).json().get("status") == "DRAFT"
-        r_sign = client.post(f"/contracts/{cid}/sign", headers=h)
+        assert client.get(f"/wizard/{cid}/status", headers=h).json().get("status") == "DRAFT"
+        r_sign = client.post(f"/wizard/{cid}/sign", headers=h)
         assert r_sign.status_code == 201

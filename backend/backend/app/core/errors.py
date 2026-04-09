@@ -148,6 +148,10 @@ def _http_exception_to_amline(
             "کد ملی با ثبت‌شده مطابقت ندارد.",
         ),
         "invalid_otp_format": ("VALIDATION_FAILED", "فرمت کد تایید نامعتبر است."),
+        "commission_required": (
+            "COMMISSION_REQUIRED",
+            "پرداخت کارمزد قبل از امضا الزامی است.",
+        ),
     }
     if d in detail_map:
         code, default_msg = detail_map[d]
@@ -176,11 +180,13 @@ async def http_exception_handler(
 ) -> JSONResponse:
     rid = _request_id(request)
     status, code, msg, details = _http_exception_to_amline(exc)
+    legacy = exc.detail if isinstance(exc.detail, str) else None
     body = _error_payload(
         code=code,
         message=msg,
         request_id=rid,
         details=details,
+        legacy_detail=legacy,
     )
     return JSONResponse(status_code=status, content=body)
 
