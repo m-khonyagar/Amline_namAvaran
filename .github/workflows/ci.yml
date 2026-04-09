@@ -120,16 +120,16 @@ jobs:
           - service: backend
             context: ./backend/backend
             dockerfile: ./backend/backend/Dockerfile
+          # admin-ui/amline-ui/site Dockerfiles expect repo root (packages/, turbo, sibling apps)
           - service: admin-ui
-            context: ./admin-ui
+            context: .
             dockerfile: ./admin-ui/Dockerfile
           - service: amline-ui
-            context: ./amline-ui
+            context: .
             dockerfile: ./amline-ui/Dockerfile
           - service: consultant-ui
             context: ./consultant-ui
             dockerfile: ./consultant-ui/Dockerfile
-          # site/Dockerfile builds from monorepo root (packages + turbo); see site/Dockerfile header
           - service: site
             context: .
             dockerfile: ./site/Dockerfile
