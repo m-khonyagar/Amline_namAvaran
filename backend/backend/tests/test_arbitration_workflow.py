@@ -3,12 +3,15 @@ from __future__ import annotations
 import io
 import uuid
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.db.session import SessionLocal
 from app.main import app
 from app.models.user import User, UserRole
 import app.services.notification_queue as notification_queue
+
+pytestmark = pytest.mark.redis
 
 
 def _auth(client: TestClient, mobile: str) -> dict:

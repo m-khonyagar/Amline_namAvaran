@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import uuid
 
+import pytest
+
 import app.services.notification_queue as notification_queue
+
+pytestmark = pytest.mark.redis
 
 
 def test_dlq_replay_moves_message_back_to_stream():

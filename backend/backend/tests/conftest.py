@@ -16,6 +16,26 @@ import pytest
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+
+def pytest_addoption(parser: pytest.Parser) -> None:
+    parser.addoption(
+        "--skip-redis",
+        action="store_true",
+        default=False,
+        help="Skip tests marked @pytest.mark.redis (no compatible Redis / Streams).",
+    )
+
+
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+    if config.getoption("--skip-redis", default=False):
+        skip = pytest.mark.skip(
+            reason="skipped via --skip-redis (Redis Streams not available)"
+        )
+        for item in items:
+            if item.get_closest_marker("redis"):
+                item.add_marker(skip)
+
+
 from app.db.base import Base
 from app.db.session import SessionLocal, engine
 
