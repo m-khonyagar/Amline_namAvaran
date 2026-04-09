@@ -120,7 +120,7 @@ jobs:
           - service: backend
             context: ./backend/backend
             dockerfile: ./backend/backend/Dockerfile
-          # admin-ui/amline-ui/site Dockerfiles expect repo root (packages/, turbo, sibling apps)
+          # These Dockerfiles COPY from repo root (packages/, turbo, sibling apps)
           - service: admin-ui
             context: .
             dockerfile: ./admin-ui/Dockerfile
@@ -128,7 +128,7 @@ jobs:
             context: .
             dockerfile: ./amline-ui/Dockerfile
           - service: consultant-ui
-            context: ./consultant-ui
+            context: .
             dockerfile: ./consultant-ui/Dockerfile
           - service: site
             context: .
