@@ -32,6 +32,7 @@ npm run dev:admin       # http://localhost:3002
 npm run dev:app         # http://localhost:3000
 npm run dev:consultant  # http://localhost:3004
 npm run dev:site        # http://localhost:3005 — بدون وابستگی به ui-core
+npm run storybook:ui-core   # Storybook کامپوننت‌های @amline/ui-core → http://localhost:6006
 ```
 
 راهنمای کامل: [`docs/MONOREPO.md`](docs/MONOREPO.md) — مرجع env: [`docs/ENV_MATRIX.md`](docs/ENV_MATRIX.md).

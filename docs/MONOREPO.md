@@ -25,6 +25,8 @@ npm run lint    # در صورت وجود اسکریپت در هر پکیج
 
 **کلون تازه:** پکیج `@amline/ui-core` باید یک‌بار بیلد شود تا `dist/` ساخته شود. اسکریپت **`npm run ensure-ui-core`** این کار را فقط وقتی لازم باشد انجام می‌دهد؛ دستورات **`npm run dev:admin`**, **`dev:app`**, **`dev:consultant`** از ریشه به‌صورت خودکار قبل از بالا آوردن Vite/Next آن را اجرا می‌کنند. (سایت مارکتینگ `dev:site` به ui-core وابسته نیست.)
 
+**Storybook (کامپوننت‌های مشترک):** از ریشهٔ مخزن **`npm run storybook:ui-core`** → پورت **6006** (فقط dev؛ خروجی `storybook-static` در `.gitignore` پکیج).
+
 ## اجرای لوکال (فرانت بدون Docker)
 
 اگر **`ERR_CONNECTION_REFUSED` روی پورت 3002** می‌بینید، یعنی سرور Vite اجرا نشده — Docker برای این مرحله لازم نیست:

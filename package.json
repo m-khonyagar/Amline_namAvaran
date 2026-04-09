@@ -24,7 +24,8 @@
     "dev:admin": "npm run ensure-ui-core && npm run dev -w amline-admin-ui",
     "dev:app": "npm run ensure-ui-core && npm run dev -w amline-ui",
     "dev:site": "npm run dev -w amline-site",
-    "dev:consultant": "npm run ensure-ui-core && npm run dev -w amline-consultant-ui"
+    "dev:consultant": "npm run ensure-ui-core && npm run dev -w amline-consultant-ui",
+    "storybook:ui-core": "npm run storybook -w @amline/ui-core"
   },
   "devDependencies": {
     "turbo": "^2.4.4"
