@@ -1,5 +1,5 @@
 import type { Config } from 'tailwindcss'
-import { amlineThemeTokens } from '../packages/amline-ui-core/theme-tokens.js'
+import { amlineThemeTokens } from '@amline/ui-core/theme-tokens.js'
 
 const config: Config = {
   darkMode: 'class',

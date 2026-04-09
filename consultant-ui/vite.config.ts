@@ -21,6 +21,8 @@ export default defineConfig(({ mode }) => {
     server: {
       // 3003 reserved for seo-dashboard; run consultant locally on 3004
       port: 3004,
+      strictPort: true,
+      host: true,
       fs: {
         allow: [path.resolve(__dirname, '..')],
       },

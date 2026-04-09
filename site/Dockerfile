@@ -7,11 +7,14 @@ WORKDIR /repo
 
 COPY package.json package-lock.json turbo.json ./
 COPY packages/amline-ui-core/package.json ./packages/amline-ui-core/
+COPY packages/amline-openapi-types/package.json ./packages/amline-openapi-types/
+COPY admin-ui/package.json ./admin-ui/
+COPY amline-ui/package.json ./amline-ui/
+COPY consultant-ui/package.json ./consultant-ui/
 COPY site/package.json ./site/
 
 RUN npm ci
 
-COPY packages/amline-ui-core ./packages/amline-ui-core
 COPY site ./site
 
 WORKDIR /repo/site

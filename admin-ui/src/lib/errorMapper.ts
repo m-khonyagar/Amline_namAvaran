@@ -1,9 +1,9 @@
 /** Re-export unified Amline API error parsing for admin-ui */
-export type { ApiErrorKind, MappedApiError } from '../../../packages/amline-ui-core/src/api/errorMapper'
+export type { ApiErrorKind, MappedApiError } from '@amline/ui-core'
 export {
   ensureMappedError,
   isMappedApiError,
   mapAxiosLikeError,
   parseAmlineErrorBody,
   parseFastApiValidationDetail,
-} from '../../../packages/amline-ui-core/src/api/errorMapper'
+} from '@amline/ui-core'

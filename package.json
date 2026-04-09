@@ -5,16 +5,22 @@
   "workspaces": [
     "admin-ui",
     "amline-ui",
+    "consultant-ui",
     "site",
-    "packages/amline-ui-core"
+    "packages/amline-ui-core",
+    "packages/amline-openapi-types"
   ],
   "scripts": {
     "build": "turbo run build",
+    "openapi:export": "python backend/backend/scripts/export_openapi.py",
+    "openapi:types": "npm run generate -w @amline/openapi-types",
+    "openapi:refresh": "npm run openapi:export && npm run openapi:types",
     "lint": "turbo run lint --continue",
     "test": "turbo run test --continue",
     "dev:admin": "npm run dev -w amline-admin-ui",
     "dev:app": "npm run dev -w amline-ui",
-    "dev:site": "npm run dev -w amline-site"
+    "dev:site": "npm run dev -w amline-site",
+    "dev:consultant": "npm run dev -w amline-consultant-ui"
   },
   "devDependencies": {
     "turbo": "^2.4.4"

@@ -4,8 +4,12 @@
 
 - `admin-ui` (Vite)
 - `amline-ui` (Next.js dashboard کاربر)
+- `consultant-ui` (Vite — پنل مشاوران)
 - `site` (Next.js static export)
-- `packages/amline-ui-core` (کتابخانهٔ مشترک — فعلاً بدون اسکریپت `build`)
+- `packages/amline-ui-core` (کتابخانهٔ مشترک — **`npm run build -w @amline/ui-core`** قبل از بیلد اپ‌ها در CI/Docker)
+- `packages/amline-openapi-types` (تایپ‌های تولیدشده از OpenAPI — [`openapi:refresh`](./ENV_MATRIX.md))
+
+مرجع متغیرهای env: [`ENV_MATRIX.md`](./ENV_MATRIX.md).
 
 ## خارج از workspace (فعلاً)
 
@@ -37,6 +41,14 @@ npm run dev:site     # سایت مارکتینگ
 ```
 
 یا کل استک با **`.\scripts\local-docker-up.ps1`** وقتی Docker Desktop سالم است.
+
+### پیش‌نمایش سریع (mock API + همهٔ فرانت‌ها)
+
+```powershell
+.\scripts\start-local-preview.ps1
+```
+
+اگر **Vite/Next خطای ماژول** داد، در همان پکیج یک‌بار `npm install` بزنید (روی Windows گاهی workspace به‌تنهایی باینری `next`/`vite` را کامل نمی‌کند).
 
 ## Docker
 

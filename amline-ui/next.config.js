@@ -5,6 +5,7 @@ const webpack = require('webpack');
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  transpilePackages: ['@amline/ui-core'],
   experimental: {
     externalDir: true,
   },

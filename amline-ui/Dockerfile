@@ -1,16 +1,25 @@
-# Amline user UI (Next.js) — build with repo root as context (needs packages/amline-ui-core).
-FROM node:20-alpine AS deps
-WORKDIR /app/amline-ui
-COPY amline-ui/package.json amline-ui/package-lock.json* ./
-RUN npm install
+# Amline user UI (Next.js) — build with repo root as context (workspaces + @amline/ui-core).
 
 FROM node:20-alpine AS builder
 WORKDIR /app
-COPY packages/amline-ui-core /app/packages/amline-ui-core
-COPY admin-ui /app/admin-ui
+
+COPY package.json package-lock.json turbo.json ./
+COPY packages/amline-ui-core/package.json ./packages/amline-ui-core/
+COPY packages/amline-openapi-types/package.json ./packages/amline-openapi-types/
+COPY admin-ui/package.json ./admin-ui/
+COPY amline-ui/package.json ./amline-ui/
+COPY consultant-ui/package.json ./consultant-ui/
+COPY site/package.json ./site/
+
+RUN npm ci
+
+COPY packages/amline-ui-core ./packages/amline-ui-core
+COPY admin-ui ./admin-ui
+COPY amline-ui ./amline-ui
+
+RUN npm run build -w @amline/ui-core
+
 WORKDIR /app/amline-ui
-COPY --from=deps /app/amline-ui/node_modules ./node_modules
-COPY amline-ui/ ./
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 

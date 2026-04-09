@@ -1,8 +1,5 @@
 import { useCallback, useState } from 'react';
-import {
-  ensureMappedError,
-  type MappedApiError,
-} from '../../../../../packages/amline-ui-core/src/errors/index';
+import { ensureMappedError, type MappedApiError } from '@amline/ui-core'
 
 export function useMappedStepError() {
   const [mapped, setMapped] = useState<MappedApiError | null>(null);

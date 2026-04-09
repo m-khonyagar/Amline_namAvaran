@@ -1,0 +1,20 @@
+{
+  "name": "@amline/openapi-types",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "TypeScript types generated from docs/generated/openapi.json",
+  "types": "./generated/api.d.ts",
+  "exports": {
+    ".": {
+      "types": "./generated/api.d.ts"
+    }
+  },
+  "files": ["generated"],
+  "scripts": {
+    "generate": "openapi-typescript ../../docs/generated/openapi.json -o generated/api.d.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.4.4"
+  }
+}

@@ -21,6 +21,7 @@
     "test:e2e:staging:all": "playwright test tests/staging-admin-smoke.spec.ts tests/staging-full-routes.spec.ts --config=playwright.staging.config.ts"
   },
   "dependencies": {
+    "@amline/ui-core": "*",
     "@sentry/react": "^8.55.1",
     "@tanstack/react-query": "^5.51.1",
     "axios": "^1.7.2",

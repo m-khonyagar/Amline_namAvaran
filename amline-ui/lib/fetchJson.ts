@@ -1,4 +1,4 @@
-import { fetchJson as coreFetchJson } from '../../packages/amline-ui-core/src/api/fetchJson'
+import { fetchJson as coreFetchJson } from '@amline/ui-core'
 
 function accessTokenFromCookie(): string | null {
   if (typeof document === 'undefined') return null

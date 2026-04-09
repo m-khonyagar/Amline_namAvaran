@@ -46,6 +46,9 @@ lib/
 # استثنا: کد منبع TypeScript پنل مشاور
 !consultant-ui/src/lib/
 !consultant-ui/src/lib/**
+# استثنا: helpers مشترک @amline/ui-core (rule سراسری lib/ پوشهٔ Python را می‌پوشاند)
+!packages/amline-ui-core/src/lib/
+!packages/amline-ui-core/src/lib/**
 lib64/
 parts/
 sdist/

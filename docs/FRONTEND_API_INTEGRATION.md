@@ -31,6 +31,20 @@
 - ادمین re-export: [`admin-ui/src/lib/errorMapper.ts`](../admin-ui/src/lib/errorMapper.ts)
 - کمک‌توابع: **`getApiBaseUrl`**, **`apiJson`** / **`apiFetch`** در [`packages/amline-ui-core/src/api/client.ts`](../packages/amline-ui-core/src/api/client.ts)
 
+## OpenAPI snapshot و تایپ‌های TypeScript
+
+- خروجی JSON از `app.openapi()` (commit‌شده): [`docs/generated/openapi.json`](./generated/openapi.json)
+- اسکریپت export: [`backend/backend/scripts/export_openapi.py`](../backend/backend/scripts/export_openapi.py)
+- تولید تایپ‌ها: پکیج [`packages/amline-openapi-types`](../packages/amline-openapi-types) — خروجی [`generated/api.d.ts`](../packages/amline-openapi-types/generated/api.d.ts)
+
+به‌روزرسانی snapshot + تایپ‌ها از ریشهٔ مخزن:
+
+```bash
+npm run openapi:refresh
+```
+
+معادل: `npm run openapi:export` سپس `npm run openapi:types`.
+
 ## فهرست ماشین‌خوان مسیرها (Inventory)
 
 - خروجی JSON (commit‌شده): [`docs/generated/frontend-http-inventory.json`](./generated/frontend-http-inventory.json)

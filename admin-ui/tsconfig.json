@@ -23,8 +23,7 @@
     /* Path aliases */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@amline/ui-core/*": ["../packages/amline-ui-core/src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"],

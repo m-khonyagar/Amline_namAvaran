@@ -3,7 +3,7 @@ import {
   isMappedApiError,
   mapAxiosLikeError,
   type MappedApiError,
-} from '../../packages/amline-ui-core/src/api/errorMapper'
+} from '@amline/ui-core'
 
 export type { MappedApiError }
 export { isMappedApiError, mapAxiosLikeError }

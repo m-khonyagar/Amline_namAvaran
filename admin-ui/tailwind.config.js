@@ -1,4 +1,4 @@
-import { amlineThemeTokens } from '../packages/amline-ui-core/theme-tokens.js';
+import { amlineThemeTokens } from '@amline/ui-core/theme-tokens.js';
 
 /** @type {import('tailwindcss').Config} */
 export default {

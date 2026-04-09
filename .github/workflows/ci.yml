@@ -23,6 +23,9 @@ jobs:
       # Monorepo workspaces: install once from root lockfile.
       - run: npm ci
         working-directory: .
+      - name: Build shared @amline/ui-core
+        run: npm run build -w @amline/ui-core
+        working-directory: .
       - name: Typecheck
         run: npx tsc --noEmit
       - name: Unit tests
@@ -94,6 +97,8 @@ jobs:
           cache-dependency-path: package-lock.json
       # Monorepo workspaces: one lockfile at repo root (includes amline-ui).
       - run: npm ci
+      - name: Build shared @amline/ui-core
+        run: npm run build -w @amline/ui-core
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
