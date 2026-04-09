@@ -6,6 +6,8 @@ const host = '127.0.0.1';
 const port = 3000;
 const baseURL = `http://${host}:${port}`;
 
+// اگر `npx playwright install` به CDN دسترسی ندارد، `PW_USE_BUNDLED_CHROMIUM` را خالی بگذارید تا از کانال `chrome` سیستم استفاده شود (در CI معمولاً `PW_USE_BUNDLED_CHROMIUM=1`).
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
