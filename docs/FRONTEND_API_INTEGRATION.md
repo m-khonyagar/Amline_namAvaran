@@ -45,7 +45,11 @@ npm run openapi:refresh
 
 معادل: `npm run openapi:export` سپس `npm run openapi:types`.
 
-مصرف در `admin-ui`: re-export در [`admin-ui/src/types/amline-openapi.ts`](../admin-ui/src/types/amline-openapi.ts) — import از `@amline/openapi-types` ترجیحاً از همان فایل برای یک نقطهٔ تغییر.
+مصرف تایپ‌های قرارداد (re-export، یک نقطهٔ تغییر):
+
+- [`admin-ui/src/types/amline-openapi.ts`](../admin-ui/src/types/amline-openapi.ts)
+- [`amline-ui/lib/amline-openapi.ts`](../amline-ui/lib/amline-openapi.ts)
+- [`consultant-ui/src/types/amline-openapi.ts`](../consultant-ui/src/types/amline-openapi.ts)
 
 ## فهرست ماشین‌خوان مسیرها (Inventory)
 

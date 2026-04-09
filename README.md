@@ -8,7 +8,7 @@
 |-------|----------|------|--------|
 | `admin-ui/` | React + Vite | 3002 | ✅ کامل |
 | `amline-ui/` | Next.js 14 (App Router) | 3000 | ✅ کامل |
-| `site/` | Next.js 15 (Static Export) | 3001 | ✅ کامل |
+| `site/` | Next.js 15 (Static Export) | 3005 (dev) | ✅ کامل |
 | `dev-mock-api/` | FastAPI | 8080 | ⚠️ مکمل (بدون DB) |
 | `pdf-generator/` | FastAPI | 8001 | ✅ موجود |
 | `seo-dashboard/` | — | 3003 | ✅ موجود |
@@ -20,6 +20,21 @@
 قوانین برای ایشوهای برچسب `sweep` و عنوان `Sweep:` در [`sweep.yaml`](sweep.yaml) و [`docs/SWEEP_RUNBOOK.md`](docs/SWEEP_RUNBOOK.md). اپ قدیمی GitHub Sweep برای باز کردن خودکار PR از Issue منسوخ است؛ برای اجرای واقعی از **GitHub Copilot coding agent** یا **Cursor** استفاده کنید.
 
 > **توجه:** `amline-ui` از **App Router** استفاده می‌کند (نه Pages Router).
+
+### مونوریپو (پیشنهاد برای توسعهٔ فرانت)
+
+از **ریشهٔ مخزن** (یک `package-lock.json`، workspaceها شامل `admin-ui`، `amline-ui`، `consultant-ui`، `site`، `@amline/ui-core`):
+
+```powershell
+npm ci
+# در صورت نبودن dist، دستورات dev خودکار @amline/ui-core را بیلد می‌کنند (ensure-ui-core)
+npm run dev:admin       # http://localhost:3002
+npm run dev:app         # http://localhost:3000
+npm run dev:consultant  # http://localhost:3004
+npm run dev:site        # http://localhost:3005 — بدون وابستگی به ui-core
+```
+
+راهنمای کامل: [`docs/MONOREPO.md`](docs/MONOREPO.md) — مرجع env: [`docs/ENV_MATRIX.md`](docs/ENV_MATRIX.md).
 
 ---
 
