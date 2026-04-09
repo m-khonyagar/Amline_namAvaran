@@ -7,7 +7,7 @@
 | متغیر | نقش | dev | staging / prod |
 |--------|-----|-----|----------------|
 | `VITE_DEV_PROXY_TARGET` | آدرس بک‌اند برای پروکسی dev (`/api/v1`, …) | `http://127.0.0.1:8080` | معمولاً خالی؛ API مطلق با `VITE_API_URL` |
-| `VITE_API_URL` | base مطلق API وقتی پروکسی استفاده نمی‌شود | خالی در dev پروکسی | URL واقعی API |
+| `VITE_API_URL` | base مطلق API وقتی پروکسی استفاده نمی‌شود | خالی در dev پروکسی | URL واقعی API؛ در Docker با nginx خالی، مسیر `/api/v1` همان origin است و nginx باید `/api/` را به بک‌اند بدهد (`admin-ui/nginx.conf`) |
 | `VITE_USE_MSW` | Mock Service Worker در مرورگر | `true`/`false` | `false` |
 | `VITE_ENABLE_DEV_BYPASS` | ورود آزمایشی در dev | `true` فقط لوکال | **هرگز** `true` |
 | `VITE_USE_CRM_API` | مسیر CRM واقعی در مقابل mock | بسته به سناریو | طبق بک‌اند |

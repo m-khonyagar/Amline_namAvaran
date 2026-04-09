@@ -181,10 +181,11 @@ services:
     build:
       context: .
       dockerfile: amline-ui/Dockerfile
+      args:
+        # برای دامنهٔ عمومی API، در .env ریشه مقدار AMLINE_PUBLIC_API_URL بگذارید
+        NEXT_PUBLIC_API_BASE_URL: ${AMLINE_PUBLIC_API_URL:-http://backend:8000}
+        NEXT_PUBLIC_ENABLE_DEV_BYPASS: "false"
     container_name: amline-ui
-    environment:
-      - NEXT_PUBLIC_API_BASE_URL=http://backend:8000
-      - NEXT_PUBLIC_ENABLE_DEV_BYPASS=false
     ports:
       - "3000:3000"
     depends_on:

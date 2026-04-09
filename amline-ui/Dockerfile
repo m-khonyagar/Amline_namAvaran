@@ -21,6 +21,13 @@ RUN npm run build -w @amline/ui-core
 
 WORKDIR /app/amline-ui
 ENV NEXT_TELEMETRY_DISABLED=1
+# NEXT_PUBLIC_* باید در زمان بیلد باشد (در باندل کلاینت درج می‌شود؛ env زمان اجرا کافی نیست)
+ARG NEXT_PUBLIC_API_BASE_URL=http://backend:8000
+ARG NEXT_PUBLIC_DEV_PROXY_TARGET=
+ARG NEXT_PUBLIC_ENABLE_DEV_BYPASS=false
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL \
+    NEXT_PUBLIC_DEV_PROXY_TARGET=$NEXT_PUBLIC_DEV_PROXY_TARGET \
+    NEXT_PUBLIC_ENABLE_DEV_BYPASS=$NEXT_PUBLIC_ENABLE_DEV_BYPASS
 RUN npm run build
 
 FROM node:20-alpine AS runner

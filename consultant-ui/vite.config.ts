@@ -4,7 +4,8 @@ import path from 'path';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const proxyTarget = env.VITE_DEV_PROXY_TARGET || 'https://api.amline.ir';
+  // هم‌تراز admin-ui / ENV_MATRIX: لوکال بدون env → mock روی 8080
+  const proxyTarget = env.VITE_DEV_PROXY_TARGET || 'http://127.0.0.1:8080';
   const bypassHtmlRequest = (req: { headers?: Record<string, string | undefined>; url?: string }) => {
     const accept = req.headers?.accept ?? '';
     if (accept.includes('text/html')) return req.url;
