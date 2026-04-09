@@ -11,7 +11,10 @@
   "scripts": {
     "build": "turbo run build",
     "lint": "turbo run lint --continue",
-    "test": "turbo run test --continue"
+    "test": "turbo run test --continue",
+    "dev:admin": "npm run dev -w amline-admin-ui",
+    "dev:app": "npm run dev -w amline-ui",
+    "dev:site": "npm run dev -w amline-site"
   },
   "devDependencies": {
     "turbo": "^2.4.4"

@@ -19,6 +19,25 @@ npm run build   # turbo run build — admin-ui + amline-ui + site (در صورت
 npm run lint    # در صورت وجود اسکریپت در هر پکیج
 ```
 
+## اجرای لوکال (فرانت بدون Docker)
+
+اگر **`ERR_CONNECTION_REFUSED` روی پورت 3002** می‌بینید، یعنی سرور Vite اجرا نشده — Docker برای این مرحله لازم نیست:
+
+```bash
+npm run dev:admin    # پنل ادمین → http://localhost:3002
+npm run dev:app      # داشبورد کاربر (Next) → پورت پیش‌فرض package
+npm run dev:site     # سایت مارکتینگ
+```
+
+در حالت dev، `admin-ui` درخواست‌های `/api/v1` را به **`http://localhost:8080`** پروکسی می‌کند (`vite.config.ts`). پس بک‌اند باید روی **8080** باشد؛ مثال:
+
+```powershell
+.\scripts\docker-deps-up.ps1    # اگر Docker دارید: فقط Postgres/Redis/MinIO
+.\scripts\run-local-stack.ps1   # ترمینال جدا: uvicorn روی 8080
+```
+
+یا کل استک با **`.\scripts\local-docker-up.ps1`** وقتی Docker Desktop سالم است.
+
 ## Docker
 
 بیلد تصویر admin-ui و site از **ریشهٔ مخزن**:
