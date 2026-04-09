@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -7,36 +8,33 @@ const nextConfig = {
   experimental: {
     externalDir: true,
   },
-  /**
-   * When Next.js compiles admin-ui code via externalDir relative imports,
-   * webpack resolves node_modules relative to the source file's location in
-   * admin-ui/.  In CI only amline-ui/node_modules is installed (npm ci runs
-   * only in amline-ui/).  Adding the amline-ui node_modules directory as an
-   * absolute fallback lets webpack find shared packages (axios, clsx, …).
-   */
-  webpack(config) {
-    config.resolve.modules = [
-      path.resolve(__dirname, 'node_modules'),
-      ...config.resolve.modules,
-    ];
-    return config;
-  },
   eslint: {
     ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: true,
   },
+  /**
+   * When Next.js compiles admin-ui code via externalDir, webpack resolves
+   * node_modules from the importing file under admin-ui/. Docker only runs
+   * npm install in amline-ui/, so prepend amline-ui/node_modules (must stay
+   * merged with the wizard replacement plugin — duplicate `webpack` keys drop
+   * the first hook entirely).
+   */
   webpack(config) {
+    config.resolve.modules = [
+      path.resolve(__dirname, 'node_modules'),
+      ...config.resolve.modules,
+    ];
     if (process.env.NEXT_PUBLIC_EMBED_ADMIN_WIZARD === '0') {
       config.plugins.push(
         new webpack.NormalModuleReplacementPlugin(
           /contracts[\\/]wizard[\\/]WizardEmbed\.tsx$/,
           path.join(__dirname, 'app/contracts/wizard/WizardStub.tsx')
         )
-      )
+      );
     }
-    return config
+    return config;
   },
   async rewrites() {
     // In Docker/production, backend is reachable at http://backend:8000
