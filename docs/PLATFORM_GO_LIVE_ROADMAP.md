@@ -1,6 +1,17 @@
 # نقشهٔ راه آماده‌سازی پلتفرم برای کاربر واقعی (Go-Live)
 
-این سند **مرحله‌بندی اجرایی** است؛ جزئیات فنی تکمیلی در پیوندها آمده است. برای **ترتیب برید باریک، مسیر بحرانی، و برنامهٔ زمانی پیشنهادی** ببینید: [`PRODUCT_READINESS_EXECUTION_PLAN.md`](./PRODUCT_READINESS_EXECUTION_PLAN.md).
+این سند **مرحله‌بندی اجرایی** است؛ جزئیات فنی تکمیلی در پیوندها آمده است. برای **ترتیب برید باریک، مسیر بحرانی، و برنامهٔ زمانی پیشنهادی** ببینید: [`PRODUCT_READINESS_EXECUTION_PLAN.md`](./PRODUCT_READINESS_EXECUTION_PLAN.md). برای **استوری‌ها، مالک نقش، معیار پذیرش، وابستگی، و نگاشت به چک‌لیست** ببینید: [`GO_LIVE_SPRINT_BACKLOG.md`](./GO_LIVE_SPRINT_BACKLOG.md).
+
+**آخرین به‌روزرسانی وضعیت فازها:** ۲۰۲۶-۰۴-۰۹ (جدول زیر را هر اسپرینت به‌روز کنید.)
+
+| فاز | موضوع کوتاه | وضعیت اجرا | مرجع استوری‌ها |
+|-----|-------------|------------|----------------|
+| ۰ | قفل محصول و مالکیت | ☐ در انتظار | [E0](GO_LIVE_SPRINT_BACKLOG.md#epic-e0) |
+| ۱ | کیفیت و ایمنی `admin-ui` | ◐ بخشی در مخزن (CI، prebuild) | [E1](GO_LIVE_SPRINT_BACKLOG.md#epic-e1) |
+| ۲ | Backend واقعی، staging، v1 روی API | ☐ در انتظار | [E2](GO_LIVE_SPRINT_BACKLOG.md#epic-e2) |
+| ۳ | احراز هویت و مجوز در production | ☐ در انتظار | [E3](GO_LIVE_SPRINT_BACKLOG.md#epic-e3) |
+| ۴ | استقرار و observability | ☐ در انتظار | [E4](GO_LIVE_SPRINT_BACKLOG.md#epic-e4) |
+| ۵ | اعتماد، بک‌آپ، پشتیبانی | ☐ در انتظار | [E5](GO_LIVE_SPRINT_BACKLOG.md#epic-e5) |
 
 ## اصول
 
@@ -132,15 +143,17 @@
 
 ## چک‌لیست سریع قبل از اولین کاربر واقعی
 
-- [ ] همهٔ ردیف‌های **هستهٔ v1** در بخش تعریف v1 روی **staging** با API واقعی تست شده‌اند
-- [ ] `admin-ui`: build با `.env.production` بدون `VITE_ENABLE_DEV_BYPASS=true` و بدون `VITE_USE_MSW=true`
-- [ ] `VITE_API_URL` یا هاست استاتیک + proxy nginx به API درست تنظیم شده
-- [ ] ورود فقط از مسیر OTP واقعی (یا SSO) تست شده
-- [ ] `pytest` / تست backend روی staging سبز
-- [ ] `npm run verify` در `admin-ui` سبز (tsc + vitest)
+نگاشت به شناسه‌های اجرایی: [`GO_LIVE_SPRINT_BACKLOG.md` — نگاشت چک‌لیست](GO_LIVE_SPRINT_BACKLOG.md#go-live-checklist-mapping)
+
+- [ ] همهٔ ردیف‌های **هستهٔ v1** در بخش تعریف v1 روی **staging** با API واقعی تست شده‌اند — *GL-P2-05, GL-P2-06*
+- [ ] `admin-ui`: build با `.env.production` بدون `VITE_ENABLE_DEV_BYPASS=true` و بدون `VITE_USE_MSW=true` — *GL-P1-02, GL-P2-06, GL-P3-03*
+- [ ] `VITE_API_URL` یا هاست استاتیک + proxy nginx به API درست تنظیم شده — *GL-P2-06, GL-P4-01*
+- [ ] ورود فقط از مسیر OTP واقعی (یا SSO) تست شده — *GL-P2-04, GL-P3-01, GL-P3-02*
+- [ ] `pytest` / تست backend روی staging سبز — *GL-P2-03, GL-P2-05*
+- [ ] `npm run verify` در `admin-ui` سبز (tsc + vitest) — *GL-P1-01*
 
 ---
 
 ## به‌روزرسانی
 
-با تکمیل هر فاز، این سند و [HAMGIT_FEATURES_PARITY.md](./HAMGIT_FEATURES_PARITY.md) را به‌روز کنید.
+با تکمیل هر فاز، این سند، [GO_LIVE_SPRINT_BACKLOG.md](./GO_LIVE_SPRINT_BACKLOG.md) (داشبورد و تیکت‌ها)، و [HAMGIT_FEATURES_PARITY.md](./HAMGIT_FEATURES_PARITY.md) را به‌روز کنید.
