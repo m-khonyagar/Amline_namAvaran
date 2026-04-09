@@ -13,7 +13,7 @@ function BrandMark({ compact }: { compact?: boolean }) {
     <div className={cn('flex items-center gap-3', compact && 'gap-2')}>
       <div
         className={cn(
-          'flex shrink-0 items-center justify-center rounded-amline-md bg-gradient-to-br from-[var(--amline-primary)] to-[var(--amline-accent)] font-extrabold text-white shadow-[var(--amline-shadow-sm)]',
+          'flex shrink-0 items-center justify-center rounded-amline-md bg-gradient-to-br from-[var(--amline-primary)] to-[var(--amline-accent)] font-extrabold text-white shadow-[var(--amline-shadow-md)] ring-2 ring-white/10 dark:ring-slate-800',
           compact ? 'h-9 w-9 text-sm' : 'h-11 w-11 text-base'
         )}
         aria-hidden
@@ -101,7 +101,7 @@ export default function MainLayout() {
       <aside
         id="app-sidebar"
         className={cn(
-          'fixed inset-y-0 right-0 z-50 flex w-[min(20.5rem,calc(100vw-env(safe-area-inset-left,0px)-0.5rem))] max-w-[100vw] flex-col border-l border-[var(--amline-border)] bg-[var(--amline-surface)]/95 shadow-[var(--amline-shadow-lg)] backdrop-blur-xl transition-transform duration-300 ease-out dark:border-slate-700 dark:bg-slate-900/95 lg:static lg:z-0 lg:w-64 lg:max-w-none lg:translate-x-0 lg:shadow-none',
+          'fixed inset-y-0 right-0 z-50 flex w-[min(20.5rem,calc(100vw-env(safe-area-inset-left,0px)-0.5rem))] max-w-[100vw] flex-col border-l border-[var(--amline-border)] bg-gradient-to-b from-[var(--amline-surface)] via-[var(--amline-surface)] to-[var(--amline-surface-muted)]/90 shadow-[var(--amline-shadow-lg)] backdrop-blur-xl transition-transform duration-300 ease-out dark:border-slate-700 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950/95 lg:static lg:z-0 lg:w-[17rem] lg:max-w-none lg:translate-x-0 lg:shadow-[4px_0_28px_-6px_rgba(15,23,42,0.07)] dark:lg:shadow-[4px_0_32px_-6px_rgba(0,0,0,0.35)]',
           mobileNavOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
         )}
       >
@@ -191,8 +191,12 @@ export default function MainLayout() {
         </div>
       </aside>
 
-      <main className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-[calc(3.5rem+env(safe-area-inset-top,0px))] safe-pb lg:pt-0 lg:pb-0">
-        <div className="container-amline animate-fadeIn flex-1 py-3 sm:py-6 lg:py-8">
+      <main className="relative flex min-h-0 flex-1 flex-col overflow-y-auto pt-[calc(3.5rem+env(safe-area-inset-top,0px))] safe-pb lg:pt-0 lg:pb-0">
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_45%_at_100%_-10%,rgba(37,99,235,0.055),transparent_55%)] dark:bg-[radial-gradient(ellipse_80%_40%_at_100%_0%,rgba(59,130,246,0.08),transparent_50%)]"
+          aria-hidden
+        />
+        <div className="container-amline animate-fadeIn relative flex-1 py-3 sm:py-6 lg:py-8">
           <Outlet />
         </div>
       </main>

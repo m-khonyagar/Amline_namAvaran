@@ -76,31 +76,36 @@ export default function LoginPage() {
   return (
     <div className="relative flex min-h-[100dvh] flex-col bg-[var(--amline-bg)] safe-pb lg:min-h-screen lg:flex-row">
       <div
-        className="pointer-events-none absolute inset-0 bg-[var(--amline-bg-mesh)] opacity-90"
+        className="pointer-events-none absolute inset-0 bg-[var(--amline-bg-mesh)] opacity-95"
         aria-hidden
       />
       <section
-        className="relative hidden flex-1 flex-col justify-between overflow-hidden bg-gradient-to-br from-[var(--amline-primary)] via-[#1e40af] to-[var(--amline-accent)] px-12 py-14 text-white lg:flex xl:px-16"
+        className="relative hidden flex-1 flex-col justify-between overflow-hidden bg-gradient-to-br from-slate-900 via-[#0f2847] to-slate-900 px-12 py-14 text-white lg:flex xl:px-16"
         aria-hidden
       >
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.06%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-40"
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-blue-900/20" />
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-50"
         />
         <div className="relative z-10 max-w-md">
-          <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-2xl font-extrabold shadow-lg backdrop-blur-sm">
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-blue-200/90 backdrop-blur-md">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+            پنل مدیریت سازمانی
+          </div>
+          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-white/20 to-white/5 text-3xl font-extrabold shadow-[0_12px_40px_-8px_rgba(0,0,0,0.5)] ring-1 ring-white/20 backdrop-blur-sm">
             ا
           </div>
-          <h2 className="text-3xl font-extrabold leading-tight tracking-tight">اَملاین</h2>
-          <p className="mt-4 text-lg leading-relaxed text-blue-100/95">
+          <h2 className="text-3xl font-extrabold leading-tight tracking-tight xl:text-4xl">اَملاین</h2>
+          <p className="mt-4 text-lg leading-relaxed text-slate-300">
             مدیریت قرارداد، CRM و عملیات املاک در یک پنل یکپارچه، امن و سریع.
           </p>
         </div>
-        <ul className="relative z-10 space-y-4 text-sm text-blue-100/90">
+        <ul className="relative z-10 space-y-4 text-sm text-slate-300">
           <li className="flex items-center gap-3">
-            <ShieldCheck className="h-5 w-5 shrink-0 text-teal-200" strokeWidth={2} />
+            <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-400/90" strokeWidth={2} />
             احراز هویت چندمرحله‌ای و کنترل دسترسی نقش‌محور
           </li>
           <li className="flex items-center gap-3">
-            <ShieldCheck className="h-5 w-5 shrink-0 text-teal-200" strokeWidth={2} />
+            <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-400/90" strokeWidth={2} />
             رابط فارسی و راست‌به‌چپ بهینه‌شده برای تیم شما
           </li>
         </ul>
@@ -120,11 +125,11 @@ export default function LoginPage() {
             <p className="amline-caption mt-1">پنل مدیریت</p>
           </div>
 
-          <Card className="overflow-hidden border-[var(--amline-border)] shadow-[var(--amline-shadow-lg)] ring-1 ring-black/[0.04] dark:border-slate-700 dark:ring-white/[0.06]">
-            <CardHeader className="space-y-1 border-0 pb-2 text-center lg:text-right">
-              <CardTitle className="amline-display text-[var(--amline-fg)] lg:text-2xl">ورود</CardTitle>
-              <CardDescription className="text-base text-[var(--amline-fg-muted)]">
-                ورود به پنل مدیریت با شماره موبایل
+          <Card className="overflow-hidden border-[var(--amline-border)] bg-[var(--amline-surface)]/95 shadow-[var(--amline-shadow-lg)] ring-1 ring-black/[0.04] backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/90 dark:ring-white/[0.08]">
+            <CardHeader className="space-y-2 border-0 pb-2 text-center lg:text-right">
+              <CardTitle className="amline-display text-[var(--amline-fg)] lg:text-2xl">ورود به حساب</CardTitle>
+              <CardDescription className="text-base leading-relaxed text-[var(--amline-fg-muted)]">
+                شماره موبایل خود را وارد کنید؛ کد یک‌بارمصرف برای شما ارسال می‌شود.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6 pt-2">
@@ -175,7 +180,7 @@ export default function LoginPage() {
               )}
 
               <p className="text-center text-xs text-[var(--amline-fg-subtle)]">
-                © ۱۴۰۳ اَملاین — تمامی حقوق محفوظ است
+                © {new Date().toLocaleDateString('fa-IR', { year: 'numeric' })} اَملاین — تمامی حقوق محفوظ است
               </p>
 
               {isDevBypassEnabled && (

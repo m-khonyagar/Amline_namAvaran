@@ -200,7 +200,7 @@ export default function DashboardPage() {
 
   return (
     <div dir="rtl" className="space-y-10 p-1 sm:p-2">
-      <header className="flex flex-col gap-4 border-b border-[var(--amline-border)] pb-8 dark:border-slate-700 sm:flex-row sm:items-end sm:justify-between">
+      <header className="flex flex-col gap-4 border-b border-[var(--amline-border)] bg-gradient-to-l from-transparent via-[var(--amline-primary-muted)]/25 to-transparent pb-8 dark:border-slate-700 dark:via-blue-950/20 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="amline-page-eyebrow mb-2">داشبورد اجرایی</p>
           <h1 className="amline-display">خوش آمدید{user?.full_name ? `، ${user.full_name}` : ''}</h1>
