@@ -64,6 +64,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.middleware("http")
+async def api_v1_compat_rewrite(request, call_next):
+    """
+    Compatibility layer for frontends that call `/api/v1/*`.
+    Dev mock endpoints are defined as `/*`, so we rewrite the incoming path.
+    """
+    path = request.scope.get("path") or ""
+    if path.startswith("/api/v1/"):
+        request.scope["path"] = path[len("/api/v1") :]
+    elif path == "/api/v1":
+        request.scope["path"] = "/"
+    return await call_next(request)
+
 FULL_ADMIN_PERMS = [
     "contracts:read",
     "contracts:write",
@@ -141,6 +155,10 @@ notifications_store: List[Dict[str, Any]] = [
 sessions_store: List[Dict[str, Any]] = []
 activity_by_user_day: Dict[str, int] = {}
 _audit_seq = 1
+
+# Used by mock_extended (consultant applications stubs)
+consultant_applications_list: List[Dict[str, Any]] = []
+consultant_profiles: Dict[str, Dict[str, Any]] = {}
 
 
 def _audit_event(
@@ -300,6 +318,11 @@ def contracts_list() -> List[Dict[str, Any]]:
     return [_contract_json(x) for x in contracts.values()]
 
 
+@app.get("/contracts/resolve-info")
+def resolve_info() -> Dict[str, str]:
+    return {"result": "ok"}
+
+
 @app.get("/contracts/{contract_id}")
 def contracts_get(contract_id: str) -> Dict[str, Any]:
     return _contract_json(_get(contract_id))
@@ -326,6 +349,23 @@ def commission_invoice(contract_id: str) -> Dict[str, Any]:
         "tenant_share": 2_500_000,
         "invoice_id": f"inv-{c['id']}",
     }
+
+
+class CommissionPayBody(BaseModel):
+    model_config = {"extra": "ignore"}
+    use_wallet_credit: bool = False
+
+
+@app.post("/contracts/{contract_id}/commission/pay")
+def commission_pay(
+    contract_id: str,
+    body: CommissionPayBody = Body(default_factory=CommissionPayBody),
+) -> Dict[str, Any]:
+    c = _get(contract_id)
+    if c.get("status") != "PENDING_COMMISSION":
+        raise HTTPException(status_code=400, detail="commission_not_pending")
+    c["status"] = "DRAFT"
+    return {"ok": True, "paid": True, "used_wallet": bool(body.use_wallet_credit)}
 
 
 @app.post("/contracts/{contract_id}/revoke")
@@ -468,6 +508,11 @@ def mortgage(
     body: SectionPatchBody = Body(default_factory=SectionPatchBody),
 ) -> Dict[str, Any]:
     c = _get(contract_id)
+    if c.get("step") != "MORTGAGE":
+        raise HTTPException(
+            status_code=422,
+            detail={"code": "invalid_step_transition"},
+        )
     if body.payload is not None:
         c["mortgage_info"] = body.payload
     nxt = body.next_step or (
@@ -489,6 +534,8 @@ def renting(
         c["renting_info"] = body.payload
     nxt = body.next_step or "SIGNING"
     c["step"] = nxt
+    if c["type"] != "BUYING_AND_SELLING":
+        c["status"] = "PENDING_COMMISSION"
     return {"next_step": nxt}
 
 
@@ -512,7 +559,9 @@ def sign(
     contract_id: str,
     body: SignRequestMock = Body(default_factory=SignRequestMock),
 ) -> Dict[str, Any]:
-    _get(contract_id)
+    c = _get(contract_id)
+    if c.get("status") == "PENDING_COMMISSION":
+        raise HTTPException(status_code=400, detail="commission_unpaid")
     return {
         "ok": True,
         "challenge_id": "mock-challenge",
@@ -590,29 +639,9 @@ def witness_verify(
     return {"ok": True, "next_step": nxt}
 
 
-@app.get("/contracts/resolve-info")
-def resolve_info() -> Dict[str, str]:
-    return {"result": "ok"}
-
-
 @app.post("/files/upload", status_code=201)
 def files_upload() -> Dict[str, Any]:
     return {"id": "file-001", "url": None}
-
-
-@app.get("/admin/users")
-def admin_users() -> Dict[str, Any]:
-    return {
-        "total_count": 1,
-        "start_index": 0,
-        "end_index": 1,
-        "data": [MOCK_USER],
-    }
-
-
-@app.get("/admin/users/{user_id}")
-def admin_user(user_id: str) -> Dict[str, Any]:
-    return MOCK_USER
 
 
 @app.get("/provinces/cities")
@@ -902,3 +931,8 @@ def crm_activity_create(lead_id: str, body: CrmActivityBody) -> Dict[str, Any]:
     }
     crm_activities.setdefault(lead_id, []).append(act)
     return act
+
+
+from mock_extended import register_extended_routes
+
+register_extended_routes(app)

@@ -4,6 +4,7 @@
   "packageManager": "npm@10.9.2",
   "workspaces": [
     "admin-ui",
+    "amline-ui",
     "site",
     "packages/amline-ui-core"
   ],

@@ -17,9 +17,36 @@ function isCredentialSubmissionRequest(config: { url?: string; baseURL?: string 
   )
 }
 
+function getViteEnv(name: string): string | undefined {
+  try {
+    const env = (import.meta as ImportMeta & { env?: Record<string, unknown> }).env
+    const value = env?.[name]
+    return value === undefined || value === null ? undefined : String(value)
+  } catch {
+    return undefined
+  }
+}
+
+/** وقتی کد ادمین داخل `amline-ui` (Next) باندل می‌شود، `NEXT_PUBLIC_*` در دسترس است. */
+function getNextPublicEnv(name: string): string | undefined {
+  try {
+    const proc = (globalThis as unknown as { process?: { env?: Record<string, string | undefined> } })
+      .process
+    const raw = proc?.env?.[name]
+    if (raw === undefined || raw === null) return undefined
+    const s = String(raw).trim()
+    return s === '' ? undefined : s
+  } catch {
+    return undefined
+  }
+}
+
 function resolveBaseUrl(): string {
-  const v = import.meta.env.VITE_API_URL
-  if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim()
+  const viteApiUrl = getViteEnv('VITE_API_URL')
+  if (viteApiUrl && viteApiUrl.trim() !== '') return viteApiUrl.trim()
+  const nextBase =
+    getNextPublicEnv('NEXT_PUBLIC_API_BASE_URL') || getNextPublicEnv('NEXT_PUBLIC_DEV_PROXY_TARGET')
+  if (nextBase) return nextBase
   return ''
 }
 
@@ -40,12 +67,13 @@ apiClient.interceptors.request.use((config) => {
     const normalized = raw.startsWith('Bearer ') ? raw : `Bearer ${raw}`
     config.headers.Authorization = normalized
   }
-  const devPerms = import.meta.env.VITE_DEV_USER_PERMISSIONS
-  if (import.meta.env.DEV && devPerms) {
+  const devPerms = getViteEnv('VITE_DEV_USER_PERMISSIONS')
+  const isViteDev = getViteEnv('DEV') === 'true'
+  if (isViteDev && devPerms) {
     config.headers['X-User-Permissions'] = String(devPerms)
   }
-  const devUid = import.meta.env.VITE_DEV_USER_ID
-  if (import.meta.env.DEV && devUid) {
+  const devUid = getViteEnv('VITE_DEV_USER_ID')
+  if (isViteDev && devUid) {
     config.headers['X-User-Id'] = String(devUid)
   } else {
     try {

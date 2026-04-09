@@ -1,21 +1,21 @@
-# مونوریپو (npm workspaces + Turborepo)
+﻿# مونوریپو (npm workspaces + Turborepo)
 
 ## پکیج‌های داخل workspace (ریشه)
 
 - `admin-ui` (Vite)
+- `amline-ui` (Next.js dashboard کاربر)
 - `site` (Next.js static export)
 - `packages/amline-ui-core` (کتابخانهٔ مشترک — فعلاً بدون اسکریپت `build`)
 
 ## خارج از workspace (فعلاً)
 
-- **`amline-ui`**: import متقابل از `admin-ui` و aliasهای `@/`؛ تا استخراج ویجت مشترک یا package واقعی، با `package-lock.json` خودش نصب می‌شود.
 - **`seo-dashboard`**: بیلد به فایل‌های محلی/پیکربندی وابسته است؛ با `npm ci` جدا در CI.
 
 ## دستورات ریشه
 
 ```bash
 npm ci          # از ریشهٔ مخزن
-npm run build   # turbo run build — admin-ui + site
+npm run build   # turbo run build — admin-ui + amline-ui + site (در صورت وجود script)
 npm run lint    # در صورت وجود اسکریپت در هر پکیج
 ```
 

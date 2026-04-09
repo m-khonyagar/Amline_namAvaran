@@ -17,6 +17,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "framer-motion": "^11.2.12",
+    "@hookform/resolvers": "^3.9.0",
     "jalaali-js": "^1.2.8",
     "jalali-react-datepicker": "^1.2.1",
     "lucide-react": "^0.408.0",
