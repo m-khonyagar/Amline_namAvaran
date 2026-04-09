@@ -26,6 +26,22 @@ gh label create "go-live" --color "0E8A16" --description "Go-Live v1 track" 2>nu
 
 در بدنهٔ PR بنویسید: `Refs: #123` یا اگر Issue ندارید حداقل `Refs: GL-P2-04` تا در جستجو بیاید. قالب PR در [`.github/PULL_REQUEST_TEMPLATE.md`](../.github/PULL_REQUEST_TEMPLATE.md) چک‌باکس Go-Live دارد.
 
-## Milestone (پیشنهادی)
+## Milestone
 
-یک Milestone به نام **`Go-Live v1`** بسازید و Issueهای فاز ۰–۵ را به آن وصل کنید تا بورد زمان‌بندی شفاف بماند.
+**[Go-Live v1](https://github.com/m-khonyagar/Amline_namAvaran/milestone/1)** — همهٔ استوری‌های `GL-P*` و `GL-PX*` به این milestone وصل شده‌اند. فهرست: [issueهای این milestone](https://github.com/m-khonyagar/Amline_namAvaran/issues?q=is%3Aissue+milestone%3A%22Go-Live+v1%22).
+
+## ایجاد / همگام‌سازی Issueها (ایدمپوتنت)
+
+از ریشهٔ مخزن (نیاز به `gh` و احراز هویت):
+
+```bash
+npm run go-live:issues
+```
+
+یا:
+
+```bash
+node scripts/create-go-live-issues.mjs
+```
+
+اسکریپت milestone را در صورت نبود می‌سازد و فقط برای شناسه‌هایی که هنوز Issue با همان پیشوند `[GL-…]` ندارند، Issue جدید می‌سازد (اجرای دوباره بی‌خطر است).

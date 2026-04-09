@@ -1,3 +1,6 @@
+# Go-Live issue script temp body (scripts/create-go-live-issues.mjs)
+.go-live-issue-body.tmp
+
 # Node.js
 node_modules/
 .npm

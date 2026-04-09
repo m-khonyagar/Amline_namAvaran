@@ -25,7 +25,8 @@
     "dev:app": "npm run ensure-ui-core && npm run dev -w amline-ui",
     "dev:site": "npm run dev -w amline-site",
     "dev:consultant": "npm run ensure-ui-core && npm run dev -w amline-consultant-ui",
-    "storybook:ui-core": "npm run storybook -w @amline/ui-core"
+    "storybook:ui-core": "npm run storybook -w @amline/ui-core",
+    "go-live:issues": "node scripts/create-go-live-issues.mjs"
   },
   "devDependencies": {
     "turbo": "^2.4.4"
