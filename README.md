@@ -1,6 +1,7 @@
 # Amline — پلتفرم هوشمند قرارداد ملکی
 
-> **SSOT بک‌اند:** مسیر استاندارد توسعه و پروداکشن **`backend/backend`** (FastAPI + PostgreSQL) است؛ قرارداد **`/api/v1/*`** و مسیرهای legacy روی همان اپ. **`dev-mock-api`** فقط جایگزین سبک وقتی بک‌اند کامل در دسترس نیست. راهنمای یکپارچگی فرانت: [`docs/FRONTEND_API_INTEGRATION.md`](docs/FRONTEND_API_INTEGRATION.md) — فهرست ماشین‌خوان مسیرها: [`docs/generated/frontend-http-inventory.json`](docs/generated/frontend-http-inventory.json).
+> **SSOT بک‌اند:** مسیر استاندارد توسعه و پروداکشن **`backend/backend`** (FastAPI + PostgreSQL) است؛ قرارداد **`/api/v1/*`** و مسیرهای legacy روی همان اپ. **`dev-mock-api`** فقط جایگزین سبک وقتی بک‌اند کامل در دسترس نیست. راهنمای یکپارچگی فرانت: [`docs/FRONTEND_API_INTEGRATION.md`](docs/FRONTEND_API_INTEGRATION.md) — فهرست ماشین‌خوان مسیرها: [`docs/generated/frontend-http-inventory.json`](docs/generated/frontend-http-inventory.json).  
+> **آماده‌سازی برای کاربر نهایی (پلن اجرایی و برید باریک):** [`docs/PRODUCT_READINESS_EXECUTION_PLAN.md`](docs/PRODUCT_READINESS_EXECUTION_PLAN.md) — مرز v1 و چک‌لیست go-live: [`docs/PLATFORM_GO_LIVE_ROADMAP.md`](docs/PLATFORM_GO_LIVE_ROADMAP.md).
 
 ## ساختار پروژه
 
