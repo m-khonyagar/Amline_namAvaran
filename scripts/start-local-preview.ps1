@@ -3,7 +3,7 @@
 #
 # پیش‌نیاز یک‌بار در هر کلون:
 #   npm ci
-#   npm run build -w @amline/ui-core
+# (بیلد ui-core اگر لازم باشد با `npm run ensure-ui-core` انجام می‌شود؛ dev:* از ریشه خودشان ensure دارند)
 #
 # پیش‌نیاز در صورت خطای Vite/Next یا missing CLI (همان پکیج):
 #   npm install -w amline-admin-ui
@@ -31,6 +31,9 @@ function Stop-ListenersOnPort {
 
 # mock 8080، ادمین 3002، اپ کاربر 3000، مشاور 3004، سایت 3005
 Stop-ListenersOnPort -Ports @(8080, 3000, 3002, 3004, 3005)
+
+npm run ensure-ui-core
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 Write-Host "Starting dev-mock-api on :8080 ..."
 Start-Process -FilePath "python" -ArgumentList "-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8080" -WorkingDirectory $mock -WindowStyle Minimized

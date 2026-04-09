@@ -2,6 +2,9 @@
   "name": "@amline/monorepo",
   "private": true,
   "packageManager": "npm@10.9.2",
+  "engines": {
+    "node": ">=20"
+  },
   "workspaces": [
     "admin-ui",
     "amline-ui",
@@ -17,10 +20,11 @@
     "openapi:refresh": "npm run openapi:export && npm run openapi:types",
     "lint": "turbo run lint --continue",
     "test": "turbo run test --continue",
-    "dev:admin": "npm run dev -w amline-admin-ui",
-    "dev:app": "npm run dev -w amline-ui",
+    "ensure-ui-core": "node scripts/ensure-ui-core.mjs",
+    "dev:admin": "npm run ensure-ui-core && npm run dev -w amline-admin-ui",
+    "dev:app": "npm run ensure-ui-core && npm run dev -w amline-ui",
     "dev:site": "npm run dev -w amline-site",
-    "dev:consultant": "npm run dev -w amline-consultant-ui"
+    "dev:consultant": "npm run ensure-ui-core && npm run dev -w amline-consultant-ui"
   },
   "devDependencies": {
     "turbo": "^2.4.4"
