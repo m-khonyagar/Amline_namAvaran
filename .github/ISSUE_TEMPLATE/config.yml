@@ -1,1 +1,8 @@
 blank_issues_enabled: false
+contact_links:
+  - name: Go-Live backlog (SSOT)
+    url: https://github.com/m-khonyagar/Amline_namAvaran/blob/main/docs/GO_LIVE_SPRINT_BACKLOG.md
+    about: Story IDs GL-P*, epics, DoD, dependencies
+  - name: GitHub workflow for Go-Live
+    url: https://github.com/m-khonyagar/Amline_namAvaran/blob/main/docs/GITHUB_GO_LIVE.md
+    about: Labels, gh CLI script, milestones

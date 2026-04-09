@@ -1,0 +1,82 @@
+name: Go-Live story
+description: کارهای ردیابی‌شدهٔ بک‌لاگ Go-Live (شناسه GL-P*)
+title: "[GL-] "
+labels:
+  - go-live
+  - triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        مرجع: [`docs/GO_LIVE_SPRINT_BACKLOG.md`](https://github.com/m-khonyagar/Amline_namAvaran/blob/main/docs/GO_LIVE_SPRINT_BACKLOG.md) — در PR بنویسید: `Refs: #issue` یا شناسهٔ `GL-Px-xx`.
+  - type: input
+    id: story_id
+    attributes:
+      label: شناسه استوری (الزامی)
+      description: مطابق جدول بک‌لاگ، مثلاً GL-P2-04
+      placeholder: GL-P2-04
+    validations:
+      required: true
+  - type: dropdown
+    id: epic
+    attributes:
+      label: اپیک (فاز roadmap)
+      options:
+        - E0 — فاز ۰ قفل محصول
+        - E1 — فاز ۱ کیفیت admin-ui
+        - E2 — فاز ۲ backend و staging
+        - E3 — فاز ۳ امنیت پرود
+        - E4 — فاز ۴ استقرار و رصد
+        - E5 — فاز ۵ اعتماد کاربر
+        - PX — مسیر موازی (amline-ui / consultant / site)
+    validations:
+      required: true
+  - type: dropdown
+    id: sprint
+    attributes:
+      label: اسپرینت پیشنهادی
+      options:
+        - S1
+        - S2
+        - S3
+        - S4
+        - S5
+        - بعداً / نامشخص
+    validations:
+      required: true
+  - type: dropdown
+    id: owner_role
+    attributes:
+      label: مالک (نقش)
+      options:
+        - محصول
+        - Backend
+        - Frontend
+        - QA
+        - DevOps
+        - Security
+        - چند نقش
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: وابستگی به سایر استوری‌ها
+      description: شناسه‌ها را با کاما جدا کنید، مثلاً GL-P2-02، GL-P0-02
+      placeholder: —
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: معیار پذیرش (DoD)
+      description: از بک‌لاگ کپی کنید یا دقیق‌تر کنید.
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: یادداشت / لینک PR
+      placeholder: PRها، اسکرین‌شات staging، شماره request_id نمونه
+    validations:
+      required: false

@@ -149,9 +149,12 @@ Hamgit/Market طبق roadmap **بعد از v1** — تیکت جدا با برچ�
 
 ## نحوهٔ استفاده در GitHub
 
-1. برای هر ردیف، **Issue** با عنوان `[GL-Px-xx] …` بسازید.
-2. در PR: `Refs: #issue` یا در بدنه `Closes #issue` وقتی کامل شد.
-3. پایان هر اسپرینت: ستون «وضعیت» در داشبورد بخش ۱ و جدول فازها در roadmap را به‌روز کنید.
+راهنمای کامل (قالب Issue، برچسب‌ها، `gh`): [`GITHUB_GO_LIVE.md`](./GITHUB_GO_LIVE.md)
+
+1. قالب **Go-Live story** در GitHub → New issue؛ یا عنوان دستی `[GL-Px-xx] …`.
+2. در PR: `Refs: #issue` یا `Closes #issue` وقتی کامل شد؛ قالب PR فیلد Go-Live دارد.
+3. یک‌بار برچسب‌ها: `.\scripts\gh-go-live-labels.ps1` (نیاز به `gh auth login`).
+4. پایان هر اسپرینت: داشبورد بخش ۱ و جدول فازها در [`PLATFORM_GO_LIVE_ROADMAP.md`](./PLATFORM_GO_LIVE_ROADMAP.md) را به‌روز کنید.
 
 ---
 
@@ -159,4 +162,5 @@ Hamgit/Market طبق roadmap **بعد از v1** — تیکت جدا با برچ�
 
 - [`PRODUCT_READINESS_EXECUTION_PLAN.md`](./PRODUCT_READINESS_EXECUTION_PLAN.md) — اصول و زمان‌بندی
 - [`PLATFORM_GO_LIVE_ROADMAP.md`](./PLATFORM_GO_LIVE_ROADMAP.md) — تعریف v1 و چک‌لیست
+- [`GITHUB_GO_LIVE.md`](./GITHUB_GO_LIVE.md) — اتصال به GitHub
 - [`FRONTEND_API_INTEGRATION.md`](./FRONTEND_API_INTEGRATION.md) — قرارداد و OpenAPI

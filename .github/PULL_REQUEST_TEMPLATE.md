@@ -10,6 +10,12 @@
 - [ ] Infrastructure / CI
 - [ ] Docs only
 
+## Go-Live (optional)
+
+If this PR maps to [`docs/GO_LIVE_SPRINT_BACKLOG.md`](docs/GO_LIVE_SPRINT_BACKLOG.md), add `Refs: GL-Px-xx` and/or `Refs: #issue` in **Summary** above.
+
+- [ ] Not applicable (no Go-Live story link needed)
+
 ## Validation
 
 - [ ] I ran the relevant local checks
