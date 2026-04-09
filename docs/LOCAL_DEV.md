@@ -14,7 +14,17 @@ npm run local:admin
 
 سپس: **http://localhost:3002/login** — ورود آزمایشی از دکمهٔ «ورود آزمایشی» با `admin-ui/.env.development`؛ یا OTP جادویی mock با شمارهٔ پیش‌فرض و کد زیر.
 
-### پنل کاربر (Next) + mock
+### همهٔ فرانت‌ها + mock (پیش‌نمایش کامل)
+
+از ریشهٔ ریپو (پورت‌های ۸۰۸۰ و ۳۰۰۰–۳۰۰۵ را آزاد می‌کند و چند پنجرهٴ PowerShell باز می‌کند):
+
+```powershell
+npm run local:preview
+```
+
+در اولین اجرا در صورت نبودن فایل، **`amline-ui/.env.local`** و **`consultant-ui/.env.local`** برای اتصال به mock و (برای اپ کاربر) ورود آزمایشی ساخته می‌شوند.
+
+### پنل کاربر (Next) + mock — فقط اپ و mock
 
 از ریشهٔ ریپو:
 

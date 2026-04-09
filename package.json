@@ -27,7 +27,8 @@
     "dev:consultant": "npm run ensure-ui-core && npm run dev -w amline-consultant-ui",
     "storybook:ui-core": "npm run storybook -w @amline/ui-core",
     "go-live:issues": "node scripts/create-go-live-issues.mjs",
-    "local:admin": "powershell -ExecutionPolicy Bypass -File scripts/dev-local-admin.ps1"
+    "local:admin": "powershell -ExecutionPolicy Bypass -File scripts/dev-local-admin.ps1",
+    "local:preview": "powershell -ExecutionPolicy Bypass -File scripts/start-local-preview.ps1"
   },
   "devDependencies": {
     "turbo": "^2.4.4"

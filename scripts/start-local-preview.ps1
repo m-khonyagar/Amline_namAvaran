@@ -16,6 +16,25 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
+# یک‌بار در هر کلون: برای پیش‌نمایش کامل با mock روی :8080 (فقط اگر فایل وجود نداشته باشد)
+$amlineLocal = Join-Path $root "amline-ui\.env.local"
+if (-not (Test-Path $amlineLocal)) {
+  @"
+NEXT_PUBLIC_DEV_PROXY_TARGET=http://127.0.0.1:8080
+NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8080
+NEXT_PUBLIC_ENABLE_DEV_BYPASS=true
+"@ | Set-Content -Path $amlineLocal -Encoding utf8
+  Write-Host "Created amline-ui/.env.local (dev bypass + mock). Delete to customize." -ForegroundColor DarkGray
+}
+$consultantLocal = Join-Path $root "consultant-ui\.env.local"
+if (-not (Test-Path $consultantLocal)) {
+  @"
+VITE_DEV_PROXY_TARGET=http://127.0.0.1:8080
+VITE_USE_MSW=false
+"@ | Set-Content -Path $consultantLocal -Encoding utf8
+  Write-Host "Created consultant-ui/.env.local (proxy to mock). Delete to customize." -ForegroundColor DarkGray
+}
+
 $mock = Join-Path $root "dev-mock-api"
 if (-not (Test-Path (Join-Path $mock "main.py"))) {
   Write-Error "dev-mock-api not found"
@@ -54,7 +73,7 @@ foreach ($s in $starts) {
 Write-Host ""
 Write-Host "URLs:"
 Write-Host "  Mock API:   http://127.0.0.1:8080/docs"
-Write-Host "  Admin:      http://localhost:3002/login  (ورود آزمایشی — فقط dev)"
+Write-Host "  Admin:      http://localhost:3002/login   (dev bypass: admin-ui/.env.development)"
 Write-Host "  Amline app: http://localhost:3000"
 Write-Host "  Site:       http://localhost:3005"
-Write-Host "  Consultant: http://localhost:3004  (strictPort — اگر اشغال بود، پورت را آزاد کنید)"
+Write-Host "  Consultant: http://localhost:3004   (strictPort; free port if busy)"
