@@ -1,15 +1,6 @@
 ARG AMLINE_PYTHON_BASE=python:3.12-slim-bookworm
 FROM ${AMLINE_PYTHON_BASE}
 WORKDIR /app
-RUN set -eux; \
-    cat > /etc/apt/sources.list.d/debian.sources <<'EOF'
-Types: deb
-URIs: http://mirror.arvancloud.ir/debian
-Suites: bookworm
-Components: main
-Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
-EOF
-RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/99mirror-stale-ok
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
 COPY docker-build-wheelhouse/ /wheelhouse/
