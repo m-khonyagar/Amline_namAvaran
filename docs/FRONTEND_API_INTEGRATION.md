@@ -45,6 +45,8 @@ npm run openapi:refresh
 
 معادل: `npm run openapi:export` سپس `npm run openapi:types`.
 
+مصرف در `admin-ui`: re-export در [`admin-ui/src/types/amline-openapi.ts`](../admin-ui/src/types/amline-openapi.ts) — import از `@amline/openapi-types` ترجیحاً از همان فایل برای یک نقطهٔ تغییر.
+
 ## فهرست ماشین‌خوان مسیرها (Inventory)
 
 - خروجی JSON (commit‌شده): [`docs/generated/frontend-http-inventory.json`](./generated/frontend-http-inventory.json)

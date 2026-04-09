@@ -61,6 +61,6 @@ docker build -f site/Dockerfile .
 
 ## CI / CD
 
-- **`ci.yml`**: تست بک‌اند، inventory فرانت، E2E `amline-ui`، بیلد Turbo (`lint` + `build`)، و تصاویر Docker روی **push**. **دیپلوی خودکار production حذف شده** تا pipeline موفق کاذب ندهد.
+- **`ci.yml`**: job **`openapi-contract`** (هم‌خوانی `docs/generated/openapi.json` و `packages/amline-openapi-types/generated/api.d.ts` با `app.openapi()`)، تست بک‌اند، E2E `amline-ui`، بیلد Turbo، و تصاویر Docker روی **push**. **دیپلوی خودکار production حذف شده** تا pipeline موفق کاذب ندهد.
 - **`deploy-staging.yml`**: استیجینگ روی push به `staging` یا دستی.
 - **`deploy-production.yml`**: فقط **`workflow_dispatch`** — تا زمان افزودن SSH/kubectl، فقط notice می‌دهد.
