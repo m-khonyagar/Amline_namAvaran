@@ -17,6 +17,10 @@
 
 پیش‌فرض محلی: `http://127.0.0.1:8080` یا `http://localhost:8080` (در `.env.example` هر دو اپ).
 
+## هدر `X-Request-Id` (هم‌ترازی لاگ و ردیابی)
+
+- **`fetchJson`** در [`packages/amline-ui-core`](../packages/amline-ui-core/src/api/fetchJson.ts) و کلاینت‌های **axios** در `admin-ui` و `consultant-ui` در صورت نبودن هدر، مقدار **`generateRequestId()`** را روی `X-Request-Id` می‌گذارند تا با لاگ بک‌اند و OpenTelemetry هم‌خوان بماند.
+
 ## هدرهای RBAC (وقتی `AMLINE_RBAC_ENFORCE=1`)
 
 - `X-User-Id`

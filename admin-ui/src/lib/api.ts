@@ -3,6 +3,7 @@
  * در dev با baseURL خالی، Vite به `VITE_DEV_PROXY_TARGET` برای `/api/v1` و `/financials` پروکسی می‌کند.
  */
 import axios from 'axios'
+import { generateRequestId } from '@amline/ui-core'
 import { notifySessionExpired } from '../auth/authSession'
 import { AMLINE_API_V1_PREFIX } from './apiPaths'
 import { CookieNames, getCookie } from './cookies'
@@ -56,6 +57,16 @@ export const apiClient = axios.create({
 })
 
 apiClient.interceptors.request.use((config) => {
+  const hdr = config.headers
+  if (hdr) {
+    const hasId =
+      typeof hdr.get === 'function'
+        ? hdr.get('X-Request-Id')
+        : (hdr as Record<string, unknown>)['X-Request-Id']
+    if (!hasId && typeof hdr.set === 'function') {
+      hdr.set('X-Request-Id', generateRequestId())
+    }
+  }
   const token = document.cookie
     .split('; ')
     .find((r) => r.startsWith('access_token='))

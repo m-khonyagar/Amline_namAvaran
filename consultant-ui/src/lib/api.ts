@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { generateRequestId } from '@amline/ui-core';
 
 const CONSULTANT_TOKEN_KEY = 'amline_consultant_access_token';
 
@@ -28,6 +29,16 @@ export function setConsultantToken(token: string | null) {
 }
 
 apiClient.interceptors.request.use((config) => {
+  const hdr = config.headers;
+  if (hdr) {
+    const hasId =
+      typeof hdr.get === 'function'
+        ? hdr.get('X-Request-Id')
+        : (hdr as Record<string, unknown>)['X-Request-Id'];
+    if (!hasId && typeof hdr.set === 'function') {
+      hdr.set('X-Request-Id', generateRequestId());
+    }
+  }
   const token = getConsultantToken();
   if (token) {
     config.headers.Authorization = token.startsWith('Bearer ') ? token : `Bearer ${token}`;

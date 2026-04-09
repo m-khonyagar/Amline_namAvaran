@@ -1,14 +1,7 @@
 import { parseAmlineErrorBody, parseFastApiValidationDetail } from './errorMapper'
+import { generateRequestId } from './requestId'
 
 export type FetchJsonInit = RequestInit & { signal?: AbortSignal }
-
-function genRequestId(): string {
-  try {
-    return crypto.randomUUID()
-  } catch {
-    return `rid-${Date.now()}`
-  }
-}
 
 /**
  * Browser fetch helper for Next.js (same-origin rewrites to backend).
@@ -17,7 +10,7 @@ function genRequestId(): string {
 export async function fetchJson<T>(input: string, init?: FetchJsonInit): Promise<T> {
   const headers = new Headers(init?.headers)
   if (!headers.has('X-Request-Id')) {
-    headers.set('X-Request-Id', genRequestId())
+    headers.set('X-Request-Id', generateRequestId())
   }
   const res = await fetch(input, { ...init, headers })
   const ct = res.headers.get('content-type') || ''
