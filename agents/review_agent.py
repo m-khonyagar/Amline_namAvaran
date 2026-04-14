@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -74,8 +75,6 @@ class ReviewAgent:
 
             content = src_file.read_text()
             user_msg = f"File: {rel_path}\n\nCode:\n{content}"
-
-            import json
 
             raw = self.llm.chat(system=REVIEW_SYSTEM_PROMPT, user=user_msg)
             try:

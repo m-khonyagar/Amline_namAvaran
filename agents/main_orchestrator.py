@@ -311,6 +311,7 @@ class MainOrchestrator:
             msg = f"EXECUTE failed: {exc}"
             errors.append(msg)
             log.error("Orchestrator: ❌ %s", msg)
+            audit.append({"stage": "EXECUTE", "ts": time.time(), "error": msg})
         return {"exec_result": exec_result, "errors": errors, "audit_log": audit}
 
     def _pr_node(self, state: WorkflowState) -> dict:
@@ -331,6 +332,7 @@ class MainOrchestrator:
             msg = f"PR failed: {exc}"
             errors.append(msg)
             log.error("Orchestrator: ❌ %s", msg)
+            audit.append({"stage": "PR", "ts": time.time(), "error": msg})
         return {"pr_result": pr_result, "errors": errors, "audit_log": audit}
 
     # ── Report builder ────────────────────────────────────────────────────────
