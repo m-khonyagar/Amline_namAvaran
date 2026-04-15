@@ -129,7 +129,24 @@ log "Starting all services..."
 $COMPOSE_CMD $PROFILES up -d
 ok "All services started"
 
-# ── Step 5: Health check ────────────────────────
+# ── Step 5: Deploy nginx config ─────────────────
+if [ -f docker/nginx/amline.conf ] && command -v nginx &>/dev/null; then
+  log "Deploying Nginx reverse proxy configuration..."
+  cp docker/nginx/amline.conf /etc/nginx/sites-available/amline
+  ln -sf /etc/nginx/sites-available/amline /etc/nginx/sites-enabled/
+  rm -f /etc/nginx/sites-enabled/default 2>/dev/null || true
+  if nginx -t 2>&1; then
+    systemctl reload nginx
+    ok "Nginx reverse proxy configured"
+  else
+    warn "Nginx config test failed — check docker/nginx/amline.conf"
+  fi
+elif [ -f docker/nginx/amline.conf ]; then
+  warn "Nginx not installed — skipping reverse proxy setup"
+  echo "  Install with: apt-get install -y nginx && bash $0"
+fi
+
+# ── Step 6: Health check ────────────────────────
 log "Waiting for services to become healthy (60s timeout)..."
 TIMEOUT=60
 ELAPSED=0
