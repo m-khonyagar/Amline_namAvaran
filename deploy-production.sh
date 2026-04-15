@@ -126,7 +126,7 @@ ok "MinIO buckets initialized"
 
 # ── Step 4: Start all services ──────────────────
 log "Starting all services..."
-$COMPOSE_CMD $PROFILES up -d $BUILD_ARG
+$COMPOSE_CMD $PROFILES up -d
 ok "All services started"
 
 # ── Step 5: Health check ────────────────────────
@@ -134,8 +134,8 @@ log "Waiting for services to become healthy (60s timeout)..."
 TIMEOUT=60
 ELAPSED=0
 while [ $ELAPSED -lt $TIMEOUT ]; do
-  UNHEALTHY=$(docker compose -f docker-compose.yml -f docker-compose.prod.yml ps --format json 2>/dev/null | grep -c '"starting"' || true)
-  if [ "$UNHEALTHY" = "0" ]; then
+  NOT_READY=$(docker compose -f docker-compose.yml -f docker-compose.prod.yml ps --format json 2>/dev/null | grep -cE '"starting"|"unhealthy"' || true)
+  if [ "$NOT_READY" = "0" ]; then
     break
   fi
   sleep 5

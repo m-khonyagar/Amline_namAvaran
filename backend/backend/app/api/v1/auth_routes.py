@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import Optional
 
 from fastapi import APIRouter, Header
@@ -7,6 +8,8 @@ from fastapi import APIRouter, Header
 from app.core.security import decode_token
 from app.repositories.memory.state import get_store
 from app.services import auth_tokens
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["auth"])
 
@@ -29,7 +32,7 @@ def auth_logout(
             if payload.get("type") == "refresh" and jti:
                 auth_tokens.rotate_refresh(refresh_jti=jti)
         except (ValueError, KeyError):
-            pass  # Token may be expired or invalid; logout is still OK
+            logger.debug("Logout token decode failed — proceeding with client-side logout")
     return {"ok": True}
 
 
