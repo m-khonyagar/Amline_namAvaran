@@ -5,7 +5,7 @@ import enum
 import secrets
 import uuid
 
-from sqlalchemy import Date, Enum, ForeignKey, Numeric, String
+from sqlalchemy import DateTime, Date, Enum, ForeignKey, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, TimestampCreatedMixin, UUIDPkMixin
@@ -39,3 +39,9 @@ class Contract(UUIDPkMixin, TimestampCreatedMixin, Base):
 
     status: Mapped[ContractStatus] = mapped_column(Enum(ContractStatus), default=ContractStatus.draft, index=True)
     tracking_code: Mapped[str] = mapped_column(String(32), unique=True, index=True, default=_tracking_code)
+
+    # --- v5.0 Review & Escalation fields ---
+    # وضعیت بررسی توسط کارشناس (مثلاً "pending", "approved", "needs_correction")
+    review_status: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    # مهلت زمانی SLA برای ارجاع (escalation_deadline)
+    escalation_deadline: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
