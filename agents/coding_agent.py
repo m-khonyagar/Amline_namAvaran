@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -120,7 +119,7 @@ class CodingAgent:
         target = (workspace / rel_path).resolve()
         workspace_resolved = workspace.resolve()
 
-        if not str(target).startswith(str(workspace_resolved) + os.sep) and target != workspace_resolved:
+        if not target.is_relative_to(workspace_resolved):
             raise ValueError(f"path escapes workspace: {rel_path}")
 
         if target.is_symlink():

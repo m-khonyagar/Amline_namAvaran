@@ -47,8 +47,8 @@ class TestCodingAgentPathSecurity:
             agent = CodingAgent(cfg)
             result = agent.implement(plan, workspace)
 
-        # The traversal path should be rejected, and a placeholder created instead
-        assert result.success is False or "error" in result.summary.lower() or len(result.files_written) > 0
+        # The traversal path should be rejected — only a placeholder is written
+        assert result.success is False
         # The evil file must NOT exist outside workspace
         evil = (tmp_path / "etc" / "passwd")
         assert not evil.exists()
@@ -100,8 +100,8 @@ class TestCodingAgentPathSecurity:
             agent = CodingAgent(cfg)
             result = agent.implement(plan, workspace)
 
-        # Empty path should be rejected
-        assert not result.success or "error" in result.summary.lower()
+        # Empty path should be rejected — marked as failed
+        assert result.success is False
 
 
 class TestCodingAgentWriteErrorHandling:

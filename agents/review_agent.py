@@ -75,7 +75,7 @@ class ReviewAgent:
             try:
                 resolved = src_file.resolve()
                 workspace_resolved = workspace.resolve()
-                if not str(resolved).startswith(str(workspace_resolved) + "/") and resolved != workspace_resolved:
+                if not resolved.is_relative_to(workspace_resolved):
                     log.warning("ReviewAgent: path escapes workspace, skipping: %s", rel_path)
                     continue
                 if src_file.is_symlink():
