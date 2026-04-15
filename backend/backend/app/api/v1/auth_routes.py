@@ -30,7 +30,7 @@ def auth_logout(
             jti = payload.get("jti")
             if payload.get("type") == "refresh" and jti:
                 auth_tokens.rotate_refresh(refresh_jti=jti)
-        except (ValueError, Exception):
+        except (ValueError, KeyError):
             pass  # Token may be expired or invalid; logout is still OK
     return {"ok": True}
 
