@@ -35,7 +35,7 @@ class StateMachine:
         self.sla_deadlines[state] = deadline
 
     def get_sla(self, state):
-        return self.sla_deadlines.get(state, 'No SLA set')
+        return self.sla_deadlines.get(state, None)
 
     def transition(self, condition):
         for transition in self.transitions:
@@ -43,7 +43,9 @@ class StateMachine:
                 self.current_state = transition[1]
                 print(f'Transitioned to {self.current_state}')
                 return
-        print('Transition not allowed')
+        raise ValueError(
+            f'Transition not allowed: no edge from "{self.current_state}" with condition "{condition}"'
+        )
 
     def get_current_state(self):
         return self.current_state
