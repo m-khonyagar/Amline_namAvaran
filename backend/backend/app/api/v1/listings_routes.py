@@ -111,3 +111,21 @@ def archive_listing(
     row = repo.archive(row)
     sync_listing_to_external_search(row)
     return ListingRead.model_validate(row)
+
+
+@router.post("/{listing_id}/publish", response_model=ListingRead)
+def publish_listing(
+    listing_id: str,
+    repo: ListingRepository = Depends(_repo),
+) -> ListingRead:
+    row = repo.get(listing_id)
+    if not row:
+        raise AmlineError(
+            "RESOURCE_NOT_FOUND",
+            "آگهی یافت نشد.",
+            status_code=404,
+            details={"entity": "listing", "listing_id": listing_id},
+        )
+    row = repo.publish(row)
+    sync_listing_to_external_search(row)
+    return ListingRead.model_validate(row)

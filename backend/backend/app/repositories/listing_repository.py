@@ -117,6 +117,14 @@ class ListingRepository:
         self.db.refresh(row)
         return row
 
+    def publish(self, row: Listing) -> Listing:
+        row.status = ListingStatus.PUBLISHED
+        row.updated_at = datetime.now(timezone.utc)
+        self.db.add(row)
+        self.db.commit()
+        self.db.refresh(row)
+        return row
+
     def list_public_published(
         self, *, skip: int = 0, limit: int = 20
     ) -> tuple[Sequence[Listing], int]:

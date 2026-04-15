@@ -408,3 +408,22 @@ def witness_verify(
         user_agent=ua,
         next_step=body.next_step,
     )
+
+
+@router.get("/contracts/{contract_id}/pdf")
+def contract_pdf_v1(contract_id: str) -> dict:
+    """دانلود PDF قرارداد (PRD §5.3).
+
+    این مسیر از Flow Service استفاده می‌کند تا PDF قرارداد را
+    از سرویس ``pdf-generator`` دریافت کند.
+    """
+    contract = _flow.get_contract(contract_id)
+    if not contract:
+        raise HTTPException(status_code=404, detail="CONTRACT_NOT_FOUND")
+    status = contract.get("status", "")
+    if status == "DRAFT":
+        raise HTTPException(status_code=400, detail="contract_not_ready")
+    pdf_url = contract.get("pdf_url")
+    if pdf_url:
+        return {"url": pdf_url, "status": "READY", "contract_id": contract_id}
+    return {"url": None, "status": "PENDING", "contract_id": contract_id}

@@ -1,0 +1,66 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github
+
+# Documentation
+*.md
+docs/
+اسناد فنی/
+Figma/
+LICENSE
+
+# IDE
+.vscode
+.idea
+.cursor
+*.swp
+*.swo
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+.venv
+venv
+.pytest_cache
+.mypy_cache
+.ruff_cache
+htmlcov
+*.egg-info
+
+# Node
+node_modules
+.turbo
+.next
+out
+dist
+coverage
+
+# Agent (desktop app - not part of deployment)
+Agent/
+
+# Testing
+qa-amline-tests/
+browser-live-control/
+
+# VPN setup
+vpn-setup/
+
+# AI specs
+ai-video-directory/
+
+# Misc
+*.log
+*.rar
+*.zip
+dash_snap.json
+production_tables.json
