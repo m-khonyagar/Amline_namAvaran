@@ -18,17 +18,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate secrets
+        run: |
+          if [ -z "${{ secrets.DEPLOY_SSH_KEY }}" ]; then
+            echo "::error::DEPLOY_SSH_KEY secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.DEPLOY_HOST }}" ]; then
+            echo "::error::DEPLOY_HOST secret is not set"
+            exit 1
+          fi
+
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          if [ -n "${{ secrets.DEPLOY_HOST }}" ]; then
-            ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
-          else
-            echo "::warning::DEPLOY_HOST secret is not set — skipping ssh-keyscan"
-            exit 1
-          fi
+          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: Copy files to server
         run: |
@@ -39,45 +45,71 @@ jobs:
             --exclude='__pycache__' \
             --exclude='.venv' \
             --exclude='*.pyc' \
+            --exclude='.env' \
             -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
-            ./ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/amline/app/
+            ./ ${{ secrets.DEPLOY_USER || 'root' }}@${{ secrets.DEPLOY_HOST }}:/opt/amline/app/
 
       - name: Deploy on server
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
-            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} 'bash -s' << 'REMOTE'
+            ${{ secrets.DEPLOY_USER || 'root' }}@${{ secrets.DEPLOY_HOST }} 'bash -s' << 'REMOTE'
             set -e
             cd /opt/amline/app
 
-            # اطمینان از وجود .env
+            # Ensure .env exists
             if [ ! -f .env ]; then
-              echo "ERROR: .env file not found on server. Create it first."
+              echo "ERROR: .env file not found on server."
+              echo "Run: cp .env.production.example .env && nano .env"
               exit 1
             fi
 
-            echo "==> Pulling latest images and rebuilding..."
-            docker compose pull --ignore-pull-failures || true
-            docker compose build --no-cache backend admin-ui amline-ui consultant-ui
+            echo "==> Pulling latest base images..."
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml pull --ignore-buildable 2>/dev/null || true
 
-            echo "==> Running migrations..."
-            docker compose run --rm db-init
+            echo "==> Building application images..."
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml build --no-cache backend admin-ui amline-ui consultant-ui site pdf-generator
+
+            echo "==> Starting infrastructure..."
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d postgres redis minio
+            sleep 5
+
+            echo "==> Running database migrations..."
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm db-init
+
+            echo "==> Initializing MinIO buckets..."
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm minio-init
 
             echo "==> Starting all services..."
-            docker compose up -d --remove-orphans
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans
 
-            echo "==> Waiting for backend health..."
+            echo "==> Waiting for backend health (90s timeout)..."
             for i in $(seq 1 30); do
               if curl -sf http://localhost:8080/health > /dev/null 2>&1; then
                 echo "Backend is healthy."
                 break
               fi
+              if [ "$i" -eq 30 ]; then
+                echo "WARNING: Backend health check timed out"
+              fi
               echo "Waiting... ($i/30)"
               sleep 3
             done
 
-            echo "==> Cleanup old images..."
+            echo "==> Deploying nginx config..."
+            if [ -f docker/nginx/amline.conf ]; then
+              cp docker/nginx/amline.conf /etc/nginx/sites-available/amline
+              ln -sf /etc/nginx/sites-available/amline /etc/nginx/sites-enabled/
+              if nginx -t 2>&1; then
+                systemctl reload nginx
+                echo "Nginx config deployed."
+              else
+                echo "WARNING: Nginx config test failed — skipping reload"
+              fi
+            fi
+
+            echo "==> Cleaning up old images..."
             docker image prune -f
 
             echo "==> Deploy complete."
-            docker compose ps
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml ps
           REMOTE
