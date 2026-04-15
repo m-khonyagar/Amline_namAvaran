@@ -1,0 +1,57 @@
+# docker-compose.prod.yml — Production overrides
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Prerequisites:
+#   1. Copy .env.production.example → .env and fill in all REPLACE_* values
+#   2. Set real passwords for POSTGRES_PASSWORD, REDIS_PASSWORD, MINIO_SECRET_KEY
+#   3. Generate JWT_SECRET and SECRET_KEY with: openssl rand -hex 32
+
+services:
+  # ── Infrastructure hardening ─────────────────────────────────────
+  postgres:
+    restart: unless-stopped
+    # Do not expose ports in production — only accessible within Docker network
+    ports: !reset []
+
+  redis:
+    restart: unless-stopped
+    ports: !reset []
+
+  minio:
+    restart: unless-stopped
+    # Only expose console port for initial setup, remove after setup
+    ports:
+      - "127.0.0.1:9001:9001"
+
+  # ── Backend ──────────────────────────────────────────────────────
+  backend:
+    restart: unless-stopped
+    environment:
+      - AMLINE_ENV=production
+      - AMLINE_OTP_MAGIC_ENABLED=${AMLINE_OTP_MAGIC_ENABLED:-0}
+      - AMLINE_METRICS_ENABLED=1
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    # In production, backend is behind nginx reverse proxy — don't expose directly
+    ports:
+      - "127.0.0.1:8080:8000"
+
+  pdf-generator:
+    restart: unless-stopped
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+    ports:
+      - "127.0.0.1:8001:8000"
+
+  # ── Frontend Applications ────────────────────────────────────────
+  admin-ui:
+    restart: unless-stopped
+
+  amline-ui:
+    restart: unless-stopped
+
+  site:
+    restart: unless-stopped
+
+  seo-dashboard:
+    restart: unless-stopped
