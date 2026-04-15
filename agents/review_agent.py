@@ -70,6 +70,20 @@ class ReviewAgent:
 
         for rel_path in files_written:
             src_file = workspace / rel_path
+
+            # Guard: reject symlinks and paths outside workspace
+            try:
+                resolved = src_file.resolve()
+                workspace_resolved = workspace.resolve()
+                if not str(resolved).startswith(str(workspace_resolved) + "/") and resolved != workspace_resolved:
+                    log.warning("ReviewAgent: path escapes workspace, skipping: %s", rel_path)
+                    continue
+                if src_file.is_symlink():
+                    log.warning("ReviewAgent: symlink rejected, skipping: %s", rel_path)
+                    continue
+            except (OSError, ValueError):
+                continue
+
             if not src_file.exists():
                 continue
 

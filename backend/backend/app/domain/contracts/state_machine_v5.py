@@ -1,62 +1,197 @@
-import time
-import logging
+"""Contract State Machine v5.0 — guard-aware lifecycle management.
 
-# Setting up logging
-logging.basicConfig(level=logging.INFO)
+Integrates with :mod:`app.domain.contracts.ssot` for canonical state
+definitions and transition rules, and with :mod:`.transition_guards`
+for pre-condition enforcement.
+
+Usage::
+
+    sm = ContractStateMachine(current_status="DRAFT")
+    ok, reason = sm.can_transition_to("IN_PROGRESS")
+    if ok:
+        sm.transition("IN_PROGRESS", actor_id="user-42")
+"""
+
+from __future__ import annotations
+
+import logging
+import time
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from typing import Any, Optional, Sequence
+
+from backend.backend.app.domain.contracts.ssot import (
+    ContractLifecycleStatus,
+    can_transition,
+    is_terminal_status,
+)
+from backend.backend.app.domain.contracts.transition_guards import (
+    TransitionGuard,
+    run_guards,
+)
+
+log = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Audit log entry
+# ---------------------------------------------------------------------------
+
+@dataclass
+class AuditEntry:
+    """Immutable record of a single state transition."""
+
+    from_status: str
+    to_status: str
+    actor_id: Optional[str]
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "from": self.from_status,
+            "to": self.to_status,
+            "actor": self.actor_id,
+            "ts": self.timestamp.isoformat(),
+            **self.metadata,
+        }
+
+
+# ---------------------------------------------------------------------------
+# Errors
+# ---------------------------------------------------------------------------
 
 class StateMachineError(Exception):
-    pass
+    """Raised when a state-machine operation is invalid."""
 
-class StateMachine:
-    def __init__(self):
-        self.states = {
-            'INITIAL': self.initial_state,
-            'STATE_1': self.state_1,
-            'STATE_2': self.state_2,
-            # ... other states
-            'STATE_20': self.state_20,
-        }
-        
-        self.current_state = 'INITIAL'
-        self.sla_tracker = {}  # Example of SLA tracking
-        
-def transition(self, event):
-        try:
-            next_state = self.states[self.current_state].get(event)
-            if next_state:
-                self.current_state = next_state
-                self.log_state_change(event)
-            else:
-                raise StateMachineError(f"No transition for event {event} in state {self.current_state}")
-        except Exception as e:
-            logging.error(f"Error during transition: {e}")
-            self.handle_error(e)
-    
-    def log_state_change(self, event):
-        logging.info(f"Transitioning from {self.current_state} on event {event}")
-        self.sla_tracker[self.current_state] = time.time()
-    
-    # State methods
-    def initial_state(self):
-        return {'START_EVENT': 'STATE_1'}  # Transitions from INITIAL to STATE_1
+    def __init__(self, message: str, *, from_status: str = "", to_status: str = "") -> None:
+        self.from_status = from_status
+        self.to_status = to_status
+        super().__init__(message)
 
-    def state_1(self):
-        return {'EVENT_1': 'STATE_2', 'EVENT_2': 'STATE_3'}
 
-    def state_2(self):
-        # Define transitions for STATE_2
-        return {'EVENT_3': 'STATE_4'}
+# ---------------------------------------------------------------------------
+# State machine
+# ---------------------------------------------------------------------------
 
-    # ... Add all other states similarly ...
+_VALID_STATUSES = frozenset(s.value for s in ContractLifecycleStatus)
 
-    def state_20(self):
-        return {}  # No outgoing transitions
 
-    def handle_error(self, error):
-        logging.error(f"Handling error: {error}")
+class ContractStateMachine:
+    """Manages contract lifecycle transitions with guard enforcement.
 
-# Example usage
-if __name__ == "__main__":
-    sm = StateMachine()
-    sm.transition('START_EVENT')
-    sm.transition('EVENT_1')
+    Parameters
+    ----------
+    current_status:
+        Current :class:`ContractLifecycleStatus` value (string).
+    guards_by_target:
+        Optional mapping of ``target_status → list[TransitionGuard]``
+        evaluated before a transition is allowed.
+    """
+
+    def __init__(
+        self,
+        current_status: str = ContractLifecycleStatus.DRAFT.value,
+        *,
+        guards_by_target: dict[str, Sequence[TransitionGuard]] | None = None,
+    ) -> None:
+        if current_status not in _VALID_STATUSES:
+            raise StateMachineError(
+                f"Invalid initial status: {current_status}",
+                from_status=current_status,
+            )
+        self._status = current_status
+        self._guards: dict[str, Sequence[TransitionGuard]] = dict(guards_by_target or {})
+        self._audit: list[AuditEntry] = []
+        self._sla_tracker: dict[str, float] = {current_status: time.monotonic()}
+
+    # -- read-only properties ------------------------------------------------
+
+    @property
+    def current_status(self) -> str:
+        return self._status
+
+    @property
+    def is_terminal(self) -> bool:
+        return is_terminal_status(self._status)
+
+    @property
+    def audit_log(self) -> list[AuditEntry]:
+        return list(self._audit)
+
+    @property
+    def sla_tracker(self) -> dict[str, float]:
+        return dict(self._sla_tracker)
+
+    # -- transition logic ----------------------------------------------------
+
+    def can_transition_to(self, target: str) -> tuple[bool, Optional[str]]:
+        """Check whether transitioning to *target* is allowed.
+
+        Returns ``(True, None)`` when allowed or ``(False, reason)``
+        when blocked by topology or a guard.
+        """
+        if target not in _VALID_STATUSES:
+            return False, f"Unknown target status: {target}"
+
+        if self.is_terminal:
+            return False, f"Current status '{self._status}' is terminal — no transitions allowed"
+
+        if not can_transition(self._status, target):
+            return False, (
+                f"Transition from '{self._status}' to '{target}' "
+                "is not allowed by the lifecycle graph"
+            )
+
+        # Run guards registered for the target state
+        guards = self._guards.get(target, [])
+        if guards:
+            return run_guards(guards)
+
+        return True, None
+
+    def transition(
+        self,
+        target: str,
+        *,
+        actor_id: str | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> AuditEntry:
+        """Execute the transition to *target*.
+
+        Raises :class:`StateMachineError` if the transition is not
+        allowed (topology or guard failure).
+
+        Returns the :class:`AuditEntry` for the transition.
+        """
+        ok, reason = self.can_transition_to(target)
+        if not ok:
+            raise StateMachineError(
+                reason or "Transition blocked",
+                from_status=self._status,
+                to_status=target,
+            )
+
+        previous = self._status
+        self._status = target
+
+        entry = AuditEntry(
+            from_status=previous,
+            to_status=target,
+            actor_id=actor_id,
+            metadata=metadata or {},
+        )
+        self._audit.append(entry)
+        self._sla_tracker[target] = time.monotonic()
+
+        log.info(
+            "ContractStateMachine: %s → %s (actor=%s)",
+            previous,
+            target,
+            actor_id,
+        )
+        return entry
+
+    def register_guards(self, target: str, guards: Sequence[TransitionGuard]) -> None:
+        """Register (or replace) guards for transitions into *target*."""
+        self._guards[target] = list(guards)
