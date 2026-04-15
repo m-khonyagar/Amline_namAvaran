@@ -1,65 +1,63 @@
-# transition_guards.py
+"""Reusable guard predicates for contract state transitions."""
 
-class PartyVerifiedGuard:
-    def __init__(self, party):
-        self.party = party
-    
-    def is_verified(self):
-        # Implementation of party verification
-        return self.party.is_verified()
+from __future__ import annotations
 
-class AllRequiredSignedGuard:
-    def __init__(self, document):
-        self.document = document
-    
-    def all_signed(self):
-        # Check if all required signatures are present
-        return all(sig in self.document.signatures for sig in self.document.required_signatures)
+from typing import Any, Callable
 
-class AllSharesPaidGuard:
-    def __init__(self, shares):
-        self.shares = shares
-    
-    def are_paid(self):
-        # Check if all shares are paid
-        return all(share.is_paid() for share in self.shares)
+GuardContext = dict[str, Any]
+GuardFn = Callable[[GuardContext], bool]
 
-class ReviewerAuthorizedGuard:
-    def __init__(self, reviewer):
-        self.reviewer = reviewer
-    
-    def is_authorized(self):
-        # Check if reviewer is authorized
-        return self.reviewer.is_authorized()
 
-class AdminPrivilegeGuard:
-    def __init__(self, user):
-        self.user = user
-    
-    def has_privilege(self):
-        # Check if user has admin privilege
-        return self.user.has_admin_privilege()
+def can_invite_parties(context: GuardContext) -> bool:
+    return bool(context.get("parties"))
 
-class SLANotExceededGuard:
-    def __init__(self, sla):
-        self.sla = sla
-    
-    def is_not_exceeded(self):
-        # Check if SLA has not been exceeded
-        return self.sla.time_remaining() > 0
 
-# Define additional guards
-class SomeOtherGuard:
-    pass  # Placeholder for additional guard implementations
+def all_parties_verified(context: GuardContext) -> bool:
+    return bool(context.get("all_parties_verified"))
 
-# Utility functions
 
-def utility_function_1():
-    pass  # Example utility function
+def all_signatures_valid(context: GuardContext) -> bool:
+    if "all_signatures_valid" in context:
+        return bool(context.get("all_signatures_valid"))
+    signature_count = int(context.get("signature_count", 0))
+    required_signatures = int(context.get("required_signatures", 1))
+    return signature_count >= required_signatures
 
-def utility_function_2():
-    pass  # Another utility function
 
-# Continue adding more functionality as needed
+def payment_amount_valid(context: GuardContext) -> bool:
+    return float(context.get("payment_amount", 0) or 0) > 0
 
-# Note: Implement all required guards and utilities to meet the 280 lines requirement.
+
+def reviewer_authorized(context: GuardContext) -> bool:
+    return str(context.get("reviewer_role", "")).lower() in {"legal", "admin"}
+
+
+def admin_privilege(context: GuardContext) -> bool:
+    return str(context.get("user_role", "")).lower() == "admin"
+
+
+def tracking_code_present(context: GuardContext) -> bool:
+    if context.get("tracking_code"):
+        return True
+    external_refs = context.get("external_refs")
+    if isinstance(external_refs, dict):
+        return bool(external_refs.get("tracking_code"))
+    return False
+
+
+GUARDS: dict[str, GuardFn] = {
+    "can_invite_parties": can_invite_parties,
+    "all_parties_verified": all_parties_verified,
+    "all_signatures_valid": all_signatures_valid,
+    "payment_amount_valid": payment_amount_valid,
+    "reviewer_authorized": reviewer_authorized,
+    "admin_privilege": admin_privilege,
+    "tracking_code_present": tracking_code_present,
+}
+
+
+def evaluate_guard(name: str, context: GuardContext) -> bool:
+    guard = GUARDS.get(name)
+    if guard is None:
+        raise KeyError(f"Unknown guard: {name}")
+    return guard(context)
