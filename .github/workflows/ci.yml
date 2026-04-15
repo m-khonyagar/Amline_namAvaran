@@ -190,7 +190,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/amline-${{ matrix.service }}
           tags: |
-            type=sha,prefix=
+            type=sha,prefix=sha-
             type=raw,value=latest
 
       - name: Build and push ${{ matrix.service }}

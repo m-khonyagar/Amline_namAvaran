@@ -154,12 +154,12 @@ if [ ! -f .env ]; then
   REDIS_PASSWORD=$(openssl rand -base64 24 | tr -dc 'a-zA-Z0-9' | head -c 24)
   MINIO_PASSWORD=$(openssl rand -base64 24 | tr -dc 'a-zA-Z0-9' | head -c 24)
 
-  sed -i "s|REPLACE_WITH_OPENSSL_RAND_HEX_32|$JWT_SECRET|" .env
-  # Handle both occurrences — JWT_SECRET and SECRET_KEY may have same placeholder
-  sed -i "0,/REPLACE_WITH_OPENSSL_RAND_HEX_32/s|REPLACE_WITH_OPENSSL_RAND_HEX_32|$SECRET_KEY|" .env
-  sed -i "s|POSTGRES_PASSWORD=REPLACE_WITH_STRONG_PASSWORD|POSTGRES_PASSWORD=$PG_PASSWORD|" .env
-  sed -i "s|REDIS_PASSWORD=REPLACE_WITH_STRONG_PASSWORD|REDIS_PASSWORD=$REDIS_PASSWORD|" .env
-  sed -i "s|MINIO_SECRET_KEY=REPLACE_WITH_STRONG_PASSWORD|MINIO_SECRET_KEY=$MINIO_PASSWORD|" .env
+  # Replace placeholders with generated values
+  sed -i "s|^JWT_SECRET=.*|JWT_SECRET=$JWT_SECRET|" .env
+  sed -i "s|^SECRET_KEY=.*|SECRET_KEY=$SECRET_KEY|" .env
+  sed -i "s|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=$PG_PASSWORD|" .env
+  sed -i "s|^REDIS_PASSWORD=.*|REDIS_PASSWORD=$REDIS_PASSWORD|" .env
+  sed -i "s|^MINIO_SECRET_KEY=.*|MINIO_SECRET_KEY=$MINIO_PASSWORD|" .env
 
   ok ".env created with auto-generated secrets"
   warn "Review .env and set KAVENEGAR_API_KEY, CORS_ORIGINS, BOOTSTRAP_ADMIN_MOBILE"
