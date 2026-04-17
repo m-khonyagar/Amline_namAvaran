@@ -18,7 +18,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Health Api V1 Health Get"
                 }
@@ -41,7 +40,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Health Live Api V1 Health Live Get"
                 }
@@ -64,7 +62,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Health Ready Api V1 Health Ready Get"
                 }
@@ -88,7 +85,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Health Metrics Api V1 Health Metrics Get"
                 }
@@ -189,9 +185,59 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Auth Me Api V1 Auth Me Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Auth Logout",
+        "description": "خروج از سیستم — ابطال refresh token فعلی.",
+        "operationId": "auth_logout_api_v1_auth_logout_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Response Auth Logout Api V1 Auth Logout Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -682,7 +728,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/ContractOut"
+                    "$ref": "#/components/schemas/app__schemas__contract__ContractOut"
                   },
                   "type": "array",
                   "title": "Response List Contracts Api V1 Contracts V2 Get"
@@ -716,7 +762,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ContractOut"
+                  "$ref": "#/components/schemas/app__schemas__contract__ContractOut"
                 }
               }
             }
@@ -765,7 +811,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ContractOut"
+                  "$ref": "#/components/schemas/app__schemas__contract__ContractOut"
                 }
               }
             }
@@ -819,7 +865,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ContractOut"
+                  "$ref": "#/components/schemas/app__schemas__contract__ContractOut"
                 }
               }
             }
@@ -1759,7 +1805,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Financials Wallet Summary Api V1 Financials Wallets Get"
                 }
@@ -1814,7 +1859,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Bank Mock Verify Api V1 Financials Bank Mock Verify Post"
                 }
@@ -1849,7 +1893,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Promos List Api V1 Financials Promos Get"
                 }
@@ -1884,7 +1927,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Promos Generate Api V1 Financials Promos Generate Post"
                 }
@@ -1929,7 +1971,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Promos Bulk Generate Api V1 Financials Promos Bulk Generate Post"
                 }
@@ -1952,6 +1993,314 @@
             "HTTPBearer": []
           }
         ]
+      }
+    },
+    "/api/v1/contracts": {
+      "get": {
+        "tags": [
+          "ssot-contracts",
+          "ssot-contracts"
+        ],
+        "summary": "List Contracts",
+        "description": "GET /contracts → لیست قراردادها با رعایت visibility.",
+        "operationId": "list_contracts_api_v1_contracts_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ContractListOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Contracts Api V1 Contracts Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "ssot-contracts",
+          "ssot-contracts"
+        ],
+        "summary": "Create Draft",
+        "description": "POST /contracts → ایجاد پیش‌نویس قرارداد جدید.",
+        "operationId": "create_draft_api_v1_contracts_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftCreateBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/contracts/{draft_id}": {
+      "patch": {
+        "tags": [
+          "ssot-contracts",
+          "ssot-contracts"
+        ],
+        "summary": "Update Draft",
+        "description": "PATCH /contracts/{id} → به‌روزرسانی پیش‌نویس.",
+        "operationId": "update_draft_api_v1_contracts__draft_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Draft Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftUpdateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/contracts/{draft_id}/finalize": {
+      "post": {
+        "tags": [
+          "ssot-contracts",
+          "ssot-contracts"
+        ],
+        "summary": "Finalize Draft",
+        "description": "POST /contracts/{id}/finalize → تبدیل پیش‌نویس به قرارداد نهایی.",
+        "operationId": "finalize_draft_api_v1_contracts__draft_id__finalize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Draft Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinalizeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__schemas__v1__ssot_contract__ContractOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/contracts/{contract_id}/invite": {
+      "post": {
+        "tags": [
+          "ssot-contracts",
+          "ssot-contracts"
+        ],
+        "summary": "Invite Party",
+        "description": "POST /contracts/{id}/invite → دعوت طرف قرارداد.",
+        "operationId": "invite_party_api_v1_contracts__contract_id__invite_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Contract Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/contracts/{contract_id}/sign": {
+      "post": {
+        "tags": [
+          "contracts"
+        ],
+        "summary": "Sign",
+        "operationId": "sign_api_v1_contracts__contract_id__sign_post",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Contract Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegacySendSignBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Response Sign Api V1 Contracts  Contract Id  Sign Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/wizard/start": {
@@ -3383,7 +3732,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Resolve Info Api V1 Contracts Resolve Info Get"
                 }
@@ -3416,7 +3764,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Contracts Start Api V1 Contracts Start Post"
                 }
@@ -3484,7 +3831,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Contracts Get Api V1 Contracts  Contract Id  Get"
                 }
               }
@@ -3528,7 +3874,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Contracts Status Api V1 Contracts  Contract Id  Status Get"
                 }
               }
@@ -3572,7 +3917,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Commission Invoice Api V1 Contracts  Contract Id  Commission Invoice Get"
                 }
               }
@@ -3616,7 +3960,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Contracts Revoke Api V1 Contracts  Contract Id  Revoke Post"
                 }
               }
@@ -3670,7 +4013,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Contracts Patch External Refs Api V1 Contracts  Contract Id  External Refs Patch"
                 }
               }
@@ -3724,7 +4066,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Contracts Patch Terms Api V1 Contracts  Contract Id  Terms Patch"
                 }
               }
@@ -3778,7 +4119,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Contracts Add Commission Api V1 Contracts  Contract Id  Commissions Post"
                 }
               }
@@ -3820,7 +4160,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Contracts List Commissions Api V1 Contracts  Contract Id  Commissions Get"
                 }
               }
@@ -3883,7 +4222,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Commission Delegate Pay Request Api V1 Contracts  Contract Id  Commissions  Commission Id  Delegate Pay Request Post"
                 }
               }
@@ -3946,7 +4284,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Commission Delegate Pay Verify Api V1 Contracts  Contract Id  Commissions  Commission Id  Delegate Pay Verify Post"
                 }
               }
@@ -3990,7 +4327,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Party Landlord Api V1 Contracts  Contract Id  Party Landlord Post"
                 }
               }
@@ -4053,7 +4389,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Party Patch Api V1 Contracts  Contract Id  Party  Party Id  Patch"
                 }
               }
@@ -4104,7 +4439,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Party Delete Api V1 Contracts  Contract Id  Party  Party Id  Delete"
                 }
               }
@@ -4158,7 +4492,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Landlord Set Api V1 Contracts  Contract Id  Party Landlord Set Post"
                 }
               }
@@ -4202,7 +4535,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Party Tenant Api V1 Contracts  Contract Id  Party Tenant Post"
                 }
               }
@@ -4256,7 +4588,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Tenant Set Api V1 Contracts  Contract Id  Party Tenant Set Post"
                 }
               }
@@ -4310,7 +4641,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Home Info Api V1 Contracts  Contract Id  Home Info Post"
                 }
               }
@@ -4364,7 +4694,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Dating Api V1 Contracts  Contract Id  Dating Post"
                 }
               }
@@ -4418,7 +4747,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Mortgage Api V1 Contracts  Contract Id  Mortgage Post"
                 }
               }
@@ -4472,7 +4800,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Renting Api V1 Contracts  Contract Id  Renting Post"
                 }
               }
@@ -4526,62 +4853,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Sign Request Api V1 Contracts  Contract Id  Sign Request Post"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/contracts/{contract_id}/sign": {
-      "post": {
-        "tags": [
-          "contracts"
-        ],
-        "summary": "Sign",
-        "operationId": "sign_api_v1_contracts__contract_id__sign_post",
-        "parameters": [
-          {
-            "name": "contract_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Contract Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LegacySendSignBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true,
-                  "title": "Response Sign Api V1 Contracts  Contract Id  Sign Post"
                 }
               }
             }
@@ -4634,7 +4906,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Sign Verify Api V1 Contracts  Contract Id  Sign Verify Post"
                 }
               }
@@ -4688,7 +4959,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Sign Agent Verify Api V1 Contracts  Contract Id  Sign Agent Verify Post"
                 }
               }
@@ -4742,7 +5012,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Sign Admin Assist Request Api V1 Contracts  Contract Id  Sign Admin Assist Request Post"
                 }
               }
@@ -4796,7 +5065,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Sign Admin Assist Verify Api V1 Contracts  Contract Id  Sign Admin Assist Verify Post"
                 }
               }
@@ -4840,7 +5108,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Sign Auto Apply Api V1 Contracts  Contract Id  Sign Auto Post"
                 }
               }
@@ -4894,7 +5161,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Sign Set Api V1 Contracts  Contract Id  Sign Set Post"
                 }
               }
@@ -4948,7 +5214,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Add Witness Api V1 Contracts  Contract Id  Add Witness Post"
                 }
               }
@@ -5002,7 +5267,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Witness Request Api V1 Contracts  Contract Id  Witness Request Post"
                 }
               }
@@ -5056,7 +5320,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Witness Send Otp Api V1 Contracts  Contract Id  Witness Send Otp Post"
                 }
               }
@@ -5110,8 +5373,51 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Witness Verify Api V1 Contracts  Contract Id  Witness Verify Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/contracts/{contract_id}/pdf": {
+      "get": {
+        "tags": [
+          "contracts"
+        ],
+        "summary": "Contract Pdf V1",
+        "description": "دانلود PDF قرارداد (PRD §5.3).\n\nاین مسیر از Flow Service استفاده می‌کند تا PDF قرارداد را\nاز سرویس ``pdf-generator`` دریافت کند.",
+        "operationId": "contract_pdf_v1_api_v1_contracts__contract_id__pdf_get",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Contract Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Response Contract Pdf V1 Api V1 Contracts  Contract Id  Pdf Get"
                 }
               }
             }
@@ -5351,8 +5657,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "additionalProperties": true
+                    "type": "object"
                   },
                   "title": "Response Provinces Cities Api V1 Provinces Cities Get"
                 }
@@ -5387,7 +5692,6 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
                     "type": "object"
                   },
                   "type": "array",
@@ -5413,7 +5717,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Files Upload Api V1 Files Upload Post"
                 }
@@ -5455,7 +5758,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Webhook Telegram Api V1 Webhooks Telegram Post"
                 }
               }
@@ -5487,7 +5789,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Webhook Bale Api V1 Webhooks Bale Post"
                 }
@@ -5510,7 +5811,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Webhook Eitaa Api V1 Webhooks Eitaa Post"
                 }
@@ -5533,7 +5833,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Admin Users Api V1 Admin Users Get"
                 }
@@ -5568,7 +5867,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Admin User Api V1 Admin Users  User Id  Get"
                 }
               }
@@ -5601,7 +5899,6 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
                     "type": "object"
                   },
                   "type": "array",
@@ -5634,7 +5931,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Admin Roles Create Api V1 Admin Roles Post"
                 }
@@ -5689,7 +5985,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Admin Roles Patch Api V1 Admin Roles  Role Id  Patch"
                 }
               }
@@ -5732,7 +6027,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Admin Audit Create Api V1 Admin Audit Post"
                 }
               }
@@ -5785,7 +6079,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Admin Audit List Api V1 Admin Audit Get"
                 }
               }
@@ -5817,7 +6110,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Admin Auth Heartbeat Api V1 Admin Auth Heartbeat Post"
                 }
@@ -5840,7 +6132,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Admin Auth Me Api V1 Admin Auth Me Get"
                 }
@@ -5919,7 +6210,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Admin Staff Activity Api V1 Admin Staff Activity Get"
                 }
               }
@@ -5974,7 +6264,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Admin Sessions List Api V1 Admin Sessions Get"
                 }
               }
@@ -6006,7 +6295,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Admin Metrics Summary Api V1 Admin Metrics Summary Get"
                 }
@@ -6030,7 +6318,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Admin Metrics Operations Api V1 Admin Metrics Operations Get"
                 }
@@ -6080,7 +6367,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Admin Notifications List Api V1 Admin Notifications Get"
                 }
               }
@@ -6121,7 +6407,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Admin Notifications Create Api V1 Admin Notifications Post"
                 }
               }
@@ -6213,7 +6498,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Crm Stats Api V1 Admin Crm Stats Get"
                 }
@@ -6267,7 +6551,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Crm Lead Create Api V1 Admin Crm Leads Post"
                 }
@@ -6312,7 +6595,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Crm Lead Get Api V1 Admin Crm Leads  Lead Id  Get"
                 }
               }
@@ -6364,7 +6646,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Crm Lead Patch Api V1 Admin Crm Leads  Lead Id  Patch"
                 }
               }
@@ -6498,7 +6779,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Crm Task Create Api V1 Admin Crm Leads  Lead Id  Tasks Post"
                 }
               }
@@ -6561,7 +6841,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Crm Task Patch Api V1 Admin Crm Leads  Lead Id  Tasks  Task Id  Patch"
                 }
               }
@@ -6704,7 +6983,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Crm Activity Create Api V1 Admin Crm Leads  Lead Id  Activities Post"
                 }
               }
@@ -7414,7 +7692,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Wallet Post Ledger Api V1 Wallets  User Id  Ledger Post"
                 }
               }
@@ -8218,7 +8495,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Dispatch Notification Api V1 Notifications Dispatch Post"
                 }
@@ -8375,8 +8651,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "additionalProperties": true
+                    "type": "object"
                   },
                   "title": "Response Nominatim Search Api V1 Geo Nominatim Search Get"
                 }
@@ -8410,8 +8685,8 @@
             "required": true,
             "schema": {
               "type": "number",
-              "maximum": 90,
-              "minimum": -90,
+              "maximum": 90.0,
+              "minimum": -90.0,
               "title": "Lat"
             }
           },
@@ -8421,8 +8696,8 @@
             "required": true,
             "schema": {
               "type": "number",
-              "maximum": 180,
-              "minimum": -180,
+              "maximum": 180.0,
+              "minimum": -180.0,
               "title": "Lon"
             }
           }
@@ -8434,7 +8709,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Nominatim Reverse Api V1 Geo Nominatim Reverse Get"
                 }
               }
@@ -8531,7 +8805,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Admin List Beta Invites Api V1 Admin Beta Invitations Get"
                 }
               }
@@ -8745,7 +9018,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Support List Tickets Api V1 Support Tickets Get"
                 }
               }
@@ -9143,7 +9415,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Ops Client Errors Api V1 Ops Client Errors Post"
                 }
@@ -9623,6 +9894,48 @@
         }
       }
     },
+    "/api/v1/listings/{listing_id}/publish": {
+      "post": {
+        "tags": [
+          "listings"
+        ],
+        "summary": "Publish Listing",
+        "operationId": "publish_listing_api_v1_listings__listing_id__publish_post",
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Listing Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/media/listing-image": {
       "post": {
         "tags": [
@@ -9685,7 +9998,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Upload Listing Media Api V1 Media Listing Image Post"
                 }
               }
@@ -9717,7 +10029,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Meta Context Api V1 Meta Context Get"
                 }
@@ -9740,7 +10051,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Ml Status Api V1 Ai Ml Status Get"
                 }
@@ -10374,8 +10684,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "string",
-                  "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                  "type": "string"
                 },
                 {
                   "type": "null"
@@ -10394,8 +10703,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "string",
-                  "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                  "type": "string"
                 },
                 {
                   "type": "null"
@@ -10676,7 +10984,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Reindex Meilisearch Api V1 Integrations Meilisearch Reindex Post"
                 }
               }
@@ -10709,7 +11016,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Meilisearch Index Stats Api V1 Integrations Meilisearch Stats Get"
                 }
@@ -10745,7 +11051,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Feature Flags Api V1 Integrations Feature Flags Get"
                 }
               }
@@ -10845,7 +11150,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Thumbor Presets Api V1 Integrations Thumbor Presets Get"
                 }
               }
@@ -10877,7 +11181,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Matrix Status Api V1 Integrations Matrix Status Get"
                 }
@@ -10900,7 +11203,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Integrations Health Summary Api V1 Integrations Health Summary Get"
                 }
@@ -11135,7 +11437,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Listing Public Meta Api V1 Public Listings  Listing Id  Meta Get"
                 }
               }
@@ -11167,7 +11468,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Admin Auth Me Admin Auth Me Get"
                 }
@@ -11195,7 +11495,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Admin Auth Heartbeat Admin Auth Heartbeat Post"
                 }
@@ -11218,7 +11517,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Admin Users Admin Users Get"
                 }
@@ -11253,7 +11551,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Admin User Admin Users  User Id  Get"
                 }
               }
@@ -11286,7 +11583,6 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
                     "type": "object"
                   },
                   "type": "array",
@@ -11319,7 +11615,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Admin Roles Create Admin Roles Post"
                 }
@@ -11374,7 +11669,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Admin Roles Patch Admin Roles  Role Id  Patch"
                 }
               }
@@ -11417,7 +11711,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Admin Audit Create Admin Audit Post"
                 }
               }
@@ -11470,7 +11763,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Admin Audit List Admin Audit Get"
                 }
               }
@@ -11553,7 +11845,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Admin Staff Activity Admin Staff Activity Get"
                 }
               }
@@ -11608,7 +11899,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Admin Sessions List Admin Sessions Get"
                 }
               }
@@ -11640,7 +11930,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Admin Metrics Summary Admin Metrics Summary Get"
                 }
@@ -11690,7 +11979,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Admin Notifications List Admin Notifications Get"
                 }
               }
@@ -11731,7 +12019,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Admin Notifications Create Admin Notifications Post"
                 }
               }
@@ -11794,7 +12081,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Crm Lead Create Admin Crm Leads Post"
                 }
@@ -11839,7 +12125,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Crm Lead Get Admin Crm Leads  Lead Id  Get"
                 }
               }
@@ -11891,7 +12176,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Crm Lead Patch Admin Crm Leads  Lead Id  Patch"
                 }
               }
@@ -12030,7 +12314,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Crm Activity Create Admin Crm Leads  Lead Id  Activities Post"
                 }
               }
@@ -12126,7 +12409,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Crm Task Create Admin Crm Leads  Lead Id  Tasks Post"
                 }
               }
@@ -12189,7 +12471,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Crm Task Patch Admin Crm Leads  Lead Id  Tasks  Task Id  Patch"
                 }
               }
@@ -12264,7 +12545,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Crm Stats Admin Crm Stats Get"
                 }
@@ -12357,7 +12637,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Health Health Get"
                 }
@@ -12380,7 +12659,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Health Live Health Live Get"
                 }
@@ -12403,7 +12681,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Health Ready Health Ready Get"
                 }
@@ -12427,7 +12704,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Health Metrics Health Metrics Get"
                 }
@@ -12528,9 +12804,59 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Auth Me Auth Me Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Auth Logout",
+        "description": "خروج از سیستم — ابطال refresh token فعلی.",
+        "operationId": "auth_logout_auth_logout_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Response Auth Logout Auth Logout Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -13021,7 +13347,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/ContractOut"
+                    "$ref": "#/components/schemas/app__schemas__contract__ContractOut"
                   },
                   "type": "array",
                   "title": "Response List Contracts Contracts V2 Get"
@@ -13055,7 +13381,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ContractOut"
+                  "$ref": "#/components/schemas/app__schemas__contract__ContractOut"
                 }
               }
             }
@@ -13104,7 +13430,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ContractOut"
+                  "$ref": "#/components/schemas/app__schemas__contract__ContractOut"
                 }
               }
             }
@@ -13158,7 +13484,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ContractOut"
+                  "$ref": "#/components/schemas/app__schemas__contract__ContractOut"
                 }
               }
             }
@@ -14098,7 +14424,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Financials Wallet Summary Financials Wallets Get"
                 }
@@ -14153,7 +14478,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Bank Mock Verify Financials Bank Mock Verify Post"
                 }
@@ -14188,7 +14512,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Promos List Financials Promos Get"
                 }
@@ -14223,7 +14546,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Promos Generate Financials Promos Generate Post"
                 }
@@ -14268,7 +14590,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Promos Bulk Generate Financials Promos Bulk Generate Post"
                 }
@@ -14291,6 +14612,314 @@
             "HTTPBearer": []
           }
         ]
+      }
+    },
+    "/contracts": {
+      "get": {
+        "tags": [
+          "ssot-contracts",
+          "ssot-contracts"
+        ],
+        "summary": "List Contracts",
+        "description": "GET /contracts → لیست قراردادها با رعایت visibility.",
+        "operationId": "list_contracts_contracts_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ContractListOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Contracts Contracts Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "ssot-contracts",
+          "ssot-contracts"
+        ],
+        "summary": "Create Draft",
+        "description": "POST /contracts → ایجاد پیش‌نویس قرارداد جدید.",
+        "operationId": "create_draft_contracts_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftCreateBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/contracts/{draft_id}": {
+      "patch": {
+        "tags": [
+          "ssot-contracts",
+          "ssot-contracts"
+        ],
+        "summary": "Update Draft",
+        "description": "PATCH /contracts/{id} → به‌روزرسانی پیش‌نویس.",
+        "operationId": "update_draft_contracts__draft_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Draft Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftUpdateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/contracts/{draft_id}/finalize": {
+      "post": {
+        "tags": [
+          "ssot-contracts",
+          "ssot-contracts"
+        ],
+        "summary": "Finalize Draft",
+        "description": "POST /contracts/{id}/finalize → تبدیل پیش‌نویس به قرارداد نهایی.",
+        "operationId": "finalize_draft_contracts__draft_id__finalize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Draft Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinalizeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__schemas__v1__ssot_contract__ContractOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/contracts/{contract_id}/invite": {
+      "post": {
+        "tags": [
+          "ssot-contracts",
+          "ssot-contracts"
+        ],
+        "summary": "Invite Party",
+        "description": "POST /contracts/{id}/invite → دعوت طرف قرارداد.",
+        "operationId": "invite_party_contracts__contract_id__invite_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Contract Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/contracts/{contract_id}/sign": {
+      "post": {
+        "tags": [
+          "contracts"
+        ],
+        "summary": "Sign",
+        "operationId": "sign_contracts__contract_id__sign_post",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Contract Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegacySendSignBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Response Sign Contracts  Contract Id  Sign Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/wizard/start": {
@@ -15722,7 +16351,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Resolve Info Contracts Resolve Info Get"
                 }
@@ -15755,7 +16383,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Contracts Start Contracts Start Post"
                 }
@@ -15823,7 +16450,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Contracts Get Contracts  Contract Id  Get"
                 }
               }
@@ -15867,7 +16493,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Contracts Status Contracts  Contract Id  Status Get"
                 }
               }
@@ -15911,7 +16536,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Commission Invoice Contracts  Contract Id  Commission Invoice Get"
                 }
               }
@@ -15955,7 +16579,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Contracts Revoke Contracts  Contract Id  Revoke Post"
                 }
               }
@@ -16009,7 +16632,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Contracts Patch External Refs Contracts  Contract Id  External Refs Patch"
                 }
               }
@@ -16063,7 +16685,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Contracts Patch Terms Contracts  Contract Id  Terms Patch"
                 }
               }
@@ -16117,7 +16738,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Contracts Add Commission Contracts  Contract Id  Commissions Post"
                 }
               }
@@ -16159,7 +16779,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Contracts List Commissions Contracts  Contract Id  Commissions Get"
                 }
               }
@@ -16222,7 +16841,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Commission Delegate Pay Request Contracts  Contract Id  Commissions  Commission Id  Delegate Pay Request Post"
                 }
               }
@@ -16285,7 +16903,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Commission Delegate Pay Verify Contracts  Contract Id  Commissions  Commission Id  Delegate Pay Verify Post"
                 }
               }
@@ -16329,7 +16946,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Party Landlord Contracts  Contract Id  Party Landlord Post"
                 }
               }
@@ -16392,7 +17008,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Party Patch Contracts  Contract Id  Party  Party Id  Patch"
                 }
               }
@@ -16443,7 +17058,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Party Delete Contracts  Contract Id  Party  Party Id  Delete"
                 }
               }
@@ -16497,7 +17111,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Landlord Set Contracts  Contract Id  Party Landlord Set Post"
                 }
               }
@@ -16541,7 +17154,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Party Tenant Contracts  Contract Id  Party Tenant Post"
                 }
               }
@@ -16595,7 +17207,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Tenant Set Contracts  Contract Id  Party Tenant Set Post"
                 }
               }
@@ -16649,7 +17260,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Home Info Contracts  Contract Id  Home Info Post"
                 }
               }
@@ -16703,7 +17313,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Dating Contracts  Contract Id  Dating Post"
                 }
               }
@@ -16757,7 +17366,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Mortgage Contracts  Contract Id  Mortgage Post"
                 }
               }
@@ -16811,7 +17419,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Renting Contracts  Contract Id  Renting Post"
                 }
               }
@@ -16865,62 +17472,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Sign Request Contracts  Contract Id  Sign Request Post"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/contracts/{contract_id}/sign": {
-      "post": {
-        "tags": [
-          "contracts"
-        ],
-        "summary": "Sign",
-        "operationId": "sign_contracts__contract_id__sign_post",
-        "parameters": [
-          {
-            "name": "contract_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Contract Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LegacySendSignBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true,
-                  "title": "Response Sign Contracts  Contract Id  Sign Post"
                 }
               }
             }
@@ -16973,7 +17525,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Sign Verify Contracts  Contract Id  Sign Verify Post"
                 }
               }
@@ -17027,7 +17578,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Sign Agent Verify Contracts  Contract Id  Sign Agent Verify Post"
                 }
               }
@@ -17081,7 +17631,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Sign Admin Assist Request Contracts  Contract Id  Sign Admin Assist Request Post"
                 }
               }
@@ -17135,7 +17684,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Sign Admin Assist Verify Contracts  Contract Id  Sign Admin Assist Verify Post"
                 }
               }
@@ -17179,7 +17727,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Sign Auto Apply Contracts  Contract Id  Sign Auto Post"
                 }
               }
@@ -17233,7 +17780,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Sign Set Contracts  Contract Id  Sign Set Post"
                 }
               }
@@ -17287,7 +17833,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Add Witness Contracts  Contract Id  Add Witness Post"
                 }
               }
@@ -17341,7 +17886,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Witness Request Contracts  Contract Id  Witness Request Post"
                 }
               }
@@ -17395,7 +17939,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Witness Send Otp Contracts  Contract Id  Witness Send Otp Post"
                 }
               }
@@ -17449,8 +17992,51 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Witness Verify Contracts  Contract Id  Witness Verify Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/contracts/{contract_id}/pdf": {
+      "get": {
+        "tags": [
+          "contracts"
+        ],
+        "summary": "Contract Pdf V1",
+        "description": "دانلود PDF قرارداد (PRD §5.3).\n\nاین مسیر از Flow Service استفاده می‌کند تا PDF قرارداد را\nاز سرویس ``pdf-generator`` دریافت کند.",
+        "operationId": "contract_pdf_v1_contracts__contract_id__pdf_get",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Contract Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Response Contract Pdf V1 Contracts  Contract Id  Pdf Get"
                 }
               }
             }
@@ -17690,8 +18276,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "additionalProperties": true
+                    "type": "object"
                   },
                   "title": "Response Provinces Cities Provinces Cities Get"
                 }
@@ -17726,7 +18311,6 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
                     "type": "object"
                   },
                   "type": "array",
@@ -17752,7 +18336,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Files Upload Files Upload Post"
                 }
@@ -17794,7 +18377,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Webhook Telegram Webhooks Telegram Post"
                 }
               }
@@ -17826,7 +18408,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Webhook Bale Webhooks Bale Post"
                 }
@@ -17849,7 +18430,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Webhook Eitaa Webhooks Eitaa Post"
                 }
@@ -17873,7 +18453,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Admin Metrics Operations Admin Metrics Operations Get"
                 }
@@ -18633,7 +19212,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Wallet Post Ledger Wallets  User Id  Ledger Post"
                 }
               }
@@ -19437,7 +20015,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Dispatch Notification Notifications Dispatch Post"
                 }
@@ -19594,8 +20171,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "additionalProperties": true
+                    "type": "object"
                   },
                   "title": "Response Nominatim Search Geo Nominatim Search Get"
                 }
@@ -19629,8 +20205,8 @@
             "required": true,
             "schema": {
               "type": "number",
-              "maximum": 90,
-              "minimum": -90,
+              "maximum": 90.0,
+              "minimum": -90.0,
               "title": "Lat"
             }
           },
@@ -19640,8 +20216,8 @@
             "required": true,
             "schema": {
               "type": "number",
-              "maximum": 180,
-              "minimum": -180,
+              "maximum": 180.0,
+              "minimum": -180.0,
               "title": "Lon"
             }
           }
@@ -19653,7 +20229,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Nominatim Reverse Geo Nominatim Reverse Get"
                 }
               }
@@ -19750,7 +20325,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Admin List Beta Invites Admin Beta Invitations Get"
                 }
               }
@@ -19964,7 +20538,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Support List Tickets Support Tickets Get"
                 }
               }
@@ -20362,7 +20935,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Ops Client Errors Ops Client Errors Post"
                 }
@@ -20842,6 +21414,48 @@
         }
       }
     },
+    "/listings/{listing_id}/publish": {
+      "post": {
+        "tags": [
+          "listings"
+        ],
+        "summary": "Publish Listing",
+        "operationId": "publish_listing_listings__listing_id__publish_post",
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Listing Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/media/listing-image": {
       "post": {
         "tags": [
@@ -20904,7 +21518,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Upload Listing Media Media Listing Image Post"
                 }
               }
@@ -20936,7 +21549,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Meta Context Meta Context Get"
                 }
@@ -20959,7 +21571,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Ml Status Ai Ml Status Get"
                 }
@@ -21593,8 +22204,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "string",
-                  "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                  "type": "string"
                 },
                 {
                   "type": "null"
@@ -21613,8 +22223,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "string",
-                  "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                  "type": "string"
                 },
                 {
                   "type": "null"
@@ -21895,7 +22504,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Reindex Meilisearch Integrations Meilisearch Reindex Post"
                 }
               }
@@ -21928,7 +22536,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Meilisearch Index Stats Integrations Meilisearch Stats Get"
                 }
@@ -21964,7 +22571,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Feature Flags Integrations Feature Flags Get"
                 }
               }
@@ -22064,7 +22670,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Thumbor Presets Integrations Thumbor Presets Get"
                 }
               }
@@ -22096,7 +22701,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Matrix Status Integrations Matrix Status Get"
                 }
@@ -22119,7 +22723,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "type": "object",
                   "title": "Response Integrations Health Summary Integrations Health Summary Get"
                 }
@@ -22354,7 +22957,6 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true,
                   "title": "Response Listing Public Meta Public Listings  Listing Id  Meta Get"
                 }
               }
@@ -22591,7 +23193,6 @@
           "properties": {
             "anyOf": [
               {
-                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -22659,7 +23260,6 @@
         "properties": {
           "groups": {
             "items": {
-              "additionalProperties": true,
               "type": "object"
             },
             "type": "array",
@@ -23026,7 +23626,6 @@
           "metadata": {
             "anyOf": [
               {
-                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -23202,7 +23801,7 @@
         "properties": {
           "file": {
             "type": "string",
-            "contentMediaType": "application/octet-stream",
+            "format": "binary",
             "title": "File"
           }
         },
@@ -23216,7 +23815,7 @@
         "properties": {
           "file": {
             "type": "string",
-            "contentMediaType": "application/octet-stream",
+            "format": "binary",
             "title": "File"
           }
         },
@@ -23230,7 +23829,7 @@
         "properties": {
           "file": {
             "type": "string",
-            "contentMediaType": "application/octet-stream",
+            "format": "binary",
             "title": "File"
           }
         },
@@ -23244,7 +23843,7 @@
         "properties": {
           "file": {
             "type": "string",
-            "contentMediaType": "application/octet-stream",
+            "format": "binary",
             "title": "File"
           }
         },
@@ -23582,49 +24181,34 @@
         "type": "object",
         "title": "ContractExternalRefsPatchBody"
       },
-      "ContractOut": {
+      "ContractListOut": {
         "properties": {
           "id": {
             "type": "string",
             "title": "Id"
           },
-          "property_id": {
-            "type": "string",
-            "title": "Property Id"
-          },
-          "owner_id": {
-            "type": "string",
-            "title": "Owner Id"
-          },
-          "tenant_id": {
-            "type": "string",
-            "title": "Tenant Id"
-          },
-          "contract_type": {
-            "type": "string",
-            "title": "Contract Type"
-          },
-          "deposit_amount": {
-            "type": "number",
-            "title": "Deposit Amount"
-          },
-          "rent_amount": {
-            "type": "number",
-            "title": "Rent Amount"
-          },
-          "start_date": {
-            "type": "string",
-            "format": "date",
-            "title": "Start Date"
-          },
-          "end_date": {
-            "type": "string",
-            "format": "date",
-            "title": "End Date"
+          "contract_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Number"
           },
           "status": {
             "type": "string",
             "title": "Status"
+          },
+          "visibility": {
+            "type": "string",
+            "title": "Visibility"
+          },
+          "creator_id": {
+            "type": "string",
+            "title": "Creator Id"
           },
           "tracking_code": {
             "type": "string",
@@ -23639,19 +24223,15 @@
         "type": "object",
         "required": [
           "id",
-          "property_id",
-          "owner_id",
-          "tenant_id",
-          "contract_type",
-          "deposit_amount",
-          "rent_amount",
-          "start_date",
-          "end_date",
+          "contract_number",
           "status",
+          "visibility",
+          "creator_id",
           "tracking_code",
           "created_at"
         ],
-        "title": "ContractOut"
+        "title": "ContractListOut",
+        "description": "آیتم لیست قراردادها."
       },
       "ContractStartBody": {
         "properties": {
@@ -23708,7 +24288,6 @@
       "ContractTermsPatchBody": {
         "properties": {
           "terms": {
-            "additionalProperties": true,
             "type": "object",
             "title": "Terms",
             "description": "JSON مطابق ssot_kind (مثلاً sale/rent/exchange)"
@@ -23946,7 +24525,6 @@
           },
           "monthly_breakdown": {
             "items": {
-              "additionalProperties": true,
               "type": "object"
             },
             "type": "array",
@@ -24954,6 +25532,157 @@
         ],
         "title": "DisputeRead"
       },
+      "DraftCreateBody": {
+        "properties": {
+          "visibility": {
+            "type": "string",
+            "title": "Visibility",
+            "description": "people_only | shared | team | public",
+            "default": "people_only"
+          },
+          "advisor_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Advisor Id",
+            "description": "شناسه مشاور (اختیاری)"
+          },
+          "step": {
+            "type": "string",
+            "title": "Step",
+            "description": "مرحله فعلی ویزارد",
+            "default": "init"
+          },
+          "data": {
+            "type": "object",
+            "title": "Data",
+            "description": "داده‌های JSON پیش‌نویس"
+          }
+        },
+        "type": "object",
+        "title": "DraftCreateBody",
+        "description": "بدنه ایجاد پیش‌نویس قرارداد."
+      },
+      "DraftOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "contract_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Id"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "step": {
+            "type": "string",
+            "title": "Step"
+          },
+          "data": {
+            "type": "object",
+            "title": "Data"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "contract_id",
+          "user_id",
+          "step",
+          "data",
+          "version",
+          "expires_at",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "DraftOut",
+        "description": "پاسخ پیش‌نویس قرارداد."
+      },
+      "DraftUpdateBody": {
+        "properties": {
+          "visibility": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visibility"
+          },
+          "advisor_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Advisor Id"
+          },
+          "step": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Step"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          }
+        },
+        "type": "object",
+        "title": "DraftUpdateBody",
+        "description": "بدنه به‌روزرسانی پیش‌نویس."
+      },
       "ExternalRefsFields": {
         "properties": {
           "khodnevis_id": {
@@ -24994,6 +25723,25 @@
         "type": "object",
         "title": "ExternalRefsFields",
         "description": "Nullable integration IDs (SSOT §3.1)."
+      },
+      "FinalizeBody": {
+        "properties": {
+          "contract_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Number",
+            "description": "شماره قرارداد (اگر خالی باشد اتوماتیک ساخته می‌شود)"
+          }
+        },
+        "type": "object",
+        "title": "FinalizeBody",
+        "description": "بدنه نهایی‌سازی پیش‌نویس به قرارداد."
       },
       "GamificationRead": {
         "properties": {
@@ -25127,6 +25875,27 @@
           "strings"
         ],
         "title": "I18nBundleResponse"
+      },
+      "InviteBody": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "description": "شناسه کاربر دعوت‌شده"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "description": "creator | principal | representative | witness | agent_signer",
+            "default": "principal"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id"
+        ],
+        "title": "InviteBody",
+        "description": "بدنه دعوت طرف قرارداد."
       },
       "InvoiceLineRead": {
         "properties": {
@@ -25401,8 +26170,7 @@
                 "type": "number"
               },
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                "type": "string"
               }
             ],
             "title": "Price Amount"
@@ -25460,8 +26228,7 @@
                 "type": "number"
               },
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                "type": "string"
               },
               {
                 "type": "null"
@@ -25486,8 +26253,7 @@
                 "type": "number"
               },
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                "type": "string"
               },
               {
                 "type": "null"
@@ -25501,8 +26267,7 @@
                 "type": "number"
               },
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                "type": "string"
               },
               {
                 "type": "null"
@@ -25596,7 +26361,6 @@
           },
           "price_amount": {
             "type": "string",
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Price Amount"
           },
           "currency": {
@@ -25643,8 +26407,7 @@
           "area_sqm": {
             "anyOf": [
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                "type": "string"
               },
               {
                 "type": "null"
@@ -25666,8 +26429,7 @@
           "latitude": {
             "anyOf": [
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                "type": "string"
               },
               {
                 "type": "null"
@@ -25678,8 +26440,7 @@
           "longitude": {
             "anyOf": [
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                "type": "string"
               },
               {
                 "type": "null"
@@ -25770,8 +26531,7 @@
                 "type": "number"
               },
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                "type": "string"
               },
               {
                 "type": "null"
@@ -25850,8 +26610,7 @@
                 "type": "number"
               },
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                "type": "string"
               },
               {
                 "type": "null"
@@ -25876,8 +26635,7 @@
                 "type": "number"
               },
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                "type": "string"
               },
               {
                 "type": "null"
@@ -25891,8 +26649,7 @@
                 "type": "number"
               },
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                "type": "string"
               },
               {
                 "type": "null"
@@ -26176,7 +26933,6 @@
           "payload": {
             "anyOf": [
               {
-                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -26216,7 +26972,6 @@
           "metadata": {
             "anyOf": [
               {
-                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -26338,6 +27093,66 @@
         ],
         "title": "OtpBody"
       },
+      "PartyOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "contract_id": {
+            "type": "string",
+            "title": "Contract Id"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "signature_status": {
+            "type": "string",
+            "title": "Signature Status"
+          },
+          "invited_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Invited At"
+          },
+          "signed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "contract_id",
+          "user_id",
+          "role",
+          "signature_status",
+          "invited_at",
+          "signed_at"
+        ],
+        "title": "PartyOut",
+        "description": "پاسخ طرف قرارداد."
+      },
       "PartyPatchBody": {
         "properties": {
           "person_type": {
@@ -26354,7 +27169,6 @@
           "natural_person_detail": {
             "anyOf": [
               {
-                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -26366,7 +27180,6 @@
           "legal_person_detail": {
             "anyOf": [
               {
-                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -26859,7 +27672,6 @@
           },
           "suggested_price": {
             "type": "string",
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Suggested Price"
           },
           "currency": {
@@ -27449,8 +28261,7 @@
                 "type": "number"
               },
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                "type": "string"
               }
             ],
             "title": "Budget Min"
@@ -27461,8 +28272,7 @@
                 "type": "number"
               },
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                "type": "string"
               }
             ],
             "title": "Budget Max"
@@ -27501,12 +28311,10 @@
           },
           "budget_min": {
             "type": "string",
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Budget Min"
           },
           "budget_max": {
             "type": "string",
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Budget Max"
           },
           "location_keywords": {
@@ -27686,7 +28494,6 @@
           "facets": {
             "anyOf": [
               {
-                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -27721,7 +28528,6 @@
           "payload": {
             "anyOf": [
               {
-                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -28449,13 +29255,6 @@
           "type": {
             "type": "string",
             "title": "Error Type"
-          },
-          "input": {
-            "title": "Input"
-          },
-          "ctx": {
-            "type": "object",
-            "title": "Context"
           }
         },
         "type": "object",
@@ -28966,6 +29765,65 @@
         ],
         "title": "WitnessVerifyBody"
       },
+      "_SignAnyBody": {
+        "properties": {
+          "otp_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Otp Code"
+          },
+          "party_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Party Id"
+          },
+          "signer_id": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signer Id"
+          },
+          "user_id": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id"
+          },
+          "sign_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sign Type"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "title": "_SignAnyBody",
+        "description": "بدنه‌ای که هم SSOT (otp_code) و هم legacy (party_id) را می‌پذیرد."
+      },
       "app__api__routes__admin_panel__CrmActivityBody": {
         "properties": {
           "lead_id": {
@@ -29038,6 +29896,77 @@
           "name"
         ],
         "title": "RoleCreateBody"
+      },
+      "app__schemas__contract__ContractOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "owner_id": {
+            "type": "string",
+            "title": "Owner Id"
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id"
+          },
+          "contract_type": {
+            "type": "string",
+            "title": "Contract Type"
+          },
+          "deposit_amount": {
+            "type": "number",
+            "title": "Deposit Amount"
+          },
+          "rent_amount": {
+            "type": "number",
+            "title": "Rent Amount"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "title": "End Date"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "tracking_code": {
+            "type": "string",
+            "title": "Tracking Code"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "property_id",
+          "owner_id",
+          "tenant_id",
+          "contract_type",
+          "deposit_amount",
+          "rent_amount",
+          "start_date",
+          "end_date",
+          "status",
+          "tracking_code",
+          "created_at"
+        ],
+        "title": "ContractOut"
       },
       "app__schemas__v1__payloads__CrmActivityBody": {
         "properties": {
@@ -29117,6 +30046,76 @@
           "name"
         ],
         "title": "RoleCreateBody"
+      },
+      "app__schemas__v1__ssot_contract__ContractOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "contract_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Number"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "visibility": {
+            "type": "string",
+            "title": "Visibility"
+          },
+          "creator_id": {
+            "type": "string",
+            "title": "Creator Id"
+          },
+          "advisor_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Advisor Id"
+          },
+          "tracking_code": {
+            "type": "string",
+            "title": "Tracking Code"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "contract_number",
+          "status",
+          "visibility",
+          "creator_id",
+          "advisor_id",
+          "tracking_code",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ContractOut",
+        "description": "پاسخ قرارداد نهایی."
       }
     },
     "securitySchemes": {

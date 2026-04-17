@@ -21,6 +21,16 @@ from app.models.contract_commission import (
     ContractCommission,
     ContractCommissionType,
 )
+from app.models.ssot_contract import (
+    ContractPartyRole,
+    ContractVisibility,
+    SignatureStatus,
+    SsotContract,
+    SsotContractDraft,
+    SsotContractParty,
+    SsotContractStatus,
+    SsotSignature,
+)
 from app.models.crm import CrmActivity, CrmActivityType, CrmLead, CrmLeadSource
 from app.models.dispute import (
     Dispute,
@@ -136,4 +146,13 @@ __all__ = [
     "CommissionPaidBy",
     "CommissionRecordStatus",
     "CommissionPaymentMethod",
+    # SSOT Contract Domain
+    "SsotContract",
+    "SsotContractDraft",
+    "SsotContractParty",
+    "SsotSignature",
+    "ContractVisibility",
+    "ContractPartyRole",
+    "SignatureStatus",
+    "SsotContractStatus",
 ]

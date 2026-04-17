@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
@@ -41,3 +43,27 @@ def get_current_user(
         raise HTTPException(status_code=401, detail="user_not_found")
 
     return user
+
+
+def get_optional_current_user(
+    creds: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    db: Session = Depends(get_db),
+) -> Optional[User]:
+    """مانند get_current_user اما اگر token نباشد یا نامعتبر باشد None برمی‌گرداند."""
+    if creds is None:
+        return None
+    try:
+        payload = decode_token(creds.credentials)
+    except ValueError:
+        return None
+    if payload.get("type") != "access":
+        return None
+    user_id = payload.get("sub")
+    if not user_id:
+        return None
+    try:
+        uid = parse_uuid(user_id)
+    except ValueError:
+        return None
+    return db.get(User, uid)
+
