@@ -25,3 +25,9 @@ from app.models.crm_lead import CrmTask  # noqa: F401
 from app.models.role import Role  # noqa: F401
 from app.models.consultant_profile import ConsultantProfile  # noqa: F401
 from app.models.market_requirement import MarketRequirement, PromoCode  # noqa: F401
+from app.models.ssot_contract import (  # noqa: F401
+    SsotContract,
+    SsotContractDraft,
+    SsotContractParty,
+    SsotSignature,
+)

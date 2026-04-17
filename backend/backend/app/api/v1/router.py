@@ -44,6 +44,7 @@ from app.api.v1 import (
     payment_routes,
     registry_routes,
     security_routes,
+    ssot_contracts_routes,
     visits_routes,
     wallet_routes,
 )
@@ -64,6 +65,9 @@ platform_router.include_router(legacy_wallet.router, prefix="/wallet")
 platform_router.include_router(legacy_payments.router, prefix="/payments")
 platform_router.include_router(legacy_tenant_score.router, prefix="/tenant-score")
 platform_router.include_router(legacy_financials.router, prefix="/financials")
+# SSOT Contract Domain (Step 2): DB-backed /contracts CRUD + invite + sign
+# باید قبل از contracts_routes (legacy) ثبت شود تا SSOT contracts اولویت داشته باشند
+platform_router.include_router(ssot_contracts_routes.router)
 # WizardContract flows (DB); prefix avoids clashing with SSOT /contracts/* on contracts_routes
 platform_router.include_router(legacy_contract_wizard.router, prefix="/wizard", tags=["contract-wizard"])
 platform_router.include_router(contracts_routes.router)
