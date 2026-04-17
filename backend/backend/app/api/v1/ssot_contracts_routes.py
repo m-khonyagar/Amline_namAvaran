@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import datetime as dt
 import hashlib
-import random
 import secrets
 import uuid
 from typing import Optional
@@ -144,7 +143,7 @@ def _get_contract_or_404(contract_id: str, db: Session) -> SsotContract:
 
 
 def _generate_otp() -> str:
-    return f"{random.randint(0, 999999):06d}"
+    return f"{secrets.randbelow(1000000):06d}"
 
 
 def _signature_hash(otp: str, party_id: str) -> str:

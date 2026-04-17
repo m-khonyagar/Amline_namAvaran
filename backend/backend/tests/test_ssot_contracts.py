@@ -145,7 +145,7 @@ def test_update_draft_success(client_as, db, creator):
     assert body["version"] == 2
 
 
-def test_update_draft_forbidden(client_as, db, other_user):
+def test_update_draft_forbidden(client_as, db, creator, other_user):
     # ایجاد با user اول
     resp = client_as.post(
         "/api/v1/contracts",
@@ -153,12 +153,20 @@ def test_update_draft_forbidden(client_as, db, other_user):
     )
     draft_id = resp.json()["id"]
 
-    # تلاش به‌روزرسانی با user دیگر
+    # تلاش به‌روزرسانی با user دیگر — override موقتی
+    original_override = app.dependency_overrides.get(get_current_user)
     app.dependency_overrides[get_current_user] = _auth_override(other_user)
+    app.dependency_overrides[get_optional_current_user] = _auth_override(other_user)
     with TestClient(app) as c2:
         resp2 = c2.patch(f"/api/v1/contracts/{draft_id}", json={"step": "hack"})
     assert resp2.status_code == 403
-    app.dependency_overrides[get_current_user] = _auth_override(client_as.app.dependency_overrides.get(get_current_user, lambda: None)())
+    # بازگرداندن override اصلی
+    if original_override:
+        app.dependency_overrides[get_current_user] = original_override
+        app.dependency_overrides[get_optional_current_user] = original_override
+    else:
+        app.dependency_overrides.pop(get_current_user, None)
+        app.dependency_overrides.pop(get_optional_current_user, None)
 
 
 def test_update_draft_not_found(client_as):
